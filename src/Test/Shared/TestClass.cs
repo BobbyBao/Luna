@@ -9,6 +9,32 @@ namespace Tests
         A,B,C,D
     }
 
+    public struct TestStruct
+    {
+        public float x, y, z;
+
+        public TestStruct(float x)
+        {
+            this.x = x;
+            this.y = 0;
+            this.z = 0;
+        }
+
+        public TestStruct(float x, float y)
+        {
+            this.x = x;
+            this.y = y;
+            this.z = 0;
+        }
+
+        public TestStruct(float x, float y, float z)
+        {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+    }
+
     public class TestClass
     {
         public const int constVar = 5;

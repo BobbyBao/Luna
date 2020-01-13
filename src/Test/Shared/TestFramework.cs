@@ -15,16 +15,21 @@ namespace Tests
     {
         Luna luna;
         public TestFramework()
-        {
-            luna = new Luna
-            {
-                Print = Print,
-                Error = Print,
-                ReadBytes = ReadBytes
-            };
+        {          
+            Luna.Print = Print;
+            Luna.Error = Print;
+            Luna.ReadBytes = ReadBytes;
 
+            luna = new Luna();
+            luna.PreInit += Luna_PreInit;
             luna.Run();
             luna.AddSearcher(Loader);
+        }
+
+        private void Luna_PreInit()
+        {
+            WrapGenerator.ExportPath = "../src/Test/Shared/Generate/";
+            WrapGenerator.GenerateClassWrap(typeof(TestStruct));
         }
 
         public void Dispose()
@@ -103,6 +108,7 @@ namespace Tests
         void AutoBind()
         {
             luna.RegisterClass(typeof(TestEnum));
+            luna.RegisterClass(typeof(TestStruct));
             luna.RegisterClass(typeof(TestClass));
         }
 

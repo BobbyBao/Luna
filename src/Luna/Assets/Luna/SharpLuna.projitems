@@ -22,6 +22,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)SharpClass.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SharpClass.Meta.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SharpObject.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\WrapGenerator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\DelegateCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\FastList.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Luna.cs" />
