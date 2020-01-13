@@ -3,5 +3,10 @@
 
 ## 主要特点
 
-使用Delegate进行反射，
+1.使用Delegate进行反射，不使用Emit和Expression
 不用生成大量的Wrap代码，而又能保证高性能，还能在各个平台上使用
+2.注册C#类到lua只需要一句话
+
+```
+luna.RegisterClass<TestClass>();
+```
