@@ -607,6 +607,12 @@ namespace SharpLuna
             }
 
             del = DelegateCache.Get(funcDelegateType, methodInfo);
+
+            if(del == null)
+            {
+                del = DelegateCache.Get(funcDelegateType, typeArray[0], methodInfo);
+            }
+
             MethodInfo CallInnerDelegateMethod = callerType.GetMethod(callFnName, BindingFlags.Static | BindingFlags.Public);
             luaFunc = (LuaNativeFunction)DelegateCache.Get(typeof(LuaNativeFunction), CallInnerDelegateMethod);
             return LuaRef.CreateFunction(State, luaFunc, del);
@@ -656,6 +662,11 @@ namespace SharpLuna
             }
 
             del = DelegateCache.Get(funcDelegateType, methodInfo);
+            if (del == null)
+            {
+                del = DelegateCache.Get(funcDelegateType, typeArray[0], methodInfo);
+            }
+
             MethodInfo CallInnerDelegateMethod = callerType.GetMethod(callFnName, BindingFlags.Static | BindingFlags.Public);
             luaFunc = (LuaNativeFunction)DelegateCache.Get(typeof(LuaNativeFunction), CallInnerDelegateMethod);
 

@@ -24,6 +24,9 @@ namespace SharpLuna
 
         static FastList<RefInfo> refInfos = new FastList<RefInfo>();
         static List<ushort> freeList = new List<ushort>();
+        static int current = 0;
+        public static int LiveCount => refInfos.Count - freeList.Count;
+        public static int FreeCount => freeList.Count;
 
         /// <summary>
         /// struct构造的时候调用
@@ -99,12 +102,23 @@ namespace SharpLuna
         /// <summary>
         /// 忘记Release的资源（比如局部变量，没有进行Dispose），定期进行清理
         /// </summary>
-
         public static void Collect()
         {
             for (int i = 0; i < refInfos.Count; i++)
             {
                 ref var info = ref refInfos[i];
+                if (info.refs == 1)
+                {
+                    info.refCount.Release();
+                }
+            }
+        }
+
+        public static void CollectFrame(int count = 8)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                ref var info = ref refInfos[current++ % refInfos.Count];
                 if (info.refs == 1)
                 {
                     info.refCount.Release();

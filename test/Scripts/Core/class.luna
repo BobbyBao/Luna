@@ -74,5 +74,18 @@ func __class(c, className, base) {
         return obj
     }
 
+    mt.__close = func() {
+    }
+
+    mt.__tostring = func(){
+    	let mt = self._class
+		let name = mt.name
+		setmetatable(self,nil)
+		var str = tostring(self)
+		setmetatable(self,mt)
+		if name { str = name ..str:gsub('table','') }
+		return str
+    }
+
     return c
 }

@@ -1,33 +1,36 @@
 
 
+print "static : "
+
 print(tostring(TestEnum.A))
 
 print(TestClass.constVar)
-
-
-//print(TestClass.staticVar)
+print(TestClass.staticVar)
 print(TestClass.staticProp)
 
-//TestClass.staticVar = "test var"
+TestClass.staticVar = "test var"
 TestClass.staticProp = "test prop"
 
-//print(TestClass.staticVar)
+print(TestClass.staticVar)
 print(TestClass.staticProp)
 
 TestClass.StaticFunc()
 TestClass.StaticFunc1("str param")
 TestClass.StaticFunc2("str param", 12345)
 
+print "instance : "
+
 var test = TestClass()
 print(test)
 
-//print(test.variable)
+print(test.variable)
+
 print(test.name)
 
-//test.variable = "test variable"
+test.variable = "test variable"
 test.name = "test name"
 
-//print(test.variable)
+print(test.variable)
 print(test.name)
 
 test[1] = "test index"

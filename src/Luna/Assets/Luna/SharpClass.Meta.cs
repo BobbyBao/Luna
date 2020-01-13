@@ -118,7 +118,7 @@ namespace SharpLuna
 
             bindClass = new SharpClass(meta);
             bindClass.parent = parentMeta;
-            bindClass.classType = classType;
+            bindClass.SetClassType(classType);
             registeredClass.Add(classType, bindClass);
             return bindClass;
         }
@@ -140,7 +140,7 @@ namespace SharpLuna
 
             bindClass = new SharpClass(meta);
             bindClass.parent = parentMeta;
-            bindClass.classType = classType;
+            bindClass.SetClassType(classType);
             registeredClass.Add(classType, bindClass);
             return bindClass;
         }
@@ -171,7 +171,7 @@ namespace SharpLuna
 
             bindClass = new SharpClass(meta);
             bindClass.parent = parentMeta;
-            bindClass.classType = classType;
+            bindClass.SetClassType(classType);
             registeredClass.Add(classType, bindClass);
             return bindClass;
         }

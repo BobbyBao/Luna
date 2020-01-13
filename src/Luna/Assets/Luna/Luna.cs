@@ -24,9 +24,9 @@ namespace SharpLuna
 
         public bool UseTraceback { get; set; } = false;
 
-        public Action<string> Print { get; set; }
-        public Action<string> Error { get; set; }
-        public Func<string, byte[]> ReadBytes { get; set; }
+        public static Action<string> Print { get; set; }
+        public static Action<string> Error { get; set; }
+        public static Func<string, byte[]> ReadBytes { get; set; }
 
 #region lua debug functions
         /// <summary>
@@ -129,8 +129,8 @@ namespace SharpLuna
             L.Dispose();
         }
 
-        public void Log(string msg) => Print?.Invoke(msg);
-        public void LogError(string msg) => Error?.Invoke(msg);
+        public static void Log(string msg) => Print?.Invoke(msg);
+        public static void LogError(string msg) => Error?.Invoke(msg);
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         int DoPrint(LuaState L)
@@ -425,15 +425,19 @@ namespace SharpLuna
             var types = type.Assembly.GetTypes();
             foreach(var t in types)
             {
-                if(t.IsDefined(typeof(WrapClassAttribute)))
+                var attr = t.GetCustomAttribute<WrapClassAttribute>();
+                if (attr == null)
                 {
-                    AddWrapClass(t);
+                    continue;
                 }
+                 
+                AddWrapClass(attr.Type, t);
+                
             }
 
         }
 
-        void AddWrapClass(Type type)
+        void AddWrapClass(Type type, Type wrapType)
         {
             if(Config.IsRegistered(type))
             {
@@ -442,7 +446,7 @@ namespace SharpLuna
 
             var classConfig = Config.GetClassConfig(type);
 
-            var methods = type.GetMethods();
+            var methods = wrapType.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
             foreach (var m in methods)
             {
                 var attr = m.GetCustomAttribute<WrapMethodAttribute>();

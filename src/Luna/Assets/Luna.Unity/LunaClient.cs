@@ -23,20 +23,19 @@ namespace SharpLuna.Unity
             Instance = this;
             DontDestroyOnLoad(gameObject);
 
-            luna = new Luna
-            {
-                Print = Print,
-                Error = Error,
-                ReadBytes = ReadBytes,
-            };
+            Luna.Print = Print;
+            Luna.Error = Error;
+            Luna.ReadBytes = ReadBytes;
 
+            luna = new Luna();
             luna.PreInit += OnPreInit;
             luna.PostInit += OnPostInit;
 
-            luna.Run();
-
             loader = new ResLoader();
             loader.AddSearchPath("core");
+
+            luna.Run();
+
         }
 
         void OnPreInit()
@@ -50,6 +49,10 @@ namespace SharpLuna.Unity
 
             luna.RegisterClass<GameObject>();
             luna.RegisterClass<Component>();
+
+
+            //luna.RegisterClass<Vector3>();
+
         }
 
         private void Start()

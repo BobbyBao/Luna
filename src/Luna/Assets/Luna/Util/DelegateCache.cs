@@ -21,7 +21,17 @@ namespace SharpLuna
                 return del;
             }
 
-            del = Delegate.CreateDelegate(type, methodInfo);
+            try
+            {
+                del = Delegate.CreateDelegate(type, methodInfo);
+            }
+            catch (System.Exception ex)
+            {
+                Luna.LogError(ex.Message);
+                Luna.LogError(type.ToString());
+                Luna.LogError(methodInfo.ReflectedType.ToString() + ", " + methodInfo.ToString());
+                return null;
+            }
             cache.Add(methodInfo, del);
             return del;
         }
@@ -33,7 +43,17 @@ namespace SharpLuna
                 return del;
             }
 
-            del = Delegate.CreateDelegate(type, targetType, methodInfo);
+            try
+            {
+                del = Delegate.CreateDelegate(type, methodInfo);
+            }
+            catch (System.Exception ex)
+            {
+                Luna.LogError(ex.Message);
+                Luna.LogError(type.ToString());
+                Luna.LogError(methodInfo.ReflectedType.ToString() + ", " + methodInfo.ToString());
+                return null;
+            }
             cache.Add(methodInfo, del);
             return del;
         }

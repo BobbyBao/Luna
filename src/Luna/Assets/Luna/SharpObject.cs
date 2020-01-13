@@ -81,9 +81,9 @@ namespace SharpLuna
             return mem;
         }
 
-        public unsafe static ref T GetValue<T>(LuaState L, int index, bool is_exact, bool raise_error)
+        public unsafe static ref T GetValue<T>(LuaState L, int index)
         {
-            var ptr = GetUserData(L, index, Signature<T>(), is_exact, raise_error);            
+            var ptr = GetUserData(L, index, Signature<T>(), true, true);            
             return ref Unsafe.AsRef<T>((void*)ptr);
         }
 
@@ -102,7 +102,7 @@ namespace SharpLuna
         {
             if (typeof(T).IsUnManaged())
             {
-                return GetValue<T>(L, index, true, true);
+                return GetValue<T>(L, index);
             }
 
             var handle = GetHandler<T>(L, index, false, true);
