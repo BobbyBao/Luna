@@ -13,53 +13,6 @@ namespace SharpLuna
     using lua_CFunction = System.IntPtr;
     using static Lua;
 
-    public struct LuaTableRef : IRefCount
-    {
-        LuaState L;
-        int _table;
-        int _key;
-
-        public LuaTableRef(LuaState state, int table, int key)
-        {
-            L = state;
-            _table = table;
-            _key = key; 
-            Handle = 0;
-            Handle = this.Alloc();
-        }
-
-        public uint Handle { get; }
-
-        public void Dispose()
-        {
-            this.Release();
-        }
-
-        public void InternalRelease()
-        {
-            luaL_unref(L, LUA_REGISTRYINDEX, _key);
-        }
-
-        public void Set<V>(V value)
-        {
-            lua_rawgeti(L, LUA_REGISTRYINDEX, _table);
-            lua_rawgeti(L, LUA_REGISTRYINDEX, _key);
-            Lua.Push(L, value);
-            lua_settable(L, -3);
-            lua_pop(L, 1);
-        }
-
-        public T Value<T>()
-        {
-            lua_rawgeti(L, LUA_REGISTRYINDEX, _table);
-            lua_rawgeti(L, LUA_REGISTRYINDEX, _key);
-            lua_gettable(L, -2);
-            T v = Lua.Get<T>(L, -1);
-            lua_pop(L, 2);
-            return v;
-        }
-    }
-
     public struct LuaRef : IRefCount, IEquatable<LuaRef>, IComparable<LuaRef>
     {
         LuaState L;
@@ -80,7 +33,7 @@ namespace SharpLuna
         public LuaRef(lua_State state, string name)
         {
             L = state;
-            pushGlobal(L, name);
+            L.PushGlobal(name);
             _ref = luaL_ref(L, LUA_REGISTRYINDEX);
             Handle = 0;
             Handle = this.Alloc();
@@ -159,7 +112,7 @@ namespace SharpLuna
         public static LuaRef CreateTableWithMeta(lua_State L, string meta)
         {
             lua_newtable(L);
-            pushGlobal(L, meta);
+            Lua.PushGlobal(L, meta);
             lua_setmetatable(L, -2);
             return PopFromStack(L);
         }
@@ -175,7 +128,7 @@ namespace SharpLuna
             return PopFromStack(L);
         }
 
-        public lua_State State =>L;
+        public lua_State State => L;
         public bool IsValid => _ref != LUA_NOREF;
         public bool IsTable => Type == LuaType.Table;
         public bool IsFunction => Type == LuaType.Function;
@@ -656,6 +609,54 @@ namespace SharpLuna
             }
         }
 
+    }
+
+
+    public struct LuaTableRef : IRefCount
+    {
+        LuaState L;
+        int _table;
+        int _key;
+
+        public LuaTableRef(LuaState state, int table, int key)
+        {
+            L = state;
+            _table = table;
+            _key = key;
+            Handle = 0;
+            Handle = this.Alloc();
+        }
+
+        public uint Handle { get; }
+
+        public void Dispose()
+        {
+            this.Release();
+        }
+
+        public void InternalRelease()
+        {
+            luaL_unref(L, LUA_REGISTRYINDEX, _key);
+        }
+
+        public void Set<V>(V value)
+        {
+            lua_rawgeti(L, LUA_REGISTRYINDEX, _table);
+            lua_rawgeti(L, LUA_REGISTRYINDEX, _key);
+            Lua.Push(L, value);
+            lua_settable(L, -3);
+            lua_pop(L, 1);
+        }
+
+        public T Value<T>()
+        {
+            lua_rawgeti(L, LUA_REGISTRYINDEX, _table);
+            lua_rawgeti(L, LUA_REGISTRYINDEX, _key);
+            lua_gettable(L, -2);
+            T v = Lua.Get<T>(L, -1);
+            lua_pop(L, 2);
+            return v;
+        }
     }
 
 }

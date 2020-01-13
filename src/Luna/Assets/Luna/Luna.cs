@@ -410,6 +410,11 @@ namespace SharpLuna
             }
         }
 
+        public LuaRef GetGlobal(string fullPath)
+        {
+            return LuaRef.Globals(L).RawGet(fullPath);
+        }
+
         public void RegisterWraps(Type type)
         {
             if(Config == null)

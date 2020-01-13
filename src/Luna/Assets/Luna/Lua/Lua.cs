@@ -30,14 +30,14 @@ namespace SharpLuna
         
         public static LuaNativeFunction lua_atpanic(lua_State L, LuaNativeFunction panicFunction)
         {
-            savedFn.Add(panicFunction);
+            savedFn.TryAdd(panicFunction);
             IntPtr newPanicPtr = panicFunction.ToFunctionPointer();
             return lua_atpanic(L, newPanicPtr).ToLuaFunction();
         }
 
         public static void lua_sethook(lua_State L, KyHookFunction hookFunction, LuaHookMask mask, int count)
         {
-            savedFn.Add(hookFunction);
+            savedFn.TryAdd(hookFunction);
             lua_sethook(L, hookFunction.ToFunctionPointer(), (int)mask, count);
         }
 
@@ -64,7 +64,7 @@ namespace SharpLuna
 
         public static void lua_register(lua_State L, string n, LuaNativeFunction f)
         {
-            savedFn.Add(f);
+            savedFn.TryAdd(f);
             lua_pushcfunction(L, (f));
             var p = Marshal.StringToHGlobalAnsi(n);
             lua_setglobal(L, (byte*)(p));
@@ -96,13 +96,13 @@ namespace SharpLuna
 
         public static void lua_pushcclosure(lua_State L, LuaNativeFunction function, int n)
         {
-            savedFn.Add(function);
+            savedFn.TryAdd(function);
             lua_pushcclosure(L, function.ToFunctionPointer(), n);
         }
 
         public static void lua_pushcfunction(lua_State L, LuaNativeFunction function)
         {
-            savedFn.Add(function);
+            savedFn.TryAdd(function);
             lua_pushcclosure(L, function.ToFunctionPointer(), 0);
         }
 
@@ -159,90 +159,6 @@ namespace SharpLuna
             var p = Marshal.StringToHGlobalAnsi(name);
             lua_setglobal(L, (byte*)p);
             Marshal.FreeHGlobal(p);
-        }
-
-        public static void pushGlobal(lua_State L, string name)
-        {
-            var p = Marshal.StringToHGlobalAnsi(name);
-            pushGlobal(L, (byte*)p);
-            Marshal.FreeHGlobal(p);
-        }
-
-        public static void popToGlobal(lua_State L, string name)
-        {
-            var p = Marshal.StringToHGlobalAnsi(name);
-            popToGlobal(L, (byte*)p);
-            Marshal.FreeHGlobal(p);
-        }
-
-        static byte* strchr(byte* p, char ch)
-        {
-            if (p == null)
-            {
-                return null;
-            }
-            while (*p != 0)
-            {
-                if (*p == ch)
-                {
-                    return p;
-                }
-                p = p + 1;
-            }
-            //strchr for '\0' should succeed - the while loop terminates
-            //*p == 0, but ch also == 0, so NULL terminator address is returned
-            return (*p == ch) ? p : null;
-        }
-
-        private unsafe static void pushGlobal(lua_State L, byte* name)
-        {
-            byte* p = strchr(name, '.');
-            if (p != null)
-            {
-                lua_pushglobaltable(L);                 // <table>
-                while (p != null)
-                {
-                    lua_pushlstring(L, name, p - name); // <table> <key>
-
-                    lua_gettable(L, -2);                // <table> <table_value>
-                    lua_remove(L, -2);                  // <table_value>
-                    if (lua_isnoneornil(L, -1)) return;
-                    name = p + 1;
-                    p = strchr(name, '.');
-                }
-                lua_pushstring(L, name);                // <last_table> <key>
-                lua_gettable(L, -2);                    // <last_table> <table_value>
-                lua_remove(L, -2);                      // <table_value>
-            }
-            else
-            {
-                lua_getglobal(L, name);
-            }
-        }
-
-        private static unsafe void popToGlobal(lua_State L, byte* name)
-        {
-            byte* p = strchr(name, '.');
-            if (p != null)
-            {
-                lua_pushglobaltable(L);                 // <value> <table>
-                while (p != null)
-                {
-                    lua_pushlstring(L, name, p - name); // <value> <table> <key>
-                    lua_gettable(L, -2);                // <value> <table> <table_value>
-                    lua_remove(L, -2);                  // <value> <table_value>
-                    name = p + 1;
-                    p = strchr(name, '.');
-                }
-                lua_pushstring(L, name);                // <value> <last_table> <name>
-                lua_pushvalue(L, -3);                   // <value> <last_table> <name> <value>
-                lua_settable(L, -3);                    // <value> <last_table>
-                lua_pop(L, 2);
-            }
-            else
-            {
-                lua_setglobal(L, name);
-            }
         }
 
 

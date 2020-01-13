@@ -7,20 +7,11 @@ using System.Text;
 
 namespace SharpLuna
 {
+    /// <summary>
+    /// struct类型转化成 T, 避免box
+    /// </summary>
     public static class Convert
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T To<T>(this ValueType v)
-        {
-#if UNBOXING
-            T val = default;
-            __refvalue(__makeref(val), ValueType) = v;
-            return val;
-#else
-            return (T)(object)v;
-#endif
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T To<T>(this bool v)
         {

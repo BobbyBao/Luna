@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SharpLuna
 {
-    public static class TypeExtensions
+    public static class SystemExtensions
     {
         private static Dictionary<Type, bool> cachedTypes = new Dictionary<Type, bool>();
         public static bool IsUnManaged(this Type t)
@@ -36,6 +36,15 @@ namespace SharpLuna
 
             cachedTypes.Add(t, result);
             return result;
+        }
+
+
+        public static void TryAdd<T>(this HashSet<T> self, T obj)
+        {
+            if (!self.Contains(obj))
+            {
+                self.Add(obj);
+            }
         }
     }
 }

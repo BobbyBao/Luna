@@ -15,6 +15,7 @@ namespace SharpLuna.Unity
         string className;
         LuaRef luaClass;
         LuaRef luaInstance;
+
         void Awake()
         {
             if(!string.IsNullOrEmpty(luaPath))
@@ -32,7 +33,7 @@ namespace SharpLuna.Unity
                     className = className.Substring(index + 1);
                 }
                 
-                luaClass = LuaRef.Globals(L).RawGet(className);
+                luaClass = luna.GetGlobal(className);
                 luaClass.AddRef();
 
                 var metaTable = luaClass.GetMetaTable();             
