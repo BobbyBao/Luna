@@ -1,0 +1,15 @@
+
+
+class vec3 {
+    var x = 0, y = 0, z = 0
+
+    func set(x, y, z) {
+        self.x = x
+        self.y = y
+        self.z = z
+    }
+
+    func __tostring() {
+        return  string.format("x:%f, y:%f, z:%f", self.x, self.y, self.z)
+    }
+}

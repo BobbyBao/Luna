@@ -1,0 +1,12 @@
+src/.vs
+src/bin/debug
+src/bin/release
+src/bin/obj
+src.Core/bin
+src/Luna/Library
+Test/NetCore
+src/Luna/Logs
+src/Luna/Temp
+src/Luna/.vs
+src/Luna/*.csproj
+src/Luna/Luna.sln

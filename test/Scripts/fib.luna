@@ -1,0 +1,14 @@
+func fib(n){
+  if n < 2 { 
+      return n
+  }
+  else {
+      return fib(n - 2) + fib(n - 1)
+  }
+}
+
+var start = os.clock()
+for i = 1, 5 {
+  io.write(fib(28) .. "\n")
+}
+io.write(string.format("elapsed: %.8f\n", os.clock() - start))

@@ -1,0 +1,48 @@
+
+var x = 1
+
+x += 2
+print(x)
+
+x -= 2
+print(x)
+
+x*= 2
+print(x)
+
+x /= 2
+
+print(x)
+
+let i = 0
+let j = 1
+
+let t = nil
+
+if !i {
+    print "not"
+} else {
+    print(i)
+}
+
+if !t || !t.aaa {
+    print("not", t)
+}
+
+if i != 1 {
+    print "not eq"
+}
+
+let i = false
+
+if !i {
+    print("not", i)
+}
+
+if i && j {
+    print("and", i, j)
+}
+
+if i || j {
+    print("or", i, j)
+}

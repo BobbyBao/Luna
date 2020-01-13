@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>af9e26ef-d64e-48fa-a3d1-46c18b54109d</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>SharpLuna</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Attributes\LuaHideAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Attributes\MonoPInvokeCallbackAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Attributes\WrapAttributes.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\BindHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Lua\Delegates.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Lua\Enums.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Lua\Lua.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Lua\Lua.NativeMethods.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Lua\Structs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LunaConfig.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SharpClass.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SharpClass.Meta.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SharpObject.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\TypeExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\DelegateCache.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\FastList.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Luna.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\RefCount.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SharpFunctors.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SharpModule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Event\DebugHookEventArgs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Event\HookExceptionEventArgs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Exceptions\LuaException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Exceptions\LuaScriptException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LuaExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\Convert.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\UnmanagedBuffer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LuaRef.cs" />
+  </ItemGroup>
+</Project>

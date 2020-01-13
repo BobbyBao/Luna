@@ -1,0 +1,38 @@
+
+var a = [1, 2, 3, 4, 5]
+
+print "iter():"
+
+for v in a.iter() {
+	print(v)
+}
+
+print "range:"
+
+for i = 0, 4 {
+	print(i, a[i])
+}
+
+var i = 5
+repeat
+{
+    print(i)
+    i = i - 1
+} until(i < 0)
+
+do
+{
+    //var i = 6
+    var i = 6
+}
+
+do
+{
+    let i = 5
+    print(i)
+    i = 6
+    let i = 6
+    print(i)
+
+}
+

@@ -1,0 +1,56 @@
+
+import "list"
+
+let a = List()
+
+print "append:"
+a.append(2)
+.append(3)
+.append(4)
+.append(5)
+.append(6)
+
+
+	
+print("#len:", #a)
+
+for k,v in pairs(a) {
+	print(k, v)
+}
+
+print "remove:"
+a.remove(2)
+
+for v in a.iter() {
+	print(v)
+}
+
+print "insert:"
+a.insert(2, 4)
+
+for v in a.iter() {
+	print(v)
+}
+
+print "clear:"
+a.clear()
+print("#len:", #a)
+
+for v in a.iter() {
+	print(v)
+}
+
+
+let a = [1, 2, 3, 4, 5]
+
+print "iter():"
+
+for v in a.iter() {
+	print(v)
+}
+
+print "range:"
+
+for i = 0, a.len() - 1 {
+	print(i, a[i])
+}

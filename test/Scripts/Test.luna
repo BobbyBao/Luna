@@ -1,0 +1,46 @@
+
+
+print(tostring(TestEnum.A))
+
+print(TestClass.constVar)
+
+
+//print(TestClass.staticVar)
+print(TestClass.staticProp)
+
+//TestClass.staticVar = "test var"
+TestClass.staticProp = "test prop"
+
+//print(TestClass.staticVar)
+print(TestClass.staticProp)
+
+TestClass.StaticFunc()
+TestClass.StaticFunc1("str param")
+TestClass.StaticFunc2("str param", 12345)
+
+var test = TestClass()
+print(test)
+
+//print(test.variable)
+print(test.name)
+
+//test.variable = "test variable"
+test.name = "test name"
+
+//print(test.variable)
+print(test.name)
+
+test[1] = "test index"
+print(test[1])
+
+test.Method()
+test.Method1("str param")
+test.Method2("str param", 12345)
+
+test.Fun0()
+test.Fun1(12345)
+
+let res = test.Fun2(12345)
+print(res)
+
+//TestClass.constVar = 10
