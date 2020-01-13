@@ -62,7 +62,7 @@ class GameObj : Obj
 
 	function _init()
 	end
-	
+
 	function setName(n)
 		self.name = n
 	end
@@ -70,7 +70,7 @@ class GameObj : Obj
 	function print()
 		print "test super"
 		super:print()
-    end
+    	end
 end
 
 local o = GameObj
