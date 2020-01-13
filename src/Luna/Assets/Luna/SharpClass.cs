@@ -15,6 +15,8 @@ namespace SharpLuna
         protected SharpClass parent;
         protected Type classType;
 
+        protected Dictionary<string, MethodConfig> classInfo;
+
         static Dictionary<string, string> tagMethods = new Dictionary<string, string>
         {
             {"ToString","__tostring"},
@@ -62,6 +64,14 @@ namespace SharpLuna
         public LuaState State => m_meta.State;
 
         public LuaRef Meta => m_meta;
+
+        protected void SetClassType(Type type)
+        {
+            classType = type;
+
+            classInfo = Luna.Config.GetClassConfig(classType);
+
+        }
 
         public SharpClass this[params object[] obj]
         {
@@ -213,12 +223,15 @@ namespace SharpLuna
                 }
 
                 //自动绑定只支持常量
-                if (!field.IsLiteral)
+                if (field.IsLiteral)
                 {
-                    continue;
+                    RegConstant(field);                   
+                }
+                else
+                {
+                    RegField(field);
                 }
 
-                RegConstant(field);
             }
 
             var ctors = type.GetConstructors();
@@ -321,10 +334,71 @@ namespace SharpLuna
 
         public SharpClass RegField(FieldInfo fieldInfo)
         {
-            LuaRef luaFun = LuaRef.Empty;// RegMethod(fieldInfo, true);
+            if (classInfo != null)
+            {
+                if(classInfo.TryGetValue(fieldInfo.Name, out var methodConfig))
+                {
+                    if (methodConfig.getter != null)
+                    {
+                        var getter = LuaRef.CreateFunction(State, methodConfig.getter);
+                        SetGetter(fieldInfo.Name, getter);
+                    }
 
-            SetGetter(fieldInfo.Name, luaFun);
-            SetSetter(fieldInfo.Name, luaFun);
+                    if (methodConfig.setter != null)
+                    {
+                        var setter = LuaRef.CreateFunction(State, methodConfig.setter);
+                        SetSetter(fieldInfo.Name, setter);
+                    }
+                    else
+                    {
+                        SetReadOnly(fieldInfo.Name);
+                    }
+
+                    return this;
+                }
+            }
+            
+            if(fieldInfo.IsStatic)
+            {
+                var fieldDelType = typeof(FieldDelegate<>).MakeGenericType(fieldInfo.FieldType);
+               
+                var getMethodInfo = fieldDelType.GetMethod("Getter", BindingFlags.Static | BindingFlags.Public);
+                var getDel = (Delegate)getMethodInfo.Invoke(null, new[] { fieldInfo });
+                var getCallerType = typeof(FuncCaller<>).MakeGenericType(fieldInfo.FieldType);
+                var getMethodCaller = getCallerType.GetMethod("Call", BindingFlags.Static | BindingFlags.Public);
+                var getLuaDel = (LuaNativeFunction)DelegateCache.Get(typeof(LuaNativeFunction), getMethodCaller);
+                var getter = LuaRef.CreateFunction(State, getLuaDel, getDel);
+                SetGetter(fieldInfo.Name, getter);
+
+                var setMethodInfo = fieldDelType.GetMethod("Setter", BindingFlags.Static | BindingFlags.Public);
+                var setDel = (Delegate)setMethodInfo.Invoke(null, new[] { fieldInfo });
+                var setCallerType = typeof(ActionCaller<>).MakeGenericType(fieldInfo.FieldType);
+                var setMethodCaller = setCallerType.GetMethod("Call", BindingFlags.Static | BindingFlags.Public);
+                var setLuaDel = (LuaNativeFunction)DelegateCache.Get(typeof(LuaNativeFunction), setMethodCaller);
+                var setter = LuaRef.CreateFunction(State, setLuaDel, setDel);
+                SetSetter(fieldInfo.Name, setter);
+            }
+            else
+            {
+                var fieldDelType = typeof(FieldDelegate<,>).MakeGenericType(fieldInfo.ReflectedType, fieldInfo.FieldType);
+
+                var getMethodInfo = fieldDelType.GetMethod("Getter", BindingFlags.Static | BindingFlags.Public);
+                var getDel = (Delegate)getMethodInfo.Invoke(null, new[] { fieldInfo });
+                var getCallerType = typeof(FuncCaller<,>).MakeGenericType(fieldInfo.ReflectedType, fieldInfo.FieldType);
+                var getMethodCaller = getCallerType.GetMethod("Call", BindingFlags.Static | BindingFlags.Public);
+                var getLuaDel = (LuaNativeFunction)DelegateCache.Get(typeof(LuaNativeFunction), getMethodCaller);
+                var getter = LuaRef.CreateFunction(State, getLuaDel, getDel);
+                SetGetter(fieldInfo.Name, getter);
+
+                var setMethodInfo = fieldDelType.GetMethod("Setter", BindingFlags.Static | BindingFlags.Public);
+                var setDel = (Delegate)setMethodInfo.Invoke(null, new[] { fieldInfo });
+                var setCallerType = typeof(ActionCaller<,>).MakeGenericType(fieldInfo.ReflectedType, fieldInfo.FieldType);
+                var setMethodCaller = setCallerType.GetMethod("Call", BindingFlags.Static | BindingFlags.Public);
+                var setLuaDel = (LuaNativeFunction)DelegateCache.Get(typeof(LuaNativeFunction), setMethodCaller);
+                var setter = LuaRef.CreateFunction(State, setLuaDel, setDel);
+                SetSetter(fieldInfo.Name, setter);
+            }
+
 
             return this;
         }

@@ -78,7 +78,7 @@ namespace SharpLuna
         }
     }
 
-    struct FieldFn<V>
+    struct FieldDelegate<V>
     {
         public static Func<V> Getter(FieldInfo fieldInfo)
         {
@@ -97,7 +97,7 @@ namespace SharpLuna
         }
     }
 
-    struct FieldFn<T, V>
+    struct FieldDelegate<T, V>
     {
         public static Func<T,V> Getter(FieldInfo fieldInfo)
         {
