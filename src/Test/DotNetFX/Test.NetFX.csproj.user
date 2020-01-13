@@ -2,6 +2,6 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
-    <StartWorkingDirectory>C:\Work\Kylin\test\</StartWorkingDirectory>
+    <StartWorkingDirectory>C:\Work\Luna\test\</StartWorkingDirectory>
   </PropertyGroup>
 </Project>
