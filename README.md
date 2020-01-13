@@ -3,12 +3,13 @@
 
 ## 主要特点
 
-1.高性能，使用Delegate进行反射，不用生成大量的Wrap代码，不使用Emit和Expression，也不用当心IOS平台的问题
+1.高性能，没用使用LuaInterface那一套。使用Delegate进行反射，不用生成大量的Wrap代码，不使用Emit和Expression，也不用当心IOS平台的问题
 
 2.简洁易用，使用接口非常简单，注册C#类到lua只需要一句话
 
 ```
 luna.RegisterClass<TestClass>();
+
 ```
 
 3. 未对lua接口做修改，可以使用原汁原味的lua编程，可将C风格的lua操作代码直接拷贝的C#中，不用做修改就能编译通过并运行
