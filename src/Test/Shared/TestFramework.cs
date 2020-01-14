@@ -101,8 +101,8 @@ namespace Tests
 
         private void Luna_PreInit()
         {
-            //WrapGenerator.ExportPath = "../src/Test/Shared/Generate/";
-            //WrapGenerator.GenerateClassWrap(typeof(TestStruct));
+            WrapGenerator.ExportPath = "../src/Test/Shared/Generate/";
+            WrapGenerator.GenerateClassWrap(typeof(TestStruct));
         }
 
         void AutoBind()

@@ -7,14 +7,14 @@ namespace SharpLuna
     using static Lua;
 
     public delegate R RefFunc<R>();
-    public delegate R RefFunc<T1, R>(ref T1 t1);
-    public delegate R RefFunc<T1, T2, R>(ref T1 t1, T2 t2);
-    public delegate R RefFunc<T1, T2, T3, R>(ref T1 t1, T2 t2, T3 t3);
-    public delegate R RefFunc<T1, T2, T3, T4, R>(ref T1 t1, T2 t2, T3 t3, T4 t4);
-    public delegate R RefFunc<T1, T2, T3, T4, T5, R>(ref T1 t1, T2 t2, T3 t3, T4 t4, T5 t5);
-    public delegate R RefFunc<T1, T2, T3, T4, T5, T6, R>(ref T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6);
-    public delegate R RefFunc<T1, T2, T3, T4, T5, T6, T7, R>(ref T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6, T7 t7);
-    public delegate R RefFunc<T1, T2, T3, T4, T5, T6, T7, T8, R>(ref T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6, T7 t7, T8 t8);
+    public delegate R RefFunc<T1, R>(ref T1 t1) where T1 : struct;
+    public delegate R RefFunc<T1, T2, R>(ref T1 t1, T2 t2) where T1 : struct;
+    public delegate R RefFunc<T1, T2, T3, R>(ref T1 t1, T2 t2, T3 t3) where T1 : struct;
+    public delegate R RefFunc<T1, T2, T3, T4, R>(ref T1 t1, T2 t2, T3 t3, T4 t4) where T1 : struct;
+    public delegate R RefFunc<T1, T2, T3, T4, T5, R>(ref T1 t1, T2 t2, T3 t3, T4 t4, T5 t5) where T1 : struct;
+    public delegate R RefFunc<T1, T2, T3, T4, T5, T6, R>(ref T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6) where T1 : struct;
+    public delegate R RefFunc<T1, T2, T3, T4, T5, T6, T7, R>(ref T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6, T7 t7) where T1 : struct;
+    public delegate R RefFunc<T1, T2, T3, T4, T5, T6, T7, T8, R>(ref T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6, T7 t7, T8 t8) where T1 : struct;
 
     public struct RefFuncCaller<R>
     {
@@ -35,7 +35,7 @@ namespace SharpLuna
         }
     }
 
-    public struct RefFuncCaller<T1, R>
+    public struct RefFuncCaller<T1, R> where T1 : struct
     {
         public static int Call(LuaState L) => Call(L, 1);
         public static int StaticCall(LuaState L) => Call(L, 2);
@@ -58,7 +58,7 @@ namespace SharpLuna
         }
     }
 
-    public struct RefFuncCaller<T1, T2, R>
+    public struct RefFuncCaller<T1, T2, R> where T1 : struct
     {
         public static int Call(LuaState L) => Call(L, 1);
         public static int StaticCall(LuaState L) => Call(L, 2);
@@ -82,7 +82,7 @@ namespace SharpLuna
         }
     }
 
-    public struct RefFuncCaller<T1, T2, T3, R>
+    public struct RefFuncCaller<T1, T2, T3, R> where T1 : struct
     {
         public static int Call(LuaState L) => Call(L, 1);
         public static int StaticCall(LuaState L) => Call(L, 2);
@@ -107,7 +107,7 @@ namespace SharpLuna
         }
     }
 
-    public struct RefFuncCaller<T1, T2, T3, T4, R>
+    public struct RefFuncCaller<T1, T2, T3, T4, R> where T1 : struct
     {
         public static int Call(LuaState L) => Call(L, 1);
         public static int StaticCall(LuaState L) => Call(L, 2);
@@ -133,7 +133,7 @@ namespace SharpLuna
         }
     }
 
-    public struct RefFuncCaller<T1, T2, T3, T4, T5, R>
+    public struct RefFuncCaller<T1, T2, T3, T4, T5, R> where T1 : struct
     {
         public static int Call(LuaState L) => Call(L, 1);
         public static int StaticCall(LuaState L) => Call(L, 2);
@@ -160,7 +160,7 @@ namespace SharpLuna
         }
     }
 
-    public struct RefFuncCaller<T1, T2, T3, T4, T5, T6, R>
+    public struct RefFuncCaller<T1, T2, T3, T4, T5, T6, R> where T1 : struct
     {
         public static int Call(LuaState L) => Call(L, 1);
         public static int StaticCall(LuaState L) => Call(L, 2);
@@ -188,7 +188,7 @@ namespace SharpLuna
         }
     }
 
-    public struct RefFuncCaller<T1, T2, T3, T4, T5, T6, T7, R>
+    public struct RefFuncCaller<T1, T2, T3, T4, T5, T6, T7, R> where T1 : struct
     {
         public static int Call(LuaState L) => Call(L, 1);
         public static int StaticCall(LuaState L) => Call(L, 2);
@@ -217,7 +217,7 @@ namespace SharpLuna
         }
     }
 
-    public struct RefFuncCaller<T1, T2, T3, T4, T5, T6, T7, T8, R>
+    public struct RefFuncCaller<T1, T2, T3, T4, T5, T6, T7, T8, R> where T1 : struct
     {
         public static int Call(LuaState L) => Call(L, 1);
         public static int StaticCall(LuaState L) => Call(L, 2);

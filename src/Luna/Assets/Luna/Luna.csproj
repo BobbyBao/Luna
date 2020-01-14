@@ -9,6 +9,11 @@
     <DefineConstants>LUNA_SCRIPT</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>TRACE;LUNA_SCRIPT</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Include="..\..\..\bin\luna_dll.dll" Link="luna_dll.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

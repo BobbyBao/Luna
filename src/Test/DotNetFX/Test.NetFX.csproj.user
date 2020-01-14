@@ -4,4 +4,7 @@
     <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
     <StartWorkingDirectory>C:\Work\Luna\test\</StartWorkingDirectory>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <StartWorkingDirectory>C:\Work\Luna\test\</StartWorkingDirectory>
+  </PropertyGroup>
 </Project>

@@ -15,7 +15,7 @@ namespace SharpLuna
 
     public delegate R RefFunc<R>();
 <# for(int i= 0; i< typeList.Length ; i ++){ #>
-    public delegate R RefFunc<<# for(int j= 0; j <= i ; j ++){#><#=typeList[j]#>, <#}#>R>(ref <# for(int j= 0; j <= i ; j ++){#><#=typeList[j]#> <#=typeList[j].ToLower()#><#if(j != i)#>, <#}#>);
+    public delegate R RefFunc<<# for(int j= 0; j <= i ; j ++){#><#=typeList[j]#>, <#}#>R>(ref <# for(int j= 0; j <= i ; j ++){#><#=typeList[j]#> <#=typeList[j].ToLower()#><#if(j != i)#>, <#}#>) where T1 : struct;
 <# }#>
 
     public struct RefFuncCaller<R>
@@ -38,7 +38,7 @@ namespace SharpLuna
     }
 
 <# for(int i= 0; i< typeList.Length ; i ++){ #>
-    public struct RefFuncCaller<<# for(int j= 0; j <= i ; j ++){#><#=typeList[j]#>, <#}#>R>
+    public struct RefFuncCaller<<# for(int j= 0; j <= i ; j ++){#><#=typeList[j]#>, <#}#>R> where T1 : struct
     {
         public static int Call(LuaState L) => Call(L, 1);
         public static int StaticCall(LuaState L) => Call(L, 2);

@@ -7,14 +7,14 @@ namespace SharpLuna
     using static Lua;
 
     public delegate void RefAction();
-    public delegate void RefAction<T1>(ref T1 t1);
-    public delegate void RefAction<T1, T2>(ref T1 t1, T2 t2);
-    public delegate void RefAction<T1, T2, T3>(ref T1 t1, T2 t2, T3 t3);
-    public delegate void RefAction<T1, T2, T3, T4>(ref T1 t1, T2 t2, T3 t3, T4 t4);
-    public delegate void RefAction<T1, T2, T3, T4, T5>(ref T1 t1, T2 t2, T3 t3, T4 t4, T5 t5);
-    public delegate void RefAction<T1, T2, T3, T4, T5, T6>(ref T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6);
-    public delegate void RefAction<T1, T2, T3, T4, T5, T6, T7>(ref T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6, T7 t7);
-    public delegate void RefAction<T1, T2, T3, T4, T5, T6, T7, T8>(ref T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6, T7 t7, T8 t8);
+    public delegate void RefAction<T1>(ref T1 t1) where T1 : struct;
+    public delegate void RefAction<T1, T2>(ref T1 t1, T2 t2) where T1 : struct;
+    public delegate void RefAction<T1, T2, T3>(ref T1 t1, T2 t2, T3 t3) where T1 : struct;
+    public delegate void RefAction<T1, T2, T3, T4>(ref T1 t1, T2 t2, T3 t3, T4 t4) where T1 : struct;
+    public delegate void RefAction<T1, T2, T3, T4, T5>(ref T1 t1, T2 t2, T3 t3, T4 t4, T5 t5) where T1 : struct;
+    public delegate void RefAction<T1, T2, T3, T4, T5, T6>(ref T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6) where T1 : struct;
+    public delegate void RefAction<T1, T2, T3, T4, T5, T6, T7>(ref T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6, T7 t7) where T1 : struct;
+    public delegate void RefAction<T1, T2, T3, T4, T5, T6, T7, T8>(ref T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6, T7 t7, T8 t8) where T1 : struct;
 
     public struct RefActionCaller
     {
@@ -34,7 +34,7 @@ namespace SharpLuna
         }
     }
 
-    public struct RefActionCaller<T1>
+    public struct RefActionCaller<T1> where T1 : struct
     {
         public static int Call(LuaState L) => Call(L, 1);
         public static int StaticCall(LuaState L) => Call(L, 2);
@@ -56,7 +56,7 @@ namespace SharpLuna
         }
     }
 
-    public struct RefActionCaller<T1, T2>
+    public struct RefActionCaller<T1, T2> where T1 : struct
     {
         public static int Call(LuaState L) => Call(L, 1);
         public static int StaticCall(LuaState L) => Call(L, 2);
@@ -79,7 +79,7 @@ namespace SharpLuna
         }
     }
 
-    public struct RefActionCaller<T1, T2, T3>
+    public struct RefActionCaller<T1, T2, T3> where T1 : struct
     {
         public static int Call(LuaState L) => Call(L, 1);
         public static int StaticCall(LuaState L) => Call(L, 2);
@@ -103,7 +103,7 @@ namespace SharpLuna
         }
     }
 
-    public struct RefActionCaller<T1, T2, T3, T4>
+    public struct RefActionCaller<T1, T2, T3, T4> where T1 : struct
     {
         public static int Call(LuaState L) => Call(L, 1);
         public static int StaticCall(LuaState L) => Call(L, 2);
@@ -128,7 +128,7 @@ namespace SharpLuna
         }
     }
 
-    public struct RefActionCaller<T1, T2, T3, T4, T5>
+    public struct RefActionCaller<T1, T2, T3, T4, T5> where T1 : struct
     {
         public static int Call(LuaState L) => Call(L, 1);
         public static int StaticCall(LuaState L) => Call(L, 2);
@@ -154,7 +154,7 @@ namespace SharpLuna
         }
     }
 
-    public struct RefActionCaller<T1, T2, T3, T4, T5, T6>
+    public struct RefActionCaller<T1, T2, T3, T4, T5, T6> where T1 : struct
     {
         public static int Call(LuaState L) => Call(L, 1);
         public static int StaticCall(LuaState L) => Call(L, 2);
@@ -181,7 +181,7 @@ namespace SharpLuna
         }
     }
 
-    public struct RefActionCaller<T1, T2, T3, T4, T5, T6, T7>
+    public struct RefActionCaller<T1, T2, T3, T4, T5, T6, T7> where T1 : struct
     {
         public static int Call(LuaState L) => Call(L, 1);
         public static int StaticCall(LuaState L) => Call(L, 2);
@@ -209,7 +209,7 @@ namespace SharpLuna
         }
     }
 
-    public struct RefActionCaller<T1, T2, T3, T4, T5, T6, T7, T8>
+    public struct RefActionCaller<T1, T2, T3, T4, T5, T6, T7, T8> where T1 : struct
     {
         public static int Call(LuaState L) => Call(L, 1);
         public static int StaticCall(LuaState L) => Call(L, 2);

@@ -18,6 +18,42 @@ namespace SharpLuna
             }
         }
 
+        static string GetTypeName(Type type)
+        {
+            if (type == typeof(bool))
+                return "bool";
+            else if (type == typeof(sbyte))
+                return "sbyte";
+            else if (type == typeof(byte))
+                return "byte";
+            else if (type == typeof(short))
+                return "short";
+            else if (type == typeof(ushort))
+                return "ushort";
+            else if (type == typeof(int))
+                return "int";
+            else if (type == typeof(uint))
+                return "uint";
+            else if (type == typeof(long))
+                return "long";
+            else if (type == typeof(ulong))
+                return "ulong";
+            else if (type == typeof(float))
+                return "float";
+            else if (type == typeof(double))
+                return "double";
+            else if (type == typeof(decimal))
+                return "decimal";
+            else if (type == typeof(char))
+                return "char";
+            else if (type == typeof(string))
+                return "string";
+            else if (type == typeof(object))
+                return "object";
+            else
+                return type.FullName;
+        }
+
         public static void GenerateClassWrap(Type type, string path = "")
         {
             string code = GenerateClass(type);
@@ -37,13 +73,14 @@ namespace SharpLuna
             StringBuilder sb = new StringBuilder();
             sb.Append("using System;\n");
             sb.Append("using SharpLuna;\n");
-            //sb.Append("using static SharpLuna.Lua;\n");
+            sb.Append("using static SharpLuna.Lua;\n");
             sb.AppendLine();
 
             sb.Append("[WrapClass(typeof(" + type.FullName + "))]\n");
-            sb.Append("class ").Append(type.Name).Append("Wrap\n{\n");
+            sb.Append("public class ").Append(type.Name).Append("Wrap\n{\n");
 
             var ctors = type.GetConstructors();
+            List<ConstructorInfo> ctorList = new List<ConstructorInfo>();
             foreach (var ctor in ctors)
             {
                 if (ctor.IsDefined(typeof(LuaHideAttribute)))
@@ -53,11 +90,15 @@ namespace SharpLuna
 
                 if (ctor.IsPublic)
                 {
-                    GenerateConstructor(type, ctor, sb);
+                    ctorList.Add(ctor);
                 }
 
             }
-            
+
+            if (ctorList.Count > 0)
+            {
+                GenerateConstructor(type, ctorList, sb);
+            }
 
             var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
             foreach(var field in fields)
@@ -75,13 +116,13 @@ namespace SharpLuna
 
         }
 
-        static void GenerateConstructor(Type type, ConstructorInfo ctor, StringBuilder sb)
+        static void GenerateConstructor(Type type, List<ConstructorInfo> ctor, StringBuilder sb)
         {
-            var parameters = ctor.GetParameters();
+            var parameters = ctor[0].GetParameters();
 
             sb.Append("\t[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]\n");
             sb.Append($"\t[WrapMethod(\"ctor\", MethodType.Normal)]\n");
-            sb.Append($"\tstatic int ctor_{parameters.Length}(LuaState L)\n\t{{\n");
+            sb.Append($"\tstatic int Constructor(LuaState L)\n\t{{\n");
 
             if(parameters.Length == 0)
             {
@@ -94,7 +135,7 @@ namespace SharpLuna
                 for(int i = 1; i <= parameters.Length; i++)
                 {
                     var paramInfo = parameters[i - 1];                    
-                    sb.Append($"\t\t\tLua.Get<{paramInfo.ParameterType.FullName}>(L, {i})");
+                    sb.Append($"\t\t\tLua.Get<{GetTypeName(paramInfo.ParameterType)}>(L, {i})");
                     if(i != parameters.Length)
                     {
                         sb.Append(",");
@@ -116,7 +157,7 @@ namespace SharpLuna
         {
             sb.Append("\t[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]\n");
             sb.Append($"\t[WrapMethod(\"{field.Name}\", MethodType.Getter)]\n");
-            sb.Append($"\tstatic int get_{field.Name}(LuaState L)\n\t{{\n");
+            sb.Append($"\tstatic int Get_{field.Name}(LuaState L)\n\t{{\n");
 
             if(type.IsUnManaged())
             {
@@ -134,7 +175,7 @@ namespace SharpLuna
 
             sb.Append("\t[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]\n");
             sb.Append($"\t[WrapMethod(\"{field.Name}\", MethodType.Setter)]\n");
-            sb.Append($"\tstatic int set_{field.Name}(LuaState L)\n\t{{\n");
+            sb.Append($"\tstatic int Set_{field.Name}(LuaState L)\n\t{{\n");
 
             if (type.IsUnManaged())
             {
@@ -145,7 +186,7 @@ namespace SharpLuna
                 sb.Append($"\t\tvar obj = SharpObject.Get<{type.FullName}>(L, 1);\n");
             }
 
-            sb.Append($"\t\tvar p1 = Lua.Get<{field.FieldType.FullName}>(L, 2);\n");
+            sb.Append($"\t\tvar p1 = Lua.Get<{GetTypeName(field.FieldType)}>(L, 2);\n");
             sb.Append($"\t\tobj.{field.Name} = p1;\n");
             sb.Append("\t\treturn 0;\n");
             sb.Append("\t}\n");
