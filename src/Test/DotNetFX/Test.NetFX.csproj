@@ -53,9 +53,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Luna\Assets\Luna\SharpLuna.csproj">
+    <ProjectReference Include="..\..\Luna\Assets\Luna\Luna.csproj">
       <Project>{ab819b5b-6d6b-4d02-9df9-ac0d31652d83}</Project>
-      <Name>SharpLuna</Name>
+      <Name>Luna</Name>
     </ProjectReference>
     <ProjectReference Include="..\Shared\Test.Shared.csproj">
       <Project>{bc07f155-3e87-45f6-bb6d-6739cb73f92d}</Project>

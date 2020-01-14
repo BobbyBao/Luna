@@ -6,24 +6,16 @@ namespace SharpLuna
 {
     using static Lua;
 
-    public delegate R RefFunc<R>();
-    public delegate R RefFunc<T1, R>(ref T1 t1);
-    public delegate R RefFunc<T1, T2, R>(ref T1 t1, T2 t2);
-    public delegate R RefFunc<T1, T2, T3, R>(ref T1 t1, T2 t2, T3 t3);
-    public delegate R RefFunc<T1, T2, T3, T4, R>(ref T1 t1, T2 t2, T3 t3, T4 t4);
-    public delegate R RefFunc<T1, T2, T3, T4, T5, R>(ref T1 t1, T2 t2, T3 t3, T4 t4, T5 t5);
-
-    public struct RefFuncCaller<R>
+    public struct ActionCaller
     {
         public static int StaticCall(LuaState L) => Call(L);
         public static int Call(LuaState L)
         {         
             try
             {
-                var a = L.ToLightObject<RefFunc<R>>(lua_upvalueindex(1), false);
-                var r = a();
-                Lua.Push(L, r);
-                return 1;
+                Action a = L.ToLightObject<Action>(lua_upvalueindex(1), false);
+                a();
+                return 0;
             }
             catch (Exception e)
             {
@@ -32,7 +24,7 @@ namespace SharpLuna
         }
     }
 
-    public struct RefFuncCaller<T1, R>
+    public struct ActionCaller<T1>
     {
         public static int Call(LuaState L) => Call(L, 1);
         public static int StaticCall(LuaState L) => Call(L, 2);
@@ -41,12 +33,11 @@ namespace SharpLuna
         {
             try
             {
-                var a = L.ToLightObject<RefFunc<T1, R>>(lua_upvalueindex(1), false);
-                var r = a(
-                    ref SharpObject.GetValue<T1>(L, 0 + start)
+                var a = L.ToLightObject<Action<T1>>(lua_upvalueindex(1), false);
+                a(
+                    Lua.Get<T1>(L, 0 + start)
                 );
-                Lua.Push(L, r);
-                return 1;
+                return 0;
             }
             catch (Exception e)
             {
@@ -55,7 +46,7 @@ namespace SharpLuna
         }
     }
 
-    public struct RefFuncCaller<T1, T2, R>
+    public struct ActionCaller<T1, T2>
     {
         public static int Call(LuaState L) => Call(L, 1);
         public static int StaticCall(LuaState L) => Call(L, 2);
@@ -64,13 +55,12 @@ namespace SharpLuna
         {
             try
             {
-                var a = L.ToLightObject<RefFunc<T1, T2, R>>(lua_upvalueindex(1), false);
-                var r = a(
-                    ref SharpObject.GetValue<T1>(L, 0 + start),
+                var a = L.ToLightObject<Action<T1, T2>>(lua_upvalueindex(1), false);
+                a(
+                    Lua.Get<T1>(L, 0 + start),
                     Lua.Get<T2>(L, 1 + start)
                 );
-                Lua.Push(L, r);
-                return 1;
+                return 0;
             }
             catch (Exception e)
             {
@@ -79,7 +69,7 @@ namespace SharpLuna
         }
     }
 
-    public struct RefFuncCaller<T1, T2, T3, R>
+    public struct ActionCaller<T1, T2, T3>
     {
         public static int Call(LuaState L) => Call(L, 1);
         public static int StaticCall(LuaState L) => Call(L, 2);
@@ -88,14 +78,13 @@ namespace SharpLuna
         {
             try
             {
-                var a = L.ToLightObject<RefFunc<T1, T2, T3, R>>(lua_upvalueindex(1), false);
-                var r = a(
-                    ref SharpObject.GetValue<T1>(L, 0 + start),
+                var a = L.ToLightObject<Action<T1, T2, T3>>(lua_upvalueindex(1), false);
+                a(
+                    Lua.Get<T1>(L, 0 + start),
                     Lua.Get<T2>(L, 1 + start),
                     Lua.Get<T3>(L, 2 + start)
                 );
-                Lua.Push(L, r);
-                return 1;
+                return 0;
             }
             catch (Exception e)
             {
@@ -104,7 +93,7 @@ namespace SharpLuna
         }
     }
 
-    public struct RefFuncCaller<T1, T2, T3, T4, R>
+    public struct ActionCaller<T1, T2, T3, T4>
     {
         public static int Call(LuaState L) => Call(L, 1);
         public static int StaticCall(LuaState L) => Call(L, 2);
@@ -113,15 +102,14 @@ namespace SharpLuna
         {
             try
             {
-                var a = L.ToLightObject<RefFunc<T1, T2, T3, T4, R>>(lua_upvalueindex(1), false);
-                var r = a(
-                    ref SharpObject.GetValue<T1>(L, 0 + start),
+                var a = L.ToLightObject<Action<T1, T2, T3, T4>>(lua_upvalueindex(1), false);
+                a(
+                    Lua.Get<T1>(L, 0 + start),
                     Lua.Get<T2>(L, 1 + start),
                     Lua.Get<T3>(L, 2 + start),
                     Lua.Get<T4>(L, 3 + start)
                 );
-                Lua.Push(L, r);
-                return 1;
+                return 0;
             }
             catch (Exception e)
             {
@@ -130,7 +118,7 @@ namespace SharpLuna
         }
     }
 
-    public struct RefFuncCaller<T1, T2, T3, T4, T5, R>
+    public struct ActionCaller<T1, T2, T3, T4, T5>
     {
         public static int Call(LuaState L) => Call(L, 1);
         public static int StaticCall(LuaState L) => Call(L, 2);
@@ -139,16 +127,15 @@ namespace SharpLuna
         {
             try
             {
-                var a = L.ToLightObject<RefFunc<T1, T2, T3, T4, T5, R>>(lua_upvalueindex(1), false);
-                var r = a(
-                    ref SharpObject.GetValue<T1>(L, 0 + start),
+                var a = L.ToLightObject<Action<T1, T2, T3, T4, T5>>(lua_upvalueindex(1), false);
+                a(
+                    Lua.Get<T1>(L, 0 + start),
                     Lua.Get<T2>(L, 1 + start),
                     Lua.Get<T3>(L, 2 + start),
                     Lua.Get<T4>(L, 3 + start),
                     Lua.Get<T5>(L, 4 + start)
                 );
-                Lua.Push(L, r);
-                return 1;
+                return 0;
             }
             catch (Exception e)
             {

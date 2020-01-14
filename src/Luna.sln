@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.NetCore", "Test\DotNet
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Test", "..\test\Test.shproj", "{4E0D6571-4E66-4790-90A0-C878F9CDD03F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpLuna", "Luna\Assets\Luna\SharpLuna.csproj", "{AB819B5B-6D6B-4D02-9DF9-AC0D31652D83}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Luna", "Luna\Assets\Luna\Luna.csproj", "{AB819B5B-6D6B-4D02-9DF9-AC0D31652D83}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution

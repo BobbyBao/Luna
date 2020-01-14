@@ -23,10 +23,28 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Delegate\Action.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Action.cs</LastGenOutput>
+    </None>
+    <None Update="Delegate\Func.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Func.cs</LastGenOutput>
+    </None>
     <None Update="Delegate\RefAction.tt">
       <LastGenOutput>RefAction.cs</LastGenOutput>
       <Generator>TextTemplatingFileGenerator</Generator>
     </None>
+    <Compile Update="Delegate\Action.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Action.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Delegate\Func.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Func.tt</DependentUpon>
+    </Compile>
     <Compile Update="Delegate\RefAction.cs">
       <DependentUpon>RefAction.tt</DependentUpon>
       <DesignTime>True</DesignTime>

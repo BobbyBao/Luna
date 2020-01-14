@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Luna\Assets\Luna\SharpLuna.csproj" />
+    <ProjectReference Include="..\..\Luna\Assets\Luna\Luna.csproj" />
   </ItemGroup>
 
   <Import Project="..\..\..\test\Test.projitems" Label="Shared" />
