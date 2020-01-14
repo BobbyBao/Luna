@@ -8,11 +8,6 @@ namespace SharpLuna
 {
     using static Lua;
 
-    public delegate void RefAction<T1>(ref T1 arg1);
-    public delegate void RefAction<T1, in T2>(ref T1 arg1, T2 arg2);
-    public delegate void RefAction<T1, in T2, in T3>(ref T1 arg1, T2 arg2, T3 arg3);
-    public delegate void RefAction<T1, in T2, in T3, in T4>(ref T1 arg1, T2 arg2, T3 arg3, T4 arg4);
-
     struct ConstantVariable
     {
         public static int Call(LuaState L)

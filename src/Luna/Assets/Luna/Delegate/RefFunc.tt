@@ -1,0 +1,72 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Reflection" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+
+<# var typeList = new string [] {"T1", "T2", "T3", "T4", "T5"}; #>
+using System;
+using System.Reflection;
+
+namespace SharpLuna
+{
+    using static Lua;
+
+    public delegate R RefFunc<R>();
+<# for(int i= 0; i< typeList.Length ; i ++){ #>
+    public delegate R RefFunc<<# for(int j= 0; j <= i ; j ++){#><#=typeList[j]#>, <#}#>R>(ref <# for(int j= 0; j <= i ; j ++){#><#=typeList[j]#> <#=typeList[j].ToLower()#><#if(j != i)#>, <#}#>);
+<# }#>
+
+    public struct RefFuncCaller<R>
+    {
+        public static int StaticCall(LuaState L) => Call(L);
+        public static int Call(LuaState L)
+        {         
+            try
+            {
+                var a = L.ToLightObject<RefFunc<R>>(lua_upvalueindex(1), false);
+                var r = a();
+                Lua.Push(L, r);
+                return 1;
+            }
+            catch (Exception e)
+            {
+                return luaL_error(L, e.Message);
+            }
+        }
+    }
+
+<# for(int i= 0; i< typeList.Length ; i ++){ #>
+    public struct RefFuncCaller<<# for(int j= 0; j <= i ; j ++){#><#=typeList[j]#>, <#}#>R>
+    {
+        public static int Call(LuaState L) => Call(L, 0);
+        public static int StaticCall(LuaState L) => Call(L, 1);
+
+        static int Call(LuaState L, int start)
+        {
+            try
+            {
+                var a = L.ToLightObject<RefFunc<<# for(int j= 0; j <= i ; j ++){#><#=typeList[j]#>, <#}#>R>>(lua_upvalueindex(1), false);
+                var r = a(
+<# for(int j= 0; j <= i ; j ++){#>
+<#if(j == 0){#>
+                    ref SharpObject.GetValue<<#=typeList[j]#>>(L, 1 + start)<#if(j != i)#>,
+<#}else{#>
+                    Lua.Get<<#=typeList[j]#>>(L, 1 + start)<#if(j != i)#>,
+<#}}#>
+
+                );
+                Lua.Push(L, r);
+                return 1;
+            }
+            catch (Exception e)
+            {
+                return luaL_error(L, e.Message);
+            }
+        }
+    }
+
+<# }#>
+
+}

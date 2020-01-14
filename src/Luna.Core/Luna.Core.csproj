@@ -28,4 +28,19 @@
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.7.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="C:\Work\Luna\src\Luna\Assets\Luna\Delegate\RefAction.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>RefAction.txt</LastGenOutput>
+    </None>
+    <None Update="C:\Work\Luna\src\Luna\Assets\Luna\Delegate\TextTemplate1.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>TextTemplate1.txt</LastGenOutput>
+    </None>
+  </ItemGroup>
+
 </Project>
