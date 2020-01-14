@@ -15,6 +15,7 @@ namespace Tests
     {
         Luna luna;
         public Luna Luna => luna;
+        public static string dataPath = "../../../../Test/Scripts/";
 
         public TestFramework()
         {          
@@ -22,9 +23,9 @@ namespace Tests
 
             luna = new Luna();
             luna.PreInit += Luna_PreInit;
+            luna.PostInit += Luna_PostInit;
             luna.Run();
             luna.AddSearcher(Loader);
-            luna.PostInit += Luna_PostInit;
    
         }
 
@@ -33,7 +34,6 @@ namespace Tests
             luna.Dispose();
         }
 
-        string rootPath = "scripts/";
         string[] searchers =
         {
             "core/",
@@ -45,7 +45,7 @@ namespace Tests
             byte[] buffer = null;
             string filePath = fileName;
             int i = 0;
-            while (!File.Exists(rootPath + filePath))
+            while (!File.Exists(dataPath + filePath))
             {
                 if (i >= searchers.Length)
                 {
@@ -55,7 +55,7 @@ namespace Tests
                 filePath = searchers[i++] + fileName;
             }
 
-            buffer = File.ReadAllBytes(rootPath + filePath);
+            buffer = File.ReadAllBytes(dataPath + filePath);
             return buffer;
         }
 

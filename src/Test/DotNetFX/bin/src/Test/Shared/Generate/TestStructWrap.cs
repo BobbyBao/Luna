@@ -6,18 +6,30 @@ using static SharpLuna.Lua;
 public class TestStructWrap
 {
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	[WrapMethod("ctor", MethodType.Normal)]
 	static int Constructor(LuaState L)
 	{
-		var obj = new Tests.TestStruct(
-			Lua.Get<float>(L, 1)
-		);
+		int n = lua_gettop(L);
+		Tests.TestStruct obj = default;
+		if(n == 1)
+			obj = new Tests.TestStruct(
+				Lua.Get<float>(L, 1)
+			);
+		else if(n == 2)
+			obj = new Tests.TestStruct(
+				Lua.Get<float>(L, 1),
+				Lua.Get<float>(L, 2)
+			);
+		else if(n == 3)
+			obj = new Tests.TestStruct(
+				Lua.Get<float>(L, 1),
+				Lua.Get<float>(L, 2),
+				Lua.Get<float>(L, 3)
+			);
 		Lua.Push(L, obj);
 		return 1;
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	[WrapMethod("x", MethodType.Getter)]
 	static int Get_x(LuaState L)
 	{
 		ref var obj = ref SharpObject.GetValue<Tests.TestStruct>(L, 1);
@@ -26,7 +38,6 @@ public class TestStructWrap
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	[WrapMethod("x", MethodType.Setter)]
 	static int Set_x(LuaState L)
 	{
 		ref var obj = ref SharpObject.GetValue<Tests.TestStruct>(L, 1);
@@ -36,7 +47,6 @@ public class TestStructWrap
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	[WrapMethod("y", MethodType.Getter)]
 	static int Get_y(LuaState L)
 	{
 		ref var obj = ref SharpObject.GetValue<Tests.TestStruct>(L, 1);
@@ -45,7 +55,6 @@ public class TestStructWrap
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	[WrapMethod("y", MethodType.Setter)]
 	static int Set_y(LuaState L)
 	{
 		ref var obj = ref SharpObject.GetValue<Tests.TestStruct>(L, 1);
@@ -55,7 +64,6 @@ public class TestStructWrap
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	[WrapMethod("z", MethodType.Getter)]
 	static int Get_z(LuaState L)
 	{
 		ref var obj = ref SharpObject.GetValue<Tests.TestStruct>(L, 1);
@@ -64,7 +72,6 @@ public class TestStructWrap
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	[WrapMethod("z", MethodType.Setter)]
 	static int Set_z(LuaState L)
 	{
 		ref var obj = ref SharpObject.GetValue<Tests.TestStruct>(L, 1);
@@ -73,4 +80,11 @@ public class TestStructWrap
 		return 0;
 	}
 
+	public static void Register(ClassWraper classWraper)
+	{
+		classWraper.RegFunction("ctor", Constructor);
+		classWraper.RegField("x", Get_x, Set_x);
+		classWraper.RegField("y", Get_y, Set_y);
+		classWraper.RegField("z", Get_z, Set_z);
+	}
 }

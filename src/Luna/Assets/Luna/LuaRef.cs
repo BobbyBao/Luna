@@ -651,8 +651,8 @@ namespace SharpLuna
 
     public struct TableKeyValuePair
     {
-        public readonly int key;
-        public readonly int value;
+        readonly int key;
+        readonly int value;
 
         readonly LuaState L;
 
@@ -661,6 +661,19 @@ namespace SharpLuna
             L = state;
             key = k;
             value = v;
+        }
+
+        public LuaRef Key()
+        {
+            lua_rawgeti(L, LUA_REGISTRYINDEX, key);
+            return Lua.Pop<LuaRef>(L);
+        }
+
+        public LuaRef Value()
+        {
+            assert(L);
+            lua_rawgeti(L, LUA_REGISTRYINDEX, value);
+            return Lua.Pop<LuaRef>(L);
         }
 
         public K Key<K>()

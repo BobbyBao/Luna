@@ -19,13 +19,14 @@ namespace Test
         public Luna Luna => framework.Luna;
         public TableTree()
         {
+
+            InitializeComponent();
+
             Luna.Print = this.Print;
             Luna.Error = this.Print;
             framework = new TestFramework();
 
-            InitializeComponent();
-
-            var it = Directory.EnumerateFiles("../Test/Scripts/", "*.luna");
+            var it = Directory.EnumerateFiles(TestFramework.dataPath, "*.luna");
             
             foreach (var file in it)
             {
@@ -33,16 +34,54 @@ namespace Test
                 treeView1.Nodes.Add(fileInfo.Name);
             }
 
+            var g = Luna.Global();
+            Refresh(g, treeView2.Nodes, 2);
         }
 
         void Print(string msg)
         {
-            listView1.Items.Add(msg);
+            listBox1.Items.Add(msg);
+        }
+
+        void Refresh(LuaRef table, TreeNodeCollection node, int depth)
+        {
+            if(depth <= 0)
+            {
+                return;
+            }
+
+            foreach (var t in table)
+            {
+                var v = t.Value();
+                var n = node.Add(t.Key<string>());
+                n.Tag = v;
+
+                if (v.IsTable)
+                {
+                    Refresh(v, n.Nodes, depth - 1);
+                }
+            }
         }
 
         private void treeView1_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
         {
             Luna.DoFile(e.Node.Text);
+        }
+
+        private void toolStripButton2_Click(object sender, EventArgs e)
+        {
+            listBox1.Items.Clear();
+        }
+
+        private void treeView2_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
+        {
+            propertyGrid1.SelectedObject = e.Node.Tag;
+        }
+
+        private void treeView2_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
+        {
+            LuaRef v = (LuaRef)e.Node.Tag;
+            Refresh(v, e.Node.Nodes, 2);
         }
     }
 }

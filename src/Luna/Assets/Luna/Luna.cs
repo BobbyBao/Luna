@@ -388,6 +388,11 @@ namespace SharpLuna
             }
         }
 
+        public LuaRef Global()
+        {
+            return LuaRef.Globals(L);
+        }
+
         public LuaRef GetGlobal(string fullPath)
         {
             return LuaRef.Globals(L).RawGet(fullPath);
