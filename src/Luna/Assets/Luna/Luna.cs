@@ -111,6 +111,7 @@ namespace SharpLuna
 
             RegisterClass<object>();
             RegisterClass<Enum>();
+            RegisterClass<string>();
 
         }
 

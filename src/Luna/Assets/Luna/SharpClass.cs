@@ -316,18 +316,34 @@ namespace SharpLuna
         public SharpClass RegConstructor(Type type, ConstructorInfo constructorInfo)
         {
             var paramInfos = constructorInfo.GetParameters();
-            var callerType = typeof(ClassConstructor<>).MakeGenericType(type);
-            MethodInfo CallInnerDelegateMethod = callerType.GetMethod("Call", BindingFlags.Static | BindingFlags.Public);
-            var luaFunc = (LuaNativeFunction)DelegateCache.Get(typeof(LuaNativeFunction), CallInnerDelegateMethod);
+            foreach (var info in paramInfos)
+            {
+                if (info.ParameterType.IsByRef || info.ParameterType.IsPointer)
+                {
+                    return this;
+                }
+            }
 
-            if (paramInfos.Length == 0)
+            try
             {
-                m_meta.RawSet("__call", LuaRef.CreateFunction(State, luaFunc));
+                var callerType = typeof(ClassConstructor<>).MakeGenericType(type);
+                MethodInfo CallInnerDelegateMethod = callerType.GetMethod("Call", BindingFlags.Static | BindingFlags.Public);
+                var luaFunc = (LuaNativeFunction)DelegateCache.Get(typeof(LuaNativeFunction), CallInnerDelegateMethod);
+
+                if (paramInfos.Length == 0)
+                {
+                    m_meta.RawSet("__call", LuaRef.CreateFunction(State, luaFunc));
+                }
+                else
+                {
+                    m_meta.RawSet("__call", LuaRef.CreateFunction(State, luaFunc, constructorInfo));
+                }
             }
-            else
+            catch(Exception e)
             {
-                m_meta.RawSet("__call", LuaRef.CreateFunction(State, luaFunc, constructorInfo));
+                Luna.Log(e.Message);
             }
+
 
             return this;
         }
@@ -536,9 +552,15 @@ namespace SharpLuna
                 paramTypes.Add(classType);
             }
 
+            if(methodInfo.CallingConvention == CallingConventions.VarArgs)
+            {
+                Luna.Log("不支持可变参数类型:" + methodInfo.ToString());
+                return LuaRef.Empty;
+            }
+
             foreach (var info in paramInfo)
             {
-                if(info.ParameterType.IsByRef)
+                if(info.ParameterType.IsByRef || info.ParameterType.IsPointer)
                 {
                     Luna.Log("不支持引用类型参数:" + methodInfo.ToString());
                     return LuaRef.Empty;

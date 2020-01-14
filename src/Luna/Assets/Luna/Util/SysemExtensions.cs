@@ -38,6 +38,15 @@ namespace SharpLuna
             return result;
         }
 
+        public static bool IsDelegatable(this Type t)
+        {
+            if(t.IsByRef || t.IsPointer)
+            {
+                return false;
+            }
+            
+            return true;
+        }
 
         public static void TryAdd<T>(this HashSet<T> self, T obj)
         {
