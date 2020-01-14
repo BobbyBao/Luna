@@ -1,7 +1,11 @@
 
+
+local go = GameObject()
+
+--[[
 t = TestClass()
 print(t:sum(1, 2))
---[[
+
 t:MethodOverload()
 t:MethodOverload(TestClass())
 t:MethodOverload(1, 2, 3)

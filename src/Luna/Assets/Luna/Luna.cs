@@ -48,7 +48,7 @@ namespace SharpLuna
 
         private GlobalModule _binder;
 
-        public LunaConfig Config { get; private set; }
+        Dictionary<Type, ClassWraper> classWrapers = new Dictionary<Type, ClassWraper>();
 
         public event Action PreInit;
         public event Action PostInit;
@@ -393,13 +393,25 @@ namespace SharpLuna
             return LuaRef.Globals(L).RawGet(fullPath);
         }
 
-        public void RegisterWraps(Type type)
+        public ClassWraper GetClassWrapper(Type type)
         {
-            if(Config == null)
+            if (classWrapers.TryGetValue(type, out var classWraper))
             {
-                Config = new LunaConfig();
+                return classWraper;
             }
 
+            classWraper = new ClassWraper();
+            classWrapers.Add(type, classWraper);
+            return classWraper;
+        }
+
+        public bool IsRegistered(Type type)
+        {
+            return classWrapers.ContainsKey(type);
+        }
+
+        public void RegisterWraps(Type type)
+        {
             var types = type.Assembly.GetTypes();
             foreach(var t in types)
             {
@@ -417,12 +429,12 @@ namespace SharpLuna
 
         void AddWrapClass(Type type, Type wrapType)
         {
-            if(Config.IsRegistered(type))
+            if(IsRegistered(type))
             {
                 return;
             }
 
-            var classWrapper = Config.GetClassWrapper(type);
+            var classWrapper = GetClassWrapper(type);
             var method = wrapType.GetMethod("Register", BindingFlags.Static | BindingFlags.Public);
             method?.Invoke(null, new object[] { classWrapper });           
         }
@@ -541,5 +553,43 @@ namespace SharpLuna
 #endregion
 
 
+    }
+
+
+    public class MethodWraper
+    {
+        public LuaNativeFunction func;
+        public LuaNativeFunction getter;
+        public LuaNativeFunction setter;
+    }
+
+    public class ClassWraper : Dictionary<string, MethodWraper>
+    {
+        public void RegField(string name, LuaNativeFunction getter, LuaNativeFunction setter = null) => RegProp(name, getter, setter);
+
+        public void RegProp(string name, LuaNativeFunction getter, LuaNativeFunction setter = null)
+        {
+            if (!TryGetValue(name, out var methodWraper))
+            {
+                methodWraper = new MethodWraper();
+                Add(name, methodWraper);
+            }
+
+            methodWraper.getter = getter;
+            methodWraper.setter = setter;
+        }
+
+        public void RegConstructor(LuaNativeFunction func) => RegFunction("ctor", func);
+
+        public void RegFunction(string name, LuaNativeFunction func)
+        {
+            if (!TryGetValue(name, out var methodWraper))
+            {
+                methodWraper = new MethodWraper();
+                Add(name, methodWraper);
+            }
+
+            methodWraper.func = func;
+        }
     }
 }

@@ -24,9 +24,7 @@ public class SampleMain : MonoBehaviour
         var luna = LunaClient.Luna;
 
         Load("UI/Panel");
-        
-        luna.RegisterClass(typeof(TestTypes.TestClass));
-        
+                
         if (!string.IsNullOrWhiteSpace(startFile))
         {
             luaClient.Run(startFile); 

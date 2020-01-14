@@ -70,7 +70,7 @@ namespace SharpLuna
         {
             classType = type;
 
-            classInfo = Luna.Config.GetClassWrapper(classType);
+            classInfo = Luna.GetClassWrapper(classType);
 
         }
 

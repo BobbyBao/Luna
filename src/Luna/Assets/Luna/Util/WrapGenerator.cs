@@ -114,7 +114,7 @@ namespace SharpLuna
                 }
 
                 GenerateField(type, field, sb);
-                members.Add((MemberTypes.Field, field.Name, true, true));
+                members.Add((MemberTypes.Field, field.Name, true, !field.IsLiteral));
             }
 
 
@@ -124,7 +124,22 @@ namespace SharpLuna
             {
                 if (memberType == MemberTypes.Field)
                 {
-                    sb.Append($"\t\tclassWraper.RegField(\"{name}\", Get_{name}, Set_{name});\n");
+                    if (hasGetter || hasSetter)
+                    {
+                        sb.Append($"\t\tclassWraper.RegField(\"{name}\"");
+
+                        if (hasGetter)
+                        {
+                            sb.Append($", Get_{name}");
+                        }
+
+                        if (hasSetter)
+                        {
+                            sb.Append($", Set_{name}");
+                        }
+
+                        sb.Append($");\n");
+                    }
                 }
                 else if (memberType == MemberTypes.Constructor)
                 {
@@ -217,10 +232,23 @@ namespace SharpLuna
                 sb.Append($"\t\tvar obj = SharpObject.Get<{type.FullName}>(L, 1);\n");
             }
 
-            sb.Append($"\t\tLua.Push(L, obj.{field.Name});\n");
+            if (field.IsStatic)
+            {
+                sb.Append($"\t\tLua.Push(L, {type.FullName}.{field.Name});\n");
+            }
+            else
+            {
+                sb.Append($"\t\tLua.Push(L, obj.{field.Name});\n");
+            }
+
             sb.Append("\t\treturn 1;\n");
             sb.Append("\t}\n");
             sb.AppendLine();
+
+            if (field.IsLiteral)
+            {
+                return;
+            }
 
             sb.Append("\t[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]\n");
             //sb.Append($"\t[WrapMethod(\"{field.Name}\", MethodType.Setter)]\n");
@@ -236,7 +264,14 @@ namespace SharpLuna
             }
 
             sb.Append($"\t\tvar p1 = Lua.Get<{GetTypeName(field.FieldType)}>(L, 2);\n");
-            sb.Append($"\t\tobj.{field.Name} = p1;\n");
+            if (field.IsStatic)
+            {
+                sb.Append($"\t\t{type.FullName}.{field.Name} = p1;\n");
+            }
+            else
+            {
+                sb.Append($"\t\tobj.{field.Name} = p1;\n");
+            }
             sb.Append("\t\treturn 0;\n");
             sb.Append("\t}\n");
             sb.AppendLine();

@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace Test
 {
-    public partial class Form1 : Form
+    public partial class TableTree : Form
     {
-        public Form1()
+        public TableTree()
         {
             InitializeComponent();
         }
