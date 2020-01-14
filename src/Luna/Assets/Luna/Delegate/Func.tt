@@ -5,7 +5,7 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ output extension=".cs" #>
 
-<# var typeList = new string [] {"T1", "T2", "T3", "T4", "T5"}; #>
+<# var typeList = new string [] {"T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8"}; #>
 using System;
 using System.Reflection;
 

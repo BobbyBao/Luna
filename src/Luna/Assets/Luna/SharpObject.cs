@@ -81,6 +81,12 @@ namespace SharpLuna
             return mem;
         }
 
+        public unsafe static ref T GetStruct<T>(LuaState L, int index) where T : struct
+        {
+            var handle = GetHandler<T>(L, index, false, true);          
+            return ref Unsafe.Unbox<T>(GCHandle.FromIntPtr(handle).Target);
+        }
+
         public unsafe static ref T GetValue<T>(LuaState L, int index)
         {
             var ptr = GetUserData(L, index, Signature<T>(), true, true);            

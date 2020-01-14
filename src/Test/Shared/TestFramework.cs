@@ -26,12 +26,6 @@ namespace Tests
             luna.AddSearcher(Loader);
         }
 
-        private void Luna_PreInit()
-        {
-            WrapGenerator.ExportPath = "../src/Test/Shared/Generate/";
-            WrapGenerator.GenerateClassWrap(typeof(TestStruct));
-        }
-
         public void Dispose()
         {
             luna.Dispose();
@@ -103,6 +97,12 @@ namespace Tests
             //CustomBind();
 
             luna.DoFile("test.luna");
+        }
+
+        private void Luna_PreInit()
+        {
+            //WrapGenerator.ExportPath = "../src/Test/Shared/Generate/";
+            //WrapGenerator.GenerateClassWrap(typeof(TestStruct));
         }
 
         void AutoBind()

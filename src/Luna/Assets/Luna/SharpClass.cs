@@ -222,7 +222,6 @@ namespace SharpLuna
                     continue;
                 }
 
-                //自动绑定只支持常量
                 if (field.IsLiteral)
                 {
                     RegConstant(field);                   
@@ -540,9 +539,10 @@ namespace SharpLuna
             {
                 if(info.ParameterType.IsByRef)
                 {
-                    Luna.Log("不支持引用类型参数");
+                    Luna.Log("不支持引用类型参数:" + methodInfo.ToString());
                     return LuaRef.Empty;
                 }
+
                 paramTypes.Add(info.ParameterType);
             }
 
@@ -576,36 +576,20 @@ namespace SharpLuna
                 luaFunc = ActionCaller.Call;
                 return LuaRef.CreateFunction(State, luaFunc, del);
             }
-            else if (typeArray.Length == 1)
-            {
-                funcDelegateType = typeof(Action<>).MakeGenericType(typeArray);
-                callerType = typeof(ActionCaller<>).MakeGenericType(typeArray);
-            }
-            else if (typeArray.Length == 2)
-            {
-                funcDelegateType = typeof(Action<,>).MakeGenericType(typeArray);
-                callerType = typeof(ActionCaller<,>).MakeGenericType(typeArray);
-            }
-            else if (typeArray.Length == 3)
-            {
-                funcDelegateType = typeof(Action<,,>).MakeGenericType(typeArray);
-                callerType = typeof(ActionCaller<,,>).MakeGenericType(typeArray);
-            }
-            else if (typeArray.Length == 4)
-            {
-                funcDelegateType = typeof(Action<,,,>).MakeGenericType(typeArray);
-                callerType = typeof(ActionCaller<,,,>).MakeGenericType(typeArray);
-            }
-            else if (typeArray.Length == 5)
-            {
-                funcDelegateType = typeof(Action<,,,,>).MakeGenericType(typeArray);
-                callerType = typeof(ActionCaller<,,,,>).MakeGenericType(typeArray);
-            }
-            else
+            else if (typeArray.Length > DelegateCache.actionType.Length)
             {
                 return LuaRef.Empty;
             }
+            else
+            {
+                (var funcGenType, var callerGenType) = (classType.IsValueType && !methodInfo.IsStatic) ?
+                    DelegateCache.refActionType[typeArray.Length] 
+                    : DelegateCache.actionType[typeArray.Length];
 
+                funcDelegateType = funcGenType.MakeGenericType(typeArray);
+                callerType = callerGenType.MakeGenericType(typeArray);
+            }
+            
             del = DelegateCache.Get(funcDelegateType, methodInfo);
 
             if(del == null)
@@ -626,41 +610,20 @@ namespace SharpLuna
             LuaNativeFunction luaFunc = null;
             Delegate del = null;
 
-            if (typeArray.Length == 1)
-            {
-                funcDelegateType = typeof(Func<>).MakeGenericType(typeArray);
-                callerType = typeof(FuncCaller<>).MakeGenericType(typeArray);
-            }
-            else if (typeArray.Length == 2)
-            {
-                funcDelegateType = typeof(Func<,>).MakeGenericType(typeArray);
-                callerType = typeof(FuncCaller<,>).MakeGenericType(typeArray);
-            }
-            else if (typeArray.Length == 3)
-            {
-                funcDelegateType = typeof(Func<,,>).MakeGenericType(typeArray);
-                callerType = typeof(FuncCaller<,,>).MakeGenericType(typeArray);
-            }
-            else if (typeArray.Length == 4)
-            {
-                funcDelegateType = typeof(Func<,,,>).MakeGenericType(typeArray);
-                callerType = typeof(FuncCaller<,,,>).MakeGenericType(typeArray);
-            }
-            else if (typeArray.Length == 5)
-            {
-                funcDelegateType = typeof(Func<,,,,>).MakeGenericType(typeArray);
-                callerType = typeof(FuncCaller<,,,,>).MakeGenericType(typeArray);
-            }
-            else if (typeArray.Length == 6)
-            {
-                funcDelegateType = typeof(Func<,,,,,>).MakeGenericType(typeArray);
-                callerType = typeof(FuncCaller<,,,,,>).MakeGenericType(typeArray);
-            }
-            else
+            if (typeArray.Length >= DelegateCache.funcType.Length)
             {
                 return LuaRef.Empty;
             }
+            else
+            {
+                (var funcGenType, var callerGenType) = (classType.IsValueType && !methodInfo.IsStatic) ?
+                    DelegateCache.refFuncType[typeArray.Length - 1]
+                    : DelegateCache.funcType[typeArray.Length - 1];
 
+                funcDelegateType = funcGenType.MakeGenericType(typeArray);
+                callerType = callerGenType.MakeGenericType(typeArray);
+            }
+            
             del = DelegateCache.Get(funcDelegateType, methodInfo);
             if (del == null)
             {

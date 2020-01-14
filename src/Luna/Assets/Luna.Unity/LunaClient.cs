@@ -51,7 +51,7 @@ namespace SharpLuna.Unity
             luna.RegisterClass<Component>();
 
 
-            //luna.RegisterClass<Vector3>();
+            luna.RegisterClass<Vector3>();
 
         }
 
