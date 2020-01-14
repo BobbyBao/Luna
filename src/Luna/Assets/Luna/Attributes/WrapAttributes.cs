@@ -20,23 +20,4 @@ namespace SharpLuna
 
     }
 
-    public enum MethodType
-    {
-        Normal,
-        Getter,
-        Setter
-    }
-
-    [AttributeUsage(AttributeTargets.Method)]
-    public sealed class WrapMethodAttribute : Attribute
-    {
-        public string MethodName { get; }
-        public MethodType MethodType { get; }
-
-        public WrapMethodAttribute(string name, MethodType methodType)
-        {
-            MethodName = name;
-            MethodType = methodType;
-        }
-    }
 }

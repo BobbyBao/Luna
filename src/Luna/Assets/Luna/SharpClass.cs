@@ -15,13 +15,14 @@ namespace SharpLuna
         protected SharpClass parent;
         protected Type classType;
 
-        protected Dictionary<string, MethodConfig> classInfo;
+        protected Dictionary<string, MethodWraper> classInfo;
 
         static Dictionary<string, string> tagMethods = new Dictionary<string, string>
         {
             {"ToString","__tostring"},
             {"Dispose", "__close"},
 
+            {"Equals","__eq"},
             {"op_Equality","__eq"},
             {"op_LessThan","__lt"},
             {"op_LessThanOrEqual","__le"},
@@ -69,7 +70,7 @@ namespace SharpLuna
         {
             classType = type;
 
-            classInfo = Luna.Config.GetClassConfig(classType);
+            classInfo = Luna.Config.GetClassWrapper(classType);
 
         }
 
@@ -562,7 +563,11 @@ namespace SharpLuna
 
         LuaRef RegAction(MethodInfo methodInfo, Type[] typeArray, bool isProp = false)
         {
+#if LUNA_SCRIPT
             string callFnName = (methodInfo.IsStatic && !isProp) ? "StaticCall" : "Call";
+#else
+            string callFnName = "Call";
+#endif
             Type funcDelegateType = null;
             Type callerType = null;
             LuaNativeFunction luaFunc = null;
@@ -604,7 +609,11 @@ namespace SharpLuna
 
         LuaRef RegFunc(MethodInfo methodInfo, Type[] typeArray, bool isProp = false)
         {
+#if LUNA_SCRIPT
             string callFnName = (methodInfo.IsStatic && !isProp) ? "StaticCall" : "Call";
+#else
+            string callFnName = "Call";
+#endif
             Type funcDelegateType = null;
             Type callerType = null;
             LuaNativeFunction luaFunc = null;
@@ -637,9 +646,9 @@ namespace SharpLuna
 
         }
 
-        #endregion
+#endregion
 
-        #region 显式绑定
+#region 显式绑定
 
         public SharpClass AddConstant<T>(string name)
         {
@@ -768,7 +777,11 @@ namespace SharpLuna
         {
             MethodInfo methodInfo = typeof(T).GetMethod(name);
             var fn = DelegateCache.Get<Action<P1>>(methodInfo);
+#if LUNA_SCRIPT
             m_meta.RawSet(name, LuaRef.CreateFunction(State, ActionCaller<P1>.StaticCall, fn));
+#else
+            m_meta.RawSet(name, LuaRef.CreateFunction(State, ActionCaller<P1>.Call, fn));
+#endif
             return this;
         }
 
@@ -776,7 +789,11 @@ namespace SharpLuna
         {
             MethodInfo methodInfo = typeof(T).GetMethod(name);
             var fn = DelegateCache.Get<Action<P1, P2>>(methodInfo);
+#if LUNA_SCRIPT
             m_meta.RawSet(name, LuaRef.CreateFunction(State, ActionCaller<P1, P2>.StaticCall, fn));
+#else
+            m_meta.RawSet(name, LuaRef.CreateFunction(State, ActionCaller<P1, P2>.Call, fn));
+#endif
             return this;
         }
 
@@ -792,7 +809,11 @@ namespace SharpLuna
         {
             MethodInfo methodInfo = typeof(T).GetMethod(name);
             var fn = DelegateCache.Get<Func<P1, R>>(methodInfo);
+#if LUNA_SCRIPT
             m_meta.RawSet(name, LuaRef.CreateFunction(State, FuncCaller<P1, R>.StaticCall, fn));
+#else
+            m_meta.RawSet(name, LuaRef.CreateFunction(State, FuncCaller<P1, R>.Call, fn));
+#endif
             return this;
         }
 
@@ -800,7 +821,11 @@ namespace SharpLuna
         {
             MethodInfo methodInfo = typeof(T).GetMethod(name);
             var fn = DelegateCache.Get<Func<P1, P2, R>>(methodInfo);
+#if LUNA_SCRIPT
             m_meta.RawSet(name, LuaRef.CreateFunction(State, FuncCaller<P1, P2, R>.StaticCall, fn));
+#else
+            m_meta.RawSet(name, LuaRef.CreateFunction(State, FuncCaller<P1, P2, R>.Call, fn));
+#endif
             return this;
         }
 
@@ -881,7 +906,7 @@ namespace SharpLuna
             return this;
         }
 
-        #endregion
+#endregion
 
     }
 

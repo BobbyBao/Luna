@@ -446,44 +446,14 @@ namespace SharpLuna
                 return;
             }
 
-            var classConfig = Config.GetClassConfig(type);
-
-            var methods = wrapType.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-            foreach (var m in methods)
-            {
-                var attr = m.GetCustomAttribute<WrapMethodAttribute>();
-                if (attr == null)
-                {
-                    continue;
-                }
-
-                if(!classConfig.TryGetValue(attr.MethodName, out var methodConfig))
-                {
-                    methodConfig = new MethodConfig();
-                    classConfig.Add(attr.MethodName, methodConfig);
-                }
-
-                var del = (LuaNativeFunction)m.CreateDelegate(typeof(LuaNativeFunction));
-                switch(attr.MethodType)
-                {
-                    case MethodType.Normal:
-                        methodConfig.func = del;
-                        break;
-                    case MethodType.Getter:
-                        methodConfig.getter = del;
-                        break;
-                    case MethodType.Setter:
-                        methodConfig.setter = del;
-                        break;
-                }
-
-            }
-
+            var classWrapper = Config.GetClassWrapper(type);
+            var method = wrapType.GetMethod("Register", BindingFlags.Static | BindingFlags.Public);
+            method.Invoke(null, new object[] { classWrapper });           
         }
 
         public SharpClass RegisterModel<T>(string name, Type[] types)
         {
-            var model = this._binder.BeginModule(name);
+            var model = _binder.BeginModule(name);
             foreach (Type t in types)
             {
                 model.RegClass(t);

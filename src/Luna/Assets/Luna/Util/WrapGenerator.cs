@@ -68,8 +68,9 @@ namespace SharpLuna
             }
         }
 
-        public static String GenerateClass(Type type)
+        public static string GenerateClass(Type type)
         {
+      
             StringBuilder sb = new StringBuilder();
             sb.Append("using System;\n");
             sb.Append("using SharpLuna;\n");
@@ -78,6 +79,9 @@ namespace SharpLuna
 
             sb.Append("[WrapClass(typeof(" + type.FullName + "))]\n");
             sb.Append("public class ").Append(type.Name).Append("Wrap\n{\n");
+
+            List<(MemberTypes memberType, string name, bool hasGetter, bool hasSetter)> members =
+                new List<(MemberTypes memberType, string name, bool hasGetter, bool hasSetter)>();
 
             var ctors = type.GetConstructors();
             List<ConstructorInfo> ctorList = new List<ConstructorInfo>();
@@ -98,6 +102,7 @@ namespace SharpLuna
             if (ctorList.Count > 0)
             {
                 GenerateConstructor(type, ctorList, sb);
+                members.Add((MemberTypes.Constructor, "ctor", false, false));
             }
 
             var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
@@ -109,43 +114,87 @@ namespace SharpLuna
                 }
 
                 GenerateField(type, field, sb);
+                members.Add((MemberTypes.Field, field.Name, true, true));
             }
+
+
+            sb.Append($"\tpublic static void Register(ClassWraper classWraper)\n\t{{\n");
+
+            foreach (var (memberType, name, hasGetter, hasSetter) in members)
+            {
+                if (memberType == MemberTypes.Field)
+                {
+                    sb.Append($"\t\tclassWraper.RegField(\"{name}\", Get_{name}, Set_{name});\n");
+                }
+                else if (memberType == MemberTypes.Constructor)
+                {
+                    sb.Append($"\t\tclassWraper.RegFunction(\"{name}\", Constructor);\n");
+                }
+            }
+
+            sb.Append("\t}\n");
 
             sb.Append("}");
             return sb.ToString();
 
         }
 
-        static void GenerateConstructor(Type type, List<ConstructorInfo> ctor, StringBuilder sb)
+        static void GenerateConstructor(Type type, List<ConstructorInfo> ctorList, StringBuilder sb)
         {
-            var parameters = ctor[0].GetParameters();
-
             sb.Append("\t[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]\n");
-            sb.Append($"\t[WrapMethod(\"ctor\", MethodType.Normal)]\n");
+            //sb.Append($"\t[WrapMethod(\"ctor\", MethodType.Normal)]\n");
             sb.Append($"\tstatic int Constructor(LuaState L)\n\t{{\n");
 
-            if(parameters.Length == 0)
-            {
-                sb.Append($"\t\tvar obj = new {type.FullName}();\n");
-            }
-            else
-            {
-                sb.Append($"\t\tvar obj = new {type.FullName}(\n");
+            sb.Append($"\t\tint n = lua_gettop(L);\n");
 
-                for(int i = 1; i <= parameters.Length; i++)
+            sb.Append($"\t\t{type.FullName} obj = default;\n");
+
+            bool first = true;
+            foreach (var ctor in ctorList)
+            {
+                var parameters = ctor.GetParameters();
+                if (parameters.Length == 0)
                 {
-                    var paramInfo = parameters[i - 1];                    
-                    sb.Append($"\t\t\tLua.Get<{GetTypeName(paramInfo.ParameterType)}>(L, {i})");
-                    if(i != parameters.Length)
+                    if (first)
                     {
-                        sb.Append(",");
+                        first = false;
+                        sb.Append($"\t\tif(n == 0)\n");
                     }
-                    sb.AppendLine();
+                    else
+                    {
+                        sb.Append($"\t\telse if(n == 0)\n");
+                    }
+                    sb.Append($"\t\t\tobj = new {type.FullName}();\n");
+                }
+                else
+                {
+                    if (first)
+                    {
+                        first = false;
+                        sb.Append($"\t\tif(n == {parameters.Length})\n");
+                    }
+                    else
+                    {
+                        sb.Append($"\t\telse if(n == {parameters.Length})\n");
+                    }
+
+                    sb.Append($"\t\t\tobj = new {type.FullName}(\n");
+
+                    for (int i = 1; i <= parameters.Length; i++)
+                    {
+                        var paramInfo = parameters[i - 1];
+                        sb.Append($"\t\t\t\tLua.Get<{GetTypeName(paramInfo.ParameterType)}>(L, {i})");
+                        if (i != parameters.Length)
+                        {
+                            sb.Append(",");
+                        }
+                        sb.AppendLine();
+                    }
+
+                    sb.Append("\t\t\t);\n");
                 }
 
-                sb.Append("\t\t);\n"); 
-            }
-         
+            }         
 
             sb.Append("\t\tLua.Push(L, obj);\n");
             sb.Append("\t\treturn 1;\n");
@@ -156,7 +205,7 @@ namespace SharpLuna
         static void GenerateField(Type type, FieldInfo field, StringBuilder sb)
         {
             sb.Append("\t[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]\n");
-            sb.Append($"\t[WrapMethod(\"{field.Name}\", MethodType.Getter)]\n");
+            //sb.Append($"\t[WrapMethod(\"{field.Name}\", MethodType.Getter)]\n");
             sb.Append($"\tstatic int Get_{field.Name}(LuaState L)\n\t{{\n");
 
             if(type.IsUnManaged())
@@ -174,7 +223,7 @@ namespace SharpLuna
             sb.AppendLine();
 
             sb.Append("\t[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]\n");
-            sb.Append($"\t[WrapMethod(\"{field.Name}\", MethodType.Setter)]\n");
+            //sb.Append($"\t[WrapMethod(\"{field.Name}\", MethodType.Setter)]\n");
             sb.Append($"\tstatic int Set_{field.Name}(LuaState L)\n\t{{\n");
 
             if (type.IsUnManaged())

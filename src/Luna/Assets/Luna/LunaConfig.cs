@@ -7,32 +7,63 @@ using System.Threading.Tasks;
 namespace SharpLuna
 {
 
-    public class MethodConfig
+    public class LunaConfig
+    {
+        Dictionary<Type, ClassWraper> classWrapers = new Dictionary<Type, ClassWraper>();
+
+        public ClassWraper GetClassWrapper(Type type)
+        {
+            if(classWrapers.TryGetValue(type, out var classWraper))
+            {
+                return classWraper;
+            }
+
+            classWraper = new ClassWraper();
+            classWrapers.Add(type, classWraper);
+            return classWraper;
+        }
+
+        public bool IsRegistered(Type type)
+        {
+            return classWrapers.ContainsKey(type);
+        }
+    }
+
+    public class MethodWraper
     {
         public LuaNativeFunction func;
         public LuaNativeFunction getter;
         public LuaNativeFunction setter;
     }
 
-    public class LunaConfig
+    public class ClassWraper : Dictionary<string, MethodWraper>
     {
-        public Dictionary<Type, Dictionary<string, MethodConfig>> wrapClassRegistry = new Dictionary<Type, Dictionary<string, MethodConfig>>();
+        public void RegField(string name, LuaNativeFunction getter, LuaNativeFunction setter) => RegProp(name, getter, setter);
 
-        public Dictionary<string, MethodConfig> GetClassConfig(Type type)
+        public void RegProp(string name, LuaNativeFunction getter, LuaNativeFunction setter)
         {
-            if(wrapClassRegistry.TryGetValue(type, out var methodConfig))
+            if (!TryGetValue(name, out var methodWraper))
             {
-                return methodConfig;
+                methodWraper = new MethodWraper();
+                Add(name, methodWraper);
             }
 
-            methodConfig = new Dictionary<string, MethodConfig>();
-            wrapClassRegistry.Add(type, methodConfig);
-            return methodConfig;
+            methodWraper.getter = getter;
+            methodWraper.setter = setter;
         }
 
-        public bool IsRegistered(Type type)
+        public void RegConstructor(LuaNativeFunction func) => RegFunction("ctor", func);
+
+        public void RegFunction(string name, LuaNativeFunction func)
         {
-            return wrapClassRegistry.ContainsKey(type);
+            if (!TryGetValue(name, out var methodWraper))
+            {
+                methodWraper = new MethodWraper();
+                Add(name, methodWraper);
+            }
+
+            methodWraper.func = func;
         }
     }
+
 }
