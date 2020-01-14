@@ -3,7 +3,7 @@
 
 ## 主要特点
 
-1.高性能，没有使用LuaInterface那一套。使用Delegate进行反射，不用生成大量的Wrap代码，不使用Emit和Expression，也不用当心IOS平台的问题
+1.高性能，没有使用LuaInterface那一套。使用Delegate进行反射，不用生成大量的Wrap代码，不使用Emit和Expression，支持IL2CPP
 
 2.简洁易用，使用接口非常简单，注册C#类到lua只需要一句话
 
@@ -95,15 +95,11 @@ end
 ```
 以上代码将输出
 
-0 1
-
-1 2
-
-2 3
-
-3 4
-
-4 5
+0 1  
+1 2  
+2 3  
+3 4  
+4 5  
 
 
 
