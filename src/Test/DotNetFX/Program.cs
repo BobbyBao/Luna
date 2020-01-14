@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Tests
 {
@@ -10,10 +11,7 @@ namespace Tests
     {
         static void Main(string[] args)
         {
-            using (var test = new TestFramework())
-            {
-                test.Run();
-            }
+            Application.Run(new Test.TableTree());
         }
     }
 }

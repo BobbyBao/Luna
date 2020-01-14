@@ -14,16 +14,18 @@ namespace Tests
     public class TestFramework : IDisposable
     {
         Luna luna;
+        public Luna Luna => luna;
+
         public TestFramework()
         {          
-            Luna.Print = Print;
-            Luna.Error = Print;
             Luna.ReadBytes = ReadBytes;
 
             luna = new Luna();
             luna.PreInit += Luna_PreInit;
             luna.Run();
             luna.AddSearcher(Loader);
+            luna.PostInit += Luna_PostInit;
+   
         }
 
         public void Dispose()
@@ -36,7 +38,6 @@ namespace Tests
         {
             "core/",
             "math/",
-
         };
 
         byte[] ReadBytes(string fileName)
@@ -86,15 +87,9 @@ namespace Tests
 
         }
 
-        void Print(string str)
-        {
-            Console.WriteLine(str);
-        }
 
         public void Run()
         {
-            AutoBind();
-            //CustomBind();
 
             luna.DoFile("test.luna");
 
@@ -108,6 +103,13 @@ namespace Tests
         {
             WrapGenerator.ExportPath = "../src/Test/Shared/Generate/";
             WrapGenerator.GenerateClassWrap(typeof(TestStruct));
+
+        }
+
+        private void Luna_PostInit()
+        {
+            AutoBind();
+            //CustomBind();
         }
 
         void AutoBind()
