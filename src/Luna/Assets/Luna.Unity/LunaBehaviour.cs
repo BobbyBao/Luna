@@ -23,7 +23,6 @@ namespace SharpLuna.Unity
                 var luna = LunaClient.Luna;
                 var L = luna.State;
 
-                luna.DoFile(luaPath);
 
                 int index = luaPath.LastIndexOf(".");
                 className = luaPath.Remove(index);
@@ -34,6 +33,16 @@ namespace SharpLuna.Unity
                 }
                 
                 luaClass = luna.GetGlobal(className);
+                if (!luaClass)
+                {
+                    luna.DoFile(luaPath);
+                    luaClass = luna.GetGlobal(className);
+                    if (!luaClass)
+                    {
+                        return;
+                    }
+                }
+
                 luaClass.AddRef();
 
                 var metaTable = luaClass.GetMetaTable();             

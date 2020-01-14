@@ -93,12 +93,12 @@ namespace TestTypes
             return input;
         }
 
-        public object[] TestLuaFunction(LuaRef func)
+        public object TestLuaFunction(LuaRef func)
         {
             if (func != null)
             {
-                //object[]  result = func.Call(1, 2);
-                //return result;
+                object  result = func.Call<object>(1, 2);
+                return result;
             }
             return null;
         }

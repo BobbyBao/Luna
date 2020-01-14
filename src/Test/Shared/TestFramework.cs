@@ -97,6 +97,11 @@ namespace Tests
             //CustomBind();
 
             luna.DoFile("test.luna");
+
+            Luna.Log("LiveCount:", RefCountHelper.LiveCount, "FreeCount:", RefCountHelper.FreeCount);
+            RefCountHelper.Collect();
+
+            Luna.Log("LiveCount:", RefCountHelper.LiveCount, "FreeCount:", RefCountHelper.FreeCount);
         }
 
         private void Luna_PreInit()
@@ -110,6 +115,33 @@ namespace Tests
             luna.RegisterClass(typeof(TestEnum));
             luna.RegisterClass(typeof(TestStruct));
             luna.RegisterClass(typeof(TestClass));
+
+            var c = luna.GetGlobal("TestClass");
+            var it = c.GetEnumerator();
+
+            Luna.Log("TestClass : ======================== ");
+
+            while(it.MoveNext())
+            {
+                Luna.Log(it.Current.Key<string>());
+            }
+
+            it.Reset();
+            Luna.Log("TestClass : ======================== ");
+
+            while (it.MoveNext())
+            {
+                Luna.Log(it.Current.Key<string>());
+            }
+
+            Luna.Log("TestClass : ======================== ");
+
+            foreach (var e in c)
+            {
+                Luna.Log(e.Key<string>());
+            }
+
+            Luna.Log("LiveCount:", RefCountHelper.LiveCount, "FreeCount:", RefCountHelper.FreeCount);
         }
 
         void CustomBind()

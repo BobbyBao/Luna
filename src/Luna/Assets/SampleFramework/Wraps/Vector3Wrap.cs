@@ -7,7 +7,6 @@ using static SharpLuna.Lua;
 public class Vector3Wrap
 {
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	[WrapMethod("x", MethodType.Getter)]
 	static int get_x(LuaState L)
     {
         ref var obj = ref SharpObject.GetValue<Vector3>(L, 1);
@@ -16,7 +15,6 @@ public class Vector3Wrap
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	[WrapMethod("x", MethodType.Setter)]
 	static int set_x(LuaState L)
     {
 		ref var obj = ref SharpObject.GetValue<Vector3>(L, 1);

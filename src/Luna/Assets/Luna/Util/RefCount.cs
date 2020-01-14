@@ -9,7 +9,7 @@ namespace SharpLuna
     /// </summary>
     public interface IRefCount : IDisposable
     {
-        uint Handle { get; }
+        uint Handle { get; set; }
         void InternalRelease();
     }
 
@@ -43,7 +43,8 @@ namespace SharpLuna
                 ref var info = ref refInfos[idx];
                 info.refCount = self;
                 info.refs = 1;
-                return (uint)((info.gen << 16) | idx);
+                info.refCount.Handle = (uint)((info.gen << 16) | idx);
+                return info.refCount.Handle;
             }
             else
             {
@@ -53,6 +54,7 @@ namespace SharpLuna
                     return 0;
                 }
 
+                self.Handle = (uint)idx;
                 refInfos.Add(new RefInfo { refCount = self, refs = 1 } );
                 return (uint)idx;
             }

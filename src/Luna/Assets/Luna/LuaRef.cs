@@ -13,7 +13,7 @@ namespace SharpLuna
     using lua_CFunction = System.IntPtr;
     using static Lua;
 
-    public struct LuaRef : IRefCount, IEquatable<LuaRef>, IComparable<LuaRef>
+    public struct LuaRef : IRefCount, IEquatable<LuaRef>, IComparable<LuaRef>, IEnumerable<TableKeyValuePair>
     {
         LuaState L;
         int _ref;
@@ -52,7 +52,7 @@ namespace SharpLuna
             this.Release();
         }
 
-        public uint Handle { get; }
+        public uint Handle { get; set; }
 
         public void InternalRelease()
         {
@@ -527,30 +527,6 @@ namespace SharpLuna
             }
         }
 
-        public void ForEach<TKey, TValue>(Action<TKey, TValue> action)
-        {
-            int oldTop = lua_gettop(L);
-            try
-            {
-                luaL_ref(L, _ref);
-                lua_pushnil(L);
-                while (lua_next(L, -2) != 0)
-                {
-                    TKey key;
-                    TValue val;
-                    key = Lua.Get<TKey>(L, -2);
-                    val = Lua.Get<TValue>(L, -1);
-                    action(key, val);                   
-                    lua_pop(L, 1);
-                }
-            }
-            finally
-            {
-                lua_settop(L, oldTop);
-            }
-
-        }
-
         static unsafe void PushUserData<T>(lua_State L, T obj)
         {
             IntPtr userdata = lua_newuserdata(L, (UIntPtr)sizeof(IntPtr));
@@ -608,9 +584,17 @@ namespace SharpLuna
                 Lua.Push(L, obj);
             }
         }
+        
+        public IEnumerator<TableKeyValuePair> GetEnumerator()
+        {
+            return new LuaTableEnumerator(L, _ref);
+        }
 
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
-
 
     public struct LuaTableRef : IRefCount
     {
@@ -627,7 +611,7 @@ namespace SharpLuna
             Handle = this.Alloc();
         }
 
-        public uint Handle { get; }
+        public uint Handle { get; set; }
 
         public void Dispose()
         {
@@ -637,6 +621,12 @@ namespace SharpLuna
         public void InternalRelease()
         {
             luaL_unref(L, LUA_REGISTRYINDEX, _key);
+        }
+
+        public K Key<K>()
+        {
+            lua_rawgeti(L, LUA_REGISTRYINDEX, _key);
+            return Lua.Pop<K>(L);
         }
 
         public void Set<V>(V value)
@@ -657,6 +647,105 @@ namespace SharpLuna
             lua_pop(L, 2);
             return v;
         }
+    }
+
+    public struct TableKeyValuePair
+    {
+        public readonly int key;
+        public readonly int value;
+
+        readonly LuaState L;
+
+        public TableKeyValuePair(LuaState state, int k, int v)
+        {
+            L = state;
+            key = k;
+            value = v;
+        }
+
+        public K Key<K>()
+        {
+            lua_rawgeti(L, LUA_REGISTRYINDEX, key);
+            return Lua.Pop<K>(L);
+        }
+
+        public V Value<V>()
+        {
+            assert(L);
+            lua_rawgeti(L, LUA_REGISTRYINDEX, value);
+            return Lua.Pop<V>(L);
+        }
+
+    }
+
+    public struct LuaTableEnumerator : IEnumerator<TableKeyValuePair>, IRefCount
+    {
+        LuaState L;
+        int _table;
+        int _key;
+        int _value;
+
+        public TableKeyValuePair Current => new TableKeyValuePair(L, _key, _value);
+        object IEnumerator.Current => (TableKeyValuePair)Current;
+
+        public LuaTableEnumerator(LuaState state, int table)
+        {
+            L = state;
+            _table = table;
+            _key = LUA_NOREF;
+            _value = LUA_NOREF;
+            Handle = 0;
+            Handle = this.Alloc();
+        }
+
+        public bool MoveNext()
+        {
+            assert(L);
+            lua_rawgeti(L, LUA_REGISTRYINDEX, _table);
+            lua_rawgeti(L, LUA_REGISTRYINDEX, _key);
+            luaL_unref(L, LUA_REGISTRYINDEX, _key);
+            luaL_unref(L, LUA_REGISTRYINDEX, _value);
+            bool ret = false;
+            if (lua_next(L, -2))
+            {
+                _value = luaL_ref(L, LUA_REGISTRYINDEX);
+                _key = luaL_ref(L, LUA_REGISTRYINDEX);
+                ret = true;
+            }
+            else
+            {
+                _value = LUA_NOREF;
+                _key = LUA_NOREF;
+                ret = false;
+            }
+            lua_pop(L, 1);
+            return ret;
+        }
+
+        public void Reset()
+        {
+            luaL_unref(L, LUA_REGISTRYINDEX, _key);
+            luaL_unref(L, LUA_REGISTRYINDEX, _value);
+            _key = LUA_NOREF;
+            _value = LUA_NOREF;
+        }
+
+        public uint Handle { get; set; }
+
+        public void Dispose()
+        {
+            this.Release();
+        }
+
+        public void InternalRelease()
+        {
+            if (L)
+            {
+                luaL_unref(L, LUA_REGISTRYINDEX, _key);
+                luaL_unref(L, LUA_REGISTRYINDEX, _value);
+            }
+        }
+
     }
 
 }

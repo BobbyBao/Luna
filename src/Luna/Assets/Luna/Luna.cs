@@ -102,6 +102,8 @@ namespace SharpLuna
 
             PostInit?.Invoke();
 
+            RefCountHelper.Collect();
+
         }
 
         private void Init()
@@ -131,8 +133,25 @@ namespace SharpLuna
             L.Dispose();
         }
 
-        public static void Log(string msg) => Print?.Invoke(msg);
-        public static void LogError(string msg) => Error?.Invoke(msg);
+        public static void Log(params object[] args) => Print?.Invoke(string.Join("\t", args));
+        public static void LogError(params object[] args) => Error?.Invoke(string.Join("\t", args));
+
+        public void AddSearcher(LuaNativeFunction searcher)
+        {
+            var state = State;
+            lua_getglobal(L, "package");
+            lua_getfield(L, -1, "searchers");
+            lua_pushcfunction(L, searcher);
+
+            for (long i = luaL_len(L, -2) + 1; i > 2; i--)
+            {
+                lua_rawgeti(L, -2, i - 1);
+                lua_rawseti(L, -3, i);
+            }
+
+            lua_rawseti(L, -2, 2);
+            lua_pop(L, 2);
+        }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         int DoPrint(LuaState L)
@@ -159,23 +178,7 @@ namespace SharpLuna
             return 0;
         }
 
-        public void AddSearcher(LuaNativeFunction searcher)
-        {
-            var state = State;
-            lua_getglobal(L, "package");
-            lua_getfield(L, -1, "searchers");
-            lua_pushcfunction(L, searcher);
-  
-            for (long i = luaL_len(L, -2) + 1; i > 2; i--)
-            {
-                lua_rawgeti(L, -2, i - 1);
-                lua_rawseti(L, -3, i);
-            }
-
-            lua_rawseti(L, -2, 2);
-            lua_pop(L, 2);
-        }
-
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         int LuaLoader(LuaState L)
         {
             string fileName = lua_tostring(L, 1);
@@ -258,13 +261,10 @@ namespace SharpLuna
             throw new LuaException(reason);
         }
 
-        /// <summary>
-        /// Assuming we have a Lua error string sitting on the stack, throw a C# exception out to the user's app
-        /// </summary>
-        /// <exception cref = "LuaScriptException">Thrown if the script caused an exception</exception>
         private void ThrowExceptionFromError(int oldTop)
         {
-            object err = L.GetObject(-1);// _translator.GetObject(L, -1);
+            object err = L.GetObject(-1);
+
             lua_settop(L, oldTop);
 
             // A pre-wrapped exception - just rethrow it (stack trace of InnerException will be preserved)
@@ -280,9 +280,6 @@ namespace SharpLuna
             throw new LuaScriptException(err.ToString(), string.Empty);
         }
 
-        /// <summary>
-        /// Push a debug.traceback reference onto the stack, for a pcall function to use as error handler. (Remember to increment any top-of-stack markers!)
-        /// </summary>
         private static int PushDebugTraceback(LuaState L, int argCount)
         {
             lua_getglobal(L, "debug");
@@ -293,10 +290,6 @@ namespace SharpLuna
             return errIndex;
         }
 
-        /// <summary>
-        /// <para>Return a debug.traceback() call result (a multi-line string, containing a full stack trace, including C calls.</para>
-        /// <para>Note: it won't return anything unless the interpreter is in the middle of execution - that is, it only makes sense to call it from a method called from Lua, or during a coroutine yield.</para>
-        /// </summary>
         public string GetDebugTraceback()
         {
             int oldTop = lua_gettop(L);
@@ -305,23 +298,6 @@ namespace SharpLuna
             L.Remove(-2); // stack: traceback
             lua_pcall(L, 0, -1, 0);
             return L.PopValues(oldTop)[0] as string;            
-        }
-
-        /// <summary>
-        /// Convert C# exceptions into Lua errors
-        /// </summary>
-        /// <returns>num of things on stack</returns>
-        /// <param name = "e">null for no pending exception</param>
-        internal int SetPendingException(Exception e)
-        {
-            var caughtExcept = e;
-
-            if (caughtExcept == null)
-                return 0;
-
-            //_translator.ThrowError(L, caughtExcept);
-            lua_pushnil(L);
-            return 1;
         }
 
         public object[] DoString(byte[] chunk, string chunkName = "chunk")
@@ -448,7 +424,7 @@ namespace SharpLuna
 
             var classWrapper = Config.GetClassWrapper(type);
             var method = wrapType.GetMethod("Register", BindingFlags.Static | BindingFlags.Public);
-            method.Invoke(null, new object[] { classWrapper });           
+            method?.Invoke(null, new object[] { classWrapper });           
         }
 
         public SharpClass RegisterModel<T>(string name, Type[] types)

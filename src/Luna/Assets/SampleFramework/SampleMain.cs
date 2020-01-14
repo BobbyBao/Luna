@@ -24,13 +24,13 @@ public class SampleMain : MonoBehaviour
         var luna = LunaClient.Luna;
 
         Load("UI/Panel");
-        /*
-        luna.RegClass(typeof(TestTypes.TestClass));
+        
+        luna.RegisterClass(typeof(TestTypes.TestClass));
         
         if (!string.IsNullOrWhiteSpace(startFile))
         {
             luaClient.Run(startFile); 
-        }   */
+        }
 
         yield return null;
     }
