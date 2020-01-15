@@ -9,7 +9,7 @@ namespace SharpLuna
 {
     using static Lua;
 
-    public class Luna : IDisposable
+    public sealed class Luna : IDisposable
     {
 #if LUNA_SCRIPT
         public const string Ext = ".luna";
@@ -25,6 +25,7 @@ namespace SharpLuna
         public bool UseTraceback { get; set; } = false;
 
         public static Action<string> Print { get; set; }
+        public static Action<string> Warning { get; set; }
         public static Action<string> Error { get; set; }
         public static Func<string, byte[]> ReadBytes { get; set; }
 
@@ -47,8 +48,7 @@ namespace SharpLuna
 #endregion
 
         private GlobalModule _binder;
-
-        Dictionary<Type, ClassWraper> classWrapers = new Dictionary<Type, ClassWraper>();
+        private readonly Dictionary<Type, ClassWraper> _classWrapers = new Dictionary<Type, ClassWraper>();
 
         public event Action PreInit;
         public event Action PostInit;
@@ -103,20 +103,21 @@ namespace SharpLuna
             PostInit?.Invoke();
 
             RefCountHelper.Collect();
-
+            
         }
 
         private void Init()
-        {           
-
+        {
+            SharpClass.SetAlias(typeof(object), "object");
             RegisterClass<object>();
+
             RegisterClass<Enum>();
             RegisterClass<string>();
+            RegisterClass<Delegate>();
 
         }
 
-
-        public virtual void Dispose()
+        public void Dispose()
         {
             Close();
 
@@ -135,6 +136,7 @@ namespace SharpLuna
         }
 
         public static void Log(params object[] args) => Print?.Invoke(string.Join("\t", args));
+        public static void LogWarning(params object[] args) => Warning?.Invoke(string.Join("\t", args));
         public static void LogError(params object[] args) => Error?.Invoke(string.Join("\t", args));
 
         public void AddSearcher(LuaNativeFunction searcher)
@@ -401,19 +403,19 @@ namespace SharpLuna
 
         public ClassWraper GetClassWrapper(Type type)
         {
-            if (classWrapers.TryGetValue(type, out var classWraper))
+            if (_classWrapers.TryGetValue(type, out var classWraper))
             {
                 return classWraper;
             }
 
             classWraper = new ClassWraper();
-            classWrapers.Add(type, classWraper);
+            _classWrapers.Add(type, classWraper);
             return classWraper;
         }
 
         public bool IsRegistered(Type type)
         {
-            return classWrapers.ContainsKey(type);
+            return _classWrapers.ContainsKey(type);
         }
 
         public void RegisterWraps(Type type)

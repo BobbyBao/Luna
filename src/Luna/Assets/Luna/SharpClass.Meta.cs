@@ -15,6 +15,7 @@ namespace SharpLuna
     public partial class SharpClass
     {
         static Dictionary<Type, SharpClass> registeredClass = new Dictionary<Type, SharpClass>();
+        static Dictionary<Type, string> classAlias = new Dictionary<Type, string>();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsRegistered<T>()
@@ -26,6 +27,21 @@ namespace SharpLuna
         public static bool IsRegistered(Type t)
         {
             return registeredClass.ContainsKey(t);
+        }
+
+        public static void SetAlias(Type t, string alias)
+        {
+            classAlias.Add(t, alias);
+        }
+
+        public static string GetTableName(Type t)
+        {
+            if (classAlias.TryGetValue(t, out string alias))
+            {
+                return alias;
+            }
+
+            return t.Name;
         }
 
         public static string GetFullName(LuaRef parent, string name)

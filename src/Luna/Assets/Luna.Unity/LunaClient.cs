@@ -23,8 +23,9 @@ namespace SharpLuna.Unity
             Instance = this;
             DontDestroyOnLoad(gameObject);
 
-            Luna.Print = Print;
-            Luna.Error = Error;
+            Luna.Print = Debug.Log;
+            Luna.Warning = Debug.LogWarning;
+            Luna.Error = Debug.LogError;
             Luna.ReadBytes = ReadBytes;
 
             luna = new Luna();
@@ -49,9 +50,12 @@ namespace SharpLuna.Unity
 
             luna.RegisterClass<GameObject>();
             luna.RegisterClass<Component>();
+            luna.RegisterClass<MonoBehaviour>();
+            luna.RegisterClass<Transform>();
 
-
+            luna.RegisterClass<Vector2>();
             luna.RegisterClass<Vector3>();
+            luna.RegisterClass<Vector4>();
 
         }
 
@@ -68,12 +72,9 @@ namespace SharpLuna.Unity
             luna.DoFile(file);
         }
 
-        static void Print(string msg) => Debug.Log(msg);
-        static void Error(string msg) => Debug.LogError(msg);
+        private byte[] ReadBytes(string fileName) => loader?.ReadBytes(fileName);
 
-        byte[] ReadBytes(string fileName) => loader.ReadBytes(fileName);
-        
-        void OnDestroy()
+        private void OnDestroy()
         {
             luna?.Dispose();
             luna = null;
