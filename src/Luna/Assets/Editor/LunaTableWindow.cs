@@ -68,11 +68,32 @@ namespace Assets.Editor
         }
     }
 
+    public class LunaTreeViewItem : TreeViewItem
+    {
+        public LuaType luaType;
+        public string fullPath;
+
+        public override int CompareTo(TreeViewItem other)
+        {
+            if (other is LunaTreeViewItem item)
+            {
+                if (item.luaType != luaType)
+                {
+                    return Math.Sign(luaType - item.luaType);
+                }
+
+            }
+
+            return base.CompareTo(other);
+        }
+       
+    }
+
     public class LunaTableView : TreeView
     {
         Dictionary<int, LuaRef> id2v = new Dictionary<int, LuaRef>();
         Dictionary<int, string> id2fullPath = new Dictionary<int, string>();
-        Dictionary<int, TreeViewItem> treeViewItems = new Dictionary<int, TreeViewItem>();
+        Dictionary<int, LunaTreeViewItem> treeViewItems = new Dictionary<int, LunaTreeViewItem>();
         Luna luna;
 
         public event Action<List<LuaRef>> selectionChanged;
@@ -90,14 +111,16 @@ namespace Assets.Editor
         protected override TreeViewItem BuildRoot()
         {
             var root = new TreeViewItem { id = 0, depth = -1, displayName = "_G" };
-           
+            SetExpanded(0, true);
+
             if (luna != null)
             {
                 string fullPath = "_G";
                 int hash = fullPath.GetHashCode();
-                var item = new TreeViewItem { id = hash, depth = 1, displayName = "_G" };
+                var item = new LunaTreeViewItem { id = hash, depth = 1, displayName = "_G" };
                 LuaRef luaRef = luna.Global();
-             
+                item.luaType = luaRef.Type;
+                item.fullPath = fullPath;
                 id2v[hash] = luaRef;
                 id2fullPath[hash] = fullPath;
                 treeViewItems[hash] = item;
@@ -121,14 +144,14 @@ namespace Assets.Editor
             return root;
         }
 
-        void EnumerateDirectories(TreeViewItem parent, LuaRef parentLuaRef, int depth)
+        void EnumerateDirectories(LunaTreeViewItem parent, LuaRef parentLuaRef, int depth)
         {
             if (depth <= 0)
             {
                 return;
             }
 
-            string parentPath = id2fullPath[parent.id];
+            string parentPath = parent.fullPath;
 
             foreach (var t in parentLuaRef)
             {
@@ -147,18 +170,22 @@ namespace Assets.Editor
                 {
                     id2v[hash] = v;
                     id2fullPath[hash] = fullPath;
-                    tvi = new TreeViewItem(hash, parent.depth + 1, k);
-                    tvi.icon = EditorGUIUtility.FindTexture("Folder Icon");
+                    tvi = new LunaTreeViewItem { id = hash, depth = parent.depth + 1, displayName = k };
+                    tvi.fullPath = fullPath;
+                    tvi.luaType = v.Type;
                     treeViewItems[hash] = tvi;
                     parent.AddChild(tvi);
                 }
 
                 if (v.IsTable)
                 {
+                    tvi.icon = EditorGUIUtility.FindTexture("Folder Icon");
                     EnumerateDirectories(tvi, v, depth - 1);
                 }
 
             }
+
+            parent.children?.Sort();
         }
 
         List<int> lastExpendedIDs = new List<int>();

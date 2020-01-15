@@ -299,7 +299,7 @@ namespace SharpLuna
         {
             lua_getglobal(L, "debug");
             lua_getfield(L, -1, "traceback");
-            L.Remove(-2);
+            lua_remove(L, -2);
             int errIndex = -argCount - 2;
             lua_insert(L, errIndex);
             return errIndex;
@@ -310,7 +310,7 @@ namespace SharpLuna
             int oldTop = lua_gettop(L);
             lua_getglobal(L, "debug"); // stack: debug
             lua_getfield(L, -1, "traceback"); // stack: debug,traceback
-            L.Remove(-2); // stack: traceback
+            lua_remove(L, -2); // stack: traceback
             lua_pcall(L, 0, -1, 0);
             return L.PopValues(oldTop)[0] as string;            
         }

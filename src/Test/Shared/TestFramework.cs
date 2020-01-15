@@ -79,7 +79,7 @@ namespace Tests
 
             if (luaL_loadbuffer(L, buffer, "@" + fileName) != 0)
             {
-                L.Error("error loading module {0} from file {1}:\n\t{2}", L.ToString(1), fileName, L.ToString(-1));
+                luaL_error(L, "error loading module {0} from file {1}:\n\t{2}", L.ToString(1), fileName, L.ToString(-1));
             }
 
             lua_pushstring(L, fileName);

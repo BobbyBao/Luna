@@ -16,22 +16,10 @@ namespace SharpLuna
             lua_setglobal(L, name);
         }
 
-        public static int Error(this LuaState L, string value, params object[] v)
-        {
-            string message = string.Format(value, v);
-            return luaL_error(L, message);
-        }
-
-
-        public static void Remove(this LuaState L, int index)
-        {
-            lua_rotate(L, index, -1);
-            lua_pop(L, 1);
-        }
-
         public static string ToString(this LuaState L, int index, bool callMetamethod = true)
         {
             var str = lua_tostring(L, index);
+
             if (callMetamethod)
             {
                 lua_pop(L, 1);
@@ -168,35 +156,36 @@ namespace SharpLuna
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T Get<T>(this LuaState L, int index)
         {
-            if (typeof(T) == typeof(bool))
+            Type t = typeof(T);
+            if (t == typeof(bool))
                 return Convert.To<T>(luaL_checkinteger(L, index) == 0 ? false : true);
-            else if (typeof(T) == typeof(sbyte))
+            else if (t == typeof(sbyte))
                 return Convert.To<T>((sbyte)luaL_checkinteger(L, index));
-            else if (typeof(T) == typeof(byte))
+            else if (t == typeof(byte))
                 return Convert.To<T>((byte)luaL_checkinteger(L, index));
-            else if (typeof(T) == typeof(short))
+            else if (t == typeof(short))
                 return Convert.To<T>((short)luaL_checkinteger(L, index));
-            else if (typeof(T) == typeof(ushort))
+            else if (t == typeof(ushort))
                 return Convert.To<T>((ushort)luaL_checkinteger(L, index));
-            else if (typeof(T) == typeof(char))
+            else if (t == typeof(char))
                 return Convert.To<T>((char)luaL_checkinteger(L, index));
-            else if (typeof(T) == typeof(int))
+            else if (t == typeof(int))
                 return Convert.To<T>((int)luaL_checkinteger(L, index));
-            else if (typeof(T) == typeof(uint))
+            else if (t == typeof(uint))
                 return Convert.To<T>((uint)luaL_checkinteger(L, index));
-            else if (typeof(T) == typeof(long))
+            else if (t == typeof(long))
                 return Convert.To<T>(luaL_checkinteger(L, index));
-            else if (typeof(T) == typeof(ulong))
+            else if (t == typeof(ulong))
                 return Convert.To<T>((ulong)luaL_checkinteger(L, index));
-            else if (typeof(T) == typeof(float))
+            else if (t == typeof(float))
                 return Convert.To<T>((float)luaL_checknumber(L, index));
-            else if (typeof(T) == typeof(double))
+            else if (t == typeof(double))
                 return Convert.To<T>(luaL_checknumber(L, index));
-            else if (typeof(T) == typeof(string))
+            else if (t == typeof(string))
                 return (T)(object)lua_checkstring(L, index);
-            else if (typeof(T) == typeof(LuaNativeFunction))
+            else if (t == typeof(LuaNativeFunction))
                  return (T)(object)lua_tocfunction(L, index).ToLuaFunction();
-            else if (typeof(T) == typeof(LuaRef))
+            else if (t == typeof(LuaRef))
             {
                 if (lua_isnone(L, index))
                     return Convert.To<T>(LuaRef.None);
@@ -429,11 +418,6 @@ namespace SharpLuna
             return ret;
         }
 
-        public static int GetStack(this LuaState L, int level, IntPtr ar)
-        {
-            return lua_getstack(L, level, ar);
-        }
-
         public static int GetStack(this LuaState L, int level, ref LuaDebug ar)
         {
             IntPtr pDebug = Marshal.AllocHGlobal(Marshal.SizeOf(ar));
@@ -442,7 +426,7 @@ namespace SharpLuna
             {
                 Marshal.StructureToPtr(ar, pDebug, false);
 
-                ret = GetStack(L, level, pDebug);
+                ret = lua_getstack(L, level, pDebug);
                 ar = LuaDebug.FromIntPtr(pDebug);
 
             }
@@ -452,6 +436,7 @@ namespace SharpLuna
             }
             return ret;
         }
+
         #endregion
     }
 }
