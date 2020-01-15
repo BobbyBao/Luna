@@ -194,6 +194,7 @@ namespace SharpLuna
 
     public class BindClassMetaMethod
     {
+        //todo:move to c
         public static int Index(LuaState L)
         {
             // <SP:1> -> table or userdata
@@ -302,6 +303,7 @@ namespace SharpLuna
             return 1;
         }
 
+        //todo:move to c
         public static int NewIndex(LuaState L)
         {
             // <SP:1> -> table or userdata

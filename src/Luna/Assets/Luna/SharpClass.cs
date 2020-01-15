@@ -443,6 +443,30 @@ namespace SharpLuna
 
         public SharpClass RegProperty(PropertyInfo propertyInfo)
         {
+            if (classInfo != null)
+            {
+                if (classInfo.TryGetValue(propertyInfo.Name, out var methodConfig))
+                {
+                    if (methodConfig.getter != null)
+                    {
+                        var getter = LuaRef.CreateFunction(State, methodConfig.getter);
+                        SetGetter(propertyInfo.Name, getter);
+                    }
+
+                    if (methodConfig.setter != null)
+                    {
+                        var setter = LuaRef.CreateFunction(State, methodConfig.setter);
+                        SetSetter(propertyInfo.Name, setter);
+                    }
+                    else
+                    {
+                        SetReadOnly(propertyInfo.Name);
+                    }
+
+                    return this;
+                }
+            }
+
             if (propertyInfo.CanRead)
             {
                 MethodInfo methodInfo = propertyInfo.GetGetMethod(false);
@@ -478,6 +502,36 @@ namespace SharpLuna
 
         public SharpClass RegIndexer(PropertyInfo propertyInfo)
         {
+            if (classInfo != null)
+            {
+                if (classInfo.TryGetValue(propertyInfo.Name, out var methodConfig))
+                {
+                    if (methodConfig.getter != null)
+                    {
+                        var luaFun = LuaRef.CreateFunction(State, methodConfig.getter);
+                        if (luaFun)
+                        {
+                            SetMemberFunction("___get_indexed", luaFun);
+                        }
+                    }
+
+                    if (methodConfig.setter != null)
+                    {
+                        var luaFun = LuaRef.CreateFunction(State, methodConfig.setter);
+                        if (luaFun)
+                        {
+                            SetMemberFunction("___set_indexed", luaFun);
+                        }
+                    }
+                    else
+                    {
+                        SetReadOnly(propertyInfo.Name);
+                    }
+
+                    return this;
+                }
+            }
+
             if (propertyInfo.CanRead)
             {
                 MethodInfo methodInfo = propertyInfo.GetGetMethod(false);
@@ -524,6 +578,27 @@ namespace SharpLuna
 
         public SharpClass RegMethod(Type classType, string name)
         {
+            if (classInfo != null)
+            {
+                if (classInfo.TryGetValue(name, out var methodConfig))
+                {
+                    if (methodConfig.getter != null)
+                    {
+                        var luaFun = LuaRef.CreateFunction(State, methodConfig.func);
+                        if (IsTagMethod(name, out var tag))
+                        {
+                            m_meta.RawSet(tag, luaFun);
+                        }
+                        else
+                        {
+                            m_meta.RawSet(name, luaFun);
+                        }
+                    }
+
+                    return this;
+                }
+            }
+
             MethodInfo methodInfo = classType.GetMethod(name);
             return RegMethod(methodInfo);
         }
@@ -542,6 +617,7 @@ namespace SharpLuna
                     m_meta.RawSet(methodInfo.Name, luaFun);
                 }
             }
+
             return this;
         }
 
@@ -615,12 +691,20 @@ namespace SharpLuna
             }
             else
             {
-                (var funcGenType, var callerGenType) = (classType.IsValueType && !methodInfo.IsStatic) ?
+                try
+                {
+                    (var funcGenType, var callerGenType) = (classType.IsValueType && !methodInfo.IsStatic) ?
                     DelegateCache.refActionType[typeArray.Length] 
                     : DelegateCache.actionType[typeArray.Length];
 
-                funcDelegateType = funcGenType.MakeGenericType(typeArray);
-                callerType = callerGenType.MakeGenericType(typeArray);
+                    funcDelegateType = funcGenType.MakeGenericType(typeArray);
+                    callerType = callerGenType.MakeGenericType(typeArray);
+                }
+                catch (Exception e)
+                {
+                    Luna.Log(e);
+                    return LuaRef.Empty;
+                }
             }
             
             del = DelegateCache.Get(funcDelegateType, methodInfo);
@@ -647,12 +731,20 @@ namespace SharpLuna
             }
             else
             {
-                (var funcGenType, var callerGenType) = (classType.IsValueType && !methodInfo.IsStatic) ?
+                try
+                {
+                    (var funcGenType, var callerGenType) = (classType.IsValueType && !methodInfo.IsStatic) ?
                     DelegateCache.refFuncType[typeArray.Length - 1]
                     : DelegateCache.funcType[typeArray.Length - 1];
 
-                funcDelegateType = funcGenType.MakeGenericType(typeArray);
-                callerType = callerGenType.MakeGenericType(typeArray);
+                    funcDelegateType = funcGenType.MakeGenericType(typeArray);
+                    callerType = callerGenType.MakeGenericType(typeArray);
+                }
+                catch (Exception e)
+                {
+                    Luna.Log(e);
+                    return LuaRef.Empty;
+                }
             }
             
             del = DelegateCache.Get(funcDelegateType, methodInfo);
@@ -771,11 +863,6 @@ namespace SharpLuna
             return this;
         }
         
-        public SharpClass AddIndexer<T, K, V>(K key, V val)
-        {
-            return this;
-        }
-
         public SharpClass AddConstructor<T>() where T : new()
         {
             m_meta.RawSet("__call", LuaRef.CreateFunction(State, ClassConstructor<T>.Call));

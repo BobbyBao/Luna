@@ -6,6 +6,7 @@ namespace Tests
     {
         static void Main(string[] args)
         {
+            TestFramework.dataPath = "../../../../../Test/Scripts/";
             using (var test = new TestFramework())
             {
                 test.Run();

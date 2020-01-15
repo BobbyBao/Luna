@@ -1,4 +1,5 @@
-﻿using System;
+﻿#define SAVE_FUNC
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices;
@@ -30,14 +31,18 @@ namespace SharpLuna
         
         public static LuaNativeFunction lua_atpanic(lua_State L, LuaNativeFunction panicFunction)
         {
+#if SAVE_FUNC
             savedFn.TryAdd(panicFunction);
+#endif
             IntPtr newPanicPtr = panicFunction.ToFunctionPointer();
             return lua_atpanic(L, newPanicPtr).ToLuaFunction();
         }
 
         public static void lua_sethook(lua_State L, KyHookFunction hookFunction, LuaHookMask mask, int count)
         {
+#if SAVE_FUNC
             savedFn.TryAdd(hookFunction);
+#endif
             lua_sethook(L, hookFunction.ToFunctionPointer(), (int)mask, count);
         }
 
@@ -64,7 +69,9 @@ namespace SharpLuna
 
         public static void lua_register(lua_State L, string n, LuaNativeFunction f)
         {
+#if SAVE_FUNC
             savedFn.TryAdd(f);
+#endif
             lua_pushcfunction(L, (f));
             var p = Marshal.StringToHGlobalAnsi(n);
             lua_setglobal(L, (byte*)(p));
@@ -96,13 +103,17 @@ namespace SharpLuna
 
         public static void lua_pushcclosure(lua_State L, LuaNativeFunction function, int n)
         {
+#if SAVE_FUNC
             savedFn.TryAdd(function);
+#endif
             lua_pushcclosure(L, function.ToFunctionPointer(), n);
         }
 
         public static void lua_pushcfunction(lua_State L, LuaNativeFunction function)
         {
+#if SAVE_FUNC
             savedFn.TryAdd(function);
+#endif
             lua_pushcclosure(L, function.ToFunctionPointer(), 0);
         }
 

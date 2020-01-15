@@ -184,7 +184,7 @@ namespace SharpLuna
                 }
                 return IntPtr.Zero;
             }
-#if DEBUG
+#if false
             // <SP: index> = <obj>
             index = lua_absindex(L, index);
 
