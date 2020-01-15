@@ -81,12 +81,14 @@ namespace SharpLuna
             return mem;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe static ref T GetUnmanaged<T>(LuaState L, int index)
         {
             var ptr = GetUserData(L, index, Signature<T>(), true, true);
             return ref Unsafe.AsRef<T>((void*)ptr);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe static ref T GetValue<T>(LuaState L, int index) where T : struct
         {
             if (typeof(T).IsUnManaged())
@@ -101,6 +103,7 @@ namespace SharpLuna
 
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static unsafe IntPtr GetHandler<T>(LuaState L, int index, bool is_exact, bool raise_error)
         {
             var ptr = GetUserData(L, index, Signature<T>(), is_exact, raise_error);
@@ -112,6 +115,7 @@ namespace SharpLuna
             return Unsafe.Read<IntPtr>((void*)ptr);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T Get<T>(LuaState L, int index)
         {
             if (typeof(T).IsUnManaged())
@@ -169,6 +173,7 @@ namespace SharpLuna
             lua_error(L);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static IntPtr GetUserData(LuaState L, int index, IntPtr class_id, bool is_exact, bool raise_error)
         {
             if (!lua_isuserdata(L, index))

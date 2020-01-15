@@ -14,14 +14,24 @@ namespace SharpLuna
     public class LunaTools
     {
 
-        static readonly (Type classType, MemberTypes memberTypes)[] baseTypes = 
+        static readonly (Type classType, MemberTypes memberTypes)[] baseTypes =
         {
-            (typeof(Vector3), MemberTypes.Constructor |  MemberTypes.Field)
+            (typeof(Vector2), MemberTypes.Constructor |  MemberTypes.Field),
+            (typeof(Vector3), MemberTypes.Constructor |  MemberTypes.Field),
+            (typeof(Vector4), MemberTypes.Constructor |  MemberTypes.Field),
+            (typeof(Quaternion), MemberTypes.Constructor |  MemberTypes.Field),
+            (typeof(Plane), MemberTypes.Constructor |  MemberTypes.Field),
+            (typeof(LayerMask), MemberTypes.Constructor |  MemberTypes.Field),
+            (typeof(Ray), MemberTypes.Constructor |  MemberTypes.Field),
+            (typeof(Bounds), MemberTypes.Constructor |  MemberTypes.Field),
+            (typeof(Color), MemberTypes.Constructor |  MemberTypes.Field),
+            (typeof(Touch), MemberTypes.Constructor |  MemberTypes.Field),
+            (typeof(RaycastHit), MemberTypes.Constructor |  MemberTypes.Field),
+            (typeof(TouchPhase), MemberTypes.Constructor |  MemberTypes.Field),
         };
 
         static readonly (Type classType, MemberTypes memberTypes)[] customTypes =
         {
-            (typeof(LunaBehaviour), MemberTypes.Constructor |  MemberTypes.Field)
         };
 
 
@@ -29,15 +39,15 @@ namespace SharpLuna
         public static void GenerateWraps()
         {
             var path = Application.dataPath + "/Luna.Unity/BaseType/";
-            
+
             if (Directory.Exists(path))
             {
                 Directory.Delete(path, true);
             }
-            
+
             WrapGenerator.ExportPath = path;
 
-            foreach (var(type, member) in baseTypes)
+            foreach (var (type, member) in baseTypes)
             {
                 WrapGenerator.GenerateClassWrap(type);
             }

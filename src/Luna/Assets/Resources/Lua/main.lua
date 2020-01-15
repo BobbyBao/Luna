@@ -1,6 +1,7 @@
 
+require "test/test_perf"
 
-local go = GameObject()
+local go = UnityEngine.GameObject()
 
 --[[
 t = TestClass()

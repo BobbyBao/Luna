@@ -1,5 +1,4 @@
 
---[[
 local Vector3 = Vector3
 local Quaternion = Quaternion
 local Normalize = Vector3.Normalize
@@ -32,7 +31,7 @@ end
 
 function Test3()		
 	local t = os.clock()
-	local New = Vector3.New
+	local New = Vector3.__call
 	
 	for i = 1, 200000 do
 		local v = New(i, i, i)		
@@ -46,7 +45,7 @@ end
 function Test4()	
 	local GameObject = UnityEngine.GameObject
 	local t = os.clock()	
-	local go = GameObject.New()
+	local go = GameObject()
 	local node = go.transform
 
 	for i = 1,100000 do				
@@ -58,6 +57,7 @@ function Test4()
 	print("GameObject.New lua cost time: ", t)	
 end
 
+--[[
 function Test5()		
 	local t = os.clock()
 	local GameObject = UnityEngine.GameObject
@@ -86,13 +86,14 @@ function Test6()
 		
 	print("lua cost time: ", os.clock() - t)	
 end
+]]
 
 function Test7()		
 	local Vector3 = Vector3	
 	local t = os.clock()
 		
 	for i = 1, 200000 do
-		local v = Vector3.New(i,i,i)
+		local v = Vector3(i,i,i)
 		Vector3.Normalize(v)
 	end
 		
@@ -111,7 +112,7 @@ function Test8()
 		
 	print("Quaternion Euler Slerp const: ", os.clock() - t)		
 end
-]]
+
 
 function fib(n)
   if n < 2 then return n end
@@ -153,6 +154,11 @@ function TestTable()
 		
 	print("Array cost time: ", os.clock() - t)	
 end
+
+Test3()
+Test4()
+Test7()
+--Test8()
 
 Test9()
 

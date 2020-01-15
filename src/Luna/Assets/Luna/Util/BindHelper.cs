@@ -7,12 +7,13 @@ namespace SharpLuna
     public static class BindHelper
     {
         static Stack<SharpClass> stack = new Stack<SharpClass>();
-
-        public static GlobalModule Begin(GlobalModule m)
+        static GlobalModule global;
+        public static GlobalModule Begin(GlobalModule g)
         {
+            global = g;
             stack.Clear();
-            stack.Push(m);
-            return m;
+            stack.Push(g);
+            return g;
         }
 
         public static void End()
@@ -30,9 +31,9 @@ namespace SharpLuna
             return cls;
         }
 
-        public static SharpClass Module(string name)
+        public static SharpModule Module(string name)
         {
-            var m = Current.BeginModule(name);
+            var m = global.BeginModule(name);
             stack.Push(m);
             return m;
         }

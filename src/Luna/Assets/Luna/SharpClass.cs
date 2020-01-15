@@ -151,16 +151,6 @@ namespace SharpLuna
             return parent;
         }
 
-        public SharpModule BeginModule(string name)
-        {
-            return new SharpModule(m_meta, name);
-        }
-
-        public SharpClass EndModule()
-        {
-            return parent;
-        }
-
         public void SetGetter(string name, LuaRef getter)
         {
             m_meta.RawGet("___getters").RawSet(name, getter);
@@ -234,21 +224,39 @@ namespace SharpLuna
 
             }
 
-            var ctors = type.GetConstructors();
-            foreach (var ctor in ctors)
+            bool wrapCtor = false;
+            if (classInfo != null)
             {
-                if (!ctor.IsPublic)
+                if (classInfo.TryGetValue("ctor", out var methodConfig))
                 {
-                    continue;
-                }
+                    if (methodConfig.func != null)
+                    {
+                        m_meta.RawSet("__call", LuaRef.CreateFunction(State, methodConfig.func));
+                        wrapCtor = true;
+                    }
 
-                if (ctor.IsDefined(typeof(LuaHideAttribute)))
-                {
-                    continue;
                 }
-
-                RegConstructor(type, ctor);
             }
+
+            if (!wrapCtor)
+            {
+                var ctors = type.GetConstructors();
+                foreach (var ctor in ctors)
+                {
+                    if (!ctor.IsPublic)
+                    {
+                        continue;
+                    }
+
+                    if (ctor.IsDefined(typeof(LuaHideAttribute)))
+                    {
+                        continue;
+                    }
+
+                    RegConstructor(type, ctor);
+                }
+            }
+
 
             var props = type.GetProperties();
             foreach (var p in props)
@@ -344,7 +352,6 @@ namespace SharpLuna
                 Luna.Log(e.Message);
             }
 
-
             return this;
         }
 
@@ -415,7 +422,6 @@ namespace SharpLuna
                 SetSetter(fieldInfo.Name, setter);
             }
 
-
             return this;
         }
         
@@ -432,7 +438,6 @@ namespace SharpLuna
         public SharpClass RegProperty(Type classType, string name)
         {
             PropertyInfo propertyInfo = classType.GetProperty(name);
-
             return RegProperty(propertyInfo);
         }
 
@@ -470,6 +475,7 @@ namespace SharpLuna
 
             return this;
         }
+
         public SharpClass RegIndexer(PropertyInfo propertyInfo)
         {
             if (propertyInfo.CanRead)
@@ -539,6 +545,7 @@ namespace SharpLuna
             return this;
         }
 
+        //todo:同名函数处理
         public LuaRef RegMethod(MethodInfo methodInfo, bool isProp)
         {
             Type typeOfResult = methodInfo.ReturnType;
@@ -598,7 +605,6 @@ namespace SharpLuna
             if (typeArray.Length == 0)
             {
                 funcDelegateType = typeof(Action);
-
                 del = DelegateCache.Get(funcDelegateType, methodInfo);
                 luaFunc = ActionCaller.Call;
                 return LuaRef.CreateFunction(State, luaFunc, del);
@@ -618,12 +624,6 @@ namespace SharpLuna
             }
             
             del = DelegateCache.Get(funcDelegateType, methodInfo);
-
-            if(del == null)
-            {
-                del = DelegateCache.Get(funcDelegateType, typeArray[0], methodInfo);
-            }
-
             MethodInfo CallInnerDelegateMethod = callerType.GetMethod(callFnName, BindingFlags.Static | BindingFlags.Public);
             luaFunc = (LuaNativeFunction)DelegateCache.Get(typeof(LuaNativeFunction), CallInnerDelegateMethod);
             return LuaRef.CreateFunction(State, luaFunc, del);
@@ -656,11 +656,6 @@ namespace SharpLuna
             }
             
             del = DelegateCache.Get(funcDelegateType, methodInfo);
-            if (del == null)
-            {
-                del = DelegateCache.Get(funcDelegateType, typeArray[0], methodInfo);
-            }
-
             MethodInfo CallInnerDelegateMethod = callerType.GetMethod(callFnName, BindingFlags.Static | BindingFlags.Public);
             luaFunc = (LuaNativeFunction)DelegateCache.Get(typeof(LuaNativeFunction), CallInnerDelegateMethod);
 

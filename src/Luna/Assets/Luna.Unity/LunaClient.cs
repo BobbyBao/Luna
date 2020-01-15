@@ -10,6 +10,8 @@ namespace SharpLuna.Unity
     public class LunaClient : MonoBehaviour
     {
         public static LunaClient Instance { get; private set; }
+        public static event Action<Luna> LunaCreate;
+        public static event Action<Luna> LunaDestroy;
 
         public static Luna Luna => Instance?.luna;
 
@@ -37,26 +39,7 @@ namespace SharpLuna.Unity
 
             luna.Run();
 
-        }
-
-        void OnPreInit()
-        {
-            luna.RegisterWraps(this.GetType());
-        }
-
-        void OnPostInit()
-        {
-            luna.RegisterClass<UnityEngine.Object>();
-
-            luna.RegisterClass<GameObject>();
-            luna.RegisterClass<Component>();
-            luna.RegisterClass<MonoBehaviour>();
-            luna.RegisterClass<Transform>();
-
-            luna.RegisterClass<Vector2>();
-            luna.RegisterClass<Vector3>();
-            luna.RegisterClass<Vector4>();
-
+            LunaCreate?.Invoke(luna);
         }
 
         private void Start()
@@ -76,9 +59,38 @@ namespace SharpLuna.Unity
 
         private void OnDestroy()
         {
+            LunaDestroy?.Invoke(luna);
             luna?.Dispose();
             luna = null;
             Instance = null;
+        }
+
+        void OnPreInit()
+        {
+            //luna.RegisterWraps(this.GetType());
+        }
+
+        static Type[] unityModule =
+        {
+            typeof(UnityEngine.Object),
+            typeof(GameObject),
+            typeof(Component),
+            typeof(MonoBehaviour),
+            typeof(Transform),
+        };
+
+        void OnPostInit()
+        {
+            luna.RegisterModel("UnityEngine", unityModule);
+
+            luna.RegisterClass<Vector2>();
+            luna.RegisterClass<Vector3>();
+            luna.RegisterClass<Vector4>();
+            luna.RegisterClass<Quaternion>();
+
+
+            luna.RegisterClass<LunaBehaviour>();
+
         }
 
     }

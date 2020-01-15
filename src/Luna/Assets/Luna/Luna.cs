@@ -102,6 +102,17 @@ namespace SharpLuna
 
             PostInit?.Invoke();
 
+            var it = _classWrapers.GetEnumerator();
+            while(it.MoveNext())
+            {
+                if (!SharpClass.IsRegistered(it.Current.Key))
+                {
+                    RegisterClass(it.Current.Key);
+                }
+            }
+
+            _classWrapers.Clear();
+
             RefCountHelper.Collect();
             
         }
@@ -109,6 +120,7 @@ namespace SharpLuna
         private void Init()
         {
             SharpClass.SetAlias(typeof(object), "object");
+
             RegisterClass<object>();
 
             RegisterClass<Enum>();
@@ -434,7 +446,7 @@ namespace SharpLuna
             }
 
         }
-
+        
         void AddWrapClass(Type type, Type wrapType)
         {
             if(IsRegistered(type))
@@ -447,7 +459,7 @@ namespace SharpLuna
             method?.Invoke(null, new object[] { classWrapper });           
         }
 
-        public SharpClass RegisterModel<T>(string name, Type[] types)
+        public SharpClass RegisterModel(string name, Type[] types)
         {
             var model = _binder.BeginModule(name);
             foreach (Type t in types)

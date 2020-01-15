@@ -69,8 +69,7 @@ namespace SharpLuna
         }
 
         public static string GenerateClass(Type type)
-        {
-      
+        {      
             StringBuilder sb = new StringBuilder();
             sb.Append("using System;\n");
             sb.Append("using SharpLuna;\n");
@@ -105,19 +104,27 @@ namespace SharpLuna
                 members.Add((MemberTypes.Constructor, "ctor", false, false));
             }
 
-            var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
-            foreach(var field in fields)
+            if(!type.IsEnum)
             {
-                if(field.IsDefined(typeof(LuaHideAttribute)))
+                var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
+                foreach (var field in fields)
                 {
-                    continue;
+                    //常量不生成
+                    if (field.IsLiteral)
+                    {
+                        continue;
+                    }
+
+                    if (field.IsDefined(typeof(LuaHideAttribute)))
+                    {
+                        continue;
+                    }
+
+                    GenerateField(type, field, sb);
+                    members.Add((MemberTypes.Field, field.Name, true, !field.IsLiteral));
                 }
-
-                GenerateField(type, field, sb);
-                members.Add((MemberTypes.Field, field.Name, true, !field.IsLiteral));
             }
-
-
+  
             sb.Append($"\tpublic static void Register(ClassWraper classWraper)\n\t{{\n");
 
             foreach (var (memberType, name, hasGetter, hasSetter) in members)
@@ -157,7 +164,6 @@ namespace SharpLuna
         static void GenerateConstructor(Type type, List<ConstructorInfo> ctorList, StringBuilder sb)
         {
             sb.Append("\t[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]\n");
-            //sb.Append($"\t[WrapMethod(\"ctor\", MethodType.Normal)]\n");
             sb.Append($"\tstatic int Constructor(LuaState L)\n\t{{\n");
 
             sb.Append($"\t\tint n = lua_gettop(L);\n");
@@ -220,7 +226,6 @@ namespace SharpLuna
         static void GenerateField(Type type, FieldInfo field, StringBuilder sb)
         {
             sb.Append("\t[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]\n");
-            //sb.Append($"\t[WrapMethod(\"{field.Name}\", MethodType.Getter)]\n");
             sb.Append($"\tstatic int Get_{field.Name}(LuaState L)\n\t{{\n");
 
             if(type.IsUnManaged())
@@ -244,11 +249,6 @@ namespace SharpLuna
             sb.Append("\t\treturn 1;\n");
             sb.Append("\t}\n");
             sb.AppendLine();
-
-            if (field.IsLiteral)
-            {
-                return;
-            }
 
             sb.Append("\t[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]\n");
             //sb.Append($"\t[WrapMethod(\"{field.Name}\", MethodType.Setter)]\n");

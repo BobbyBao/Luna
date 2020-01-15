@@ -26,15 +26,34 @@ namespace SharpLuna
             this.luna = luna;
         }
 
+        Dictionary<string, SharpModule> registeredModule;
+        public SharpModule BeginModule(string name)
+        {
+            if (registeredModule == null)
+            {
+                registeredModule = new Dictionary<string, SharpModule>();
+            }
+
+            if (registeredModule.TryGetValue(name, out var module))
+            {
+                return module;
+            }
+
+            module = new SharpModule(this, m_meta, name);
+            registeredModule.Add(name, module);
+            return module;
+        }
+
+        public SharpClass EndModule()
+        {
+            return parent;
+        }
+
     }
 
     public class SharpModule : SharpClass
     {
-        public SharpModule(LuaRef meta) : base(meta)
-        {
-        }
-
-        public SharpModule(LuaRef meta, string name) : base(meta)
+        public SharpModule(SharpClass parent, LuaRef meta, string name) : base(meta)
         {
             LuaRef @ref = meta.RawGet(name);
             if (@ref)
@@ -42,6 +61,8 @@ namespace SharpLuna
                 m_meta = @ref;
                 return;
             }
+
+            this.parent = parent;
 
             lua_State L = meta.State;
             string type_name = "module<" + GetFullName(meta, name) + ">";

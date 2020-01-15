@@ -113,7 +113,7 @@ namespace SharpLuna
             return false;
         }
 
-        public static SharpClass Bind<T>(SharpClass parentMeta, string name = null)
+        public static SharpClass Bind<T>(SharpClass parentMeta)
         {
             Type classType = typeof(T);
             if(registeredClass.TryGetValue(classType, out var bindClass))
@@ -121,11 +121,7 @@ namespace SharpLuna
                 return bindClass;
             }
 
-            if (name == null)
-            {
-                name = classType.Name;
-            }
-
+            var name = GetTableName(classType);        
             LuaRef meta = LuaRef.None;
             if (BuildMetaTable(ref meta, parentMeta.Meta, name, SharpObject.Signature<T>()))
             {
@@ -147,7 +143,7 @@ namespace SharpLuna
                 return bindClass;
             }
 
-            string name = classType.Name;
+            string name = GetTableName(classType);
             LuaRef meta = LuaRef.None;
             if (BuildMetaTable(ref meta, parentMeta.Meta, name, SharpObject.Signature<T>(), SharpObject.Signature<SUPER>()))
             {
@@ -168,7 +164,7 @@ namespace SharpLuna
                 return bindClass;
             }
 
-            string name = classType.Name;
+            string name = GetTableName(classType);
             LuaRef meta = LuaRef.None;
             if (BuildMetaTable(ref meta, parentMeta.Meta, name, SharpObject.Signature(classType), SharpObject.Signature(superType)))
             {

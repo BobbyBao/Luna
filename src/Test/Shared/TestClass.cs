@@ -37,9 +37,9 @@ namespace Tests
         public void Normalize()
         {
             float mag = 1 / (float)Math.Sqrt(x * x + y * y + z * z);
-            x *= x;
-            y *= y;
-            z *= z;
+            x *= mag;
+            y *= mag;
+            z *= mag;
         }
     }
 

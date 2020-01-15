@@ -2,22 +2,16 @@ using System;
 using SharpLuna;
 using static SharpLuna.Lua;
 
-[WrapClass(typeof(UnityEngine.Vector3))]
-public class Vector3Wrap
+[WrapClass(typeof(UnityEngine.Vector2))]
+public class Vector2Wrap
 {
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Constructor(LuaState L)
 	{
 		int n = lua_gettop(L);
-		UnityEngine.Vector3 obj = default;
-		if(n == 3)
-			obj = new UnityEngine.Vector3(
-				Lua.Get<float>(L, 1),
-				Lua.Get<float>(L, 2),
-				Lua.Get<float>(L, 3)
-			);
-		else if(n == 2)
-			obj = new UnityEngine.Vector3(
+		UnityEngine.Vector2 obj = default;
+		if(n == 2)
+			obj = new UnityEngine.Vector2(
 				Lua.Get<float>(L, 1),
 				Lua.Get<float>(L, 2)
 			);
@@ -28,7 +22,7 @@ public class Vector3Wrap
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Get_x(LuaState L)
 	{
-		ref var obj = ref SharpObject.GetValue<UnityEngine.Vector3>(L, 1);
+		ref var obj = ref SharpObject.GetValue<UnityEngine.Vector2>(L, 1);
 		Lua.Push(L, obj.x);
 		return 1;
 	}
@@ -36,7 +30,7 @@ public class Vector3Wrap
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Set_x(LuaState L)
 	{
-		ref var obj = ref SharpObject.GetValue<UnityEngine.Vector3>(L, 1);
+		ref var obj = ref SharpObject.GetValue<UnityEngine.Vector2>(L, 1);
 		var p1 = Lua.Get<float>(L, 2);
 		obj.x = p1;
 		return 0;
@@ -45,7 +39,7 @@ public class Vector3Wrap
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Get_y(LuaState L)
 	{
-		ref var obj = ref SharpObject.GetValue<UnityEngine.Vector3>(L, 1);
+		ref var obj = ref SharpObject.GetValue<UnityEngine.Vector2>(L, 1);
 		Lua.Push(L, obj.y);
 		return 1;
 	}
@@ -53,26 +47,9 @@ public class Vector3Wrap
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Set_y(LuaState L)
 	{
-		ref var obj = ref SharpObject.GetValue<UnityEngine.Vector3>(L, 1);
+		ref var obj = ref SharpObject.GetValue<UnityEngine.Vector2>(L, 1);
 		var p1 = Lua.Get<float>(L, 2);
 		obj.y = p1;
-		return 0;
-	}
-
-	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	static int Get_z(LuaState L)
-	{
-		ref var obj = ref SharpObject.GetValue<UnityEngine.Vector3>(L, 1);
-		Lua.Push(L, obj.z);
-		return 1;
-	}
-
-	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	static int Set_z(LuaState L)
-	{
-		ref var obj = ref SharpObject.GetValue<UnityEngine.Vector3>(L, 1);
-		var p1 = Lua.Get<float>(L, 2);
-		obj.z = p1;
 		return 0;
 	}
 
@@ -81,6 +58,5 @@ public class Vector3Wrap
 		classWraper.RegFunction("ctor", Constructor);
 		classWraper.RegField("x", Get_x, Set_x);
 		classWraper.RegField("y", Get_y, Set_y);
-		classWraper.RegField("z", Get_z, Set_z);
 	}
 }
