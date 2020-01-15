@@ -82,8 +82,14 @@ namespace SharpLuna
             LuaRef type_clazz = LuaRef.FromPtr(L, clazz_id);
             LuaRef clazz = LuaRef.CreateTable(L);
             clazz.SetMetaTable(clazz);
-            clazz.RawSet("__index", (LuaNativeFunction)BindClassMetaMethod.Index);
-            clazz.RawSet("__newindex", (LuaNativeFunction)BindClassMetaMethod.NewIndex);
+
+#if LUNA_SCRIPT
+            clazz.RawSet("__index", (LuaNativeFunction)class_index);
+            clazz.RawSet("__newindex", (LuaNativeFunction)class_newindex);
+#else
+            clazz.RawSet("__index", (LuaNativeFunction)luna_class_index);
+            clazz.RawSet("__newindex", (LuaNativeFunction)luna_class_newindex);
+#endif
             clazz.RawSet("___getters", LuaRef.CreateTable(L));
             clazz.RawSet("___setters", LuaRef.CreateTable(L));
 
@@ -187,15 +193,9 @@ namespace SharpLuna
             registeredClass.Add(classType, bindClass);
             return bindClass;
         }
-
-
-
-    }
-
-    public class BindClassMetaMethod
-    {
-        //todo:move to c
-        public static int Index(LuaState L)
+         
+        //todo: use upvalue
+        public static int class_index(LuaState L)
         {
             // <SP:1> -> table or userdata
             // <SP:2> -> key
@@ -277,20 +277,6 @@ namespace SharpLuna
 
                 if (lua_isnil(L, -1))
                 {
-
-#if LUAINTF_EXTRA_LUA_FIELDS
-                    if (lua_isuserdata(L, 1))
-                    {
-                        lua_getuservalue(L, 1);
-                        if (!lua_isnil(L, -1))
-                        {
-                            // get extra_fields[key] -> <mt> <nil> <extra_fields> <extra_fields[key]>
-                            lua_pushvalue(L, 2);    // push key
-                            lua_rawget(L, -2);      // lookup key in extra fields
-                        }
-                    }
-#endif
-
                     // leave value on top -> <nil> or <extra_fields[key]>
                     break;
                 }
@@ -303,8 +289,7 @@ namespace SharpLuna
             return 1;
         }
 
-        //todo:move to c
-        public static int NewIndex(LuaState L)
+        public static int class_newindex(LuaState L)
         {
             // <SP:1> -> table or userdata
             // <SP:2> -> key
@@ -372,45 +357,6 @@ namespace SharpLuna
                 // check if there is one
                 if (lua_isnil(L, -1))
                 {
-
-#if LUAINTF_EXTRA_LUA_FIELDS
-                    if (lua_isuserdata(L, 1))
-                    {
-                        // set instance fields
-                        lua_pushliteral(L, "___const");
-                        lua_rawget(L, -3);
-                        if (!lua_rawequal(L, -1, -3))
-                        {
-                            // set field only if not const
-                            lua_getuservalue(L, 1);
-                            if (lua_isnil(L, -1))
-                            {
-                                lua_newtable(L);
-                                lua_pushvalue(L, 2);
-                                lua_pushvalue(L, 3);
-                                lua_rawset(L, -3);
-                                lua_setuservalue(L, 1);
-                            }
-                            else
-                            {
-                                lua_pushvalue(L, 2);
-                                lua_pushvalue(L, 3);
-                                lua_rawset(L, -3);
-                            }
-                            break;
-                        }
-                        lua_pop(L, 1);
-                    }
-                    else
-                    {
-                        // set class fields
-                        lua_pushvalue(L, 2);
-                        lua_pushvalue(L, 3);
-                        lua_rawset(L, 1);
-                        break;
-                    }
-#endif
-
                     // give up
                     lua_pushliteral(L, "___type");
                     lua_rawget(L, -3);
@@ -423,6 +369,74 @@ namespace SharpLuna
                 lua_remove(L, -2);              // pop <mt>
             }
 
+            return 0;
+        }
+
+        public static int module_index(LuaState L)
+        {
+            // <SP:1> -> table
+            // <SP:2> -> key
+
+            // push metatable of table -> <mt>
+            lua_getmetatable(L, 1);
+
+            // push metatable[key] -> <mt> <mt[key]>
+            lua_pushvalue(L, 2);
+            lua_rawget(L, -2);
+
+            if (lua_isnil(L, -1))
+            {
+                // get metatable.getters -> <mt> <getters>
+                lua_pop(L, 1);          // pop nil
+                lua_pushliteral(L, "___getters");
+                lua_rawget(L, -2);      // get getters table
+                assert(lua_istable(L, -1));
+
+                // get metatable.getters[key] -> <mt> <getters> <getters[key]>
+                lua_pushvalue(L, 2);    // push key
+                lua_rawget(L, -2);      // lookup key in getters
+
+                if (lua_iscfunction(L, -1))
+                {
+                    // getter function found
+                    lua_call(L, 0, 1);
+                }
+            }
+
+            return 1;
+        }
+
+        public static int module_newindex(LuaState L)
+        {
+            // <SP:1> -> table
+            // <SP:2> -> key
+            // <SP:3> -> value
+
+            // push metatable of table -> <mt>
+            lua_getmetatable(L, 1);
+
+            // get setters subtable of metatable -> <mt> <setters>
+            lua_pushliteral(L, "___setters");
+            lua_rawget(L, -2);          // get __setters table
+            assert(lua_istable(L, -1));
+
+            // get setters[key] -> <mt> <setters> <setters[key]>
+            lua_pushvalue(L, 2);        // push key arg2
+            lua_rawget(L, -2);          // lookup key in setters
+
+            if (lua_iscfunction(L, -1))
+            {
+                // setter function found
+                lua_pushvalue(L, 3);    // push new value as arg
+                lua_call(L, 1, 0);
+            }
+            else
+            {
+                // no setter found, just set the table field
+                assert(lua_isnil(L, -1));
+                lua_pop(L, 3);
+                lua_rawset(L, 1);
+            }
             return 0;
         }
 

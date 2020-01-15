@@ -160,7 +160,7 @@ namespace SharpLuna
         {
             LuaRef meta_class = m_meta;
             string full_name = GetMemberName(meta_class, name);
-            LuaRef err = LuaRef.CreateFunctionWith(State, BindClassMetaMethod.ErrorConstMismatch, full_name);
+            LuaRef err = LuaRef.CreateFunctionWith(State, ErrorConstMismatch, full_name);
 
             meta_class.RawGet("___setters").RawSet(name, setter);
         }
@@ -169,7 +169,7 @@ namespace SharpLuna
         {
             LuaRef meta_class = m_meta;
             string full_name = GetMemberName(meta_class, name);
-            LuaRef err = LuaRef.CreateFunctionWith(State, BindClassMetaMethod.ErrorReadOnly, full_name);
+            LuaRef err = LuaRef.CreateFunctionWith(State, ErrorReadOnly, full_name);
 
             meta_class.RawGet("___setters").RawSet(name, err);
         }

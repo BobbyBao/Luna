@@ -49,8 +49,8 @@ function Test4()
 	local node = go.transform
 
 	for i = 1,100000 do				
-		go = GameObject()
-		--go = node.gameObject
+		--go = GameObject()
+		go = node.gameObject
 	end
 	
 	t = os.clock() - t
