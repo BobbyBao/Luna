@@ -15,8 +15,9 @@ namespace SharpLuna
 
     public struct LuaRef : IRefCount, IEquatable<LuaRef>, IComparable<LuaRef>, IEnumerable<TableKeyValuePair>
     {
-        LuaState L;
-        int _ref;
+        private LuaState L;
+        private int _ref;
+
         public static readonly LuaRef Empty = new LuaRef();
         public static readonly LuaRef None = new LuaRef { _ref = LUA_NOREF };
         public static readonly LuaRef Nil = new LuaRef { _ref = LUA_REFNIL };
@@ -59,6 +60,44 @@ namespace SharpLuna
             if (L != IntPtr.Zero)
             {
                 luaL_unref(L, LUA_REGISTRYINDEX, _ref);
+            }
+        }
+
+        public LuaState State => L;
+        public bool IsValid => _ref != LUA_NOREF;
+        public bool IsTable => Type == LuaType.Table;
+        public bool IsFunction => Type == LuaType.Function;
+
+        public LuaType Type
+        {
+            get
+            {
+                if (_ref == LUA_NOREF)
+                {
+                    return LuaType.None;
+                }
+                else if (_ref == LUA_REFNIL)
+                {
+                    return LuaType.Nil;
+                }
+                else
+                {
+                    PushToStack();
+                    LuaType t = lua_type(L, -1);
+                    lua_pop(L, 1);
+                    return (LuaType)(t);
+                }
+            }
+        }
+
+        public string TypeName
+        {
+            get
+            {
+                PushToStack();
+                var s = lua_typename(L, lua_type(L, -1));
+                lua_pop(L, 1);
+                return s;
             }
         }
 
@@ -126,44 +165,6 @@ namespace SharpLuna
         {
             lua_pushglobaltable(L);
             return PopFromStack(L);
-        }
-
-        public lua_State State => L;
-        public bool IsValid => _ref != LUA_NOREF;
-        public bool IsTable => Type == LuaType.Table;
-        public bool IsFunction => Type == LuaType.Function;
-
-        public LuaType Type
-        {
-            get
-            {
-                if (_ref == LUA_NOREF)
-                {
-                    return LuaType.None;
-                }
-                else if (_ref == LUA_REFNIL)
-                {
-                    return LuaType.Nil;
-                }
-                else
-                {
-                    PushToStack();
-                    LuaType t = lua_type(L, -1);
-                    lua_pop(L, 1);
-                    return (LuaType)(t);
-                }
-            }
-        }
-
-        public string TypeName 
-        {
-            get
-            {
-                PushToStack();
-                var s = lua_typename(L, lua_type(L, -1));
-                lua_pop(L, 1);
-                return s;
-            }
         }
 
         public LuaRef CheckTable()
@@ -244,7 +245,6 @@ namespace SharpLuna
         public static bool operator >(in LuaRef l, in LuaRef r) => !(l <= r);
         public static bool operator >=(in LuaRef l, in LuaRef r) => !(l < r);
 
-
         public static implicit operator bool(LuaRef luaRef)
         {
             return luaRef.L != IntPtr.Zero && luaRef._ref != LUA_NOREF && luaRef._ref != LUA_REFNIL;
@@ -290,6 +290,7 @@ namespace SharpLuna
         {
             Invoke(L, this, args);
         }
+
         public void Dispatch(string func, params object[] args)
         {
             Invoke(L, Get<LuaRef, string>(func), args);
