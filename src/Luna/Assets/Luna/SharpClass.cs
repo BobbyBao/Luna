@@ -159,9 +159,6 @@ namespace SharpLuna
         public void SetSetter(string name, LuaRef setter)
         {
             LuaRef meta_class = m_meta;
-            string full_name = GetMemberName(meta_class, name);
-            LuaRef err = LuaRef.CreateFunctionWith(State, ErrorConstMismatch, full_name);
-
             meta_class.RawGet("___setters").RawSet(name, setter);
         }
 
