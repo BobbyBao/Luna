@@ -47,7 +47,7 @@ namespace SharpLuna
         private KyHookFunction _hookCallback;
 #endregion
 
-        private GlobalModule _binder;
+        private SharpModule _binder;
         private readonly Dictionary<Type, ClassWraper> _classWrapers = new Dictionary<Type, ClassWraper>();
 
         public event Action PreInit;
@@ -90,7 +90,7 @@ namespace SharpLuna
             L.Register("dofile", DoFile);
             L.Register("loadfile", LoadFile);
 
-            _binder = new GlobalModule(this);
+            _binder = new SharpModule(this);
 
             AddSearcher(LuaLoader);
 
@@ -461,7 +461,7 @@ namespace SharpLuna
 
         public SharpClass RegisterModel(string name, Type[] types)
         {
-            var model = _binder.BeginModule(name);
+            var model = _binder.CreateModule(name);
             foreach (Type t in types)
             {
                 model.RegClass(t);

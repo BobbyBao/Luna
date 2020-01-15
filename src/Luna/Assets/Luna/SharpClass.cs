@@ -59,7 +59,7 @@ namespace SharpLuna
 
         public virtual Luna Luna
         {
-            get {return parent.Luna;}
+            get { return parent.Luna;}
         }
 
         public LuaState State => m_meta.State;
@@ -74,31 +74,6 @@ namespace SharpLuna
 
         }
         
-        public SharpClass BeginRoot<SUB>()
-        {
-            return SharpClass.Bind<SUB>(this);
-        }
-
-        public SharpClass BeginClass<SUB>()
-        {
-            if (typeof(SUB) == typeof(object))
-            {
-                return SharpClass.Bind<SUB>(this);
-            }
-
-            return SharpClass.Extend<SUB, object>(this);
-        }
-
-        public SharpClass BeginClass<SUB, SUPER>()
-        {
-            if (typeof(SUB) == typeof(SUPER))
-            {
-                return SharpClass.Bind<SUB>(this);
-            }
-
-            return SharpClass.Extend<SUB, SUPER>(this);
-        }
-
         public SharpClass BeginClass(Type classType, Type superClass = null)
         {
             if (classType == superClass)
@@ -132,12 +107,7 @@ namespace SharpLuna
 
             return SharpClass.Extend(classType, superClass, this);
         }
-
-        public SharpClass EndClass()
-        {
-            return parent;
-        }
-
+        
         public void SetGetter(string name, LuaRef getter)
         {
             m_meta.RawGet("___getters").RawSet(name, getter);
@@ -184,12 +154,7 @@ namespace SharpLuna
 
         protected void OnRegClass()
         {
-            OnRegClass(classType);
-        }
-
-        protected void OnRegClass(Type type)
-        {
-            var fields = type.GetFields();
+            var fields = classType.GetFields();
             foreach (var field in fields)
             {
                 if (!field.IsPublic)
@@ -224,7 +189,7 @@ namespace SharpLuna
 
             if (!wrapCtor)
             {
-                var ctors = type.GetConstructors();
+                var ctors = classType.GetConstructors();
                 foreach (var ctor in ctors)
                 {
                     if (!ctor.IsPublic)
@@ -237,12 +202,12 @@ namespace SharpLuna
                         continue;
                     }
 
-                    RegConstructor(type, ctor);
+                    RegConstructor(classType, ctor);
                 }
             }
 
 
-            var props = type.GetProperties();
+            var props = classType.GetProperties();
             foreach (var p in props)
             {
                 if (p.IsDefined(typeof(LuaHideAttribute)))
@@ -261,7 +226,7 @@ namespace SharpLuna
                 }
             }
 
-            var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            var methods = classType.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly);
             foreach (var m in methods)
             {
                 if (m.IsSpecialName)

@@ -8,51 +8,28 @@ namespace SharpLuna
     using lua_State = System.IntPtr;
     using static Lua;
 
-    public class GlobalModule : SharpClass
-    {
-        protected Luna luna;
-        public override Luna Luna
-        {
-            get { return luna; }
-        }
-
-        public GlobalModule(Luna luna) : base(LuaRef.Globals(luna.State))
-        {
-            this.luna = luna;
-        }
-
-        public GlobalModule(Luna luna, LuaRef mod) : base(mod)
-        {
-            this.luna = luna;
-        }
-
-        Dictionary<string, SharpModule> registeredModule;
-        public SharpModule BeginModule(string name)
-        {
-            if (registeredModule == null)
-            {
-                registeredModule = new Dictionary<string, SharpModule>();
-            }
-
-            if (registeredModule.TryGetValue(name, out var module))
-            {
-                return module;
-            }
-
-            module = new SharpModule(this, m_meta, name);
-            registeredModule.Add(name, module);
-            return module;
-        }
-
-        public SharpClass EndModule()
-        {
-            return parent;
-        }
-
-    }
-
     public class SharpModule : SharpClass
     {
+        static Dictionary<string, SharpModule> registeredModule;
+        protected Luna luna;
+
+        public override Luna Luna
+        {
+            get
+            {               
+                if(luna != null)   
+                    return luna;
+
+                return base.Luna;
+            }
+        }
+
+        //GlobalModule
+        public SharpModule(Luna luna) : base(LuaRef.Globals(luna.State))
+        {
+            this.luna = luna;
+        }
+        
         public SharpModule(SharpClass parent, LuaRef meta, string name) : base(meta)
         {
             LuaRef @ref = meta.RawGet(name);
@@ -82,6 +59,23 @@ namespace SharpLuna
             module.RawSet("___parent", meta);
             meta.RawSet(name, module);
             m_meta = module;
+        }
+
+        public SharpModule CreateModule(string name)
+        {
+            if (registeredModule == null)
+            {
+                registeredModule = new Dictionary<string, SharpModule>();
+            }
+
+            if (registeredModule.TryGetValue(name, out var module))
+            {
+                return module;
+            }
+
+            module = new SharpModule(this, m_meta, name);
+            registeredModule.Add(name, module);
+            return module;
         }
 
     };
