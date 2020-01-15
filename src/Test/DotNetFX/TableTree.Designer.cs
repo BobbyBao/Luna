@@ -378,6 +378,7 @@
             this.treeView2.Name = "treeView2";
             this.treeView2.Size = new System.Drawing.Size(317, 701);
             this.treeView2.TabIndex = 0;
+            this.treeView2.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.treeView2_BeforeExpand);
             this.treeView2.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeView2_NodeMouseClick);
             this.treeView2.NodeMouseDoubleClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeView2_NodeMouseDoubleClick);
             // 

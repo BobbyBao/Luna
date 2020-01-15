@@ -52,9 +52,19 @@ namespace Test
 
             foreach (var t in table)
             {
+                var k = t.Key<string>();
                 var v = t.Value();
-                var n = node.Add(t.Key<string>());
-                n.Tag = v;
+                TreeNode n;
+                if (!node.ContainsKey(k))
+                {
+                    n = node.Add(k, k);
+                    n.Tag = v;
+                }
+                else
+                {
+                    n = node[k];
+                }
+
 
                 if (v.IsTable)
                 {
@@ -81,7 +91,19 @@ namespace Test
         private void treeView2_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
         {
             LuaRef v = (LuaRef)e.Node.Tag;
-            Refresh(v, e.Node.Nodes, 2);
+            if (v.IsTable)
+            {
+                Refresh(v, e.Node.Nodes, 2);
+            }
+        }
+
+        private void treeView2_BeforeExpand(object sender, TreeViewCancelEventArgs e)
+        {
+            LuaRef v = (LuaRef)e.Node.Tag;
+            if (v.IsTable)
+            {
+                Refresh(v, e.Node.Nodes, 2);
+            }
         }
     }
 }
