@@ -9,7 +9,6 @@ using SharpLuna;
 namespace Tests
 {
     using static Lua;
-    using static BindHelper;
 
     public class TestFramework : IDisposable
     {
@@ -109,7 +108,6 @@ namespace Tests
         private void Luna_PostInit()
         {
             AutoBind();
-            //CustomBind();
         }
 
         void AutoBind()
@@ -146,36 +144,6 @@ namespace Tests
             Luna.Log("LiveCount:", RefCountHelper.LiveCount, "FreeCount:", RefCountHelper.FreeCount);
         }
 
-        void CustomBind()
-        {
-            var t = luna.Bind
-            [
-                Class<TestClass>()
-                [
-                    Constant("constVar", TestClass.constVar),
-                    Enum<TestEnum>(),
-                    Property<TestClass, string>("staticProp"),
-                    Variable("staticVar", () => TestClass.staticVar, (val) => TestClass.staticVar = val),
-
-                    Method<TestClass>("StaticFunc"),
-                    Method<TestClass, string>("StaticFunc1"),
-                    Method<TestClass, string, int>("StaticFunc2"),
-
-                    Constructor<TestClass>(),
-                    Variable<TestClass, string>("variable", (_) => _.variable, (_, val) => _.variable = val),
-                    Property<TestClass, string>("name"),
-
-                    Method<TestClass>("Method"),
-                    Method<TestClass, string>("Method1"),
-                    Method<TestClass, string, float>("Method2"),
-
-                    MethodR<TestClass, string>("Fun0"),
-                    MethodR<TestClass, int, string>("Fun1"),
-                    MethodR<TestClass, int, float>("Fun2")
-                ]
-            ];
-
-        }
 
     }
 }

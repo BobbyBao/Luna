@@ -482,9 +482,7 @@ namespace SharpLuna
         public SharpClass RegisterClass(Type classType, Type superType)
         {
             return _binder.RegClass(classType, superType);
-        }
-
-        public GlobalModule Bind => BindHelper.Begin(_binder);       
+        }   
 
         #region lua debug functions
 
