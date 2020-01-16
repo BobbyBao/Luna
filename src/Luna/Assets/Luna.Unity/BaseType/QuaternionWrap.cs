@@ -6,7 +6,7 @@ using static SharpLuna.Lua;
 public class QuaternionWrap
 {
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	static int Constructor(LuaState L)
+	static int Constructor(IntPtr L)
 	{
 		int n = lua_gettop(L);
 		UnityEngine.Quaternion obj = default;
@@ -22,7 +22,7 @@ public class QuaternionWrap
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	static int Get_x(LuaState L)
+	static int Get_x(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
 		Lua.Push(L, obj.x);
@@ -30,7 +30,7 @@ public class QuaternionWrap
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	static int Set_x(LuaState L)
+	static int Set_x(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
 		var p1 = Lua.Get<float>(L, 2);
@@ -39,7 +39,7 @@ public class QuaternionWrap
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	static int Get_y(LuaState L)
+	static int Get_y(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
 		Lua.Push(L, obj.y);
@@ -47,7 +47,7 @@ public class QuaternionWrap
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	static int Set_y(LuaState L)
+	static int Set_y(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
 		var p1 = Lua.Get<float>(L, 2);
@@ -56,7 +56,7 @@ public class QuaternionWrap
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	static int Get_z(LuaState L)
+	static int Get_z(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
 		Lua.Push(L, obj.z);
@@ -64,7 +64,7 @@ public class QuaternionWrap
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	static int Set_z(LuaState L)
+	static int Set_z(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
 		var p1 = Lua.Get<float>(L, 2);
@@ -73,7 +73,7 @@ public class QuaternionWrap
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	static int Get_w(LuaState L)
+	static int Get_w(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
 		Lua.Push(L, obj.w);
@@ -81,12 +81,45 @@ public class QuaternionWrap
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	static int Set_w(LuaState L)
+	static int Set_w(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
 		var p1 = Lua.Get<float>(L, 2);
 		obj.w = p1;
 		return 0;
+	}
+
+	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+	static int Get_identity(IntPtr L)
+	{
+		ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
+		Lua.Push(L, UnityEngine.Quaternion.identity);
+		return 1;
+	}
+
+	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+	static int Get_eulerAngles(IntPtr L)
+	{
+		ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
+		Lua.Push(L, obj.eulerAngles);
+		return 1;
+	}
+
+	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+	static int Set_eulerAngles(IntPtr L)
+	{
+		ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
+		var p1 = Lua.Get<UnityEngine.Vector3>(L, 2);
+		obj.eulerAngles = p1;
+		return 0;
+	}
+
+	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+	static int Get_normalized(IntPtr L)
+	{
+		ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
+		Lua.Push(L, obj.normalized);
+		return 1;
 	}
 
 	public static void Register(ClassWraper classWraper)
@@ -96,5 +129,8 @@ public class QuaternionWrap
 		classWraper.RegField("y", Get_y, Set_y);
 		classWraper.RegField("z", Get_z, Set_z);
 		classWraper.RegField("w", Get_w, Set_w);
+		classWraper.RegProp("identity", Get_identity);
+		classWraper.RegProp("eulerAngles", Get_eulerAngles, Set_eulerAngles);
+		classWraper.RegProp("normalized", Get_normalized);
 	}
 }

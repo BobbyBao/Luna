@@ -6,7 +6,7 @@ using static SharpLuna.Lua;
 public class RayWrap
 {
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	static int Constructor(LuaState L)
+	static int Constructor(IntPtr L)
 	{
 		int n = lua_gettop(L);
 		UnityEngine.Ray obj = default;
@@ -19,8 +19,44 @@ public class RayWrap
 		return 1;
 	}
 
+	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+	static int Get_origin(IntPtr L)
+	{
+		ref var obj = ref SharpObject.GetValue<UnityEngine.Ray>(L, 1);
+		Lua.Push(L, obj.origin);
+		return 1;
+	}
+
+	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+	static int Set_origin(IntPtr L)
+	{
+		ref var obj = ref SharpObject.GetValue<UnityEngine.Ray>(L, 1);
+		var p1 = Lua.Get<UnityEngine.Vector3>(L, 2);
+		obj.origin = p1;
+		return 0;
+	}
+
+	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+	static int Get_direction(IntPtr L)
+	{
+		ref var obj = ref SharpObject.GetValue<UnityEngine.Ray>(L, 1);
+		Lua.Push(L, obj.direction);
+		return 1;
+	}
+
+	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+	static int Set_direction(IntPtr L)
+	{
+		ref var obj = ref SharpObject.GetValue<UnityEngine.Ray>(L, 1);
+		var p1 = Lua.Get<UnityEngine.Vector3>(L, 2);
+		obj.direction = p1;
+		return 0;
+	}
+
 	public static void Register(ClassWraper classWraper)
 	{
 		classWraper.RegFunction("ctor", Constructor);
+		classWraper.RegProp("origin", Get_origin, Set_origin);
+		classWraper.RegProp("direction", Get_direction, Set_direction);
 	}
 }
