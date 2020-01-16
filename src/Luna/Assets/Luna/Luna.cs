@@ -8,6 +8,7 @@ using System.Text;
 namespace SharpLuna
 {
     using static Lua;
+    using lua_State = IntPtr;
 
     public sealed class Luna : IDisposable
     {
@@ -86,9 +87,9 @@ namespace SharpLuna
 
             lua_atpanic(L, PanicCallback);
 
-            L.Register("print", DoPrint);
-            L.Register("dofile", DoFile);
-            L.Register("loadfile", LoadFile);
+            Lua.Register(L, "print", DoPrint);
+            Lua.Register(L, "dofile", DoFile);
+            Lua.Register(L, "loadfile", LoadFile);
 
             _binder = new SharpModule(this);
 
@@ -171,7 +172,7 @@ namespace SharpLuna
         }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        int DoPrint(LuaState L)
+        int DoPrint(lua_State L)
         {
             int n = lua_gettop(L);
 
@@ -196,7 +197,7 @@ namespace SharpLuna
         }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        int LuaLoader(LuaState L)
+        int LuaLoader(lua_State L)
         {
             string fileName = lua_tostring(L, 1);
 
@@ -220,7 +221,7 @@ namespace SharpLuna
         }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        private int DoFile(LuaState L)
+        private int DoFile(lua_State L)
         {
             string fileName = lua_tostring(L, 1);
             int n = lua_gettop(L);
@@ -248,7 +249,7 @@ namespace SharpLuna
         }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        private int LoadFile(LuaState L)
+        private int LoadFile(lua_State L)
         {
             int oldTop = lua_gettop(L);
             string fileName = lua_tostring(L, 1);
@@ -272,7 +273,7 @@ namespace SharpLuna
 
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        static int PanicCallback(LuaState L)
+        static int PanicCallback(lua_State L)
         {
             string reason = string.Format("Unprotected error in call to Lua API ({0})", lua_tostring(L, -1));
             throw new LuaException(reason);
@@ -297,7 +298,7 @@ namespace SharpLuna
             throw new LuaScriptException(err.ToString(), string.Empty);
         }
 
-        private static int PushDebugTraceback(LuaState L, int argCount)
+        private static int PushDebugTraceback(lua_State L, int argCount)
         {
             lua_getglobal(L, "debug");
             lua_getfield(L, -1, "traceback");
@@ -536,11 +537,11 @@ namespace SharpLuna
         }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        void DebugHookCallback(LuaState L, IntPtr luaDebug)
+        void DebugHookCallback(lua_State L, IntPtr luaDebug)
         {
             lua_getstack(L, 0, luaDebug);
 
-            if (!L.GetInfo("Snlu", luaDebug))
+            if (!Lua.GetInfo(L, "Snlu", luaDebug))
                 return;
 
             var debug = LuaDebug.FromIntPtr(luaDebug);

@@ -6,7 +6,7 @@ using static SharpLuna.Lua;
 public class TestStructWrap
 {
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	static int Constructor(LuaState L)
+	static int Constructor(IntPtr L)
 	{
 		int n = lua_gettop(L);
 		Tests.TestStruct obj = default;
@@ -30,7 +30,7 @@ public class TestStructWrap
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	static int Get_x(LuaState L)
+	static int Get_x(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<Tests.TestStruct>(L, 1);
 		Lua.Push(L, obj.x);
@@ -38,7 +38,7 @@ public class TestStructWrap
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	static int Set_x(LuaState L)
+	static int Set_x(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<Tests.TestStruct>(L, 1);
 		var p1 = Lua.Get<float>(L, 2);
@@ -47,7 +47,7 @@ public class TestStructWrap
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	static int Get_y(LuaState L)
+	static int Get_y(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<Tests.TestStruct>(L, 1);
 		Lua.Push(L, obj.y);
@@ -55,7 +55,7 @@ public class TestStructWrap
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	static int Set_y(LuaState L)
+	static int Set_y(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<Tests.TestStruct>(L, 1);
 		var p1 = Lua.Get<float>(L, 2);
@@ -64,7 +64,7 @@ public class TestStructWrap
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	static int Get_z(LuaState L)
+	static int Get_z(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<Tests.TestStruct>(L, 1);
 		Lua.Push(L, obj.z);
@@ -72,7 +72,7 @@ public class TestStructWrap
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	static int Set_z(LuaState L)
+	static int Set_z(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<Tests.TestStruct>(L, 1);
 		var p1 = Lua.Get<float>(L, 2);

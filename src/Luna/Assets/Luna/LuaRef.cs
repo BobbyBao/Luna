@@ -544,7 +544,7 @@ namespace SharpLuna
             lua_setmetatable(L, -2);
         }
 
-        static unsafe int DestructUserData(LuaState L)
+        static unsafe int DestructUserData(lua_State L)
         {
             IntPtr obj = lua_touserdata(L, 1);
             IntPtr handle = Unsafe.Read<IntPtr>((void*)obj);

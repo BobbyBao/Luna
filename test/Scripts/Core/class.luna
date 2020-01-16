@@ -56,7 +56,7 @@ func __class(c, className, base) {
         return c
     }
     
-    mt.__call = func(class_tbl, ...) {
+    mt.__call = func(...) {
         var obj  = {}
         if c.init {
             setmetatable(obj, c)

@@ -7,10 +7,11 @@ using System.Text;
 namespace SharpLuna
 {
     using static Lua;
+    using lua_State = IntPtr;
 
     public struct ConstantVariable
     {
-        public static int Call(LuaState L)
+        public static int Call(lua_State L)
         {
             lua_pushvalue(L, lua_upvalueindex(1));
             return 1;
@@ -19,7 +20,7 @@ namespace SharpLuna
 
     public struct ClassConstructor<T> where T : new()
     {
-        public static int Call(LuaState L)
+        public static int Call(lua_State L)
         {
             try
             {
@@ -39,11 +40,11 @@ namespace SharpLuna
             }
         }
 
-        static int CallConstructor(LuaState L, int n)
+        static int CallConstructor(lua_State L, int n)
         {
             try
             {
-                ConstructorInfo fn = L.ToLightObject<ConstructorInfo>(lua_upvalueindex(1), false);
+                ConstructorInfo fn = Lua.ToLightObject<ConstructorInfo>(L, lua_upvalueindex(1), false);
                 //忽略self
                 object[] args = new object[n - 1];
                 for (int i = 2; i <= n; i++)
@@ -65,7 +66,7 @@ namespace SharpLuna
 
     public struct ClassDestructor<T>
     {
-        public static int Call(LuaState L)
+        public static int Call(lua_State L)
         {
             try
             {
@@ -81,17 +82,17 @@ namespace SharpLuna
 
     public struct PropertyCaller<T1>
     {
-        public static int Getter(LuaState L)
+        public static int Getter(lua_State L)
         {
-            var a = L.ToLightObject<Func<T1>>(lua_upvalueindex(2), false);
+            var a = Lua.ToLightObject<Func<T1>>(L, lua_upvalueindex(2), false);
             var r = a();
             Lua.Push(L, r);
             return 1;
         }
 
-        public static int Setter(LuaState L)
+        public static int Setter(lua_State L)
         {
-            var a = L.ToLightObject<Action<T1>>(lua_upvalueindex(3), false);
+            var a = Lua.ToLightObject<Action<T1>>(L, lua_upvalueindex(3), false);
             a(
                 Lua.Get<T1>(L, 1)
             );
@@ -102,18 +103,18 @@ namespace SharpLuna
 
     public struct PropertyCaller<T1, T2>
     {
-        public static int Getter(LuaState L)
+        public static int Getter(lua_State L)
         {
-            var a = L.ToLightObject<Func<T1, T2>>(lua_upvalueindex(2), false);
+            var a = Lua.ToLightObject<Func<T1, T2>>(L, lua_upvalueindex(2), false);
             var p1 = SharpObject.Get<T1>(L, 1);
             var r = a(p1);
             Lua.Push(L, r);
             return 1;
         }
 
-        public static int Setter(LuaState L, int start)
+        public static int Setter(lua_State L, int start)
         {
-            var a = L.ToLightObject<Action<T1, T2>>(lua_upvalueindex(3), false);
+            var a = Lua.ToLightObject<Action<T1, T2>>(L, lua_upvalueindex(3), false);
             a(
                 Lua.Get<T1>(L, 1), Lua.Get<T2>(L, 2)
             );

@@ -12,15 +12,16 @@ using System.Reflection;
 namespace SharpLuna
 {
     using static Lua;
+    using lua_State = IntPtr;
 
     public struct FuncCaller<R>
     {
-        public static int StaticCall(LuaState L) => Call(L);
-        public static int Call(LuaState L)
+        public static int StaticCall(lua_State L) => Call(L);
+        public static int Call(lua_State L)
         {         
             try
             {
-                var a = L.ToLightObject<Func<R>>(lua_upvalueindex(1), false);
+                var a = Lua.ToLightObject<Func<R>>(L, lua_upvalueindex(1), false);
                 var r = a();
                 Lua.Push(L, r);
                 return 1;
@@ -35,14 +36,14 @@ namespace SharpLuna
 <# for(int i= 0; i< typeList.Length ; i ++){ #>
     public struct FuncCaller<<# for(int j= 0; j <= i ; j ++){#><#=typeList[j]#>, <#}#>R>
     {
-        public static int Call(LuaState L) => Call(L, 1);
-        public static int StaticCall(LuaState L) => Call(L, 2);
+        public static int Call(lua_State L) => Call(L, 1);
+        public static int StaticCall(lua_State L) => Call(L, 2);
 
-        static int Call(LuaState L, int start)
+        static int Call(lua_State L, int start)
         {
             try
             {
-                var a = L.ToLightObject<Func<<# for(int j= 0; j <= i ; j ++){#><#=typeList[j]#>, <#}#>R>>(lua_upvalueindex(1), false);
+                var a = Lua.ToLightObject<Func<<# for(int j= 0; j <= i ; j ++){#><#=typeList[j]#>, <#}#>R>>(L, lua_upvalueindex(1), false);
                 var r = a(
 <# for(int j= 0; j <= i ; j ++){#>
                     Lua.Get<<#=typeList[j]#>>(L, <#=j#> + start)<#if(j != i)#>,

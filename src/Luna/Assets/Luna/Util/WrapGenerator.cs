@@ -8,13 +8,14 @@ namespace SharpLuna
 {
     public class WrapGenerator
     {
-        static string exportPath = "";
+        static string exportPath = "";        
         public static string ExportPath
         {
+            get => exportPath;
             set
             {
                 exportPath = value;
-                Directory.CreateDirectory(exportPath);
+                Directory.CreateDirectory(WrapGenerator.ExportPath);
             }
         }
 
@@ -124,7 +125,25 @@ namespace SharpLuna
                     members.Add((MemberTypes.Field, field.Name, true, !field.IsLiteral));
                 }
             }
-  
+
+            var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
+            foreach (var prop in properties)
+            {
+                if (prop.IsDefined(typeof(LuaHideAttribute)))
+                {
+                    continue;
+                }
+
+                //indexer 暂时不支持
+                if (prop.Name == "Item")
+                {
+                    continue;
+                }
+
+                GenerateProperty(type, prop, sb);
+                members.Add((MemberTypes.Property, prop.Name, prop.CanRead, prop.CanWrite));
+            }
+
             sb.Append($"\tpublic static void Register(ClassWraper classWraper)\n\t{{\n");
 
             foreach (var (memberType, name, hasGetter, hasSetter) in members)
@@ -134,6 +153,25 @@ namespace SharpLuna
                     if (hasGetter || hasSetter)
                     {
                         sb.Append($"\t\tclassWraper.RegField(\"{name}\"");
+
+                        if (hasGetter)
+                        {
+                            sb.Append($", Get_{name}");
+                        }
+
+                        if (hasSetter)
+                        {
+                            sb.Append($", Set_{name}");
+                        }
+
+                        sb.Append($");\n");
+                    }
+                }
+                else if (memberType == MemberTypes.Property)
+                {
+                    if (hasGetter || hasSetter)
+                    {
+                        sb.Append($"\t\tclassWraper.RegProp(\"{name}\"");
 
                         if (hasGetter)
                         {
@@ -164,7 +202,7 @@ namespace SharpLuna
         static void GenerateConstructor(Type type, List<ConstructorInfo> ctorList, StringBuilder sb)
         {
             sb.Append("\t[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]\n");
-            sb.Append($"\tstatic int Constructor(LuaState L)\n\t{{\n");
+            sb.Append($"\tstatic int Constructor(IntPtr L)\n\t{{\n");
 
             sb.Append($"\t\tint n = lua_gettop(L);\n");
 
@@ -225,56 +263,74 @@ namespace SharpLuna
 
         static void GenerateField(Type type, FieldInfo field, StringBuilder sb)
         {
-            sb.Append("\t[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]\n");
-            sb.Append($"\tstatic int Get_{field.Name}(LuaState L)\n\t{{\n");
+            GenerateVal(type, field.Name, field.IsStatic, field.FieldType, sb, true, true);
+        }
 
-            if(type.IsUnManaged())
-            {
-                sb.Append($"\t\tref var obj = ref SharpObject.GetValue<{type.FullName}>(L, 1);\n");
-            }
-            else
-            {
-                sb.Append($"\t\tvar obj = SharpObject.Get<{type.FullName}>(L, 1);\n");
-            }
+        static void GenerateProperty(Type type, PropertyInfo propertyInfo, StringBuilder sb)
+        {
+            GenerateVal(type, propertyInfo.Name, propertyInfo.GetMethod.IsStatic,
+                propertyInfo.PropertyType, sb, propertyInfo.CanRead, propertyInfo.CanWrite);
+        }
 
-            if (field.IsStatic)
+        static void GenerateVal(Type type, string name, bool isStatic, Type valType, StringBuilder sb, bool read, bool write)
+        {
+            if (read)
             {
-                sb.Append($"\t\tLua.Push(L, {type.FullName}.{field.Name});\n");
-            }
-            else
-            {
-                sb.Append($"\t\tLua.Push(L, obj.{field.Name});\n");
-            }
+                sb.Append("\t[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]\n");
+                sb.Append($"\tstatic int Get_{name}(IntPtr L)\n\t{{\n");
 
-            sb.Append("\t\treturn 1;\n");
-            sb.Append("\t}\n");
-            sb.AppendLine();
+                if (type.IsUnManaged())
+                {
+                    sb.Append($"\t\tref var obj = ref SharpObject.GetValue<{type.FullName}>(L, 1);\n");
+                }
+                else
+                {
+                    sb.Append($"\t\tvar obj = SharpObject.Get<{type.FullName}>(L, 1);\n");
+                }
 
-            sb.Append("\t[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]\n");
-            //sb.Append($"\t[WrapMethod(\"{field.Name}\", MethodType.Setter)]\n");
-            sb.Append($"\tstatic int Set_{field.Name}(LuaState L)\n\t{{\n");
+                if (isStatic)
+                {
+                    sb.Append($"\t\tLua.Push(L, {type.FullName}.{name});\n");
+                }
+                else
+                {
+                    sb.Append($"\t\tLua.Push(L, obj.{name});\n");
+                }
 
-            if (type.IsUnManaged())
-            {
-                sb.Append($"\t\tref var obj = ref SharpObject.GetValue<{type.FullName}>(L, 1);\n");
+                sb.Append("\t\treturn 1;\n");
+                sb.Append("\t}\n");
+                sb.AppendLine();
             }
-            else
+           
+            if (write)
             {
-                sb.Append($"\t\tvar obj = SharpObject.Get<{type.FullName}>(L, 1);\n");
-            }
+                sb.Append("\t[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]\n");
+                sb.Append($"\tstatic int Set_{name}(IntPtr L)\n\t{{\n");
 
-            sb.Append($"\t\tvar p1 = Lua.Get<{GetTypeName(field.FieldType)}>(L, 2);\n");
-            if (field.IsStatic)
-            {
-                sb.Append($"\t\t{type.FullName}.{field.Name} = p1;\n");
+                if (type.IsUnManaged())
+                {
+                    sb.Append($"\t\tref var obj = ref SharpObject.GetValue<{type.FullName}>(L, 1);\n");
+                }
+                else
+                {
+                    sb.Append($"\t\tvar obj = SharpObject.Get<{type.FullName}>(L, 1);\n");
+                }
+
+                sb.Append($"\t\tvar p1 = Lua.Get<{GetTypeName(valType)}>(L, 2);\n");
+                if (isStatic)
+                {
+                    sb.Append($"\t\t{type.FullName}.{name} = p1;\n");
+                }
+                else
+                {
+                    sb.Append($"\t\tobj.{name} = p1;\n");
+                }
+                sb.Append("\t\treturn 0;\n");
+                sb.Append("\t}\n");
+                sb.AppendLine();
             }
-            else
-            {
-                sb.Append($"\t\tobj.{field.Name} = p1;\n");
-            }
-            sb.Append("\t\treturn 0;\n");
-            sb.Append("\t}\n");
-            sb.AppendLine();
+            
         }
     }
+
 }

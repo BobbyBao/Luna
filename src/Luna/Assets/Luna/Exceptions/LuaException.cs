@@ -22,7 +22,7 @@ namespace SharpLuna
         {
         }
 
-        public static int traceback(LuaState L)
+        public static int traceback(IntPtr L)
         {
             if (!lua_isstring(L, 1)) return 1;
 

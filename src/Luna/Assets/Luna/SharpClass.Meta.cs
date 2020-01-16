@@ -479,7 +479,7 @@ namespace SharpLuna
             return 0;
         }
 
-        public static int ErrorReadOnly(LuaState L)
+        public static int ErrorReadOnly(lua_State L)
         {
             return luaL_error(L, "property '{0}' is read-only", lua_tostring(L, lua_upvalueindex(1)));
         }

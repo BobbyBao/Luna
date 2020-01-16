@@ -58,9 +58,9 @@ namespace Tests
             return buffer;
         }
 
-        int Loader(LuaState L)
+        int Loader(IntPtr L)
         {
-            string fileName = L.ToString(1);
+            string fileName = Lua.ToString(L, 1);
             fileName = fileName.Replace(".", "/");
             if (!fileName.EndsWith(Luna.Ext))
             {
@@ -78,7 +78,7 @@ namespace Tests
 
             if (luaL_loadbuffer(L, buffer, "@" + fileName) != 0)
             {
-                luaL_error(L, "error loading module {0} from file {1}:\n\t{2}", L.ToString(1), fileName, L.ToString(-1));
+                luaL_error(L, "error loading module {0} from file {1}:\n\t{2}", Lua.ToString(L, 1), fileName, Lua.ToString(L, -1));
             }
 
             lua_pushstring(L, fileName);
@@ -100,9 +100,19 @@ namespace Tests
 
         private void Luna_PreInit()
         {
-            //WrapGenerator.ExportPath = "../src/Test/Shared/Generate/";
-            //WrapGenerator.GenerateClassWrap(typeof(TestStruct));
+            string path = "../../../../Test/Shared/Generate/";
+      
+            if (Directory.Exists(path))
+            {
+                luna.RegisterWraps(this.GetType());
+                return;
+            }
+     
+            WrapGenerator.ExportPath = path;
+            WrapGenerator.GenerateClassWrap(typeof(TestStruct));
+            WrapGenerator.GenerateClassWrap(typeof(TestClass));
 
+            luna.RegisterWraps(this.GetType());
         }
 
         private void Luna_PostInit()

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 
@@ -27,10 +28,18 @@ namespace SharpLuna
             items = new T[capacity];
         }
 
-        public ref T this[int index] => ref items[index];
+        public ref T this[int index]
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                return ref items[index];
+            }
+        }
         public int Count => size;
         public int Capacity => items.Length;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Add(T item)
         {
             if (size == items.Length)

@@ -437,34 +437,34 @@ namespace SharpLuna
         public static int lua_upvalueindex(int i) => (LUA_REGISTRYINDEX - (i));
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int luaopen_base(LuaState L);
+        public static extern int luaopen_base(lua_State L);
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int luaopen_coroutine(LuaState L);
+        public static extern int luaopen_coroutine(lua_State L);
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int luaopen_table(LuaState L);
+        public static extern int luaopen_table(lua_State L);
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int luaopen_io(LuaState L);
+        public static extern int luaopen_io(lua_State L);
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int luaopen_os(LuaState L);
+        public static extern int luaopen_os(lua_State L);
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int luaopen_string(LuaState L);
+        public static extern int luaopen_string(lua_State L);
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int luaopen_utf8(LuaState L);
+        public static extern int luaopen_utf8(lua_State L);
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int luaopen_math(LuaState L);
+        public static extern int luaopen_math(lua_State L);
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int luaopen_debug(LuaState L);
+        public static extern int luaopen_debug(lua_State L);
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int luaopen_package(LuaState L);
+        public static extern int luaopen_package(lua_State L);
 
         //luna extension
 
@@ -482,16 +482,16 @@ namespace SharpLuna
         public static extern int luna_init(ref LunaData data);
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int luna_class_index(LuaState L);
+        public static extern int luna_class_index(lua_State L);
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int luna_class_newindex(LuaState L);
+        public static extern int luna_class_newindex(lua_State L);
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int luna_module_index(LuaState L);
+        public static extern int luna_module_index(lua_State L);
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int luna_module_newindex(LuaState L);
+        public static extern int luna_module_newindex(lua_State L);
 #pragma warning restore IDE1006 // Naming Styles
 
 

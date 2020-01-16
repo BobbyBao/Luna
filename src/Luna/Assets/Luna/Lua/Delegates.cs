@@ -19,7 +19,7 @@ namespace SharpLuna
     /// <returns></returns>
     [SuppressUnmanagedCodeSecurity]
     [UnmanagedFunctionPointer (CallingConvention.Cdecl)]
-    public delegate int LuaNativeFunction(LuaState luaState);
+    public delegate int LuaNativeFunction(IntPtr luaState);
 
     /// <summary>
     /// Type for debugging hook functions callbacks. 
@@ -28,7 +28,7 @@ namespace SharpLuna
     /// <param name="ar"></param>
     [SuppressUnmanagedCodeSecurity]
     [UnmanagedFunctionPointer (CallingConvention.Cdecl)]
-    public delegate void KyHookFunction (LuaState luaState, lua_Debug ar);
+    public delegate void KyHookFunction (IntPtr luaState, lua_Debug ar);
 
     /// <summary>
     /// Type for continuation functions 
@@ -39,7 +39,7 @@ namespace SharpLuna
     /// <returns></returns>
     [SuppressUnmanagedCodeSecurity]
     [UnmanagedFunctionPointer (CallingConvention.Cdecl)]
-    public delegate int LuaKFunction (LuaState L, int status, lua_KContext ctx);
+    public delegate int LuaKFunction (IntPtr L, int status, lua_KContext ctx);
 
     /// <summary>
     /// The reader function used by lua_load. Every time it needs another piece of the chunk, lua_load calls the reader, passing along its data parameter. The reader must return a pointer to a block of memory with a new piece of the chunk and set size to the block size
@@ -50,7 +50,7 @@ namespace SharpLuna
     /// <returns></returns>
     [SuppressUnmanagedCodeSecurity]
     [UnmanagedFunctionPointer (CallingConvention.Cdecl)]
-    public delegate charptr_t LuaReader (LuaState L, voidptr_t ud, ref size_t sz);
+    public delegate charptr_t LuaReader (IntPtr L, voidptr_t ud, ref size_t sz);
 
     /// <summary>
     /// 
@@ -62,7 +62,7 @@ namespace SharpLuna
     /// <returns></returns>
     [SuppressUnmanagedCodeSecurity]
     [UnmanagedFunctionPointer (CallingConvention.Cdecl)]
-    public delegate int LuaWriter (LuaState L, voidptr_t p, size_t size, voidptr_t ud);
+    public delegate int LuaWriter (IntPtr L, voidptr_t p, size_t size, voidptr_t ud);
 
     /// <summary>
     /// The type of the memory-allocation function used by Lua states. The allocator function must provide a functionality similar to realloc
