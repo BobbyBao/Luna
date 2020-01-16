@@ -7,34 +7,17 @@ using System.Runtime.InteropServices;
 
 namespace SharpLuna
 {
+    using lua_State = IntPtr;
+
     public unsafe static partial class Lua
     {        
-        public static void Register(this LuaState L, string name, LuaNativeFunction function)
-        {
-            savedFn.TryAdd(function);
-            lua_pushcfunction(L, function);
-            lua_setglobal(L, name);
-        }
-
-        public static string ToString(this LuaState L, int index, bool callMetamethod = true)
-        {
-            var str = lua_tostring(L, index);
-
-            if (callMetamethod)
-            {
-                lua_pop(L, 1);
-            }
-
-            return str;
-        }
-
-        public static unsafe void PushLightObject<T>(this LuaState L, T obj)
+        public static unsafe void PushLightObject<T>(lua_State L, T obj)
         {
             GCHandle gc = GCHandle.Alloc(obj, GCHandleType.Normal);
             lua_pushlightuserdata(L, GCHandle.ToIntPtr(gc));
         }
 
-        public static T ToLightObject<T>(this LuaState L, int index, bool freeGCHandle = true)
+        public static T ToLightObject<T>(lua_State L, int index, bool freeGCHandle = true)
         {
             //if (lua_isnil(L, index) || !lua_islightuserdata(L, index))
             //    return default(T);
@@ -56,7 +39,7 @@ namespace SharpLuna
         }        
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Push<T>(this LuaState L, T v)
+        public static void Push<T>(lua_State L, T v)
         {
             switch (v)
             {
@@ -129,7 +112,7 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static object GetObject(this LuaState L, int index)
+        internal static object GetObject(lua_State L, int index)
         {
             LuaType type = lua_type(L, index);
 
@@ -151,7 +134,7 @@ namespace SharpLuna
                 case LuaType.Function:
                     return Get<LuaRef>(L, index);
                 case LuaType.LightUserData:
-                    return L.ToLightObject<object>(index);
+                    return ToLightObject<object>(L, index);
                 case LuaType.UserData:
                     return SharpObject.Get<object>(L, index);
                 default:
@@ -160,7 +143,7 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T Get<T>(this LuaState L, int index)
+        public static T Get<T>(lua_State L, int index)
         {
             Type t = typeof(T);
             if (t.IsPrimitive)
@@ -215,7 +198,7 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T Opt<T>(this LuaState L, int index, T def)
+        public static T Opt<T>(lua_State L, int index, T def)
         {
             switch (def)
             {
@@ -256,14 +239,14 @@ namespace SharpLuna
 
         }
 
-        public static T Pop<T>(this LuaState L)
+        public static T Pop<T>(lua_State L)
         {
             T v = Get<T>(L, -1);
             lua_pop(L, 1);
             return v;
         }
 
-        public static object[] PopValues(this LuaState L, int oldTop)
+        public static object[] PopValues(lua_State L, int oldTop)
         {
             int newTop = lua_gettop(L);
 
@@ -278,14 +261,14 @@ namespace SharpLuna
             return returnValues.ToArray();
         }
 
-        public unsafe static void PushGlobal(this LuaState L, string name)
+        public unsafe static void PushGlobal(lua_State L, string name)
         {
             var p = Marshal.StringToHGlobalAnsi(name);
             PushGlobal(L, (byte*)p);
             Marshal.FreeHGlobal(p);
         }
 
-        public static void PopToGlobal(this LuaState L, string name)
+        public static void PopToGlobal(lua_State L, string name)
         {
             var p = Marshal.StringToHGlobalAnsi(name);
             PopToGlobal(L, (byte*)p);
@@ -311,7 +294,7 @@ namespace SharpLuna
             return (*p == ch) ? p : null;
         }
 
-        private unsafe static void PushGlobal(this LuaState L, byte* name)
+        private unsafe static void PushGlobal(lua_State L, byte* name)
         {
             byte* p = strchr(name, '.');
             if (p != null)
@@ -337,7 +320,7 @@ namespace SharpLuna
             }
         }
 
-        private static unsafe void PopToGlobal(this LuaState L, byte* name)
+        private static unsafe void PopToGlobal(lua_State L, byte* name)
         {
             byte* p = strchr(name, '.');
             if (p != null)
@@ -363,12 +346,12 @@ namespace SharpLuna
         }
 
 #region LUA_DEBUG
-        public static bool GetInfo(this LuaState L, string what, IntPtr ar)
+        public static bool GetInfo(lua_State L, string what, IntPtr ar)
         {
             return lua_getinfo(L, what, ar) != 0;
         }
 
-        public static bool GetInfo(this LuaState L, string what, ref LuaDebug ar)
+        public static bool GetInfo(lua_State L, string what, ref LuaDebug ar)
         {
             IntPtr pDebug = Marshal.AllocHGlobal(Marshal.SizeOf(ar));
             bool ret = false;
@@ -387,13 +370,13 @@ namespace SharpLuna
             return ret;
         }
 
-        public static string GetLocal(this LuaState L, IntPtr ar, int n)
+        public static string GetLocal(lua_State L, IntPtr ar, int n)
         {
             IntPtr ptr = lua_getlocal(L, ar, n);
             return Marshal.PtrToStringAnsi(ptr);
         }
 
-        public static string GetLocal(this LuaState L, LuaDebug ar, int n)
+        public static string GetLocal(lua_State L, LuaDebug ar, int n)
         {
             IntPtr pDebug = Marshal.AllocHGlobal(Marshal.SizeOf(ar));
             string ret = string.Empty;
@@ -410,13 +393,13 @@ namespace SharpLuna
             return ret;
         }
 
-        public static string SetLocal(this LuaState L, IntPtr ar, int n)
+        public static string SetLocal(lua_State L, IntPtr ar, int n)
         {
             IntPtr ptr = lua_setlocal(L, ar, n);
             return Marshal.PtrToStringAnsi(ptr);
         }
 
-        public static string SetLocal(this LuaState L, LuaDebug ar, int n)
+        public static string SetLocal(lua_State L, LuaDebug ar, int n)
         {
             IntPtr pDebug = Marshal.AllocHGlobal(Marshal.SizeOf(ar));
             string ret = string.Empty;
@@ -433,7 +416,7 @@ namespace SharpLuna
             return ret;
         }
 
-        public static int GetStack(this LuaState L, int level, ref LuaDebug ar)
+        public static int GetStack(lua_State L, int level, ref LuaDebug ar)
         {
             IntPtr pDebug = Marshal.AllocHGlobal(Marshal.SizeOf(ar));
             int ret = 0;

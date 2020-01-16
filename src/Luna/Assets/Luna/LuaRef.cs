@@ -15,7 +15,7 @@ namespace SharpLuna
 
     public struct LuaRef : IRefCount, IEquatable<LuaRef>, IComparable<LuaRef>, IEnumerable<TableKeyValuePair>
     {
-        private LuaState L;
+        private lua_State L;
         private int _ref;
 
         public static readonly LuaRef Empty = new LuaRef();
@@ -34,7 +34,7 @@ namespace SharpLuna
         public LuaRef(lua_State state, string name)
         {
             L = state;
-            L.PushGlobal(name);
+            PushGlobal(L, name);
             _ref = luaL_ref(L, LUA_REGISTRYINDEX);
             Handle = 0;
             Handle = this.Alloc();
@@ -63,7 +63,7 @@ namespace SharpLuna
             }
         }
 
-        public LuaState State => L;
+        public lua_State State => L;
         public bool IsValid => _ref != LUA_NOREF;
         public bool IsTable => Type == LuaType.Table;
         public bool IsFunction => Type == LuaType.Function;
@@ -121,7 +121,7 @@ namespace SharpLuna
             return PopFromStack(L);
         }
 
-        public static LuaRef CreateFunction(LuaState L, LuaNativeFunction proc, object obj)
+        public static LuaRef CreateFunction(lua_State L, LuaNativeFunction proc, object obj)
         {
             GCHandle gC = GCHandle.Alloc(obj);
             lua_pushlightuserdata(L, GCHandle.ToIntPtr(gC));
@@ -129,13 +129,13 @@ namespace SharpLuna
             return PopFromStack(L);
         }
 
-        public static LuaRef CreateFunction(LuaState L, LuaNativeFunction proc)
+        public static LuaRef CreateFunction(lua_State L, LuaNativeFunction proc)
         {
             lua_pushcclosure(L, proc, 0);
             return PopFromStack(L);
         }
 
-        public static LuaRef CreateFunctionUnmanaged<T>(LuaState L, LuaNativeFunction proc, T cpp_obj)
+        public static LuaRef CreateFunctionUnmanaged<T>(lua_State L, LuaNativeFunction proc, T cpp_obj)
         {
             PushUserData<T>(L, cpp_obj);
             lua_pushcclosure(L, proc, 1);
@@ -637,11 +637,11 @@ namespace SharpLuna
 
     public struct LuaTableRef : IRefCount
     {
-        LuaState L;
+        lua_State L;
         int _table;
         int _key;
 
-        public LuaTableRef(LuaState state, int table, int key)
+        public LuaTableRef(lua_State state, int table, int key)
         {
             L = state;
             _table = table;
@@ -693,9 +693,9 @@ namespace SharpLuna
         readonly int key;
         readonly int value;
 
-        readonly LuaState L;
+        readonly lua_State L;
 
-        public TableKeyValuePair(LuaState state, int k, int v)
+        public TableKeyValuePair(lua_State state, int k, int v)
         {
             L = state;
             key = k;
@@ -710,7 +710,6 @@ namespace SharpLuna
 
         public LuaRef Value()
         {
-            assert(L);
             lua_rawgeti(L, LUA_REGISTRYINDEX, value);
             return Lua.Pop<LuaRef>(L);
         }
@@ -723,7 +722,6 @@ namespace SharpLuna
 
         public V Value<V>()
         {
-            assert(L);
             lua_rawgeti(L, LUA_REGISTRYINDEX, value);
             return Lua.Pop<V>(L);
         }
@@ -732,7 +730,7 @@ namespace SharpLuna
 
     public struct LuaTableEnumerator : IEnumerator<TableKeyValuePair>, IRefCount
     {
-        LuaState L;
+        lua_State L;
         int _table;
         int _key;
         int _value;
@@ -740,7 +738,7 @@ namespace SharpLuna
         public TableKeyValuePair Current => new TableKeyValuePair(L, _key, _value);
         object IEnumerator.Current => (TableKeyValuePair)Current;
 
-        public LuaTableEnumerator(LuaState state, int table)
+        public LuaTableEnumerator(lua_State state, int table)
         {
             L = state;
             _table = table;
@@ -752,7 +750,6 @@ namespace SharpLuna
 
         public bool MoveNext()
         {
-            assert(L);
             lua_rawgeti(L, LUA_REGISTRYINDEX, _table);
             lua_rawgeti(L, LUA_REGISTRYINDEX, _key);
             luaL_unref(L, LUA_REGISTRYINDEX, _key);
@@ -791,7 +788,7 @@ namespace SharpLuna
 
         public void InternalRelease()
         {
-            if (L)
+            if (L != IntPtr.Zero)
             {
                 luaL_unref(L, LUA_REGISTRYINDEX, _key);
                 luaL_unref(L, LUA_REGISTRYINDEX, _value);

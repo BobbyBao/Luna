@@ -60,7 +60,7 @@ namespace Tests
 
         int Loader(IntPtr L)
         {
-            string fileName = Lua.ToString(L, 1);
+            string fileName = Luna.ToString(1);
             fileName = fileName.Replace(".", "/");
             if (!fileName.EndsWith(Luna.Ext))
             {
@@ -78,7 +78,7 @@ namespace Tests
 
             if (luaL_loadbuffer(L, buffer, "@" + fileName) != 0)
             {
-                luaL_error(L, "error loading module {0} from file {1}:\n\t{2}", Lua.ToString(L, 1), fileName, Lua.ToString(L, -1));
+                luaL_error(L, "error loading module {0} from file {1}:\n\t{2}", Luna.ToString(1), fileName, Luna.ToString(-1));
             }
 
             lua_pushstring(L, fileName);

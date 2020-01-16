@@ -224,7 +224,7 @@ namespace SharpLuna
         }
          
         //todo: use upvalue
-        public static int class_index(LuaState L)
+        public static int class_index(lua_State L)
         {
             // <SP:1> -> table or userdata
             // <SP:2> -> key
@@ -322,7 +322,7 @@ namespace SharpLuna
             return 1;
         }
 
-        public static int class_newindex(LuaState L)
+        public static int class_newindex(lua_State L)
         {
             // <SP:1> -> table or userdata
             // <SP:2> -> key
@@ -409,7 +409,7 @@ namespace SharpLuna
             return 0;
         }
 
-        public static int module_index(LuaState L)
+        public static int module_index(lua_State L)
         {
             // <SP:1> -> table
             // <SP:2> -> key
@@ -444,7 +444,7 @@ namespace SharpLuna
             return 1;
         }
 
-        public static int module_newindex(LuaState L)
+        public static int module_newindex(lua_State L)
         {
             // <SP:1> -> table
             // <SP:2> -> key

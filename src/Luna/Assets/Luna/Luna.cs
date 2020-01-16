@@ -17,8 +17,8 @@ namespace SharpLuna
 #else
         public const string Ext = ".lua";
 #endif
-        public LuaState State => L;
-        private LuaState L;
+        public lua_State State => L;
+        private lua_State L;
         public bool IsExecuting => _executing;
         private bool _executing;
 
@@ -81,15 +81,15 @@ namespace SharpLuna
                 ReadBytes = System.IO.File.ReadAllBytes;
             }
 
-            L = new LuaState(false);
-
+            L = luaL_newstate();
+            
             luaL_openlibs(L);
 
             lua_atpanic(L, PanicCallback);
 
-            Lua.Register(L, "print", DoPrint);
-            Lua.Register(L, "dofile", DoFile);
-            Lua.Register(L, "loadfile", LoadFile);
+            Register("print", DoPrint);
+            Register("dofile", DoFile);
+            Register("loadfile", LoadFile);
 
             _binder = new SharpModule(this);
 
@@ -141,18 +141,27 @@ namespace SharpLuna
 
         public void Close()
         {
-            if (!L)
+            if (L == IntPtr.Zero)
                 return;
 
             _binder.Dispose();
             
             RefCountHelper.Clear();
-            L.Dispose();
+
+            lua_close(L);
+            L = IntPtr.Zero;
         }
 
         public static void Log(params object[] args) => Print?.Invoke(string.Join("\t", args));
         public static void LogWarning(params object[] args) => Warning?.Invoke(string.Join("\t", args));
         public static void LogError(params object[] args) => Error?.Invoke(string.Join("\t", args));
+
+        public void Register(string name, LuaNativeFunction function)
+        {
+            savedFn.TryAdd(function);
+            lua_pushcfunction(L, function);
+            lua_setglobal(L, name);
+        }
 
         public void AddSearcher(LuaNativeFunction searcher)
         {
@@ -281,7 +290,7 @@ namespace SharpLuna
 
         private void ThrowExceptionFromError(int oldTop)
         {
-            object err = L.GetObject(-1);
+            object err = GetObject(L, -1);
 
             lua_settop(L, oldTop);
 
@@ -315,7 +324,7 @@ namespace SharpLuna
             lua_getfield(L, -1, "traceback"); // stack: debug,traceback
             lua_remove(L, -2); // stack: traceback
             lua_pcall(L, 0, -1, 0);
-            return L.PopValues(oldTop)[0] as string;            
+            return PopValues(L, oldTop)[0] as string;            
         }
 
         public object[] DoString(byte[] chunk, string chunkName = "chunk")
@@ -339,7 +348,7 @@ namespace SharpLuna
                 if (lua_pcall(L, 0, -1, errorFunctionIndex) != LuaStatus.OK)
                     ThrowExceptionFromError(oldTop);
                 
-                return L.PopValues(oldTop);
+                return PopValues(L, oldTop);
             }
             finally
             {
@@ -368,7 +377,7 @@ namespace SharpLuna
                 if (lua_pcall(L, 0, -1, errorFunctionIndex) != LuaStatus.OK)
                     ThrowExceptionFromError(oldTop);
 
-                return L.PopValues(oldTop);
+                return PopValues(L, oldTop);
             }
             finally
             {
@@ -398,7 +407,7 @@ namespace SharpLuna
                 if (lua_pcall(L, 0, -1, errorFunctionIndex) != LuaStatus.OK)
                     ThrowExceptionFromError(oldTop);
 
-                return L.PopValues(oldTop);
+                return PopValues(L, oldTop);
             }
             finally
             {
@@ -414,6 +423,18 @@ namespace SharpLuna
         public LuaRef GetGlobal(string fullPath)
         {
             return LuaRef.Globals(L).RawGet(fullPath);
+        }
+
+        public string ToString(int index, bool callMetamethod = true)
+        {
+            var str = lua_tostring(L, index);
+
+            if (callMetamethod)
+            {
+                lua_pop(L, 1);
+            }
+
+            return str;
         }
 
         public ClassWraper GetClassWrapper(Type type)
@@ -518,22 +539,22 @@ namespace SharpLuna
 
         public string GetLocal(LuaDebug luaDebug, int n)
         {
-            return L.GetLocal(luaDebug, n);
+            return Lua.GetLocal(L, luaDebug, n);
         }
 
         public string SetLocal(LuaDebug luaDebug, int n)
         {            
-            return L.SetLocal(luaDebug, n);
+            return Lua.SetLocal(L, luaDebug, n);
         }
 
         public int GetStack(int level, ref LuaDebug ar)
         {            
-            return L.GetStack(level, ref ar);
+            return Lua.GetStack(L, level, ref ar);
         }
 
         public bool GetInfo(string what, ref LuaDebug ar)
         {
-            return L.GetInfo(what, ref ar);
+            return Lua.GetInfo(L, what, ref ar);
         }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]

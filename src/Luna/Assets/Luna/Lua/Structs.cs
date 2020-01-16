@@ -6,44 +6,7 @@ using System.Text;
 namespace SharpLuna
 {
     using static Lua;
-
-    public unsafe struct LuaState : IDisposable
-    {
-        public IntPtr Handle => _luaState;
-        private IntPtr _luaState;
-
-        public static implicit operator IntPtr(LuaState lua) => lua._luaState;
-        public static implicit operator LuaState(IntPtr luaState) => new LuaState(luaState);
-        public static implicit operator bool(LuaState lua) => lua._luaState != IntPtr.Zero;
-
-        public LuaState(bool openLibs)
-        {
-            _luaState = luaL_newstate();
-
-            if (openLibs)
-                luaL_openlibs(_luaState);
-        }
-
-        public LuaState(LuaAlloc allocator, IntPtr ud)
-        {
-            _luaState = lua_newstate(allocator.ToFunctionPointer(), ud);
-        }
-
-        private LuaState(IntPtr luaThread)
-        {
-            _luaState = luaThread;
-        }
-
-        public void Dispose()
-        {
-            if (_luaState == IntPtr.Zero)
-                return;
-
-            lua_close(_luaState);
-            _luaState = IntPtr.Zero;
-        }
-    }
-
+    
     /// <summary>
     /// LuaRegister store the name and the delegate to register a native function
     /// </summary>

@@ -7,7 +7,7 @@ using System.Text;
 
 namespace SharpLuna
 {
-    using static Lua;
+    using lua_State = IntPtr;
 
     public partial class SharpClass : IDisposable
     {
@@ -62,7 +62,7 @@ namespace SharpLuna
             get { return parent.Luna;}
         }
 
-        public LuaState State => m_meta.State;
+        public lua_State State => m_meta.State;
 
         public LuaRef Meta => m_meta;
 
