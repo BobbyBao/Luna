@@ -39,6 +39,7 @@
     <None Include="$(MSBuildThisFileDirectory)Scripts\Math\vec3.luna">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Scripts\test_perf.luna" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Scripts\Core\" />

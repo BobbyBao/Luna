@@ -36,8 +36,8 @@ namespace SharpLuna
 
         public static T ToLightObject<T>(this LuaState L, int index, bool freeGCHandle = true)
         {
-            if (lua_isnil(L, index) || !lua_islightuserdata(L, index))
-                return default(T);
+            //if (lua_isnil(L, index) || !lua_islightuserdata(L, index))
+            //    return default(T);
 
             IntPtr data = lua_touserdata(L, index);
             if (data == IntPtr.Zero)
@@ -116,14 +116,14 @@ namespace SharpLuna
                     }
                     break;
                 default:
-                    if (SharpClass.IsRegistered<T>())
+                    //if (SharpClass.IsRegistered<T>())
                     {
                         SharpObject.PushToStack(L, v);
                     }
-                    else
-                    {
-                        PushLightObject(L, v);
-                    }
+//                     else
+//                     {
+//                         PushLightObject(L, v);
+//                     }
                     break;
             }
         }

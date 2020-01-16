@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace SharpLuna
 {
@@ -60,11 +61,15 @@ namespace SharpLuna
             return Marshal.PtrToStringAnsi(lua_typename(L, (int)type));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static lua_Number lua_tonumber(lua_State L, int i) => lua_tonumberx(L, (i), null);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static lua_Integer lua_tointeger(lua_State L, int i) => lua_tointegerx(L, (i), null);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void lua_pop(lua_State L, int n) => lua_settop(L, -(n) - 1);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void lua_newtable(lua_State L) => lua_createtable(L, 0, 0);
 
         public static void lua_register(lua_State L, string n, LuaNativeFunction f)
@@ -78,13 +83,21 @@ namespace SharpLuna
             Marshal.FreeHGlobal(p);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool lua_isfunction(lua_State L, int n) => (lua_type(L, (n)) == LuaType.Function);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool lua_istable(lua_State L, int n) => (lua_type(L, (n)) == LuaType.Table);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool lua_islightuserdata(lua_State L, int n) => (lua_type(L, (n)) == LuaType.LightUserData);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool lua_isnil(lua_State L, int n) => (lua_type(L, (n)) == LuaType.Nil);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool lua_isboolean(lua_State L, int n) => (lua_type(L, (n)) == LuaType.Boolean);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool lua_isthread(lua_State L, int n) => (lua_type(L, (n)) == LuaType.Thread);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool lua_isnone(lua_State L, int n) => (lua_type(L, (n)) == LuaType.None);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool lua_isnoneornil(lua_State L, int n) => (lua_type(L, (n)) <= 0);
 
         public static void lua_pushstring(lua_State L, string s)
@@ -117,6 +130,7 @@ namespace SharpLuna
             lua_pushcclosure(L, function.ToFunctionPointer(), 0);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static voidptr_t lua_newuserdata(lua_State L, size_t size) => lua_newuserdatauv(L, size, 1);
 
         public static void lua_pushglobaltable(lua_State L) => lua_rawgeti(L, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);

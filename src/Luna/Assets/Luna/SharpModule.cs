@@ -46,7 +46,7 @@ namespace SharpLuna
             LuaRef module = LuaRef.CreateTable(L);
             module.SetMetaTable(module);
 
-#if LUNA_SCRIPT
+#if CS_META
             module.RawSet("__index", (LuaNativeFunction)module_index);
             module.RawSet("__newindex", (LuaNativeFunction)module_newindex);
 

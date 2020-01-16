@@ -68,9 +68,21 @@ namespace Tests
         public string variable = "Default variable";
         public string name { get; set; } = "Default Name";
 
+        public TestClass Child { get; set; }
+
         public event Action testEvent;
 
         Dictionary<int, string> testString = new Dictionary<int, string>();
+
+        public TestClass()
+        {
+        }
+
+        public void CreateChild()
+        {
+            Child = new TestClass();
+        }
+
         public string this [int index]
         {
             get

@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define MEM_TRICK
+
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -12,13 +14,13 @@ namespace SharpLuna
     {
         struct SignatureHolder<T>
         {
-            public readonly static IntPtr value = (IntPtr)typeof(T).FullName.GetHashCode();
+            public readonly static IntPtr value = (IntPtr)typeof(T).GetHashCode();//MetadataToken;//FullName.GetHashCode();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IntPtr Signature<T>(T obj)
         {
-            return (IntPtr)obj.GetType().FullName.GetHashCode();
+            return (IntPtr)obj.GetType().GetHashCode();// MetadataToken;//FullName.GetHashCode();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -32,21 +34,24 @@ namespace SharpLuna
         {
             if (type == null) return IntPtr.Zero;
 
-            return (IntPtr)type.FullName.GetHashCode();
+            return (IntPtr)type.GetHashCode();//MetadataToken;//FullName.GetHashCode();
         }
 
-        public static void PushToStack<T>(LuaState L) where T : new()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void PushToStack<T>(IntPtr L) where T : new()
         {
             T obj = new T();
             AllocObject(L, Signature<T>(), obj);
         }
 
-        public static void PushToStack<T>(LuaState L, T obj)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void PushToStack<T>(IntPtr L, T obj)
         {
             AllocObject(L, Signature(obj), obj);
         }
 
-        public static unsafe IntPtr AllocValueObject<T>(LuaState L, IntPtr classId, T obj)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe IntPtr AllocValueObject<T>(IntPtr L, IntPtr classId, T obj)
         {
             IntPtr mem = lua_newuserdata(L, (UIntPtr)Unsafe.SizeOf<T>());
             Unsafe.Write((void*)mem, obj);
@@ -57,12 +62,13 @@ namespace SharpLuna
             return mem;
         }
 
-        public static unsafe IntPtr AllocObject<T>(LuaState L, IntPtr classId, T obj)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe IntPtr AllocObject<T>(IntPtr L, IntPtr classId, T obj)
         {
-            if (typeof(T).IsUnManaged())
-            {
-                return AllocValueObject(L, classId, obj);
-            }
+//             if (typeof(T).IsUnManaged())
+//             {
+//                 return AllocValueObject(L, classId, obj);
+//             }
 
             IntPtr mem = lua_newuserdata(L, (UIntPtr)sizeof(long));
 
@@ -82,20 +88,24 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static ref T GetUnmanaged<T>(LuaState L, int index)
+        public unsafe static ref T GetUnmanaged<T>(IntPtr L, int index)
         {
+#if DEBUG
             var ptr = GetUserData(L, index, Signature<T>(), true, true);
+#else
+            var ptr = lua_touserdata(L, index);
+#endif
             return ref Unsafe.AsRef<T>((void*)ptr);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static ref T GetValue<T>(LuaState L, int index) where T : struct
+        public unsafe static ref T GetValue<T>(IntPtr L, int index) where T : struct
         {
-            if (typeof(T).IsUnManaged())
-            {
-                return ref GetUnmanaged<T>(L, index);
-            }
-            else
+//             if (typeof(T).IsUnManaged())
+//             {
+//                 return ref GetUnmanaged<T>(L, index);
+//             }
+//             else
             {
                 var handle = GetHandler<T>(L, index, false, true);
                 return ref Unsafe.Unbox<T>(GCHandle.FromIntPtr(handle).Target);
@@ -104,7 +114,7 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T GetObject<T>(LuaState L, int index)
+        public static T GetObject<T>(IntPtr L, int index)
         {
             var handle = GetHandler<T>(L, index, false, true);
             if (handle == IntPtr.Zero)
@@ -116,12 +126,12 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T Get<T>(LuaState L, int index)
+        public static T Get<T>(IntPtr L, int index)
         {
-            if (typeof(T).IsUnManaged())
-            {
-                return GetUnmanaged<T>(L, index);
-            }
+//             if (typeof(T).IsUnManaged())
+//             {
+//                 return GetUnmanaged<T>(L, index);
+//             }
 
             var handle = GetHandler<T>(L, index, false, true);
             if (handle == IntPtr.Zero)
@@ -132,9 +142,13 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static unsafe IntPtr GetHandler<T>(LuaState L, int index, bool is_exact, bool raise_error)
+        static unsafe IntPtr GetHandler<T>(IntPtr L, int index, bool is_exact, bool raise_error)
         {
+#if DEBUG
             var ptr = GetUserData(L, index, Signature<T>(), is_exact, raise_error);
+#else
+            var ptr = lua_touserdata(L, index);
+#endif
             if (ptr == IntPtr.Zero)
             {
                 return IntPtr.Zero;
@@ -143,12 +157,12 @@ namespace SharpLuna
             return Unsafe.Read<IntPtr>((void*)ptr);
         }
 
-        public static void Free<T>(LuaState L, int index)
+        public static void Free<T>(IntPtr L, int index)
         {
-            if (typeof(T).IsUnManaged())
-            {
-                return;
-            }
+//             if (typeof(T).IsUnManaged())
+//             {
+//                 return;
+//             }
 
             var handle = GetHandler<T>(L, index, false, true);
             GCHandle gCHandle = GCHandle.FromIntPtr(handle);
@@ -159,8 +173,9 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static IntPtr GetUserData(LuaState L, int index, IntPtr class_id, bool is_exact, bool raise_error)
+        static IntPtr GetUserData(IntPtr L, int index, IntPtr class_id, bool is_exact, bool raise_error)
         {
+#if DEBUG
             if (!lua_isuserdata(L, index))
             {
                 if (raise_error)
@@ -169,6 +184,8 @@ namespace SharpLuna
                 }
                 return IntPtr.Zero;
             }
+#endif
+
 #if false
             // <SP: index> = <obj>
             index = lua_absindex(L, index);

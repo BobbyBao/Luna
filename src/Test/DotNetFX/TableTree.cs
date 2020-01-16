@@ -52,7 +52,13 @@ namespace Test
 
             foreach (var t in table)
             {
-                var k = t.Key<string>();
+                var key = t.Key();
+                var k = key.ToString();
+                if (k == "_G")
+                {
+                    continue;
+                }
+
                 var v = t.Value();
                 TreeNode n;
                 if (!node.ContainsKey(k))

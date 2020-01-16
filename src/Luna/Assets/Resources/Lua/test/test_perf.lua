@@ -113,18 +113,6 @@ function Test8()
 	print("Quaternion Euler Slerp const: ", os.clock() - t)		
 end
 
-
-function fib(n)
-  if n < 2 then return n end
-  return fib(n - 2) + fib(n - 1)
-end
-
-local start = os.clock()
-for i = 1, 5 do
-  print(fib(28))
-end
-print(string.format("elapsed: %.8f", os.clock() - start))
-
 function Test9()	
 	local total = 0
 	local t = os.clock()
@@ -154,7 +142,7 @@ function TestTable()
 		
 	print("Array cost time: ", os.clock() - t)	
 end
-
+--[[
 Test3()
 Test4()
 Test7()
@@ -163,3 +151,4 @@ Test7()
 Test9()
 
 TestTable()
+]]

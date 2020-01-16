@@ -1,0 +1,18 @@
+
+func TestIndex(){	
+
+    var test = TestClass()
+	var t = os.clock()	
+    test.CreateChild()
+	var c = test.Child
+
+	for i = 1,100000 {		
+		c = test.Child
+		//test.Child = c
+	}
+	
+	t = os.clock() - t
+	print("TestIndex luna cost time: ", t)	
+}
+
+TestIndex()
