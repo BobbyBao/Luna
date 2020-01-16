@@ -6,6 +6,8 @@
     </StartWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-    <StartWorkingDirectory>C:\Work\Luna\test\</StartWorkingDirectory>
+    <StartWorkingDirectory>
+    </StartWorkingDirectory>
+    <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
   </PropertyGroup>
 </Project>

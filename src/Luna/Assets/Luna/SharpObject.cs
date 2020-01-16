@@ -155,7 +155,7 @@ namespace SharpLuna
 #if DEBUG
             if (ptr == IntPtr.Zero)
             {
-                return IntPtr.Zero;
+                return 0;
             }
 #endif
             return *((long*)ptr);

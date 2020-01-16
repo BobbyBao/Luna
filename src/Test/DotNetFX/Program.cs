@@ -11,7 +11,13 @@ namespace Tests
     {
         static void Main(string[] args)
         {
-            Application.Run(new Test.TableTree());
+            TestFramework.dataPath = "../../../../Test/Scripts/";
+            using (var test = new TestFramework())
+            {
+                //test.Run();
+                test.Luna.DoFile("test_perf.luna");
+            }
+            //Application.Run(new Test.TableTree());
         }
     }
 }

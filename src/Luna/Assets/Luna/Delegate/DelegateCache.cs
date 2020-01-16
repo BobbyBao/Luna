@@ -8,8 +8,6 @@ namespace SharpLuna
     using static Lua;
     public struct DelegateCache
     {
-        static Dictionary<MethodInfo, Delegate> cache = new Dictionary<MethodInfo, Delegate>();
-
         public readonly static (Type, Type)[] actionType = 
         {
             (typeof(Action), typeof(ActionCaller)),
@@ -62,6 +60,9 @@ namespace SharpLuna
             (typeof(RefFunc<,,,,,,,,>), typeof(RefFuncCaller<,,,,,,,,>)),
         };
 
+        static Dictionary<MethodInfo, Delegate> cache = new Dictionary<MethodInfo, Delegate>();
+        static Dictionary<(MethodInfo, object), Delegate> cacheClose = new Dictionary<(MethodInfo, object), Delegate>();
+
         public static Delegate Get<T>(MethodInfo methodInfo)
         {
             return Get(typeof(T), methodInfo);
@@ -110,7 +111,28 @@ namespace SharpLuna
             cache.Add(methodInfo, del);
             return del;
         }
-        
+
+        public static Delegate GetInvokeer(MethodInfo methodInfo, object obj)
+        {
+            if (cacheClose.TryGetValue((methodInfo, obj), out var del))
+            {
+                return del;
+            }
+
+            try
+            {
+                del = (Delegate)methodInfo.Invoke(null, new[] { obj });
+            }
+            catch (System.Exception ex)
+            {
+                Luna.LogError(ex.Message);
+                Luna.LogError(methodInfo.ReflectedType.ToString() + ", " + methodInfo.ToString());
+                return null;
+            }
+            cacheClose.Add((methodInfo, obj), del);
+            return del;
+        }
+
     }
 
 }

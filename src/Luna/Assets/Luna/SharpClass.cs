@@ -339,7 +339,7 @@ namespace SharpLuna
                 var fieldDelType = typeof(FieldDelegate<>).MakeGenericType(fieldInfo.FieldType);
                
                 var getMethodInfo = fieldDelType.GetMethod("Getter", BindingFlags.Static | BindingFlags.Public);
-                var getDel = (Delegate)getMethodInfo.Invoke(null, new[] { fieldInfo });
+                var getDel = DelegateCache.GetInvokeer(getMethodInfo, fieldInfo);// (Delegate)getMethodInfo.Invoke(null, new[] { fieldInfo });
                 var getCallerType = typeof(FuncCaller<>).MakeGenericType(fieldInfo.FieldType);
                 var getMethodCaller = getCallerType.GetMethod("Call", BindingFlags.Static | BindingFlags.Public);
                 var getLuaDel = (LuaNativeFunction)DelegateCache.Get(typeof(LuaNativeFunction), getMethodCaller);
@@ -347,7 +347,7 @@ namespace SharpLuna
                 SetGetter(fieldInfo.Name, getter);
 
                 var setMethodInfo = fieldDelType.GetMethod("Setter", BindingFlags.Static | BindingFlags.Public);
-                var setDel = (Delegate)setMethodInfo.Invoke(null, new[] { fieldInfo });
+                var setDel = DelegateCache.GetInvokeer(getMethodInfo, fieldInfo);// (Delegate)setMethodInfo.Invoke(null, new[] { fieldInfo });
                 var setCallerType = typeof(ActionCaller<>).MakeGenericType(fieldInfo.FieldType);
                 var setMethodCaller = setCallerType.GetMethod("Call", BindingFlags.Static | BindingFlags.Public);
                 var setLuaDel = (LuaNativeFunction)DelegateCache.Get(typeof(LuaNativeFunction), setMethodCaller);
@@ -359,7 +359,7 @@ namespace SharpLuna
                 var fieldDelType = typeof(FieldDelegate<,>).MakeGenericType(fieldInfo.ReflectedType, fieldInfo.FieldType);
 
                 var getMethodInfo = fieldDelType.GetMethod("Getter", BindingFlags.Static | BindingFlags.Public);
-                var getDel = (Delegate)getMethodInfo.Invoke(null, new[] { fieldInfo });
+                var getDel = DelegateCache.GetInvokeer(getMethodInfo, fieldInfo);//(Delegate)getMethodInfo.Invoke(null, new[] { fieldInfo });
                 var getCallerType = typeof(FuncCaller<,>).MakeGenericType(fieldInfo.ReflectedType, fieldInfo.FieldType);
                 var getMethodCaller = getCallerType.GetMethod("Call", BindingFlags.Static | BindingFlags.Public);
                 var getLuaDel = (LuaNativeFunction)DelegateCache.Get(typeof(LuaNativeFunction), getMethodCaller);
@@ -367,7 +367,7 @@ namespace SharpLuna
                 SetGetter(fieldInfo.Name, getter);
 
                 var setMethodInfo = fieldDelType.GetMethod("Setter", BindingFlags.Static | BindingFlags.Public);
-                var setDel = (Delegate)setMethodInfo.Invoke(null, new[] { fieldInfo });
+                var setDel = DelegateCache.GetInvokeer(setMethodInfo, fieldInfo);//(Delegate)setMethodInfo.Invoke(null, new[] { fieldInfo });
                 var setCallerType = typeof(ActionCaller<,>).MakeGenericType(fieldInfo.ReflectedType, fieldInfo.FieldType);
                 var setMethodCaller = setCallerType.GetMethod("Call", BindingFlags.Static | BindingFlags.Public);
                 var setLuaDel = (LuaNativeFunction)DelegateCache.Get(typeof(LuaNativeFunction), setMethodCaller);
