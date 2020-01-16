@@ -10,17 +10,16 @@ using System.Collections;
 namespace SharpLuna
 {
     using lua_State = System.IntPtr;
-    using lua_CFunction = System.IntPtr;
     using static Lua;
 
     public struct LuaRef : IRefCount, IEquatable<LuaRef>, IComparable<LuaRef>, IEnumerable<TableKeyValuePair>
     {
-        private lua_State L;
-        private int _ref;
+        private readonly lua_State L;
+        private readonly int _ref;
 
         public static readonly LuaRef Empty = new LuaRef();
-        public static readonly LuaRef None = new LuaRef { _ref = LUA_NOREF };
-        public static readonly LuaRef Nil = new LuaRef { _ref = LUA_REFNIL };
+        public static readonly LuaRef None = new LuaRef(LUA_NOREF);
+        public static readonly LuaRef Nil = new LuaRef(LUA_REFNIL);
         
         public LuaRef(lua_State state, int index)
         {
@@ -46,6 +45,13 @@ namespace SharpLuna
             _ref = luaL_ref(state, LUA_REGISTRYINDEX); 
             Handle = 0;
             Handle = this.Alloc();
+        }
+
+        private LuaRef(int luaRef)
+        {
+            L = IntPtr.Zero;
+            _ref = luaRef;
+            Handle = 0;
         }
 
         public void Dispose()
@@ -135,9 +141,9 @@ namespace SharpLuna
             return PopFromStack(L);
         }
 
-        public static LuaRef CreateFunctionUnmanaged<T>(lua_State L, LuaNativeFunction proc, T cpp_obj)
+        public static LuaRef CreateFunctionUnmanaged<T>(lua_State L, LuaNativeFunction proc, T valueObj)
         {
-            PushUserData<T>(L, cpp_obj);
+            PushUserData<T>(L, valueObj);
             lua_pushcclosure(L, proc, 1);
             return PopFromStack(L);
         }
