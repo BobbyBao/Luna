@@ -5,24 +5,13 @@ using System.Text;
 
 namespace SharpLuna
 {
-    public class FreeList<T>
+    public class FreeList<T> : FastList<T>
     {
-        public FastList<T> active;
         Stack<int> freeList = new Stack<int>();
 
-        public FreeList(int size)
+        public FreeList(int size) : base(size)
         {
-            active = new FastList<T>(size);
-            active.Add(default);
-        }
-
-        public ref T this[int index]
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                return ref active[index];
-            }
+            Add(default);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -31,45 +20,30 @@ namespace SharpLuna
             if (freeList.Count > 0)
             {
                 int id = freeList.Pop();
-                active[id] = obj;
+                items[id] = obj;
                 return id;
             }
 
-            int count = active.Count;
-            active.Add(obj);
+            int count = Count;
+            Add(obj);
             return count;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Free(int id)
         {
-            active[id] = default;
+            items[id] = default;
             freeList.Push(id);
         }
     }
 
-    public class WeakFreeList<T> where T : class
+    public class WeakFreeList<T> : FastList<WeakReference<T>> where T : class
     {
-        public FastList<WeakReference<T>> active;
         Stack<int> freeList = new Stack<int>();
 
-        public WeakFreeList(int size)
+        public WeakFreeList(int size) : base(size)
         {
-            active = new FastList<WeakReference<T>>(size);
-            active.Add(default);
-        }
-
-        public T this[int index]
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                if(active[index].TryGetTarget(out T ret))
-                {
-                    return ret;
-                }
-                return default;
-            }
+            Add(default);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -78,12 +52,12 @@ namespace SharpLuna
             if (freeList.Count > 0)
             {
                 int id = freeList.Pop();
-                active[id].SetTarget(obj);
+                items[id].SetTarget(obj);
                 return id;
             }
 
-            int count = active.Count;
-            active.Add(new WeakReference<T>(obj));
+            int count = Count;
+            Add(new WeakReference<T>(obj));
             return count;
         }
 

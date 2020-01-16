@@ -1,4 +1,4 @@
-﻿//#define SAVE_FUNC
+﻿#define SAVE_FUNC
 using System;
 using System.Collections.Generic;
 using System.Text;

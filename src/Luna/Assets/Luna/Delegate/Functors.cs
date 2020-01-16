@@ -68,15 +68,8 @@ namespace SharpLuna
     {
         public static int Call(lua_State L)
         {
-            try
-            {
-                SharpObject.Free<T>(L, 1);
-                return 0;
-            }
-            catch (Exception e)
-            {
-                return luaL_error(L, e.Message);
-            }
+            SharpObject.Free<T>(L, 1);
+            return 0;            
         }
     }
 

@@ -109,11 +109,7 @@ namespace SharpLuna
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe static ref T GetUnmanaged<T>(IntPtr L, int index)
         {
-#if DEBUG
-            var ptr = GetUserData(L, index, Signature<T>(), true, true);
-#else
             var ptr = lua_touserdata(L, index);
-#endif
             return ref Unsafe.AsRef<T>((void*)ptr);
         }
 
@@ -126,7 +122,7 @@ namespace SharpLuna
 //             }
 //             else
             {
-                var handle = GetHandler<T>(L, index, false, true);
+                var handle = GetHandler<T>(L, index);
 #if FREE_LIST
                 return ref Unsafe.Unbox<T>(freeList[(int)handle]);
 #else
@@ -144,11 +140,7 @@ namespace SharpLuna
 //                 return GetUnmanaged<T>(L, index);
 //             }
 
-            var handle = GetHandler<T>(L, index, false, true);
-            if (handle == IntPtr.Zero)
-            {
-                return default;
-            }
+            var handle = GetHandler<T>(L, index);
 #if FREE_LIST
             return (T)freeList[(int)handle];
 #else
@@ -157,19 +149,16 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static unsafe IntPtr GetHandler<T>(IntPtr L, int index, bool is_exact, bool raise_error)
+        static unsafe long GetHandler<T>(IntPtr L, int index)
         {
-#if DEBUG
-            var ptr = GetUserData(L, index, Signature<T>(), is_exact, raise_error);
-#else
             var ptr = lua_touserdata(L, index);
-#endif
+#if DEBUG
             if (ptr == IntPtr.Zero)
             {
                 return IntPtr.Zero;
             }
-
-            return *((IntPtr*)ptr);
+#endif
+            return *((long*)ptr);
         }
 
         public static void Free<T>(IntPtr L, int index)
@@ -179,7 +168,7 @@ namespace SharpLuna
             //                 return;
             //             }
 
-            var handle = GetHandler<T>(L, index, false, true);
+            var handle = GetHandler<T>(L, index);
 #if FREE_LIST
             freeList.Free((int)handle);
 #else
@@ -191,94 +180,5 @@ namespace SharpLuna
 #endif
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static IntPtr GetUserData(IntPtr L, int index, IntPtr class_id, bool is_exact, bool raise_error)
-        {
-#if DEBUG
-            if (!lua_isuserdata(L, index))
-            {
-                if (raise_error)
-                {
-                    luaL_error(L, "expect userdata, got %s", lua_typename(L, lua_type(L, index)));
-                }
-                return IntPtr.Zero;
-            }
-#endif
-
-#if false
-            // <SP: index> = <obj>
-            index = lua_absindex(L, index);
-
-            // get registry base class metatable -> <base_mt>
-            lua_rawgetp(L, LUA_REGISTRYINDEX, class_id);
-
-            // report error if no metatable
-            if (!lua_istable(L, -1))
-            {
-                if (raise_error)
-                {
-                    luaL_error(L, "unknown class, you need to register this class first by using LuaBinding");
-                }
-                else
-                {
-                    lua_pop(L, 1);
-                }
-                return IntPtr.Zero;
-            }
-
-            // get the object metatable -> <base_mt> <obj_mt>
-            lua_getmetatable(L, index);
-
-            for (; ; )
-            {
-                // check if <obj_mt> and <base_mt> are equal
-                if (lua_rawequal(L, -1, -2))
-                {
-                    // matched, return this object
-                    lua_pop(L, 2);
-                    break;
-                }
-
-                // give up if exact match is needed
-                if (is_exact)
-                {
-                    if (raise_error)
-                    {
-                        TypeMismatchError(L, index);
-                    }
-                    else
-                    {
-                        lua_pop(L, 2);
-                    }
-                    return IntPtr.Zero;
-                }
-
-                // now try super class -> <base_mt> <obj_mt> <obj_super_mt>
-                lua_pushliteral(L, "___super");
-                lua_rawget(L, -2);
-
-                if (lua_isnil(L, -1))
-                {
-                    // no super class
-                    if (raise_error)
-                    {
-                        lua_pop(L, 1); // pop nil
-                        TypeMismatchError(L, index);
-                    }
-                    else
-                    {
-                        lua_pop(L, 3);
-                    }
-                    return IntPtr.Zero;
-                }
-                else
-                {
-                    // continue with <obj_super_mt> -> <base_mt> <obj_super_mt>
-                    lua_remove(L, -2);
-                }
-            }
-#endif
-            return lua_touserdata(L, index);
-        }
     }
 }

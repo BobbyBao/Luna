@@ -12,8 +12,8 @@ namespace SharpLuna
     [DebuggerDisplay("Count = {Count}")]
     public class FastList<T>
     {
-        private T[] items;
-        private int size;
+        protected T[] items;
+        protected int size;
 
         private const int defaultCapacity = 4;
         public static readonly T[] Empty = new T[0];
