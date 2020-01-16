@@ -467,6 +467,20 @@ namespace SharpLuna
         public static extern int luaopen_package(LuaState L);
 
         //luna extension
+
+        public struct LunaData
+        {
+            public IntPtr type;
+            public IntPtr super;
+            public IntPtr getters;
+            public IntPtr setters;
+            public IntPtr get_indexed;
+            public IntPtr set_indexed;
+        }
+
+        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int luna_init(ref LunaData data);
+
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int luna_class_index(LuaState L);
 

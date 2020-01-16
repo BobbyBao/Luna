@@ -94,6 +94,8 @@ namespace SharpLuna
 
             AddSearcher(LuaLoader);
 
+            SharpClass.Init();
+
             RegisterWraps(this.GetType());
 
             PreInit?.Invoke();

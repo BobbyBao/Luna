@@ -110,13 +110,13 @@ namespace SharpLuna
         
         public void SetGetter(string name, LuaRef getter)
         {
-            m_meta.RawGet("___getters").RawSet(name, getter);
+            m_meta.RawGet(___getters).RawSet(name, getter);
         }
 
         public void SetSetter(string name, LuaRef setter)
         {
             LuaRef meta_class = m_meta;
-            meta_class.RawGet("___setters").RawSet(name, setter);
+            meta_class.RawGet(___setters).RawSet(name, setter);
         }
 
         public void SetReadOnly(string name)
@@ -125,13 +125,17 @@ namespace SharpLuna
             string full_name = GetMemberName(meta_class, name);
             LuaRef err = LuaRef.CreateFunctionWith(State, ErrorReadOnly, full_name);
 
-            meta_class.RawGet("___setters").RawSet(name, err);
+            meta_class.RawGet(___setters).RawSet(name, err);
+        }
+
+        public void SetMemberFunction(IntPtr name, LuaRef proc)
+        {
+            m_meta.RawSet(name, proc);
         }
 
         public void SetMemberFunction(string name, LuaRef proc)
         {
-            LuaRef meta_class = m_meta;
-            meta_class.RawSet(name, proc);
+            m_meta.RawSet(name, proc);
         }
 
         #region 自动绑定
@@ -460,7 +464,7 @@ namespace SharpLuna
                         var luaFun = LuaRef.CreateFunction(State, methodConfig.getter);
                         if (luaFun)
                         {
-                            SetMemberFunction("___get_indexed", luaFun);
+                            SetMemberFunction(___get_indexed, luaFun);
                         }
                     }
 
@@ -469,7 +473,7 @@ namespace SharpLuna
                         var luaFun = LuaRef.CreateFunction(State, methodConfig.setter);
                         if (luaFun)
                         {
-                            SetMemberFunction("___set_indexed", luaFun);
+                            SetMemberFunction(___set_indexed, luaFun);
                         }
                     }
                     else
@@ -489,7 +493,7 @@ namespace SharpLuna
                     var luaFun = RegMethod(methodInfo, true);
                     if(luaFun)
                     {
-                        SetMemberFunction("___get_indexed", luaFun);
+                        SetMemberFunction(___get_indexed, luaFun);
                     }
                     
                 }
@@ -503,7 +507,7 @@ namespace SharpLuna
                     var luaFun = RegMethod(methodInfo, true);
                     if (luaFun)
                     {
-                        SetMemberFunction("___set_indexed", luaFun);
+                        SetMemberFunction(___set_indexed, luaFun);
                     }
                 }
             }

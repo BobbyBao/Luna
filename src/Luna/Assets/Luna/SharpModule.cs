@@ -49,13 +49,14 @@ namespace SharpLuna
 #if LUNA_SCRIPT
             module.RawSet("__index", (LuaNativeFunction)module_index);
             module.RawSet("__newindex", (LuaNativeFunction)module_newindex);
+
 #else
             module.RawSet("__index", (LuaNativeFunction)luna_module_index);
             module.RawSet("__newindex", (LuaNativeFunction)luna_module_newindex);
 #endif
-            module.RawSet("___getters", LuaRef.CreateTable(L));
-            module.RawSet("___setters", LuaRef.CreateTable(L));
-            module.RawSet("___type", type_name);
+            module.RawSet(___getters, LuaRef.CreateTable(L));
+            module.RawSet(___setters, LuaRef.CreateTable(L));
+            module.RawSet(___type, type_name);
             module.RawSet("___parent", meta);
             meta.RawSet(name, module);
             m_meta = module;

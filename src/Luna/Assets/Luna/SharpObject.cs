@@ -104,15 +104,15 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static unsafe IntPtr GetHandler<T>(LuaState L, int index, bool is_exact, bool raise_error)
+        public static T GetObject<T>(LuaState L, int index)
         {
-            var ptr = GetUserData(L, index, Signature<T>(), is_exact, raise_error);
-            if (ptr == IntPtr.Zero)
+            var handle = GetHandler<T>(L, index, false, true);
+            if (handle == IntPtr.Zero)
             {
-                return IntPtr.Zero;
+                return default;
             }
 
-            return Unsafe.Read<IntPtr>((void*)ptr);
+            return (T)GCHandle.FromIntPtr(handle).Target;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -129,6 +129,18 @@ namespace SharpLuna
                 return default;
             }
             return (T)GCHandle.FromIntPtr(handle).Target;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static unsafe IntPtr GetHandler<T>(LuaState L, int index, bool is_exact, bool raise_error)
+        {
+            var ptr = GetUserData(L, index, Signature<T>(), is_exact, raise_error);
+            if (ptr == IntPtr.Zero)
+            {
+                return IntPtr.Zero;
+            }
+
+            return Unsafe.Read<IntPtr>((void*)ptr);
         }
 
         public static void Free<T>(LuaState L, int index)

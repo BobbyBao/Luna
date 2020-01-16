@@ -100,8 +100,8 @@ namespace Tests
 
         private void Luna_PreInit()
         {
-            WrapGenerator.ExportPath = "../src/Test/Shared/Generate/";
-            WrapGenerator.GenerateClassWrap(typeof(TestStruct));
+            //WrapGenerator.ExportPath = "../src/Test/Shared/Generate/";
+            //WrapGenerator.GenerateClassWrap(typeof(TestStruct));
 
         }
 
@@ -116,12 +116,17 @@ namespace Tests
             luna.RegisterClass(typeof(TestStruct));
             luna.RegisterClass(typeof(TestClass));
 
+        }
+
+        void TestTable()
+        {
+
             var c = luna.GetGlobal("TestClass");
             var it = c.GetEnumerator();
 
             Luna.Log("TestClass : ======================== ");
 
-            while(it.MoveNext())
+            while (it.MoveNext())
             {
                 Luna.Log(it.Current.Key<string>());
             }
@@ -143,7 +148,6 @@ namespace Tests
 
             Luna.Log("LiveCount:", RefCountHelper.LiveCount, "FreeCount:", RefCountHelper.FreeCount);
         }
-
 
     }
 }

@@ -36,7 +36,7 @@ print(test.name)
 test[1] = "test index"
 print(test[1])
 
-test.Method()
+//test.Method()
 test.Method1("str param")
 test.Method2("str param", 12345)
 

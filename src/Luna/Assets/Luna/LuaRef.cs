@@ -374,6 +374,11 @@ namespace SharpLuna
             return v;
         }
 
+        public LuaRef RawGet(IntPtr p)
+        {
+            return RawGetP<LuaRef>(p);
+        }
+
         public V RawGet<V>(IntPtr p)
         {
             return RawGetP<V>(p);

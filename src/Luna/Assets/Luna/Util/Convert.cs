@@ -181,6 +181,30 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T To<T>(this IntPtr v)
+        {
+#if UNBOXING
+            T val = default;
+            __refvalue(__makeref(val), IntPtr) = v;
+            return val;
+#else
+            return (T)(object)v;
+#endif
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T To<T>(this UIntPtr v)
+        {
+#if UNBOXING
+            T val = default;
+            __refvalue(__makeref(val), UIntPtr) = v;
+            return val;
+#else
+            return (T)(object)v;
+#endif
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T To<T>(this LuaRef v)
         {
 #if UNBOXING

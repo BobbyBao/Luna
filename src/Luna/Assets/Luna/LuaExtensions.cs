@@ -53,7 +53,7 @@ namespace SharpLuna
                 handle.Free();
 
             return reference;
-        }
+        }        
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Push<T>(this LuaState L, T v)
@@ -63,29 +63,35 @@ namespace SharpLuna
                 case bool bval:
                     lua_pushboolean(L, bval ? 1 : 0);
                     break;
-                case sbyte ival:
-                    lua_pushinteger(L, ival);
-                    break;
-                case byte ival:
-                    lua_pushinteger(L, ival);
-                    break;
-                case short ival:
-                    lua_pushinteger(L, ival);
-                    break;
-                case ushort ival:
-                    lua_pushinteger(L, ival);
-                    break;
-                case int ival:
-                    lua_pushinteger(L, ival);
-                    break;
-                case uint ival:
-                    lua_pushinteger(L, ival);
-                    break;
                 case long lval:
                     lua_pushinteger(L, lval);
                     break;
                 case ulong lval:
                     lua_pushinteger(L, (long)lval);
+                    break;
+                case IntPtr lval:
+                    lua_pushinteger(L, (long)lval);
+                    break;
+                case UIntPtr lval:
+                    lua_pushinteger(L, (long)lval);
+                    break;
+                case sbyte ival:
+                    lua_pushnumber(L, ival);
+                    break;
+                case byte ival:
+                    lua_pushnumber(L, ival);
+                    break;
+                case short ival:
+                    lua_pushnumber(L, ival);
+                    break;
+                case ushort ival:
+                    lua_pushnumber(L, ival);
+                    break;
+                case int ival:
+                    lua_pushnumber(L, ival);
+                    break;
+                case uint ival:
+                    lua_pushnumber(L, ival);
                     break;
                 case float fval:
                     lua_pushnumber(L, fval);
@@ -157,30 +163,39 @@ namespace SharpLuna
         public static T Get<T>(this LuaState L, int index)
         {
             Type t = typeof(T);
-            if (t == typeof(bool))
-                return Convert.To<T>(luaL_checkinteger(L, index) == 0 ? false : true);
-            else if (t == typeof(sbyte))
-                return Convert.To<T>((sbyte)luaL_checkinteger(L, index));
-            else if (t == typeof(byte))
-                return Convert.To<T>((byte)luaL_checkinteger(L, index));
-            else if (t == typeof(short))
-                return Convert.To<T>((short)luaL_checkinteger(L, index));
-            else if (t == typeof(ushort))
-                return Convert.To<T>((ushort)luaL_checkinteger(L, index));
-            else if (t == typeof(char))
-                return Convert.To<T>((char)luaL_checkinteger(L, index));
-            else if (t == typeof(int))
-                return Convert.To<T>((int)luaL_checkinteger(L, index));
-            else if (t == typeof(uint))
-                return Convert.To<T>((uint)luaL_checkinteger(L, index));
-            else if (t == typeof(long))
-                return Convert.To<T>(luaL_checkinteger(L, index));
-            else if (t == typeof(ulong))
-                return Convert.To<T>((ulong)luaL_checkinteger(L, index));
-            else if (t == typeof(float))
-                return Convert.To<T>((float)luaL_checknumber(L, index));
-            else if (t == typeof(double))
-                return Convert.To<T>(luaL_checknumber(L, index));
+            if (t.IsPrimitive)
+            {
+                if (t == typeof(bool))
+                    return Convert.To<T>(luaL_checkinteger(L, index) == 0 ? false : true);
+                else if (t == typeof(long))
+                    return Convert.To<T>(luaL_checkinteger(L, index));
+                else if (t == typeof(ulong))
+                    return Convert.To<T>((ulong)luaL_checkinteger(L, index));
+                else if (t == typeof(sbyte))
+                    return Convert.To<T>((sbyte)luaL_checkinteger(L, index));
+                else if (t == typeof(byte))
+                    return Convert.To<T>((byte)luaL_checkinteger(L, index));
+                else if (t == typeof(short))
+                    return Convert.To<T>((short)luaL_checkinteger(L, index));
+                else if (t == typeof(ushort))
+                    return Convert.To<T>((ushort)luaL_checkinteger(L, index));
+                else if (t == typeof(char))
+                    return Convert.To<T>((char)luaL_checkinteger(L, index));
+                else if (t == typeof(int))
+                    return Convert.To<T>((int)luaL_checkinteger(L, index));
+                else if (t == typeof(uint))
+                    return Convert.To<T>((uint)luaL_checkinteger(L, index));
+                else if (t == typeof(float))
+                    return Convert.To<T>((float)luaL_checknumber(L, index));
+                else if (t == typeof(double))
+                    return Convert.To<T>(luaL_checknumber(L, index));
+                else
+                    throw new Exception("未知类型");
+            }
+            else if (t == typeof(IntPtr))
+                return Convert.To<T>((IntPtr)luaL_checkinteger(L, index));
+            else if (t == typeof(UIntPtr))
+                return Convert.To<T>((UIntPtr)luaL_checkinteger(L, index));
             else if (t == typeof(string))
                 return (T)(object)lua_checkstring(L, index);
             else if (t == typeof(LuaNativeFunction))
@@ -193,8 +208,8 @@ namespace SharpLuna
                     return Convert.To<T>(new LuaRef(L, index));
             }
             else
-            {
-                return SharpObject.Get<T>(L, index);
+            {                  
+                return SharpObject.Get<T>(L, index);              
             }
 
         }
@@ -347,7 +362,7 @@ namespace SharpLuna
             }
         }
 
-        #region LUA_DEBUG
+#region LUA_DEBUG
         public static bool GetInfo(this LuaState L, string what, IntPtr ar)
         {
             return lua_getinfo(L, what, ar) != 0;
@@ -437,6 +452,6 @@ namespace SharpLuna
             return ret;
         }
 
-        #endregion
+#endregion
     }
 }

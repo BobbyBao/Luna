@@ -16,6 +16,24 @@ namespace SharpLuna
     {
         static Dictionary<Type, SharpClass> registeredClass = new Dictionary<Type, SharpClass>();
         static Dictionary<Type, string> classAlias = new Dictionary<Type, string>();
+        static LunaData lunaData;
+        protected static IntPtr ___type;
+        protected static IntPtr ___super;
+        protected static IntPtr ___getters;
+        protected static IntPtr ___setters;
+        protected static IntPtr ___get_indexed;
+        protected static IntPtr ___set_indexed;
+
+        public static void Init()
+        {
+            luna_init(ref lunaData);
+            ___type = lunaData.type;
+            ___super = lunaData.super;
+            ___getters = lunaData.getters;
+            ___setters = lunaData.setters;
+            ___get_indexed = lunaData.get_indexed;
+            ___set_indexed = lunaData.set_indexed;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsRegistered<T>()
@@ -46,7 +64,8 @@ namespace SharpLuna
 
         public static string GetFullName(LuaRef parent, string name)
         {
-            string full_name = parent.Get("___type", "");
+            //string full_name = parent.Get("___type", "");
+            string full_name = parent.Get(___type, "");
             if (!string.IsNullOrEmpty(full_name))
             {
                 int pos = full_name.IndexOf('<');
@@ -61,7 +80,8 @@ namespace SharpLuna
 
         public static string GetMemberName(LuaRef parent, string name)
         {
-            string full_name = parent.RawGet("___type", "<unknown>");
+            //string full_name = parent.RawGet("___type", "<unknown>");
+            string full_name = parent.RawGet(___type, "<unknown>");
             full_name += '.';
             full_name += name;
             return full_name;
@@ -90,10 +110,9 @@ namespace SharpLuna
             clazz.RawSet("__index", (LuaNativeFunction)luna_class_index);
             clazz.RawSet("__newindex", (LuaNativeFunction)luna_class_newindex);
 #endif
-            clazz.RawSet("___getters", LuaRef.CreateTable(L));
-            clazz.RawSet("___setters", LuaRef.CreateTable(L));
-
-            clazz.RawSet("___type", type_name);
+            clazz.RawSet(___getters, LuaRef.CreateTable(L));
+            clazz.RawSet(___setters, LuaRef.CreateTable(L));
+            clazz.RawSet(___type, type_name);
 
             LuaRef registry = new LuaRef(L, LUA_REGISTRYINDEX);
             registry.RawSet(type_clazz, clazz);
@@ -111,7 +130,7 @@ namespace SharpLuna
                 {
                     LuaRef registry = new LuaRef(parent.State, LUA_REGISTRYINDEX);
                     LuaRef super = registry.RawGetP<LuaRef>(super_static_id);
-                    meta.RawSet("___super", super);
+                    meta.RawSet(___super, super);
                 }
 
                 return true;
@@ -229,7 +248,7 @@ namespace SharpLuna
 
                     if (!lua_isnil(L, -1))
                     {
-                        //assert(lua_iscfunction(L, -1));
+                        assert(lua_iscfunction(L, -1));
                         lua_pushvalue(L, 1);
                         lua_pushvalue(L, 2);
                         lua_call(L, 2, 1);
@@ -263,7 +282,7 @@ namespace SharpLuna
                         else
                         {
                             // otherwise, it is static (class getters)
-                            //assert(lua_istable(L, 1));
+                            assert(lua_istable(L, 1));
                             lua_call(L, 0, 1);
                         }
                     }

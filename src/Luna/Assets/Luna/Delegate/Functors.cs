@@ -79,6 +79,50 @@ namespace SharpLuna
         }
     }
 
+    public struct PropertyCaller<T1>
+    {
+        public static int Getter(LuaState L)
+        {
+            var a = L.ToLightObject<Func<T1>>(lua_upvalueindex(2), false);
+            var r = a();
+            Lua.Push(L, r);
+            return 1;
+        }
+
+        public static int Setter(LuaState L)
+        {
+            var a = L.ToLightObject<Action<T1>>(lua_upvalueindex(3), false);
+            a(
+                Lua.Get<T1>(L, 1)
+            );
+            return 0;
+        }
+
+    }
+
+    public struct PropertyCaller<T1, T2>
+    {
+        public static int Getter(LuaState L)
+        {
+            var a = L.ToLightObject<Func<T1, T2>>(lua_upvalueindex(2), false);
+            var p1 = SharpObject.Get<T1>(L, 1);
+            var r = a(p1);
+            Lua.Push(L, r);
+            return 1;
+        }
+
+        public static int Setter(LuaState L, int start)
+        {
+            var a = L.ToLightObject<Action<T1, T2>>(lua_upvalueindex(3), false);
+            a(
+                Lua.Get<T1>(L, 1), Lua.Get<T2>(L, 2)
+            );
+            return 0;
+        }
+
+    }
+
+    //低效率版本的field
     public struct FieldDelegate<V>
     {
         public static Func<V> Getter(FieldInfo fieldInfo)
