@@ -158,33 +158,6 @@ namespace SharpLuna
             }
         }
 
-        static void TypeMismatchError(LuaState L, int index)
-        {
-            // <SP: index> = <obj>
-            // <SP: -2> = <expected_mt>
-            // <SP: -1> = <actual_mt>
-
-            // now get the expected type -> <expected_mt> <actual_mt> <expected>
-            lua_pushliteral(L, "___type");
-            lua_rawget(L, -3);
-            string expected = lua_tostring(L, -1);
-
-            // now get the actual got type -> <expected_mt> <actual_mt> <expected> <actual>
-            lua_pushliteral(L, "___type");
-            lua_rawget(L, -3);
-            string actual = lua_tostring(L, -1);
-            if (actual == null)
-            {
-                actual = lua_typename(L, lua_type(L, index));
-            }
-
-            // now create error msg, put it into bottom and pop all others -> <msg>
-            luaL_where(L, 1);
-            lua_pushstring(L, string.Format("{0} expected, got {1}", expected, actual));
-            lua_concat(L, 2);
-            lua_error(L);
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static IntPtr GetUserData(LuaState L, int index, IntPtr class_id, bool is_exact, bool raise_error)
         {

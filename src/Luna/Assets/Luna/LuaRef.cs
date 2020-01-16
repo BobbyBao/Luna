@@ -600,6 +600,39 @@ namespace SharpLuna
         {
             return GetEnumerator();
         }
+
+        public override string ToString()
+        {
+            if (_ref == 0)
+            {
+                return "Empty";
+            }
+
+            LuaType t = Type;
+            switch(t)
+            {
+                case LuaType.Boolean:
+                    return ToValue<bool>().ToString();
+                    
+                case LuaType.LightUserData:
+                    return ToPtr().ToString();
+                case LuaType.Number:
+                    return ToValue<double>().ToString();
+                case LuaType.String:
+                    return ToValue<string>();
+                case LuaType.Table:
+                    return ToValue<string>();
+                case LuaType.Function:
+                    return ToValue<string>();
+                case LuaType.UserData:
+                    return ToPtr().ToString();                    
+                case LuaType.Thread:
+                    return ToValue<string>();                    
+                default:
+                    return "nil";
+            }
+
+        }
     }
 
     public struct LuaTableRef : IRefCount

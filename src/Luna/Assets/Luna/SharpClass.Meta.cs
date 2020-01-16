@@ -26,6 +26,14 @@ namespace SharpLuna
 
         public static void Init()
         {
+#if LUNA_SCRIPT
+            ___type = Marshal.AllocHGlobal(1);
+            ___super = Marshal.AllocHGlobal(1);
+            ___getters = Marshal.AllocHGlobal(1);
+            ___setters = Marshal.AllocHGlobal(1);
+            ___get_indexed = Marshal.AllocHGlobal(1);
+            ___set_indexed = Marshal.AllocHGlobal(1);
+#else
             luna_init(ref lunaData);
             ___type = lunaData.type;
             ___super = lunaData.super;
@@ -33,6 +41,7 @@ namespace SharpLuna
             ___setters = lunaData.setters;
             ___get_indexed = lunaData.get_indexed;
             ___set_indexed = lunaData.set_indexed;
+#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -243,7 +252,8 @@ namespace SharpLuna
 
                 if (lua_isnumber(L, 2))
                 {
-                    lua_pushliteral(L, "___get_indexed");
+                    //lua_pushliteral(L, "___get_indexed");
+                    lua_pushlightuserdata(L, ___get_indexed);
                     lua_rawget(L, -2);
 
                     if (!lua_isnil(L, -1))
@@ -260,7 +270,8 @@ namespace SharpLuna
                     }
                 }
 
-                lua_pushliteral(L, "___getters");
+                //lua_pushliteral(L, "___getters");
+                lua_pushlightuserdata(L, ___getters);
                 lua_rawget(L, -2);
                 assert(lua_istable(L, -1));
 
@@ -291,7 +302,8 @@ namespace SharpLuna
 
                 // now try super metatable -> <mt> <super_mt>
                 lua_pop(L, 2);                  // pop <getters> <getters[key]>
-                lua_pushliteral(L, "___super");
+                //lua_pushliteral(L, "___super");
+                lua_pushlightuserdata(L, ___super);
                 lua_rawget(L, -2);
 
                 if (lua_isnil(L, -1))
@@ -321,7 +333,8 @@ namespace SharpLuna
             {
                 if (lua_isnumber(L, 2))
                 {
-                    lua_pushliteral(L, "___set_indexed");
+                    //lua_pushliteral(L, "___set_indexed");
+                    lua_pushlightuserdata(L, ___set_indexed);
                     lua_rawget(L, -2);
 
                     if (!lua_isnil(L, -1))
@@ -340,7 +353,8 @@ namespace SharpLuna
                 }
 
                 // get setters subtable of metatable -> <mt> <setters>
-                lua_pushliteral(L, "___setters");
+                //lua_pushliteral(L, "___setters");
+                lua_pushlightuserdata(L, ___setters);
                 lua_rawget(L, -2);              // get __setters table
                 assert(lua_istable(L, -1));
 
@@ -370,14 +384,16 @@ namespace SharpLuna
                 // now try super metatable -> <mt> <super_mt>
                 assert(lua_isnil(L, -1));
                 lua_pop(L, 2);                  // pop <setters> <setters[key]>
-                lua_pushliteral(L, "___super");
+                //lua_pushliteral(L, "___super");
+                lua_pushlightuserdata(L, ___super);
                 lua_rawget(L, -2);
 
                 // check if there is one
                 if (lua_isnil(L, -1))
                 {
                     // give up
-                    lua_pushliteral(L, "___type");
+                    //lua_pushliteral(L, "___type");
+                    lua_pushlightuserdata(L, ___type);
                     lua_rawget(L, -3);
                     return luaL_error(L, "property '{0}.{1}' is not found or not writable",
                         luaL_optstring(L, -1, "<unknown>"), lua_tostring(L, 2));
@@ -407,7 +423,8 @@ namespace SharpLuna
             {
                 // get metatable.getters -> <mt> <getters>
                 lua_pop(L, 1);          // pop nil
-                lua_pushliteral(L, "___getters");
+                //lua_pushliteral(L, "___getters");
+                lua_pushlightuserdata(L, ___getters);
                 lua_rawget(L, -2);      // get getters table
                 assert(lua_istable(L, -1));
 
@@ -435,7 +452,8 @@ namespace SharpLuna
             lua_getmetatable(L, 1);
 
             // get setters subtable of metatable -> <mt> <setters>
-            lua_pushliteral(L, "___setters");
+            //lua_pushliteral(L, "___setters");
+            lua_pushlightuserdata(L, ___setters);
             lua_rawget(L, -2);          // get __setters table
             assert(lua_istable(L, -1));
 
@@ -462,11 +480,6 @@ namespace SharpLuna
         public static int ErrorReadOnly(LuaState L)
         {
             return luaL_error(L, "property '{0}' is read-only", lua_tostring(L, lua_upvalueindex(1)));
-        }
-
-        public static int ErrorConstMismatch(LuaState L)
-        {
-            return luaL_error(L, "member function '{0}' can not be access by const object", lua_tostring(L, lua_upvalueindex(1)));
         }
 
     }

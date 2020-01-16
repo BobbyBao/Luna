@@ -155,13 +155,8 @@ namespace Assets.Editor
 
             foreach (var t in parentLuaRef)
             {
-                var key = t.Key();                
-                if (key.Type != LuaType.String)
-                {
-                    continue;
-                }
-
-                var k = t.Key<string>();
+                var key = t.Key();
+                var k = key.ToString();
                 if (k == "_G")
                 {
                     continue;
