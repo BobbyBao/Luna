@@ -31,8 +31,8 @@ namespace SharpLuna
                     Lua.Push(L, v);
                     return 1;
                 }
-                
-                return CallConstructor(L, n);
+                lua_pushnil(L);
+                return 1;
             }
             catch (Exception e)
             {
@@ -40,28 +40,6 @@ namespace SharpLuna
             }
         }
 
-        static int CallConstructor(lua_State L, int n)
-        {
-            try
-            {
-                ConstructorInfo fn = Lua.ToLightObject<ConstructorInfo>(L, lua_upvalueindex(1), false);
-                //忽略self
-                object[] args = new object[n - 1];
-                for (int i = 2; i <= n; i++)
-                {
-                    args[i - 2] = Lua.GetObject(L, i);
-                }
-
-                object ret = fn.Invoke(args);                   
-                Lua.Push(L, ret);
-                return 1;
-               
-            }
-            catch (Exception e)
-            {
-                return luaL_error(L, "%s", e.Message);
-            }
-        }
     }
 
     public struct ClassDestructor<T>

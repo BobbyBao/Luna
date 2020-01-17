@@ -74,7 +74,6 @@ namespace SharpLuna
 
         public static string GetFullName(LuaRef parent, string name)
         {
-            //string full_name = parent.Get("___type", "");
             string full_name = parent.Get(___type, "");
             if (!string.IsNullOrEmpty(full_name))
             {
@@ -96,7 +95,7 @@ namespace SharpLuna
             return full_name;
         }
 
-        protected static bool BuildMetaTable(ref LuaRef meta, LuaRef parent, string name, IntPtr clazz_id)
+        protected static bool BuildMetaTable(ref LuaRef meta, LuaRef parent, string name, int clazz_id)
         {
             LuaRef @ref = parent.RawGet<LuaRef, string>(name);
             if (@ref)
@@ -108,7 +107,7 @@ namespace SharpLuna
             var L = parent.State;
             string type_name = "class<" + GetFullName(parent, name) + ">";
 
-            LuaRef type_clazz = LuaRef.FromPtr(L, clazz_id);
+            LuaRef type_clazz = LuaRef.FromValue(L, clazz_id);
             LuaRef clazz = LuaRef.CreateTable(L);
             clazz.SetMetaTable(clazz);
 
@@ -124,21 +123,21 @@ namespace SharpLuna
             clazz.RawSet(___type, type_name);
 
             LuaRef registry = new LuaRef(L, LUA_REGISTRYINDEX);
-            registry.RawSet(type_clazz, clazz);
+            registry.RawSet(type_clazz/*clazz_id*/, clazz);
             parent.RawSet(name, clazz);
             meta = clazz;
             return true;
         }
 
         protected static bool BuildMetaTable(ref LuaRef meta, LuaRef parent, string name,
-            IntPtr clazz_id, IntPtr super_static_id)
+            int clazz_id, int super_static_id)
         {
             if (BuildMetaTable(ref meta, parent, name, clazz_id))
             {
-                if (super_static_id != IntPtr.Zero)
+                if (super_static_id != 0)
                 {
                     LuaRef registry = new LuaRef(parent.State, LUA_REGISTRYINDEX);
-                    LuaRef super = registry.RawGetP<LuaRef>(super_static_id);
+                    LuaRef super = registry.RawGet<LuaRef>(super_static_id);
                     meta.RawSet(___super, super);
                 }
 

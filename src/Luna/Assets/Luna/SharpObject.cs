@@ -1,4 +1,4 @@
-﻿#define LUA_WEAKTABLE
+﻿//#define LUA_WEAKTABLE
 
 using System;
 using System.Collections.Generic;
@@ -15,7 +15,7 @@ namespace SharpLuna
     {
         struct SignatureHolder<T>
         {
-            public readonly static IntPtr value = (IntPtr)typeof(T).GetHashCode();
+            public readonly static int value = typeof(T).GetHashCode();
         }
 
 #if LUA_WEAKTABLE
@@ -75,23 +75,23 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IntPtr Signature<T>(T obj)
+        public static int Signature<T>(T obj)
         {
-            return (IntPtr)obj.GetType().GetHashCode();
+            return obj.GetType().GetHashCode();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IntPtr Signature<T>()
+        public static int Signature<T>()
         {
             return SignatureHolder<T>.value;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IntPtr Signature(Type type)
+        public static int Signature(Type type)
         {
-            if (type == null) return IntPtr.Zero;
+            if (type == null) return 0;
 
-            return (IntPtr)type.GetHashCode();
+            return type.GetHashCode();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -144,18 +144,18 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void AllocValueObject<T>(lua_State L, IntPtr classId, T obj)
+        public static unsafe void AllocValueObject<T>(lua_State L, int classId, T obj)
         {
             IntPtr mem = lua_newuserdata(L, (UIntPtr)Unsafe.SizeOf<T>());
             Unsafe.Write((void*)mem, obj);
 
-            lua_rawgetp(L, LUA_REGISTRYINDEX, classId);
+            lua_rawgeti(L, LUA_REGISTRYINDEX, classId);
             luaL_checktype(L, -1, (int)LuaType.Table);
             lua_setmetatable(L, -2);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void AllocObject<T>(lua_State L, IntPtr classId, T obj)
+        public static unsafe void AllocObject<T>(lua_State L, int classId, T obj)
         {
             //             if (typeof(T).IsUnManaged())
             //             {
@@ -179,7 +179,7 @@ namespace SharpLuna
             UserDataRef userDataRef = new UserDataRef(L, userRef);
             objectUserData.Add(obj, userDataRef);
 #endif
-            lua_rawgetp(L, LUA_REGISTRYINDEX, classId);
+            lua_rawgeti(L, LUA_REGISTRYINDEX, classId);
 #if DEBUG
             luaL_checktype(L, -1, (int)LuaType.Table);
 #endif

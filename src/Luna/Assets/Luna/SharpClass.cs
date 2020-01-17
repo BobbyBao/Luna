@@ -8,6 +8,7 @@ using System.Text;
 namespace SharpLuna
 {
     using lua_State = IntPtr;
+    using static Lua;
 
     public partial class SharpClass : IDisposable
     {
@@ -287,17 +288,17 @@ namespace SharpLuna
 
             try
             {
-                var callerType = typeof(ClassConstructor<>).MakeGenericType(type);
-                MethodInfo CallInnerDelegateMethod = callerType.GetMethod("Call", BindingFlags.Static | BindingFlags.Public);
-                var luaFunc = (LuaNativeFunction)DelegateCache.Get(typeof(LuaNativeFunction), CallInnerDelegateMethod);
-
                 if (paramInfos.Length == 0)
                 {
+                    var callerType = typeof(ClassConstructor<>).MakeGenericType(type);
+                    MethodInfo CallInnerDelegateMethod = callerType.GetMethod("Call", BindingFlags.Static | BindingFlags.Public);
+                    var luaFunc = (LuaNativeFunction)DelegateCache.Get(typeof(LuaNativeFunction), CallInnerDelegateMethod);
+
                     m_meta.RawSet("__call", LuaRef.CreateFunction(State, luaFunc));
                 }
                 else
                 {
-                    m_meta.RawSet("__call", LuaRef.CreateFunction(State, luaFunc, constructorInfo));
+                    m_meta.RawSet("__call", LuaRef.CreateFunction(State, (LuaNativeFunction)CallConstructor, constructorInfo));
                 }
             }
             catch(Exception e)
@@ -306,6 +307,30 @@ namespace SharpLuna
             }
 
             return this;
+        }
+
+        static int CallConstructor(lua_State L)
+        {
+            try
+            {
+                int n = lua_gettop(L);
+                ConstructorInfo fn = ToLightObject<ConstructorInfo>(L, lua_upvalueindex(1), false);
+                //忽略self
+                object[] args = new object[n - 1];
+                for (int i = 2; i <= n; i++)
+                {
+                    args[i - 2] = Lua.GetObject(L, i);
+                }
+
+                object ret = fn.Invoke(args);
+                Lua.Push(L, ret);
+                return 1;
+
+            }
+            catch (Exception e)
+            {
+                return luaL_error(L, "%s", e.Message);
+            }
         }
 
         public SharpClass RegField(FieldInfo fieldInfo)
@@ -596,7 +621,13 @@ namespace SharpLuna
 
             foreach (var info in paramInfo)
             {
-                if(info.ParameterType.IsByRef || info.ParameterType.IsPointer)
+                if (info.ParameterType.IsGenericType)
+                {
+                    Luna.Log("不支持泛型参数:" + methodInfo.ToString());
+                    return LuaRef.Empty;
+                }
+
+                if (info.ParameterType.IsByRef || info.ParameterType.IsPointer)
                 {
                     Luna.Log("不支持引用类型参数:" + methodInfo.ToString());
                     return LuaRef.Empty;
@@ -612,6 +643,18 @@ namespace SharpLuna
             }
             else
             {
+                if (typeOfResult.IsGenericType)
+                {
+                    Luna.Log("不支持泛型参数:" + methodInfo.ToString());
+                    return LuaRef.Empty;
+                }
+
+                if (typeOfResult.IsByRef || typeOfResult.IsPointer)
+                {
+                    Luna.Log("不支持引用类型参数:" + methodInfo.ToString());
+                    return LuaRef.Empty;
+                }
+
                 paramTypes.Add(typeOfResult);
                 var typeArray = paramTypes.ToArray();
                 return RegFunc(methodInfo, typeArray, isProp);
