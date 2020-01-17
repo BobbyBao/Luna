@@ -8,7 +8,7 @@ namespace SharpLuna
 {
     public class WrapGenerator
     {
-        static string exportPath = "";        
+        static string exportPath = "";
         public static string ExportPath
         {
             get => exportPath;
@@ -59,7 +59,7 @@ namespace SharpLuna
         {
             string code = GenerateClass(type);
 
-            if(!string.IsNullOrEmpty(path))
+            if (!string.IsNullOrEmpty(path))
             {
                 File.WriteAllText(path, code);
             }
@@ -70,7 +70,7 @@ namespace SharpLuna
         }
 
         public static string GenerateClass(Type type)
-        {      
+        {
             StringBuilder sb = new StringBuilder();
             sb.Append("using System;\n");
             sb.Append("using SharpLuna;\n");
@@ -105,7 +105,7 @@ namespace SharpLuna
                 members.Add((MemberTypes.Constructor, "ctor", false, false));
             }
 
-            if(!type.IsEnum)
+            if (!type.IsEnum)
             {
                 var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
                 foreach (var field in fields)
@@ -266,7 +266,7 @@ namespace SharpLuna
             if (type.IsValueType)
             {
                 first = false;
-                sb.Append($"\t\tif(n == 0)\n");               
+                sb.Append($"\t\tif(n == 0)\n");
                 sb.Append($"\t\t\tobj = new {type.FullName}();\n");
             }
             foreach (var ctor in ctorList)
@@ -302,7 +302,7 @@ namespace SharpLuna
                     for (int i = 1; i <= parameters.Length; i++)
                     {
                         var paramInfo = parameters[i - 1];
-                        sb.Append($"\t\t\t\tLua.Get<{GetTypeName(paramInfo.ParameterType)}>(L, {(i+1)})");
+                        sb.Append($"\t\t\t\tLua.Get<{GetTypeName(paramInfo.ParameterType)}>(L, {(i + 1)})");
                         if (i != parameters.Length)
                         {
                             sb.Append(",");
@@ -313,7 +313,7 @@ namespace SharpLuna
                     sb.Append("\t\t\t);\n");
                 }
 
-            }         
+            }
 
             sb.Append("\t\tLua.Push(L, obj);\n");
             sb.Append("\t\treturn 1;\n");
@@ -361,7 +361,7 @@ namespace SharpLuna
                 sb.Append("\t}\n");
                 sb.AppendLine();
             }
-           
+
             if (write)
             {
                 sb.Append("\t[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]\n");
@@ -389,7 +389,7 @@ namespace SharpLuna
                 sb.Append("\t}\n");
                 sb.AppendLine();
             }
-            
+
         }
 
         static void GenerateMethod(Type type, MethodInfo[] methodInfo, StringBuilder sb)
@@ -398,7 +398,7 @@ namespace SharpLuna
             sb.Append($"\tstatic int _{methodInfo[0].Name}(IntPtr L)\n\t{{\n");
 
             sb.Append($"\t\tint n = lua_gettop(L) - 1;\n");
-            
+
 
             bool first = true;
             int idx = 0;
@@ -406,7 +406,7 @@ namespace SharpLuna
             {
                 idx++;
                 var parameters = method.GetParameters();
-               
+
                 if (methodInfo.Length > 1)
                 {
                     if (first)
@@ -414,7 +414,7 @@ namespace SharpLuna
                         first = false;
                         sb.Append($"\t\tif(n == {parameters.Length}){{\n");
                     }
-                    else if(idx == methodInfo.Length)
+                    else if (idx == methodInfo.Length)
                     {
                         sb.Append($"\t\t}} else(n == {parameters.Length}){{\n");
                     }
@@ -423,71 +423,71 @@ namespace SharpLuna
                         sb.Append($"\t\t}} else if(n == {parameters.Length}){{\n");
                     }
 
-                if (!method.IsStatic)
-                {
-                    if (type.IsUnManaged())
+                    if (!method.IsStatic)
                     {
-                        sb.Append($"\t\tref var obj = ref SharpObject.GetValue<{type.FullName}>(L, 1);\n");
+                        if (type.IsUnManaged())
+                        {
+                            sb.Append($"\t\tref var obj = ref SharpObject.GetValue<{type.FullName}>(L, 1);\n");
+                        }
+                        else
+                        {
+                            sb.Append($"\t\tvar obj = SharpObject.Get<{type.FullName}>(L, 1);\n");
+                        }
+                    }
+
+                    if (method.ReturnType != typeof(void))
+                    {
+                        sb.Append("\t\t\tvar ret = ");
+                        if (method.IsStatic)
+                            sb.Append($"{type.FullName}.{method.Name}(\n");
+                        else
+                            sb.Append($"obj.{method.Name}(\n");
                     }
                     else
                     {
-                        sb.Append($"\t\tvar obj = SharpObject.Get<{type.FullName}>(L, 1);\n");
+                        if (method.IsStatic)
+                            sb.Append($"\t\t\t{type.FullName}.{method.Name}(\n");
+                        else
+                            sb.Append($"\t\t\tobj.{method.Name}(\n");
                     }
-                }
 
-                if (method.ReturnType != typeof(void))
-                {
-                    sb.Append("\t\t\tvar ret = ");
-                    if (method.IsStatic)
-                        sb.Append($"{type.FullName}.{method.Name}(\n");
-                    else
-                        sb.Append($"obj.{method.Name}(\n");
-                }
-                else
-                {
-                    if (method.IsStatic)
-                        sb.Append($"\t\t\t{type.FullName}.{method.Name}(\n");
-                    else
-                        sb.Append($"\t\t\tobj.{method.Name}(\n");
-                }
-            
-                for (int i = 0; i < parameters.Length; i++)
-                {
-                    var paramInfo = parameters[i];
-                    sb.Append($"\t\t\t\tLua.Get<{GetTypeName(paramInfo.ParameterType)}>(L, {(i + 1)})");
-                    if (i != parameters.Length - 1)
+                    for (int i = 0; i < parameters.Length; i++)
                     {
-                        sb.Append(",");
+                        var paramInfo = parameters[i];
+                        sb.Append($"\t\t\t\tLua.Get<{GetTypeName(paramInfo.ParameterType)}>(L, {(i + 1)})");
+                        if (i != parameters.Length - 1)
+                        {
+                            sb.Append(",");
+                        }
+                        sb.AppendLine();
                     }
-                    sb.AppendLine();
-                }
 
-                sb.Append("\t\t\t);\n");
+                    sb.Append("\t\t\t);\n");
 
-                if (method.ReturnType != typeof(void))
-                {
-                    sb.Append("\t\t\tLua.Push(L, ret);\n");
-                    sb.Append("\t\t\treturn 1;\n");
-                }
-                else
-                {
-                    sb.Append("\t\t\treturn 0;\n");
-                }
-
-                if (methodInfo.Length > 1)
-                {
-                    if (idx == methodInfo.Length)
+                    if (method.ReturnType != typeof(void))
                     {
-                        sb.Append("\t\t}\n");
+                        sb.Append("\t\t\tLua.Push(L, ret);\n");
+                        sb.Append("\t\t\treturn 1;\n");
+                    }
+                    else
+                    {
+                        sb.Append("\t\t\treturn 0;\n");
                     }
 
+                    if (methodInfo.Length > 1)
+                    {
+                        if (idx == methodInfo.Length)
+                        {
+                            sb.Append("\t\t}\n");
+                        }
+
+                    }
                 }
+
+                sb.Append("\t}\n");
+                sb.AppendLine();
             }
 
-            sb.Append("\t}\n");
-            sb.AppendLine();
         }
-
     }
-
 }
