@@ -8,23 +8,25 @@ public class PlaneWrap
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Constructor(IntPtr L)
 	{
-		int n = lua_gettop(L);
+		int n = lua_gettop(L) - 1;
 		UnityEngine.Plane obj = default;
-		if(n == 2)
+		if(n == 0)
+			obj = new UnityEngine.Plane();
+		else if(n == 2)
 			obj = new UnityEngine.Plane(
-				Lua.Get<UnityEngine.Vector3>(L, 1),
-				Lua.Get<UnityEngine.Vector3>(L, 2)
+				Lua.Get<UnityEngine.Vector3>(L, 2),
+				Lua.Get<UnityEngine.Vector3>(L, 3)
 			);
 		else if(n == 2)
 			obj = new UnityEngine.Plane(
-				Lua.Get<UnityEngine.Vector3>(L, 1),
-				Lua.Get<float>(L, 2)
+				Lua.Get<UnityEngine.Vector3>(L, 2),
+				Lua.Get<float>(L, 3)
 			);
 		else if(n == 3)
 			obj = new UnityEngine.Plane(
-				Lua.Get<UnityEngine.Vector3>(L, 1),
 				Lua.Get<UnityEngine.Vector3>(L, 2),
-				Lua.Get<UnityEngine.Vector3>(L, 3)
+				Lua.Get<UnityEngine.Vector3>(L, 3),
+				Lua.Get<UnityEngine.Vector3>(L, 4)
 			);
 		Lua.Push(L, obj);
 		return 1;
@@ -74,7 +76,7 @@ public class PlaneWrap
 
 	public static void Register(ClassWraper classWraper)
 	{
-		classWraper.RegFunction("ctor", Constructor);
+		classWraper.RegConstructor(Constructor);
 		classWraper.RegProp("normal", Get_normal, Set_normal);
 		classWraper.RegProp("distance", Get_distance, Set_distance);
 		classWraper.RegProp("flipped", Get_flipped);

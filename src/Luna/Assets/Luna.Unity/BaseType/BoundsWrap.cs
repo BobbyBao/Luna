@@ -8,12 +8,14 @@ public class BoundsWrap
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Constructor(IntPtr L)
 	{
-		int n = lua_gettop(L);
+		int n = lua_gettop(L) - 1;
 		UnityEngine.Bounds obj = default;
-		if(n == 2)
+		if(n == 0)
+			obj = new UnityEngine.Bounds();
+		else if(n == 2)
 			obj = new UnityEngine.Bounds(
-				Lua.Get<UnityEngine.Vector3>(L, 1),
-				Lua.Get<UnityEngine.Vector3>(L, 2)
+				Lua.Get<UnityEngine.Vector3>(L, 2),
+				Lua.Get<UnityEngine.Vector3>(L, 3)
 			);
 		Lua.Push(L, obj);
 		return 1;
@@ -106,7 +108,7 @@ public class BoundsWrap
 
 	public static void Register(ClassWraper classWraper)
 	{
-		classWraper.RegFunction("ctor", Constructor);
+		classWraper.RegConstructor(Constructor);
 		classWraper.RegProp("center", Get_center, Set_center);
 		classWraper.RegProp("size", Get_size, Set_size);
 		classWraper.RegProp("extents", Get_extents, Set_extents);

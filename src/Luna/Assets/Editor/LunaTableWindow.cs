@@ -33,6 +33,12 @@ namespace Assets.Editor
              
         }
 
+        private void OnDisable()
+        {
+            LunaClient.LunaCreate -= LunaClient_LunaCreate;
+            LunaClient.LunaDestroy -= LunaClient_LunaDestroy;
+        }
+
         private void LunaClient_LunaCreate(Luna obj)
         {
             if (luna != obj)
@@ -132,7 +138,7 @@ namespace Assets.Editor
                 item.icon = EditorGUIUtility.FindTexture("Folder Icon");
                 root.AddChild(item);
           
-                EnumerateDirectories(item, luaRef, 2);
+                EnumerateTable(item, luaRef, 2);
             }
             else
             {
@@ -144,7 +150,7 @@ namespace Assets.Editor
             return root;
         }
 
-        void EnumerateDirectories(LunaTreeViewItem parent, LuaRef parentLuaRef, int depth)
+        void EnumerateTable(LunaTreeViewItem parent, LuaRef parentLuaRef, int depth)
         {
             if (depth <= 0)
             {
@@ -181,7 +187,7 @@ namespace Assets.Editor
                 if (v.IsTable)
                 {
                     tvi.icon = EditorGUIUtility.FindTexture("Folder Icon");
-                    EnumerateDirectories(tvi, v, depth - 1);
+                    EnumerateTable(tvi, v, depth - 1);
                 }
 
             }
@@ -201,7 +207,7 @@ namespace Assets.Editor
                 {
                     if (id2v.TryGetValue(id, out var luaRef))
                     {
-                        EnumerateDirectories(treeViewItems[id], luaRef, 2);
+                        EnumerateTable(treeViewItems[id], luaRef, 2);
                     }
                 }
             }

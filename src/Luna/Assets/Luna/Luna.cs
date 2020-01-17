@@ -22,7 +22,6 @@ namespace SharpLuna
         public bool IsExecuting => _executing;
         private bool _executing;
 
-
         public bool UseTraceback { get; set; } = false;
 
         public static Action<string> Print { get; set; }
@@ -30,29 +29,14 @@ namespace SharpLuna
         public static Action<string> Error { get; set; }
         public static Func<string, byte[]> ReadBytes { get; set; }
 
-#region lua debug functions
-        /// <summary>
-        /// Event that is raised when an exception occures during a hook call.
-        /// </summary>
+        public event Action PreInit;
+        public event Action PostInit;
         public event EventHandler<HookExceptionEventArgs> HookException;
-        /// <summary>
-        /// Event when lua hook callback is called
-        /// </summary>
-        /// <remarks>
-        /// Is only raised if SetDebugHook is called before.
-        /// </remarks>
         public event EventHandler<DebugHookEventArgs> DebugHook;
-        /// <summary>
-        /// lua hook calback delegate
-        /// </summary>
         private KyHookFunction _hookCallback;
-#endregion
 
         private SharpModule _binder;
         private readonly Dictionary<Type, ClassWraper> _classWrapers = new Dictionary<Type, ClassWraper>();
-
-        public event Action PreInit;
-        public event Action PostInit;
 
 
         public Luna()
@@ -81,7 +65,7 @@ namespace SharpLuna
                 ReadBytes = System.IO.File.ReadAllBytes;
             }
 
-            L = luaL_newstate();
+            L = Lua.newstate();
             
             luaL_openlibs(L);
 
@@ -148,7 +132,7 @@ namespace SharpLuna
             
             RefCountHelper.Clear();
 
-            lua_close(L);
+            Lua.close(L);
             L = IntPtr.Zero;
         }
 

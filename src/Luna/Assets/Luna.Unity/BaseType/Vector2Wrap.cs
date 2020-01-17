@@ -8,12 +8,14 @@ public class Vector2Wrap
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Constructor(IntPtr L)
 	{
-		int n = lua_gettop(L);
+		int n = lua_gettop(L) - 1;
 		UnityEngine.Vector2 obj = default;
-		if(n == 2)
+		if(n == 0)
+			obj = new UnityEngine.Vector2();
+		else if(n == 2)
 			obj = new UnityEngine.Vector2(
-				Lua.Get<float>(L, 1),
-				Lua.Get<float>(L, 2)
+				Lua.Get<float>(L, 2),
+				Lua.Get<float>(L, 3)
 			);
 		Lua.Push(L, obj);
 		return 1;
@@ -143,7 +145,7 @@ public class Vector2Wrap
 
 	public static void Register(ClassWraper classWraper)
 	{
-		classWraper.RegFunction("ctor", Constructor);
+		classWraper.RegConstructor(Constructor);
 		classWraper.RegField("x", Get_x, Set_x);
 		classWraper.RegField("y", Get_y, Set_y);
 		classWraper.RegProp("normalized", Get_normalized);

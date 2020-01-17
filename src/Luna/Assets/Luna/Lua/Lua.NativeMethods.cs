@@ -55,7 +55,7 @@ namespace SharpLuna
         public static extern int lua_checkstack(lua_State luaState, int extra);
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void lua_close(lua_State luaState);
+        static extern void lua_close(lua_State luaState);
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
         public static extern Bool lua_compare(lua_State luaState, int index1, int index2, LuaCompare op);
@@ -389,7 +389,7 @@ namespace SharpLuna
         public static extern int luaL_newmetatable(lua_State luaState, string name);
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern lua_State luaL_newstate();
+        static extern lua_State luaL_newstate();
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void luaL_openlibs(lua_State luaState);

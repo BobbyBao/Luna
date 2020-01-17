@@ -87,7 +87,7 @@ namespace SharpLuna
             List<ConstructorInfo> ctorList = new List<ConstructorInfo>();
             foreach (var ctor in ctors)
             {
-                if (ctor.IsDefined(typeof(LuaHideAttribute)))
+                if (!ctor.ShouldExport())
                 {
                     continue;
                 }
@@ -116,7 +116,7 @@ namespace SharpLuna
                         continue;
                     }
 
-                    if (field.IsDefined(typeof(LuaHideAttribute)))
+                    if (!field.ShouldExport())
                     {
                         continue;
                     }
@@ -129,7 +129,8 @@ namespace SharpLuna
             var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
             foreach (var prop in properties)
             {
-                if (prop.IsDefined(typeof(LuaHideAttribute)))
+
+                if (!prop.ShouldExport())
                 {
                     continue;
                 }
@@ -188,7 +189,7 @@ namespace SharpLuna
                 }
                 else if (memberType == MemberTypes.Constructor)
                 {
-                    sb.Append($"\t\tclassWraper.RegFunction(\"{name}\", Constructor);\n");
+                    sb.Append($"\t\tclassWraper.RegConstructor(Constructor);\n");
                 }
             }
 
@@ -204,11 +205,18 @@ namespace SharpLuna
             sb.Append("\t[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]\n");
             sb.Append($"\tstatic int Constructor(IntPtr L)\n\t{{\n");
 
-            sb.Append($"\t\tint n = lua_gettop(L);\n");
+            sb.Append($"\t\tint n = lua_gettop(L) - 1;\n");
 
             sb.Append($"\t\t{type.FullName} obj = default;\n");
 
             bool first = true;
+
+            if (type.IsValueType)
+            {
+                first = false;
+                sb.Append($"\t\tif(n == 0)\n");               
+                sb.Append($"\t\t\tobj = new {type.FullName}();\n");
+            }
             foreach (var ctor in ctorList)
             {
                 var parameters = ctor.GetParameters();
@@ -242,7 +250,7 @@ namespace SharpLuna
                     for (int i = 1; i <= parameters.Length; i++)
                     {
                         var paramInfo = parameters[i - 1];
-                        sb.Append($"\t\t\t\tLua.Get<{GetTypeName(paramInfo.ParameterType)}>(L, {i})");
+                        sb.Append($"\t\t\t\tLua.Get<{GetTypeName(paramInfo.ParameterType)}>(L, {(i+1)})");
                         if (i != parameters.Length)
                         {
                             sb.Append(",");

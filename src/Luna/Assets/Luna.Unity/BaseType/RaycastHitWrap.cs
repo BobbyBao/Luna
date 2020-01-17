@@ -106,14 +106,6 @@ public class RaycastHitWrap
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	static int Get_textureCoord1(IntPtr L)
-	{
-		ref var obj = ref SharpObject.GetValue<UnityEngine.RaycastHit>(L, 1);
-		Lua.Push(L, obj.textureCoord1);
-		return 1;
-	}
-
-	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Get_transform(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.RaycastHit>(L, 1);
@@ -147,7 +139,6 @@ public class RaycastHitWrap
 		classWraper.RegProp("triangleIndex", Get_triangleIndex);
 		classWraper.RegProp("textureCoord", Get_textureCoord);
 		classWraper.RegProp("textureCoord2", Get_textureCoord2);
-		classWraper.RegProp("textureCoord1", Get_textureCoord1);
 		classWraper.RegProp("transform", Get_transform);
 		classWraper.RegProp("rigidbody", Get_rigidbody);
 		classWraper.RegProp("lightmapCoord", Get_lightmapCoord);

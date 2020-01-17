@@ -90,7 +90,6 @@ namespace SharpLuna
 
         public static string GetMemberName(LuaRef parent, string name)
         {
-            //string full_name = parent.RawGet("___type", "<unknown>");
             string full_name = parent.RawGet(___type, "<unknown>");
             full_name += '.';
             full_name += name;

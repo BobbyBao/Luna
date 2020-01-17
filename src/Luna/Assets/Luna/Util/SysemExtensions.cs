@@ -48,6 +48,20 @@ namespace SharpLuna
             return true;
         }
 
+        public static bool ShouldExport(this MemberInfo memberInfo)
+        {
+            if (memberInfo.IsDefined(typeof(ObsoleteAttribute)))
+            {
+                return false;
+            }
+
+            if (memberInfo.IsDefined(typeof(LuaHideAttribute)))
+            {
+                return false;
+            }
+            return true;
+        }
+
         public static void TryAdd<T>(this HashSet<T> self, T obj)
         {
             if (!self.Contains(obj))

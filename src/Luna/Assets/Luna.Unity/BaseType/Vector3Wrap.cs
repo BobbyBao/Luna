@@ -8,18 +8,20 @@ public class Vector3Wrap
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Constructor(IntPtr L)
 	{
-		int n = lua_gettop(L);
+		int n = lua_gettop(L) - 1;
 		UnityEngine.Vector3 obj = default;
-		if(n == 3)
+		if(n == 0)
+			obj = new UnityEngine.Vector3();
+		else if(n == 3)
 			obj = new UnityEngine.Vector3(
-				Lua.Get<float>(L, 1),
 				Lua.Get<float>(L, 2),
-				Lua.Get<float>(L, 3)
+				Lua.Get<float>(L, 3),
+				Lua.Get<float>(L, 4)
 			);
 		else if(n == 2)
 			obj = new UnityEngine.Vector3(
-				Lua.Get<float>(L, 1),
-				Lua.Get<float>(L, 2)
+				Lua.Get<float>(L, 2),
+				Lua.Get<float>(L, 3)
 			);
 		Lua.Push(L, obj);
 		return 1;
@@ -180,17 +182,9 @@ public class Vector3Wrap
 		return 1;
 	}
 
-	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-	static int Get_fwd(IntPtr L)
-	{
-		ref var obj = ref SharpObject.GetValue<UnityEngine.Vector3>(L, 1);
-		Lua.Push(L, UnityEngine.Vector3.fwd);
-		return 1;
-	}
-
 	public static void Register(ClassWraper classWraper)
 	{
-		classWraper.RegFunction("ctor", Constructor);
+		classWraper.RegConstructor(Constructor);
 		classWraper.RegField("x", Get_x, Set_x);
 		classWraper.RegField("y", Get_y, Set_y);
 		classWraper.RegField("z", Get_z, Set_z);
@@ -207,6 +201,5 @@ public class Vector3Wrap
 		classWraper.RegProp("right", Get_right);
 		classWraper.RegProp("positiveInfinity", Get_positiveInfinity);
 		classWraper.RegProp("negativeInfinity", Get_negativeInfinity);
-		classWraper.RegProp("fwd", Get_fwd);
 	}
 }

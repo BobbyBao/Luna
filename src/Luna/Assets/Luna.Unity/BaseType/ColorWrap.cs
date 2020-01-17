@@ -8,20 +8,22 @@ public class ColorWrap
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Constructor(IntPtr L)
 	{
-		int n = lua_gettop(L);
+		int n = lua_gettop(L) - 1;
 		UnityEngine.Color obj = default;
-		if(n == 4)
+		if(n == 0)
+			obj = new UnityEngine.Color();
+		else if(n == 4)
 			obj = new UnityEngine.Color(
-				Lua.Get<float>(L, 1),
 				Lua.Get<float>(L, 2),
 				Lua.Get<float>(L, 3),
-				Lua.Get<float>(L, 4)
+				Lua.Get<float>(L, 4),
+				Lua.Get<float>(L, 5)
 			);
 		else if(n == 3)
 			obj = new UnityEngine.Color(
-				Lua.Get<float>(L, 1),
 				Lua.Get<float>(L, 2),
-				Lua.Get<float>(L, 3)
+				Lua.Get<float>(L, 3),
+				Lua.Get<float>(L, 4)
 			);
 		Lua.Push(L, obj);
 		return 1;
@@ -217,7 +219,7 @@ public class ColorWrap
 
 	public static void Register(ClassWraper classWraper)
 	{
-		classWraper.RegFunction("ctor", Constructor);
+		classWraper.RegConstructor(Constructor);
 		classWraper.RegField("r", Get_r, Set_r);
 		classWraper.RegField("g", Get_g, Set_g);
 		classWraper.RegField("b", Get_b, Set_b);

@@ -16,6 +16,8 @@ namespace SharpLuna
 
         static readonly (Type classType, MemberTypes memberTypes)[] baseTypes =
         {
+            (typeof(GameObject), MemberTypes.Constructor |  MemberTypes.Field),
+            (typeof(Transform), MemberTypes.Constructor |  MemberTypes.Field),
             (typeof(Vector2), MemberTypes.Constructor |  MemberTypes.Field),
             (typeof(Vector3), MemberTypes.Constructor |  MemberTypes.Field),
             (typeof(Vector4), MemberTypes.Constructor |  MemberTypes.Field),
