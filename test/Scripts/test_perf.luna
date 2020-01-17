@@ -6,8 +6,8 @@ func TestIndex(){
     test.CreateChild()
 	var c = test.Child
 
-	for i = 1,10000000 {		
-		c = test.Child
+	for i = 1,100000 {		
+		c = test.Child		
 		//test.Child = c
 	}
 	
