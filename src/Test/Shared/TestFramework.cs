@@ -99,14 +99,15 @@ namespace Tests
         private void Luna_PreInit()
         {
             string path = "../../../../Test/Shared/Generate/";
-      
-            if (Directory.Exists(path))
-            {
-                luna.RegisterWraps(this.GetType());
-                return;
-            }
+
+            //if (Directory.Exists(path))
+            //{
+            //    luna.RegisterWraps(this.GetType());
+            //    return;
+            //}
      
             WrapGenerator.ExportPath = path;
+            WrapGenerator.GenerateClassWrap(typeof(string));
             WrapGenerator.GenerateClassWrap(typeof(TestStruct));
             WrapGenerator.GenerateClassWrap(typeof(TestClass));
 

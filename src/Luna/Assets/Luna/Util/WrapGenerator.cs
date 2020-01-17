@@ -92,11 +92,36 @@ namespace SharpLuna
                     continue;
                 }
 
-                if (ctor.IsPublic)
+                if(!ctor.IsPublic)
+                {
+                    continue;
+                }
+
+                bool gen = true;
+                foreach (var p in ctor.GetParameters())
+                {
+                    if (p.ParameterType.IsByRef)
+                    {
+                        gen = false;
+                    }
+
+                    if (p.ParameterType.IsPointer)
+                    {
+                        gen = false;
+                    }
+
+                    if (p.ParameterType.IsGenericType)
+                    {
+                        gen = false;
+                    }
+                }
+
+                if (gen)
                 {
                     ctorList.Add(ctor);
                 }
 
+               
             }
 
             if (ctorList.Count > 0)
@@ -122,7 +147,7 @@ namespace SharpLuna
                     }
 
                     GenerateField(type, field, sb);
-                    members.Add((MemberTypes.Field, field.Name, true, !field.IsLiteral));
+                    members.Add((MemberTypes.Field, field.Name, true, !field.IsLiteral && !field.IsInitOnly));
                 }
             }
 
@@ -181,6 +206,11 @@ namespace SharpLuna
                             gen = false;
                         }
 
+                        if (p.ParameterType.IsPointer)
+                        {
+                            gen = false;
+                        }
+
                         if (p.ParameterType.IsGenericType)
                         {
                             gen = false;
@@ -206,7 +236,11 @@ namespace SharpLuna
 
             foreach (var (memberType, name, hasGetter, hasSetter) in members)
             {
-                if (memberType == MemberTypes.Field)
+                if (memberType == MemberTypes.Constructor)
+                {
+                    sb.Append($"\t\tclassWraper.RegConstructor(Constructor);\n");
+                }
+                else if (memberType == MemberTypes.Field)
                 {
                     if (hasGetter || hasSetter)
                     {
@@ -244,9 +278,9 @@ namespace SharpLuna
                         sb.Append($");\n");
                     }
                 }
-                else if (memberType == MemberTypes.Constructor)
+                else if (memberType == MemberTypes.Method)
                 {
-                    sb.Append($"\t\tclassWraper.RegConstructor(Constructor);\n");
+                    sb.Append($"\t\tclassWraper.RegFunction(\"{name}\", {name});\n");
                 }
             }
 
@@ -400,7 +434,7 @@ namespace SharpLuna
         static void GenerateMethod(Type type, MethodInfo[] methodInfo, StringBuilder sb)
         {
             sb.Append("\t[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]\n");
-            sb.Append($"\tstatic int _{methodInfo[0].Name}(IntPtr L)\n\t{{\n");
+            sb.Append($"\tstatic int {methodInfo[0].Name}(IntPtr L)\n\t{{\n");
 
             sb.Append($"\t\tint n = lua_gettop(L) - 1;\n");
             
@@ -417,11 +451,11 @@ namespace SharpLuna
                     if (first)
                     {
                         first = false;
-                        sb.Append($"\t\tif(n == {parameters.Length}){{\n");
+                        sb.Append($"\tif(n == {parameters.Length})\n\t{{\n");
                     }                    
                     else
                     {
-                        sb.Append($"\t\t}} else if(n == {parameters.Length}){{\n");
+                        sb.Append($"\t}} else if(n == {parameters.Length})\n\t{{\n");
                     }
                 }
 
@@ -439,24 +473,29 @@ namespace SharpLuna
 
                 if (method.ReturnType != typeof(void))
                 {
-                    sb.Append("\t\t\tvar ret = ");
+                    sb.Append("\t\tvar ret = ");
                     if (method.IsStatic)
-                        sb.Append($"{type.FullName}.{method.Name}(\n");
+                        sb.Append($"{type.FullName}.{method.Name}(");
                     else
-                        sb.Append($"obj.{method.Name}(\n");
+                        sb.Append($"obj.{method.Name}(");
                 }
                 else
                 {
                     if (method.IsStatic)
-                        sb.Append($"\t\t\t{type.FullName}.{method.Name}(\n");
+                        sb.Append($"\t\t{type.FullName}.{method.Name}(");
                     else
-                        sb.Append($"\t\t\tobj.{method.Name}(\n");
+                        sb.Append($"\t\tobj.{method.Name}(");                    
                 }
-            
+
+                if (parameters.Length > 0)
+                {
+                    sb.Append("\n");
+                }
+                   
                 for (int i = 0; i < parameters.Length; i++)
                 {
                     var paramInfo = parameters[i];
-                    sb.Append($"\t\t\t\tLua.Get<{GetTypeName(paramInfo.ParameterType)}>(L, {(i + 1)})");
+                    sb.Append($"\t\t\tLua.Get<{GetTypeName(paramInfo.ParameterType)}>(L, {(i + 1)})");
                     if (i != parameters.Length - 1)
                     {
                         sb.Append(",");
@@ -464,16 +503,23 @@ namespace SharpLuna
                     sb.AppendLine();
                 }
 
-                sb.Append("\t\t\t);\n");
-
-                if (method.ReturnType != typeof(void))
+                if (parameters.Length > 0)
                 {
-                    sb.Append("\t\t\tLua.Push(L, ret);\n");
-                    sb.Append("\t\t\treturn 1;\n");
+                    sb.Append("\t\t);\n");
                 }
                 else
                 {
-                    sb.Append("\t\t\treturn 0;\n");
+                    sb.Append(");\n");
+                }
+
+                if (method.ReturnType != typeof(void))
+                {
+                    sb.Append("\t\tLua.Push(L, ret);\n");
+                    sb.Append("\t\treturn 1;\n");
+                }
+                else
+                {
+                    sb.Append("\t\treturn 0;\n");
                 }
 
                 if (methodInfo.Length > 1)
