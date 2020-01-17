@@ -24,8 +24,7 @@ namespace Tests
             luna.PreInit += Luna_PreInit;
             luna.PostInit += Luna_PostInit;
             luna.Run();
-            luna.AddSearcher(Loader);
-   
+            luna.AddSearcher(Loader);           
         }
 
         public void Dispose()
@@ -89,7 +88,6 @@ namespace Tests
 
         public void Run()
         {
-
             luna.DoFile("test.luna");
 
             Luna.Log("LiveCount:", RefCountHelper.LiveCount, "FreeCount:", RefCountHelper.FreeCount);

@@ -1,4 +1,4 @@
-﻿//#define FREE_LIST
+﻿#define LUA_WEAKTABLE
 
 using System;
 using System.Collections.Generic;
@@ -18,6 +18,11 @@ namespace SharpLuna
             public readonly static IntPtr value = (IntPtr)typeof(T).GetHashCode();
         }
 
+#if LUA_WEAKTABLE
+        static FreeList<object> freeList = new FreeList<object>(1024);
+        static Dictionary<object, int> obj2id = new Dictionary<object, int>();
+        static int weakTableRef;
+#else
         class UserDataRef : IDisposable
         {
             public int Ref { get; }
@@ -52,24 +57,20 @@ namespace SharpLuna
             }
         }
 
-#if FREE_LIST
-        static FreeList<object> freeList = new FreeList<object>(1024);
-        static int cacheRef;
-#else
         static ConditionalWeakTable<object, UserDataRef> objectUserData = new ConditionalWeakTable<object, UserDataRef>();
 
 #endif
 
         public static void Init(lua_State L)
         {
-#if FREE_LIST
+#if LUA_WEAKTABLE
             lua_newtable(L);
             lua_newtable(L);
             lua_pushstring(L, "__mode");
             lua_pushstring(L, "v");
             lua_rawset(L, -3);
             lua_setmetatable(L, -2);
-            cacheRef = luaL_ref(L, LUA_REGISTRYINDEX);
+            weakTableRef = luaL_ref(L, LUA_REGISTRYINDEX);
 #endif
         }
 
@@ -103,8 +104,14 @@ namespace SharpLuna
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void PushToStack<T>(lua_State L, T obj)
         {
-#if FREE_LIST
-
+#if LUA_WEAKTABLE
+            if (obj2id.TryGetValue(obj, out var key))
+            {
+                if (TryGetUserData(L, key, weakTableRef) == 1)
+                {
+                    return;
+                }
+            }
 #else
             if (objectUserData.TryGetValue(obj, out var userRef))
             {
@@ -118,8 +125,14 @@ namespace SharpLuna
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void PushToStack<T>(lua_State L, object obj)
         {
-#if FREE_LIST
-
+#if LUA_WEAKTABLE
+            if (obj2id.TryGetValue(obj, out var key))
+            {
+                if (TryGetUserData(L, key, weakTableRef) == 1)
+                {
+                    return;
+                }
+            }
 #else
             if (objectUserData.TryGetValue(obj, out var userRef))
             {
@@ -150,23 +163,27 @@ namespace SharpLuna
             //             }
 
             IntPtr mem = lua_newuserdata(L, (UIntPtr)sizeof(long));
-            lua_rawgetp(L, LUA_REGISTRYINDEX, classId);
-            luaL_checktype(L, -1, (int)LuaType.Table);
-            lua_setmetatable(L, -2);
-
-            int userRef = luaL_ref(L, LUA_REGISTRYINDEX);
-            lua_rawgeti(L, LUA_REGISTRYINDEX, userRef);
-
-#if FREE_LIST
+       
+#if LUA_WEAKTABLE
             long id = freeList.Alloc(obj);
             *((long*)mem) = id;
+            obj2id.Add(obj, (int)id);
+
+            CacheUserData(L, id, weakTableRef);
 #else
             GCHandle gc = GCHandle.Alloc(obj, GCHandleType.Weak);
             Unsafe.Write((void*)mem, GCHandle.ToIntPtr(gc));
-            UserDataRef userDataRef = new UserDataRef(L, userRef);          
+
+            int userRef = luaL_ref(L, LUA_REGISTRYINDEX);
+            lua_rawgeti(L, LUA_REGISTRYINDEX, userRef);
+            UserDataRef userDataRef = new UserDataRef(L, userRef);
             objectUserData.Add(obj, userDataRef);
 #endif
-
+            lua_rawgetp(L, LUA_REGISTRYINDEX, classId);
+#if DEBUG
+            luaL_checktype(L, -1, (int)LuaType.Table);
+#endif
+            lua_setmetatable(L, -2);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -186,7 +203,7 @@ namespace SharpLuna
 //             else
             {
                 var handle = GetHandler<T>(L, index);
-#if FREE_LIST
+#if LUA_WEAKTABLE
                 return ref Unsafe.Unbox<T>(freeList[(int)handle]);
 #else
                 return ref Unsafe.Unbox<T>(GCHandle.FromIntPtr((IntPtr)handle).Target);
@@ -204,7 +221,7 @@ namespace SharpLuna
 //             }
 
             var handle = GetHandler<T>(L, index);
-#if FREE_LIST
+#if LUA_WEAKTABLE
             return (T)freeList[(int)handle];
 #else
             return (T)GCHandle.FromIntPtr((IntPtr)handle).Target;
@@ -232,7 +249,9 @@ namespace SharpLuna
             //             }
 
             var handle = GetHandler<T>(L, index);
-#if FREE_LIST
+#if LUA_WEAKTABLE
+            var obj = freeList[(int)handle];
+            obj2id.Remove(obj);
             freeList.Free((int)handle);
 #else
             GCHandle gCHandle = GCHandle.FromIntPtr((IntPtr)handle);
@@ -242,6 +261,27 @@ namespace SharpLuna
             }
 #endif
         }
+#if LUA_WEAKTABLE
+        static int TryGetUserData(lua_State L, long key, int cache_ref)
+        {
+            lua_rawgeti(L, LUA_REGISTRYINDEX, cache_ref);
+            lua_rawgeti(L, -1, key);
+            if (!lua_isnil(L, -1))
+            {
+                lua_remove(L, -2);
+                return 1;
+            }
+            lua_pop(L, 2);
+            return 0;
+        }
 
+        static void CacheUserData(lua_State L, long key, int cache_ref)
+        {
+            lua_rawgeti(L, LUA_REGISTRYINDEX, cache_ref);
+            lua_pushvalue(L, -2);
+            lua_rawseti(L, -2, key);
+            lua_pop(L, 1);
+        }
+#endif
     }
 }

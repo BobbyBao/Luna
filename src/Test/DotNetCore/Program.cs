@@ -10,6 +10,8 @@ namespace Tests
             using (var test = new TestFramework())
             {
                 //test.Run();
+
+
                 test.Luna.DoFile("test_perf.luna");
             }
         }
