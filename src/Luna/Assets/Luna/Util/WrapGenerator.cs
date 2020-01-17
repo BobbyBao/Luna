@@ -145,6 +145,58 @@ namespace SharpLuna
                 members.Add((MemberTypes.Property, prop.Name, prop.CanRead, prop.CanWrite));
             }
 
+
+            var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
+            foreach (var method in methods)
+            {
+                if (method.IsSpecialName)
+                {
+                    continue;
+                }
+
+                if (!method.ShouldExport())
+                {
+                    continue;
+                }
+
+                if (members.FindIndex((t) => t.Item2 == method.Name) != -1)
+                {
+                    continue;
+                }
+
+                var memberInfo = type.GetMember(method.Name);
+                List<MethodInfo> methodInfos = new List<MethodInfo>();//[memberInfo.Length];
+                foreach (var m in memberInfo)
+                {
+                    if (!(m is MethodInfo mi))
+                    {
+                        continue;
+                    }
+
+                    foreach (var p in mi.GetParameters())
+                    {
+                        if (p.ParameterType.IsByRef)
+                        {
+                            continue;
+                        }
+
+                        if (p.ParameterType.IsGenericType)
+                        {
+                            continue;
+                        }
+                    }
+
+                    if (m.ShouldExport())
+                    {
+                        methodInfos.Add((MethodInfo)m);
+                    }
+                }
+
+                GenerateMethod(type, methodInfos.ToArray(), sb);
+                members.Add((MemberTypes.Method, method.Name, false, false));
+            }
+
+
             sb.Append($"\tpublic static void Register(ClassWraper classWraper)\n\t{{\n");
 
             foreach (var (memberType, name, hasGetter, hasSetter) in members)
@@ -339,6 +391,103 @@ namespace SharpLuna
             }
             
         }
+
+        static void GenerateMethod(Type type, MethodInfo[] methodInfo, StringBuilder sb)
+        {
+            sb.Append("\t[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]\n");
+            sb.Append($"\tstatic int _{methodInfo[0].Name}(IntPtr L)\n\t{{\n");
+
+            sb.Append($"\t\tint n = lua_gettop(L) - 1;\n");
+            
+
+            bool first = true;
+            int idx = 0;
+            foreach (var method in methodInfo)
+            {
+                idx++;
+                var parameters = method.GetParameters();
+               
+                if (methodInfo.Length > 1)
+                {
+                    if (first)
+                    {
+                        first = false;
+                        sb.Append($"\t\tif(n == {parameters.Length}){{\n");
+                    }
+                    else if(idx == methodInfo.Length)
+                    {
+                        sb.Append($"\t\t}} else(n == {parameters.Length}){{\n");
+                    }
+                    else
+                    {
+                        sb.Append($"\t\t}} else if(n == {parameters.Length}){{\n");
+                    }
+
+                if (!method.IsStatic)
+                {
+                    if (type.IsUnManaged())
+                    {
+                        sb.Append($"\t\tref var obj = ref SharpObject.GetValue<{type.FullName}>(L, 1);\n");
+                    }
+                    else
+                    {
+                        sb.Append($"\t\tvar obj = SharpObject.Get<{type.FullName}>(L, 1);\n");
+                    }
+                }
+
+                if (method.ReturnType != typeof(void))
+                {
+                    sb.Append("\t\t\tvar ret = ");
+                    if (method.IsStatic)
+                        sb.Append($"{type.FullName}.{method.Name}(\n");
+                    else
+                        sb.Append($"obj.{method.Name}(\n");
+                }
+                else
+                {
+                    if (method.IsStatic)
+                        sb.Append($"\t\t\t{type.FullName}.{method.Name}(\n");
+                    else
+                        sb.Append($"\t\t\tobj.{method.Name}(\n");
+                }
+            
+                for (int i = 0; i < parameters.Length; i++)
+                {
+                    var paramInfo = parameters[i];
+                    sb.Append($"\t\t\t\tLua.Get<{GetTypeName(paramInfo.ParameterType)}>(L, {(i + 1)})");
+                    if (i != parameters.Length - 1)
+                    {
+                        sb.Append(",");
+                    }
+                    sb.AppendLine();
+                }
+
+                sb.Append("\t\t\t);\n");
+
+                if (method.ReturnType != typeof(void))
+                {
+                    sb.Append("\t\t\tLua.Push(L, ret);\n");
+                    sb.Append("\t\t\treturn 1;\n");
+                }
+                else
+                {
+                    sb.Append("\t\t\treturn 0;\n");
+                }
+
+                if (methodInfo.Length > 1)
+                {
+                    if (idx == methodInfo.Length)
+                    {
+                        sb.Append("\t\t}\n");
+                    }
+
+                }
+            }
+
+            sb.Append("\t}\n");
+            sb.AppendLine();
+        }
+
     }
 
 }
