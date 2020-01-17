@@ -188,18 +188,18 @@ public class Vector3Wrap
 		classWraper.RegField("x", Get_x, Set_x);
 		classWraper.RegField("y", Get_y, Set_y);
 		classWraper.RegField("z", Get_z, Set_z);
-		classWraper.RegProp("normalized", Get_normalized);
-		classWraper.RegProp("magnitude", Get_magnitude);
-		classWraper.RegProp("sqrMagnitude", Get_sqrMagnitude);
-		classWraper.RegProp("zero", Get_zero);
-		classWraper.RegProp("one", Get_one);
-		classWraper.RegProp("forward", Get_forward);
-		classWraper.RegProp("back", Get_back);
-		classWraper.RegProp("up", Get_up);
-		classWraper.RegProp("down", Get_down);
-		classWraper.RegProp("left", Get_left);
-		classWraper.RegProp("right", Get_right);
-		classWraper.RegProp("positiveInfinity", Get_positiveInfinity);
-		classWraper.RegProp("negativeInfinity", Get_negativeInfinity);
+		classWraper.RegProperty("normalized", Get_normalized);
+		classWraper.RegProperty("magnitude", Get_magnitude);
+		classWraper.RegProperty("sqrMagnitude", Get_sqrMagnitude);
+		classWraper.RegProperty("zero", Get_zero);
+		classWraper.RegProperty("one", Get_one);
+		classWraper.RegProperty("forward", Get_forward);
+		classWraper.RegProperty("back", Get_back);
+		classWraper.RegProperty("up", Get_up);
+		classWraper.RegProperty("down", Get_down);
+		classWraper.RegProperty("left", Get_left);
+		classWraper.RegProperty("right", Get_right);
+		classWraper.RegProperty("positiveInfinity", Get_positiveInfinity);
+		classWraper.RegProperty("negativeInfinity", Get_negativeInfinity);
 	}
 }

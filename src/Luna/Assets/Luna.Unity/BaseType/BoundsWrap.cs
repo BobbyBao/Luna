@@ -109,10 +109,10 @@ public class BoundsWrap
 	public static void Register(ClassWraper classWraper)
 	{
 		classWraper.RegConstructor(Constructor);
-		classWraper.RegProp("center", Get_center, Set_center);
-		classWraper.RegProp("size", Get_size, Set_size);
-		classWraper.RegProp("extents", Get_extents, Set_extents);
-		classWraper.RegProp("min", Get_min, Set_min);
-		classWraper.RegProp("max", Get_max, Set_max);
+		classWraper.RegProperty("center", Get_center, Set_center);
+		classWraper.RegProperty("size", Get_size, Set_size);
+		classWraper.RegProperty("extents", Get_extents, Set_extents);
+		classWraper.RegProperty("min", Get_min, Set_min);
+		classWraper.RegProperty("max", Get_max, Set_max);
 	}
 }

@@ -245,19 +245,19 @@ public class TouchWrap
 
 	public static void Register(ClassWraper classWraper)
 	{
-		classWraper.RegProp("fingerId", Get_fingerId, Set_fingerId);
-		classWraper.RegProp("position", Get_position, Set_position);
-		classWraper.RegProp("rawPosition", Get_rawPosition, Set_rawPosition);
-		classWraper.RegProp("deltaPosition", Get_deltaPosition, Set_deltaPosition);
-		classWraper.RegProp("deltaTime", Get_deltaTime, Set_deltaTime);
-		classWraper.RegProp("tapCount", Get_tapCount, Set_tapCount);
-		classWraper.RegProp("phase", Get_phase, Set_phase);
-		classWraper.RegProp("pressure", Get_pressure, Set_pressure);
-		classWraper.RegProp("maximumPossiblePressure", Get_maximumPossiblePressure, Set_maximumPossiblePressure);
-		classWraper.RegProp("type", Get_type, Set_type);
-		classWraper.RegProp("altitudeAngle", Get_altitudeAngle, Set_altitudeAngle);
-		classWraper.RegProp("azimuthAngle", Get_azimuthAngle, Set_azimuthAngle);
-		classWraper.RegProp("radius", Get_radius, Set_radius);
-		classWraper.RegProp("radiusVariance", Get_radiusVariance, Set_radiusVariance);
+		classWraper.RegProperty("fingerId", Get_fingerId, Set_fingerId);
+		classWraper.RegProperty("position", Get_position, Set_position);
+		classWraper.RegProperty("rawPosition", Get_rawPosition, Set_rawPosition);
+		classWraper.RegProperty("deltaPosition", Get_deltaPosition, Set_deltaPosition);
+		classWraper.RegProperty("deltaTime", Get_deltaTime, Set_deltaTime);
+		classWraper.RegProperty("tapCount", Get_tapCount, Set_tapCount);
+		classWraper.RegProperty("phase", Get_phase, Set_phase);
+		classWraper.RegProperty("pressure", Get_pressure, Set_pressure);
+		classWraper.RegProperty("maximumPossiblePressure", Get_maximumPossiblePressure, Set_maximumPossiblePressure);
+		classWraper.RegProperty("type", Get_type, Set_type);
+		classWraper.RegProperty("altitudeAngle", Get_altitudeAngle, Set_altitudeAngle);
+		classWraper.RegProperty("azimuthAngle", Get_azimuthAngle, Set_azimuthAngle);
+		classWraper.RegProperty("radius", Get_radius, Set_radius);
+		classWraper.RegProperty("radiusVariance", Get_radiusVariance, Set_radiusVariance);
 	}
 }

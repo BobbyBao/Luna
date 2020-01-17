@@ -224,20 +224,20 @@ public class ColorWrap
 		classWraper.RegField("g", Get_g, Set_g);
 		classWraper.RegField("b", Get_b, Set_b);
 		classWraper.RegField("a", Get_a, Set_a);
-		classWraper.RegProp("red", Get_red);
-		classWraper.RegProp("green", Get_green);
-		classWraper.RegProp("blue", Get_blue);
-		classWraper.RegProp("white", Get_white);
-		classWraper.RegProp("black", Get_black);
-		classWraper.RegProp("yellow", Get_yellow);
-		classWraper.RegProp("cyan", Get_cyan);
-		classWraper.RegProp("magenta", Get_magenta);
-		classWraper.RegProp("gray", Get_gray);
-		classWraper.RegProp("grey", Get_grey);
-		classWraper.RegProp("clear", Get_clear);
-		classWraper.RegProp("grayscale", Get_grayscale);
-		classWraper.RegProp("linear", Get_linear);
-		classWraper.RegProp("gamma", Get_gamma);
-		classWraper.RegProp("maxColorComponent", Get_maxColorComponent);
+		classWraper.RegProperty("red", Get_red);
+		classWraper.RegProperty("green", Get_green);
+		classWraper.RegProperty("blue", Get_blue);
+		classWraper.RegProperty("white", Get_white);
+		classWraper.RegProperty("black", Get_black);
+		classWraper.RegProperty("yellow", Get_yellow);
+		classWraper.RegProperty("cyan", Get_cyan);
+		classWraper.RegProperty("magenta", Get_magenta);
+		classWraper.RegProperty("gray", Get_gray);
+		classWraper.RegProperty("grey", Get_grey);
+		classWraper.RegProperty("clear", Get_clear);
+		classWraper.RegProperty("grayscale", Get_grayscale);
+		classWraper.RegProperty("linear", Get_linear);
+		classWraper.RegProperty("gamma", Get_gamma);
+		classWraper.RegProperty("maxColorComponent", Get_maxColorComponent);
 	}
 }

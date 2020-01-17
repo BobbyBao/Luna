@@ -343,29 +343,29 @@ public class TransformWrap
 
 	public static void Register(ClassWraper classWraper)
 	{
-		classWraper.RegProp("position", Get_position, Set_position);
-		classWraper.RegProp("localPosition", Get_localPosition, Set_localPosition);
-		classWraper.RegProp("eulerAngles", Get_eulerAngles, Set_eulerAngles);
-		classWraper.RegProp("localEulerAngles", Get_localEulerAngles, Set_localEulerAngles);
-		classWraper.RegProp("right", Get_right, Set_right);
-		classWraper.RegProp("up", Get_up, Set_up);
-		classWraper.RegProp("forward", Get_forward, Set_forward);
-		classWraper.RegProp("rotation", Get_rotation, Set_rotation);
-		classWraper.RegProp("localRotation", Get_localRotation, Set_localRotation);
-		classWraper.RegProp("localScale", Get_localScale, Set_localScale);
-		classWraper.RegProp("parent", Get_parent, Set_parent);
-		classWraper.RegProp("worldToLocalMatrix", Get_worldToLocalMatrix);
-		classWraper.RegProp("localToWorldMatrix", Get_localToWorldMatrix);
-		classWraper.RegProp("root", Get_root);
-		classWraper.RegProp("childCount", Get_childCount);
-		classWraper.RegProp("lossyScale", Get_lossyScale);
-		classWraper.RegProp("hasChanged", Get_hasChanged, Set_hasChanged);
-		classWraper.RegProp("hierarchyCapacity", Get_hierarchyCapacity, Set_hierarchyCapacity);
-		classWraper.RegProp("hierarchyCount", Get_hierarchyCount);
-		classWraper.RegProp("transform", Get_transform);
-		classWraper.RegProp("gameObject", Get_gameObject);
-		classWraper.RegProp("tag", Get_tag, Set_tag);
-		classWraper.RegProp("name", Get_name, Set_name);
-		classWraper.RegProp("hideFlags", Get_hideFlags, Set_hideFlags);
+		classWraper.RegProperty("position", Get_position, Set_position);
+		classWraper.RegProperty("localPosition", Get_localPosition, Set_localPosition);
+		classWraper.RegProperty("eulerAngles", Get_eulerAngles, Set_eulerAngles);
+		classWraper.RegProperty("localEulerAngles", Get_localEulerAngles, Set_localEulerAngles);
+		classWraper.RegProperty("right", Get_right, Set_right);
+		classWraper.RegProperty("up", Get_up, Set_up);
+		classWraper.RegProperty("forward", Get_forward, Set_forward);
+		classWraper.RegProperty("rotation", Get_rotation, Set_rotation);
+		classWraper.RegProperty("localRotation", Get_localRotation, Set_localRotation);
+		classWraper.RegProperty("localScale", Get_localScale, Set_localScale);
+		classWraper.RegProperty("parent", Get_parent, Set_parent);
+		classWraper.RegProperty("worldToLocalMatrix", Get_worldToLocalMatrix);
+		classWraper.RegProperty("localToWorldMatrix", Get_localToWorldMatrix);
+		classWraper.RegProperty("root", Get_root);
+		classWraper.RegProperty("childCount", Get_childCount);
+		classWraper.RegProperty("lossyScale", Get_lossyScale);
+		classWraper.RegProperty("hasChanged", Get_hasChanged, Set_hasChanged);
+		classWraper.RegProperty("hierarchyCapacity", Get_hierarchyCapacity, Set_hierarchyCapacity);
+		classWraper.RegProperty("hierarchyCount", Get_hierarchyCount);
+		classWraper.RegProperty("transform", Get_transform);
+		classWraper.RegProperty("gameObject", Get_gameObject);
+		classWraper.RegProperty("tag", Get_tag, Set_tag);
+		classWraper.RegProperty("name", Get_name, Set_name);
+		classWraper.RegProperty("hideFlags", Get_hideFlags, Set_hideFlags);
 	}
 }

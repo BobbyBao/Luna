@@ -58,7 +58,7 @@ public class RayWrap
 	public static void Register(ClassWraper classWraper)
 	{
 		classWraper.RegConstructor(Constructor);
-		classWraper.RegProp("origin", Get_origin, Set_origin);
-		classWraper.RegProp("direction", Get_direction, Set_direction);
+		classWraper.RegProperty("origin", Get_origin, Set_origin);
+		classWraper.RegProperty("direction", Get_direction, Set_direction);
 	}
 }

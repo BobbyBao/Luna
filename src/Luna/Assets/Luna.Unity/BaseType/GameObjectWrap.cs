@@ -153,15 +153,15 @@ public class GameObjectWrap
 	public static void Register(ClassWraper classWraper)
 	{
 		classWraper.RegConstructor(Constructor);
-		classWraper.RegProp("transform", Get_transform);
-		classWraper.RegProp("layer", Get_layer, Set_layer);
-		classWraper.RegProp("activeSelf", Get_activeSelf);
-		classWraper.RegProp("activeInHierarchy", Get_activeInHierarchy);
-		classWraper.RegProp("isStatic", Get_isStatic, Set_isStatic);
-		classWraper.RegProp("tag", Get_tag, Set_tag);
-		classWraper.RegProp("scene", Get_scene);
-		classWraper.RegProp("gameObject", Get_gameObject);
-		classWraper.RegProp("name", Get_name, Set_name);
-		classWraper.RegProp("hideFlags", Get_hideFlags, Set_hideFlags);
+		classWraper.RegProperty("transform", Get_transform);
+		classWraper.RegProperty("layer", Get_layer, Set_layer);
+		classWraper.RegProperty("activeSelf", Get_activeSelf);
+		classWraper.RegProperty("activeInHierarchy", Get_activeInHierarchy);
+		classWraper.RegProperty("isStatic", Get_isStatic, Set_isStatic);
+		classWraper.RegProperty("tag", Get_tag, Set_tag);
+		classWraper.RegProperty("scene", Get_scene);
+		classWraper.RegProperty("gameObject", Get_gameObject);
+		classWraper.RegProperty("name", Get_name, Set_name);
+		classWraper.RegProperty("hideFlags", Get_hideFlags, Set_hideFlags);
 	}
 }

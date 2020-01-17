@@ -131,16 +131,16 @@ public class RaycastHitWrap
 
 	public static void Register(ClassWraper classWraper)
 	{
-		classWraper.RegProp("collider", Get_collider);
-		classWraper.RegProp("point", Get_point, Set_point);
-		classWraper.RegProp("normal", Get_normal, Set_normal);
-		classWraper.RegProp("barycentricCoordinate", Get_barycentricCoordinate, Set_barycentricCoordinate);
-		classWraper.RegProp("distance", Get_distance, Set_distance);
-		classWraper.RegProp("triangleIndex", Get_triangleIndex);
-		classWraper.RegProp("textureCoord", Get_textureCoord);
-		classWraper.RegProp("textureCoord2", Get_textureCoord2);
-		classWraper.RegProp("transform", Get_transform);
-		classWraper.RegProp("rigidbody", Get_rigidbody);
-		classWraper.RegProp("lightmapCoord", Get_lightmapCoord);
+		classWraper.RegProperty("collider", Get_collider);
+		classWraper.RegProperty("point", Get_point, Set_point);
+		classWraper.RegProperty("normal", Get_normal, Set_normal);
+		classWraper.RegProperty("barycentricCoordinate", Get_barycentricCoordinate, Set_barycentricCoordinate);
+		classWraper.RegProperty("distance", Get_distance, Set_distance);
+		classWraper.RegProperty("triangleIndex", Get_triangleIndex);
+		classWraper.RegProperty("textureCoord", Get_textureCoord);
+		classWraper.RegProperty("textureCoord2", Get_textureCoord2);
+		classWraper.RegProperty("transform", Get_transform);
+		classWraper.RegProperty("rigidbody", Get_rigidbody);
+		classWraper.RegProperty("lightmapCoord", Get_lightmapCoord);
 	}
 }

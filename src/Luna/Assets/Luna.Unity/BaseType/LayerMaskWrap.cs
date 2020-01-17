@@ -24,6 +24,6 @@ public class LayerMaskWrap
 
 	public static void Register(ClassWraper classWraper)
 	{
-		classWraper.RegProp("value", Get_value, Set_value);
+		classWraper.RegProperty("value", Get_value, Set_value);
 	}
 }

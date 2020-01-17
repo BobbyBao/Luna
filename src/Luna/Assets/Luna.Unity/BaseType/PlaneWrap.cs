@@ -77,8 +77,8 @@ public class PlaneWrap
 	public static void Register(ClassWraper classWraper)
 	{
 		classWraper.RegConstructor(Constructor);
-		classWraper.RegProp("normal", Get_normal, Set_normal);
-		classWraper.RegProp("distance", Get_distance, Set_distance);
-		classWraper.RegProp("flipped", Get_flipped);
+		classWraper.RegProperty("normal", Get_normal, Set_normal);
+		classWraper.RegProperty("distance", Get_distance, Set_distance);
+		classWraper.RegProperty("flipped", Get_flipped);
 	}
 }

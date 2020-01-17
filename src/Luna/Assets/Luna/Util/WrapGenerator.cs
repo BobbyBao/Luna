@@ -271,16 +271,16 @@ namespace SharpLuna
 
         static void GenerateField(Type type, FieldInfo field, StringBuilder sb)
         {
-            GenerateVal(type, field.Name, field.IsStatic, field.FieldType, sb, true, true);
+            GenerateVariable(type, field.Name, field.IsStatic, field.FieldType, sb, true, true);
         }
 
         static void GenerateProperty(Type type, PropertyInfo propertyInfo, StringBuilder sb)
         {
-            GenerateVal(type, propertyInfo.Name, propertyInfo.GetMethod.IsStatic,
+            GenerateVariable(type, propertyInfo.Name, propertyInfo.GetMethod.IsStatic,
                 propertyInfo.PropertyType, sb, propertyInfo.CanRead, propertyInfo.CanWrite);
         }
 
-        static void GenerateVal(Type type, string name, bool isStatic, Type valType, StringBuilder sb, bool read, bool write)
+        static void GenerateVariable(Type type, string name, bool isStatic, Type valType, StringBuilder sb, bool read, bool write)
         {
             if (read)
             {

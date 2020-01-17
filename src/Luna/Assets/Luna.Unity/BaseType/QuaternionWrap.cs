@@ -131,8 +131,8 @@ public class QuaternionWrap
 		classWraper.RegField("y", Get_y, Set_y);
 		classWraper.RegField("z", Get_z, Set_z);
 		classWraper.RegField("w", Get_w, Set_w);
-		classWraper.RegProp("identity", Get_identity);
-		classWraper.RegProp("eulerAngles", Get_eulerAngles, Set_eulerAngles);
-		classWraper.RegProp("normalized", Get_normalized);
+		classWraper.RegProperty("identity", Get_identity);
+		classWraper.RegProperty("eulerAngles", Get_eulerAngles, Set_eulerAngles);
+		classWraper.RegProperty("normalized", Get_normalized);
 	}
 }
