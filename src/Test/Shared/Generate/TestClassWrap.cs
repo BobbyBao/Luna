@@ -106,8 +106,8 @@ public class TestClassWrap
 		classWraper.RegFunction("ctor", Constructor);
 		classWraper.RegField("variable", Get_variable, Set_variable);
 		classWraper.RegField("staticVar", Get_staticVar, Set_staticVar);
-		classWraper.RegProp("staticProp", Get_staticProp, Set_staticProp);
-		classWraper.RegProp("name", Get_name, Set_name);
-		classWraper.RegProp("Child", Get_Child, Set_Child);
+		classWraper.RegProperty("staticProp", Get_staticProp, Set_staticProp);
+		classWraper.RegProperty("name", Get_name, Set_name);
+		classWraper.RegProperty("Child", Get_Child, Set_Child);
 	}
 }

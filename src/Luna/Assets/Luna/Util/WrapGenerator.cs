@@ -172,7 +172,7 @@ namespace SharpLuna
                 {
                     if (hasGetter || hasSetter)
                     {
-                        sb.Append($"\t\tclassWraper.RegProp(\"{name}\"");
+                        sb.Append($"\t\tclassWraper.RegProperty(\"{name}\"");
 
                         if (hasGetter)
                         {

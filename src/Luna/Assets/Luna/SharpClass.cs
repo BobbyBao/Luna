@@ -544,32 +544,30 @@ namespace SharpLuna
             return this;
         }
 
-        public SharpClass RegMethod(string name)
-        {
-            return RegMethod(classType, name);
-        }
-
-        public SharpClass RegMethod<T>(string name)
-        {
-            return RegMethod(typeof(T), name);
-        }
-
         public SharpClass RegMethod(Type classType, string name)
         {
+            MethodInfo methodInfo = classType.GetMethod(name);
+
+            return RegMethod(methodInfo);
+        }
+
+        public SharpClass RegMethod(MethodInfo methodInfo)
+        {
+            string name = methodInfo.Name;
             if (classInfo != null)
             {
                 if (classInfo.TryGetValue(name, out var methodConfig))
                 {
                     if (methodConfig.getter != null)
                     {
-                        var luaFun = LuaRef.CreateFunction(State, methodConfig.func);
+                        var fn = LuaRef.CreateFunction(State, methodConfig.func);
                         if (IsTagMethod(name, out var tag))
                         {
-                            m_meta.RawSet(tag, luaFun);
+                            m_meta.RawSet(tag, fn);
                         }
                         else
                         {
-                            m_meta.RawSet(name, luaFun);
+                            m_meta.RawSet(name, fn);
                         }
                     }
 
@@ -577,12 +575,13 @@ namespace SharpLuna
                 }
             }
 
-            MethodInfo methodInfo = classType.GetMethod(name);
-            return RegMethod(methodInfo);
-        }
+            MemberInfo[] memberInfo = classType.GetMember(methodInfo.Name);
+            if (memberInfo.Length > 1)
+            {
+                //todo:同名函数处理
+                //Luna.Log("同名函数");
+            }
 
-        public SharpClass RegMethod(MethodInfo methodInfo)
-        {
             var luaFun = RegMethod(methodInfo, false);
             if (luaFun)
             {
@@ -599,7 +598,6 @@ namespace SharpLuna
             return this;
         }
 
-        //todo:同名函数处理
         public LuaRef RegMethod(MethodInfo methodInfo, bool isProp)
         {
             Type typeOfResult = methodInfo.ReturnType;

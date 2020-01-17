@@ -585,16 +585,20 @@ namespace SharpLuna
 
     public class MethodWraper
     {
-        public LuaNativeFunction func;
-        public LuaNativeFunction getter;
-        public LuaNativeFunction setter;
+        public ref LuaNativeFunction func => ref funcs[0];
+        public ref LuaNativeFunction setter => ref funcs[1];
+        public ref LuaNativeFunction getter => ref funcs[2];
+        //同一个名字的函数，最多支持8种不同参数类型
+        public LuaNativeFunction[] funcs = new LuaNativeFunction[8];
     }
 
     public class ClassWraper : Dictionary<string, MethodWraper>
     {
-        public void RegField(string name, LuaNativeFunction getter, LuaNativeFunction setter = null) => RegProp(name, getter, setter);
+        public void RegConstructor(LuaNativeFunction func) => RegFunction("ctor", func);
 
-        public void RegProp(string name, LuaNativeFunction getter, LuaNativeFunction setter = null)
+        public void RegField(string name, LuaNativeFunction getter, LuaNativeFunction setter = null) => RegProperty(name, getter, setter);
+
+        public void RegProperty(string name, LuaNativeFunction getter, LuaNativeFunction setter = null)
         {
             if (!TryGetValue(name, out var methodWraper))
             {
@@ -605,8 +609,6 @@ namespace SharpLuna
             methodWraper.getter = getter;
             methodWraper.setter = setter;
         }
-
-        public void RegConstructor(LuaNativeFunction func) => RegFunction("ctor", func);
 
         public void RegFunction(string name, LuaNativeFunction func)
         {
