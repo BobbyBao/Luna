@@ -372,7 +372,7 @@ namespace SharpLuna
                 SetGetter(fieldInfo.Name, getter);
 
                 var setMethodInfo = fieldDelType.GetMethod("Setter", BindingFlags.Static | BindingFlags.Public);
-                var setDel = DelegateCache.GetInvokeer(getMethodInfo, fieldInfo);// (Delegate)setMethodInfo.Invoke(null, new[] { fieldInfo });
+                var setDel = DelegateCache.GetInvokeer(setMethodInfo, fieldInfo);// (Delegate)setMethodInfo.Invoke(null, new[] { fieldInfo });
                 var setCallerType = typeof(ActionCaller<>).MakeGenericType(fieldInfo.FieldType);
                 var setMethodCaller = setCallerType.GetMethod("Call", BindingFlags.Static | BindingFlags.Public);
                 var setLuaDel = (LuaNativeFunction)DelegateCache.Get(typeof(LuaNativeFunction), setMethodCaller);

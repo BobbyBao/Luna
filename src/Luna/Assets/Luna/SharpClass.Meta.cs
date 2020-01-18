@@ -95,57 +95,6 @@ namespace SharpLuna
             return full_name;
         }
 
-        protected static bool BuildMetaTable(ref LuaRef meta, LuaRef parent, string name, int clazz_id)
-        {
-            LuaRef @ref = parent.RawGet<LuaRef, string>(name);
-            if (@ref)
-            {
-                meta = @ref;
-                return false;
-            }
-
-            var L = parent.State;
-            string type_name = "class<" + GetFullName(parent, name) + ">";
-
-            LuaRef type_clazz = LuaRef.FromValue(L, clazz_id);
-            LuaRef clazz = LuaRef.CreateTable(L);
-            clazz.SetMetaTable(clazz);
-
-#if CS_META
-            clazz.RawSet("__index", (LuaNativeFunction)class_index);
-            clazz.RawSet("__newindex", (LuaNativeFunction)class_newindex);
-#else
-            clazz.RawSet("__index", (LuaNativeFunction)luna_class_index);
-            clazz.RawSet("__newindex", (LuaNativeFunction)luna_class_newindex);
-#endif
-            clazz.RawSet(___getters, LuaRef.CreateTable(L));
-            clazz.RawSet(___setters, LuaRef.CreateTable(L));
-            clazz.RawSet(___type, type_name);
-
-            LuaRef registry = new LuaRef(L, LUA_REGISTRYINDEX);
-            registry.RawSet(type_clazz/*clazz_id*/, clazz);
-            parent.RawSet(name, clazz);
-            meta = clazz;
-            return true;
-        }
-
-        protected static bool BuildMetaTable(ref LuaRef meta, LuaRef parent, string name,
-            int clazz_id, int super_static_id)
-        {
-            if (BuildMetaTable(ref meta, parent, name, clazz_id))
-            {
-                if (super_static_id != 0)
-                {
-                    LuaRef registry = new LuaRef(parent.State, LUA_REGISTRYINDEX);
-                    LuaRef super = registry.RawGet<LuaRef>(super_static_id);
-                    meta.RawSet(___super, super);
-                }
-
-                return true;
-            }
-            return false;
-        }
-
         public static SharpClass Bind<T>(SharpClass parentMeta)
         {
             Type classType = typeof(T);
@@ -156,7 +105,7 @@ namespace SharpLuna
 
             var name = GetTableName(classType);        
             LuaRef meta = LuaRef.None;
-            if (BuildMetaTable(ref meta, parentMeta.Meta, name, SharpObject.Signature<T>()))
+            if (CreateClass(ref meta, parentMeta.Meta, name, SharpObject.Signature<T>()))
             {
                 meta.RawSet("__gc", (LuaNativeFunction)ClassDestructor<T>.Call);
             }
@@ -206,7 +155,6 @@ namespace SharpLuna
                     var callerType = typeof(ClassDestructor<>).MakeGenericType(classType);
                     MethodInfo CallInnerDelegateMethod = callerType.GetMethod("Call", BindingFlags.Static | BindingFlags.Public);
                     var luaFunc = (LuaNativeFunction)DelegateCache.Get(typeof(LuaNativeFunction), CallInnerDelegateMethod);
-
                     meta.RawSet("__gc", luaFunc);
                 }
                 catch
@@ -220,7 +168,58 @@ namespace SharpLuna
             registeredClass.Add(classType, bindClass);
             return bindClass;
         }
-         
+
+        protected static bool CreateClass(ref LuaRef meta, LuaRef parent, string name, int classId)
+        {
+            LuaRef @ref = parent.RawGet<LuaRef, string>(name);
+            if (@ref)
+            {
+                meta = @ref;
+                return false;
+            }
+
+            var L = parent.State;
+            string type_name = "class<" + GetFullName(parent, name) + ">";
+
+            LuaRef typeClass = LuaRef.FromValue(L, classId);
+            LuaRef cls = LuaRef.CreateTable(L);
+            cls.SetMetaTable(cls);
+
+#if CS_META
+            cls.RawSet("__index", (LuaNativeFunction)class_index);
+            cls.RawSet("__newindex", (LuaNativeFunction)class_newindex);
+#else
+            cls.RawSet("__index", (LuaNativeFunction)luna_class_index);
+            cls.RawSet("__newindex", (LuaNativeFunction)luna_class_newindex);
+#endif
+            cls.RawSet(___getters, LuaRef.CreateTable(L));
+            cls.RawSet(___setters, LuaRef.CreateTable(L));
+            cls.RawSet(___type, type_name);
+
+            LuaRef registry = new LuaRef(L, LUA_REGISTRYINDEX);
+            registry.RawSet(typeClass/*classId*/, cls);
+            parent.RawSet(name, cls);
+            meta = cls;
+            return true;
+        }
+
+        protected static bool BuildMetaTable(ref LuaRef meta, LuaRef parent, string name,
+            int classId, int superClassID)
+        {
+            if (CreateClass(ref meta, parent, name, classId))
+            {
+                if (superClassID != 0)
+                {
+                    LuaRef registry = new LuaRef(parent.State, LUA_REGISTRYINDEX);
+                    LuaRef super = registry.RawGet<LuaRef>(superClassID);
+                    meta.RawSet(___super, super);
+                }
+
+                return true;
+            }
+            return false;
+        }
+
         //todo: use upvalue
         public static int class_index(lua_State L)
         {
@@ -248,6 +247,26 @@ namespace SharpLuna
 
                 // get metatable.getters -> <mt> <getters>
                 lua_pop(L, 1);                  // pop nil
+
+                if (lua_isnumber(L, 2))
+                {
+                    //lua_pushliteral(L, "___get_indexed");
+                    lua_pushlightuserdata(L, ___get_indexed);
+                    lua_rawget(L, -2);
+
+                    if (!lua_isnil(L, -1))
+                    {
+                        assert(lua_iscfunction(L, -1));
+                        lua_pushvalue(L, 1);
+                        lua_pushvalue(L, 2);
+                        lua_call(L, 2, 1);
+                        break;
+                    }
+                    else
+                    {
+                        lua_pop(L, 1);
+                    }
+                }
 
                 //lua_pushliteral(L, "___getters");
                 lua_pushlightuserdata(L, ___getters);
@@ -278,27 +297,6 @@ namespace SharpLuna
                     }
                     break;
                 }
-
-                if (lua_isnumber(L, 2))
-                {
-                    //lua_pushliteral(L, "___get_indexed");
-                    lua_pushlightuserdata(L, ___get_indexed);
-                    lua_rawget(L, -2);
-
-                    if (!lua_isnil(L, -1))
-                    {
-                        assert(lua_iscfunction(L, -1));
-                        lua_pushvalue(L, 1);
-                        lua_pushvalue(L, 2);
-                        lua_call(L, 2, 1);
-                        break;
-                    }
-                    else
-                    {
-                        lua_pop(L, 1);
-                    }
-                }
-
 
                 // now try super metatable -> <mt> <super_mt>
                 lua_pop(L, 2);                  // pop <getters> <getters[key]>
@@ -331,6 +329,28 @@ namespace SharpLuna
 
             for (; ; )
             {
+                
+                if (lua_isnumber(L, 2))
+                {
+                    //lua_pushliteral(L, "___set_indexed");
+                    lua_pushlightuserdata(L, ___set_indexed);
+                    lua_rawget(L, -2);
+
+                    if (!lua_isnil(L, -1))
+                    {
+                        assert(lua_iscfunction(L, -1));
+                        lua_pushvalue(L, 1);
+                        lua_pushvalue(L, 2);
+                        lua_pushvalue(L, 3);
+                        lua_call(L, 3, 0);
+                        break;
+                    }
+                    else
+                    {
+                        lua_pop(L, 1);
+                    }
+                }
+
                 // get setters subtable of metatable -> <mt> <setters>
                 //lua_pushliteral(L, "___setters");
                 lua_pushlightuserdata(L, ___setters);
@@ -360,27 +380,6 @@ namespace SharpLuna
                     break;
                 }
 
-                if (lua_isnumber(L, 2))
-                {
-                    //lua_pushliteral(L, "___set_indexed");
-                    lua_pushlightuserdata(L, ___set_indexed);
-                    lua_rawget(L, -2);
-
-                    if (!lua_isnil(L, -1))
-                    {
-                        assert(lua_iscfunction(L, -1));
-                        lua_pushvalue(L, 1);
-                        lua_pushvalue(L, 2);
-                        lua_pushvalue(L, 3);
-                        lua_call(L, 3, 0);
-                        break;
-                    }
-                    else
-                    {
-                        lua_pop(L, 1);
-                    }
-                }
-
                 // now try super metatable -> <mt> <super_mt>
                 assert(lua_isnil(L, -1));
                 lua_pop(L, 2);                  // pop <setters> <setters[key]>
@@ -405,6 +404,28 @@ namespace SharpLuna
             }
 
             return 0;
+        }
+
+        public static LuaRef create_module(lua_State L, LuaRef parentMeta, string name)
+        {
+            string type_name = "module<" + GetFullName(parentMeta, name) + ">";
+            LuaRef module = LuaRef.CreateTable(L);
+            module.SetMetaTable(module);
+
+#if CS_META
+            module.RawSet("__index", (LuaNativeFunction)module_index);
+            module.RawSet("__newindex", (LuaNativeFunction)module_newindex);
+
+#else
+            module.RawSet("__index", (LuaNativeFunction)luna_module_index);
+            module.RawSet("__newindex", (LuaNativeFunction)luna_module_newindex);
+#endif
+            module.RawSet(___getters, LuaRef.CreateTable(L));
+            module.RawSet(___setters, LuaRef.CreateTable(L));
+            module.RawSet(___type, type_name);
+            module.RawSet("___parent", parentMeta);
+            parentMeta.RawSet(name, module);
+            return module;
         }
 
         public static int module_index(lua_State L)

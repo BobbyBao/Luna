@@ -77,7 +77,7 @@ func __class(c, className, base) {
     mt.__close = func() {
     }
 
-    mt.__tostring = func(){
+    mt.__tostring = func(self){
     	let mt = self._class
 		let name = mt.name
 		setmetatable(self,nil)

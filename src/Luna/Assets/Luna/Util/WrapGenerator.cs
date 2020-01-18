@@ -378,21 +378,21 @@ namespace SharpLuna
                 sb.Append("\t[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]\n");
                 sb.Append($"\tstatic int Get_{name}(IntPtr L)\n\t{{\n");
 
-                if (type.IsUnManaged())
-                {
-                    sb.Append($"\t\tref var obj = ref SharpObject.GetValue<{type.FullName}>(L, 1);\n");
-                }
-                else
-                {
-                    sb.Append($"\t\tvar obj = SharpObject.Get<{type.FullName}>(L, 1);\n");
-                }
-
                 if (isStatic)
                 {
                     sb.Append($"\t\tLua.Push(L, {type.FullName}.{name});\n");
                 }
                 else
                 {
+                    if (type.IsUnManaged())
+                    {
+                        sb.Append($"\t\tref var obj = ref SharpObject.GetValue<{type.FullName}>(L, 1);\n");
+                    }
+                    else
+                    {
+                        sb.Append($"\t\tvar obj = SharpObject.Get<{type.FullName}>(L, 1);\n");
+                    }
+
                     sb.Append($"\t\tLua.Push(L, obj.{name});\n");
                 }
 
@@ -405,25 +405,27 @@ namespace SharpLuna
             {
                 sb.Append("\t[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]\n");
                 sb.Append($"\tstatic int Set_{name}(IntPtr L)\n\t{{\n");
-
-                if (type.IsUnManaged())
-                {
-                    sb.Append($"\t\tref var obj = ref SharpObject.GetValue<{type.FullName}>(L, 1);\n");
-                }
-                else
-                {
-                    sb.Append($"\t\tvar obj = SharpObject.Get<{type.FullName}>(L, 1);\n");
-                }
-
-                sb.Append($"\t\tvar p1 = Lua.Get<{GetTypeName(valType)}>(L, 2);\n");
+                
                 if (isStatic)
                 {
+                    sb.Append($"\t\tvar p1 = Lua.Get<{GetTypeName(valType)}>(L, 1);\n");
                     sb.Append($"\t\t{type.FullName}.{name} = p1;\n");
                 }
                 else
-                {
+                {                
+                    if (type.IsUnManaged())
+                    {
+                        sb.Append($"\t\tref var obj = ref SharpObject.GetValue<{type.FullName}>(L, 1);\n");
+                    }
+                    else
+                    {
+                        sb.Append($"\t\tvar obj = SharpObject.Get<{type.FullName}>(L, 1);\n");
+                    }
+
+                    sb.Append($"\t\tvar p1 = Lua.Get<{GetTypeName(valType)}>(L, 2);\n");
                     sb.Append($"\t\tobj.{name} = p1;\n");
                 }
+
                 sb.Append("\t\treturn 0;\n");
                 sb.Append("\t}\n");
                 sb.AppendLine();
