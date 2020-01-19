@@ -117,6 +117,11 @@ namespace SharpLuna
 
         public static void lua_pushcclosure(lua_State L, LuaNativeFunction function, int n)
         {
+            //Delegate
+            if(!function.Method.IsDefined(typeof(AOT.MonoPInvokeCallbackAttribute), false))
+            {
+                assert(false);
+            }
 #if SAVE_FUNC
             savedFn.TryAdd(function);
 #endif

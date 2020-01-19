@@ -115,6 +115,7 @@ namespace SharpLuna
         }
 
         //todo: use upvalue
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int class_index(lua_State L)
         {
             // <SP:1> -> table or userdata
@@ -212,6 +213,7 @@ namespace SharpLuna
             return 1;
         }
 
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int class_newindex(lua_State L)
         {
             // <SP:1> -> table or userdata
@@ -299,6 +301,7 @@ namespace SharpLuna
             return 0;
         }
 
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int module_index(lua_State L)
         {
             // <SP:1> -> table
@@ -334,6 +337,7 @@ namespace SharpLuna
             return 1;
         }
 
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int module_newindex(lua_State L)
         {
             // <SP:1> -> table
@@ -369,6 +373,7 @@ namespace SharpLuna
             return 0;
         }
 
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int ErrorReadOnly(lua_State L)
         {
             return luaL_error(L, "property '{0}' is read-only", lua_tostring(L, lua_upvalueindex(1)));

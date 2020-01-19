@@ -419,6 +419,7 @@ namespace SharpLuna
             return this;
         }
 
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         static int CallConstructor(lua_State L)
         {
             try
