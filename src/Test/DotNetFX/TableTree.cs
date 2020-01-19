@@ -34,7 +34,7 @@ namespace Test
                 treeView1.Nodes.Add(fileInfo.Name);
             }
 
-            var g = Luna.Global();
+            var g = Luna.Global;
             Refresh(g, treeView2.Nodes, 2);
         }
 

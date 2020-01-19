@@ -21,9 +21,9 @@ namespace SharpLuna
         {         
             try
             {
-                var a = Lua.ToLightObject<Func<R>>(L, lua_upvalueindex(1), false);
+                var a = ToLightObject<Func<R>>(L, lua_upvalueindex(1), false);
                 var r = a();
-                Lua.Push(L, r);
+                Push(L, r);
                 return 1;
             }
             catch (Exception e)
@@ -43,14 +43,12 @@ namespace SharpLuna
         {
             try
             {
-                var a = Lua.ToLightObject<Func<<# for(int j= 0; j <= i ; j ++){#><#=typeList[j]#>, <#}#>R>>(L, lua_upvalueindex(1), false);
-                var r = a(
+                var a = ToLightObject<Func<<# for(int j= 0; j <= i ; j ++){#><#=typeList[j]#>, <#}#>R>>(L, lua_upvalueindex(1), false);
 <# for(int j= 0; j <= i ; j ++){#>
-                    Lua.Get<<#=typeList[j]#>>(L, <#=j#> + start)<#if(j != i)#>,
+                Get(L, <#=j#> + start, out <#=typeList[j]#> <#=typeList[j].ToLower()#>);
 <#}#>
-
-                );
-                Lua.Push(L, r);
+                var r = a(<# for(int j= 0; j <= i ; j ++){#><#=typeList[j].ToLower()#><#if(j != i)#>, <#}#>);
+                Push(L, r);
                 return 1;
             }
             catch (Exception e)
