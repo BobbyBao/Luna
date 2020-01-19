@@ -255,7 +255,7 @@ namespace SharpLuna
             meta_class.RawGet(___setters).RawSet(name, err);
         }
 
-        public void SetMemberFunction(int name, LuaRef proc)
+        public void SetMemberFunction(IntPtr name, LuaRef proc)
         {
             m_meta.RawSet(name, proc);
         }

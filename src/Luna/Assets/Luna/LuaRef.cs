@@ -620,10 +620,15 @@ namespace SharpLuna
                 case LuaType.Boolean:
                     return ToValue<bool>().ToString();                    
                 case LuaType.LightUserData:
-                    return ToPtr().ToString();
+                    try
+                    {
+                        return Marshal.PtrToStringAnsi(ToPtr());
+                    }
+                    catch
+                    {
+                        return ToPtr().ToString();
+                    }
                 case LuaType.Number:
-                    //lua_rawgeti(L, LUA_REGISTRYINDEX, _ref);
-                    //return lua_tostring(L, -1);
                     return ToValue<double>().ToString();
                 case LuaType.String:
                     return ToValue<string>();
