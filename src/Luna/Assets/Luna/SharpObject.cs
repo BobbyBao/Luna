@@ -202,7 +202,7 @@ namespace SharpLuna
 //             }
 //             else
             {
-                var handle = GetHandler<T>(L, index);
+                var handle = GetHandler(L, index);
 #if LUA_WEAKTABLE
                 return ref Unsafe.Unbox<T>(freeList[(int)handle]);
 #else
@@ -213,6 +213,17 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static object Get(lua_State L, int index)
+        {
+            var handle = GetHandler(L, index);
+#if LUA_WEAKTABLE
+            return freeList[(int)handle];
+#else
+            return GCHandle.FromIntPtr((IntPtr)handle).Target;
+#endif
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T Get<T>(lua_State L, int index)
         {
 //             if (typeof(T).IsUnManaged())
@@ -220,7 +231,7 @@ namespace SharpLuna
 //                 return GetUnmanaged<T>(L, index);
 //             }
 
-            var handle = GetHandler<T>(L, index);
+            var handle = GetHandler(L, index);
 #if LUA_WEAKTABLE
             return (T)freeList[(int)handle];
 #else
@@ -229,7 +240,7 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static unsafe long GetHandler<T>(lua_State L, int index)
+        static unsafe long GetHandler(lua_State L, int index)
         {
             var ptr = lua_touserdata(L, index);
 #if DEBUG
@@ -241,14 +252,14 @@ namespace SharpLuna
             return *((long*)ptr);
         }
 
-        public static void Free<T>(lua_State L, int index)
+        public static void Free(lua_State L, int index)
         {
             //             if (typeof(T).IsUnManaged())
             //             {
             //                 return;
             //             }
 
-            var handle = GetHandler<T>(L, index);
+            var handle = GetHandler(L, index);
 #if LUA_WEAKTABLE
             var obj = freeList[(int)handle];
             obj2id.Remove(obj);
@@ -261,6 +272,7 @@ namespace SharpLuna
             }
 #endif
         }
+
 #if LUA_WEAKTABLE
         static int TryGetUserData(lua_State L, long key, int cache_ref)
         {

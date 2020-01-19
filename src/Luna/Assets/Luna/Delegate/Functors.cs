@@ -42,11 +42,11 @@ namespace SharpLuna
 
     }
 
-    public struct ClassDestructor<T>
+    public struct ClassDestructor
     {
         public static int Call(lua_State L)
         {
-            SharpObject.Free<T>(L, 1);
+            SharpObject.Free(L, 1);
             return 0;            
         }
     }

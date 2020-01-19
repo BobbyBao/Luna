@@ -1,4 +1,4 @@
-﻿//#define CS_META
+﻿#define CS_META
 
 using System;
 using System.Collections.Generic;
@@ -14,9 +14,6 @@ namespace SharpLuna
 
     public partial class SharpClass
     {
-        static Dictionary<Type, SharpClass> registeredClass = new Dictionary<Type, SharpClass>();
-        static Dictionary<Type, string> classAlias = new Dictionary<Type, string>();
-
         protected static IntPtr ___type;
         protected static IntPtr ___super;
         protected static IntPtr ___getters;
@@ -45,131 +42,7 @@ namespace SharpLuna
 #endif
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsRegistered<T>()
-        {
-            return IsRegistered(typeof(T));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsRegistered(Type t)
-        {
-            return registeredClass.ContainsKey(t);
-        }
-
-        public static void SetAlias(Type t, string alias)
-        {
-            classAlias.Add(t, alias);
-        }
-
-        public static string GetTableName(Type t)
-        {
-            if (classAlias.TryGetValue(t, out string alias))
-            {
-                return alias;
-            }
-
-            return t.Name;
-        }
-
-        public static string GetFullName(LuaRef parent, string name)
-        {
-            string full_name = parent.Get(___type, "");
-            if (!string.IsNullOrEmpty(full_name))
-            {
-                int pos = full_name.IndexOf('<');
-                if (pos != -1) full_name.Remove(0, pos + 1);
-                pos = full_name.LastIndexOf('>');
-                if (pos != -1) full_name.Remove(pos);
-                full_name += '.';
-            }
-            full_name += name;
-            return full_name;
-        }
-
-        public static string GetMemberName(LuaRef parent, string name)
-        {
-            string full_name = parent.RawGet(___type, "<unknown>");
-            full_name += '.';
-            full_name += name;
-            return full_name;
-        }
-
-        public static SharpClass Bind<T>(SharpClass parentMeta)
-        {
-            Type classType = typeof(T);
-            if(registeredClass.TryGetValue(classType, out var bindClass))
-            {
-                return bindClass;
-            }
-
-            var name = GetTableName(classType);        
-            LuaRef meta = LuaRef.None;
-            if (CreateClass(ref meta, parentMeta.Meta, name, SharpObject.Signature<T>()))
-            {
-                meta.RawSet("__gc", (LuaNativeFunction)ClassDestructor<T>.Call);
-            }
-
-            bindClass = new SharpClass(meta);
-            bindClass.parent = parentMeta;
-            bindClass.SetClassType(classType);
-            registeredClass.Add(classType, bindClass);
-            return bindClass;
-        }
-
-        public static SharpClass Extend<T, SUPER>(SharpClass parentMeta)
-        {
-            Type classType = typeof(T);
-            if (registeredClass.TryGetValue(classType, out var bindClass))
-            {
-                return bindClass;
-            }
-
-            string name = GetTableName(classType);
-            LuaRef meta = LuaRef.None;
-            if (BuildMetaTable(ref meta, parentMeta.Meta, name, SharpObject.Signature<T>(), SharpObject.Signature<SUPER>()))
-            {
-                meta.RawSet("__gc", (LuaNativeFunction)ClassDestructor<T>.Call);
-            }
-
-            bindClass = new SharpClass(meta);
-            bindClass.parent = parentMeta;
-            bindClass.SetClassType(classType);
-            registeredClass.Add(classType, bindClass);
-            return bindClass;
-        }
-
-        public static SharpClass Extend(Type classType, Type superType, SharpClass parentMeta)
-        {
-            if (registeredClass.TryGetValue(classType, out var bindClass))
-            {
-                return bindClass;
-            }
-
-            string name = GetTableName(classType);
-            LuaRef meta = LuaRef.None;
-            if (BuildMetaTable(ref meta, parentMeta.Meta, name, SharpObject.Signature(classType), SharpObject.Signature(superType)))
-            {
-                try
-                {
-                    var callerType = typeof(ClassDestructor<>).MakeGenericType(classType);
-                    MethodInfo CallInnerDelegateMethod = callerType.GetMethod("Call", BindingFlags.Static | BindingFlags.Public);
-                    var luaFunc = (LuaNativeFunction)DelegateCache.Get(typeof(LuaNativeFunction), CallInnerDelegateMethod);
-                    meta.RawSet("__gc", luaFunc);
-                }
-                catch
-                {
-                }
-            }
-
-            bindClass = new SharpClass(meta);
-            bindClass.parent = parentMeta;
-            bindClass.SetClassType(classType);
-            registeredClass.Add(classType, bindClass);
-            return bindClass;
-        }
-
-        protected static bool CreateClass(ref LuaRef meta, LuaRef parent, string name, int classId)
+        public static bool CreateClass(ref LuaRef meta, LuaRef parent, string name, int classId)
         {
             LuaRef @ref = parent.RawGet<LuaRef, string>(name);
             if (@ref)
@@ -203,8 +76,7 @@ namespace SharpLuna
             return true;
         }
 
-        protected static bool BuildMetaTable(ref LuaRef meta, LuaRef parent, string name,
-            int classId, int superClassID)
+        public static bool CreateClass(ref LuaRef meta, LuaRef parent, string name, int classId, int superClassID)
         {
             if (CreateClass(ref meta, parent, name, classId))
             {
@@ -218,6 +90,28 @@ namespace SharpLuna
                 return true;
             }
             return false;
+        }
+
+        public static LuaRef create_module(lua_State L, LuaRef parentMeta, string name)
+        {
+            string type_name = "module<" + GetFullName(parentMeta, name) + ">";
+            LuaRef module = LuaRef.CreateTable(L);
+            module.SetMetaTable(module);
+
+#if CS_META
+            module.RawSet("__index", (LuaNativeFunction)module_index);
+            module.RawSet("__newindex", (LuaNativeFunction)module_newindex);
+
+#else
+            module.RawSet("__index", (LuaNativeFunction)luna_module_index);
+            module.RawSet("__newindex", (LuaNativeFunction)luna_module_newindex);
+#endif
+            module.RawSet(___getters, LuaRef.CreateTable(L));
+            module.RawSet(___setters, LuaRef.CreateTable(L));
+            module.RawSet(___type, type_name);
+            module.RawSet("___parent", parentMeta);
+            parentMeta.RawSet(name, module);
+            return module;
         }
 
         //todo: use upvalue
@@ -234,8 +128,8 @@ namespace SharpLuna
                 // push metatable[key] -> <mt> <mt[key]>
                 lua_pushvalue(L, 2);
 #if DEBUG
-                //string key = lua_tostring(L, -1);
-                //lua_pop(L, 1);
+                string key = lua_tostring(L, -1);
+                lua_pop(L, 1);
 #endif
                 lua_rawget(L, -2);
 
@@ -328,8 +222,7 @@ namespace SharpLuna
             lua_getmetatable(L, 1);
 
             for (; ; )
-            {
-                
+            {                
                 if (lua_isnumber(L, 2))
                 {
                     //lua_pushliteral(L, "___set_indexed");
@@ -404,28 +297,6 @@ namespace SharpLuna
             }
 
             return 0;
-        }
-
-        public static LuaRef create_module(lua_State L, LuaRef parentMeta, string name)
-        {
-            string type_name = "module<" + GetFullName(parentMeta, name) + ">";
-            LuaRef module = LuaRef.CreateTable(L);
-            module.SetMetaTable(module);
-
-#if CS_META
-            module.RawSet("__index", (LuaNativeFunction)module_index);
-            module.RawSet("__newindex", (LuaNativeFunction)module_newindex);
-
-#else
-            module.RawSet("__index", (LuaNativeFunction)luna_module_index);
-            module.RawSet("__newindex", (LuaNativeFunction)luna_module_newindex);
-#endif
-            module.RawSet(___getters, LuaRef.CreateTable(L));
-            module.RawSet(___setters, LuaRef.CreateTable(L));
-            module.RawSet(___type, type_name);
-            module.RawSet("___parent", parentMeta);
-            parentMeta.RawSet(name, module);
-            return module;
         }
 
         public static int module_index(lua_State L)

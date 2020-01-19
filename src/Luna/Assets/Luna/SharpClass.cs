@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace SharpLuna
@@ -17,6 +18,9 @@ namespace SharpLuna
         protected Type classType;
 
         protected Dictionary<string, MethodWraper> classInfo;
+
+        static Dictionary<Type, SharpClass> registeredClass = new Dictionary<Type, SharpClass>();
+        static Dictionary<Type, string> classAlias = new Dictionary<Type, string>();
 
         static Dictionary<string, string> tagMethods = new Dictionary<string, string>
         {
@@ -67,12 +71,134 @@ namespace SharpLuna
 
         public LuaRef Meta => m_meta;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsRegistered<T>()
+        {
+            return IsRegistered(typeof(T));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsRegistered(Type t)
+        {
+            return registeredClass.ContainsKey(t);
+        }
+
+        public static void SetAlias(Type t, string alias)
+        {
+            classAlias.Add(t, alias);
+        }
+
+        public static string GetTableName(Type t)
+        {
+            if (classAlias.TryGetValue(t, out string alias))
+            {
+                return alias;
+            }
+
+            return t.Name;
+        }
+
+        public static string GetFullName(LuaRef parent, string name)
+        {
+            string full_name = parent.Get(___type, "");
+            if (!string.IsNullOrEmpty(full_name))
+            {
+                int pos = full_name.IndexOf('<');
+                if (pos != -1) full_name.Remove(0, pos + 1);
+                pos = full_name.LastIndexOf('>');
+                if (pos != -1) full_name.Remove(pos);
+                full_name += '.';
+            }
+            full_name += name;
+            return full_name;
+        }
+
+        public static string GetMemberName(LuaRef parent, string name)
+        {
+            string full_name = parent.RawGet(___type, "<unknown>");
+            full_name += '.';
+            full_name += name;
+            return full_name;
+        }
+
+        public static SharpClass Bind<T>(SharpClass parentMeta)
+        {
+            Type classType = typeof(T);
+            if (registeredClass.TryGetValue(classType, out var bindClass))
+            {
+                return bindClass;
+            }
+
+            var name = GetTableName(classType);
+            LuaRef meta = LuaRef.None;
+            if (CreateClass(ref meta, parentMeta.Meta, name, SharpObject.Signature<T>()))
+            {
+                meta.RawSet("__gc", (LuaNativeFunction)ClassDestructor.Call);
+            }
+
+            bindClass = new SharpClass(meta);
+            bindClass.parent = parentMeta;
+            bindClass.SetClassType(classType);
+            registeredClass.Add(classType, bindClass);
+            return bindClass;
+        }
+
+        public static SharpClass Extend<T, SUPER>(SharpClass parent)
+        {
+            Type classType = typeof(T);
+            if (registeredClass.TryGetValue(classType, out var bindClass))
+            {
+                return bindClass;
+            }
+
+            string name = GetTableName(classType);
+            LuaRef meta = LuaRef.None;
+            if (CreateClass(ref meta, parent.Meta, name, SharpObject.Signature<T>(), SharpObject.Signature<SUPER>()))
+            {
+                meta.RawSet("__gc", (LuaNativeFunction)ClassDestructor.Call);
+            }
+
+            bindClass = new SharpClass(meta);
+            bindClass.parent = parent;
+            bindClass.SetClassType(classType);
+            registeredClass.Add(classType, bindClass);
+            return bindClass;
+        }
+
+        public static SharpClass Extend(Type classType, Type superType, SharpClass parent)
+        {
+            if (registeredClass.TryGetValue(classType, out var bindClass))
+            {
+                return bindClass;
+            }
+
+            string name = GetTableName(classType);
+            LuaRef meta = LuaRef.None;
+            if (CreateClass(ref meta, parent.Meta, name, SharpObject.Signature(classType), SharpObject.Signature(superType)))
+            {
+                try
+                {
+                    //var callerType = typeof(ClassDestructor<>).MakeGenericType(classType);
+                    //MethodInfo CallInnerDelegateMethod = callerType.GetMethod("Call", BindingFlags.Static | BindingFlags.Public);
+                    //var luaFunc = (LuaNativeFunction)DelegateCache.Get(typeof(LuaNativeFunction), CallInnerDelegateMethod);
+                    meta.RawSet("__gc", (LuaNativeFunction)ClassDestructor.Call);
+                }
+                catch
+                {
+                }
+            }
+
+            bindClass = new SharpClass(meta);
+            bindClass.parent = parent;
+            bindClass.SetClassType(classType);
+            registeredClass.Add(classType, bindClass);
+            return bindClass;
+        }
+
         protected void SetClassType(Type type)
         {
             classType = type;
-
             classInfo = Luna.GetClassWrapper(classType);
-
         }
         
         public SharpClass BeginClass(Type classType, Type superClass = null)
@@ -202,7 +328,7 @@ namespace SharpLuna
                         continue;
                     }
 
-                    if (ctor.IsDefined(typeof(LuaHideAttribute)))
+                    if (!ctor.ShouldExport())
                     {
                         continue;
                     }
@@ -211,11 +337,10 @@ namespace SharpLuna
                 }
             }
 
-
             var props = classType.GetProperties();
             foreach (var p in props)
             {
-                if (p.IsDefined(typeof(LuaHideAttribute)))
+                if (!p.ShouldExport())
                 {
                     continue;
                 }
@@ -234,22 +359,7 @@ namespace SharpLuna
             var methods = classType.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly);
             foreach (var m in methods)
             {
-                if (m.IsSpecialName)
-                {
-                    continue;
-                }
-
-                if (!m.IsPublic)
-                {
-                    continue;
-                }
-
-                if (m.IsGenericMethod)
-                {
-                    continue;
-                }
-
-                if (m.IsDefined(typeof(LuaHideAttribute)))
+                if (!m.ShouldExport())
                 {
                     continue;
                 }
@@ -364,7 +474,7 @@ namespace SharpLuna
                 var fieldDelType = typeof(FieldDelegate<>).MakeGenericType(fieldInfo.FieldType);
                
                 var getMethodInfo = fieldDelType.GetMethod("Getter", BindingFlags.Static | BindingFlags.Public);
-                var getDel = DelegateCache.GetInvokeer(getMethodInfo, fieldInfo);// (Delegate)getMethodInfo.Invoke(null, new[] { fieldInfo });
+                var getDel = DelegateCache.GetInvokeer(getMethodInfo, fieldInfo);
                 var getCallerType = typeof(FuncCaller<>).MakeGenericType(fieldInfo.FieldType);
                 var getMethodCaller = getCallerType.GetMethod("Call", BindingFlags.Static | BindingFlags.Public);
                 var getLuaDel = (LuaNativeFunction)DelegateCache.Get(typeof(LuaNativeFunction), getMethodCaller);
@@ -372,7 +482,7 @@ namespace SharpLuna
                 SetGetter(fieldInfo.Name, getter);
 
                 var setMethodInfo = fieldDelType.GetMethod("Setter", BindingFlags.Static | BindingFlags.Public);
-                var setDel = DelegateCache.GetInvokeer(setMethodInfo, fieldInfo);// (Delegate)setMethodInfo.Invoke(null, new[] { fieldInfo });
+                var setDel = DelegateCache.GetInvokeer(setMethodInfo, fieldInfo);
                 var setCallerType = typeof(ActionCaller<>).MakeGenericType(fieldInfo.FieldType);
                 var setMethodCaller = setCallerType.GetMethod("Call", BindingFlags.Static | BindingFlags.Public);
                 var setLuaDel = (LuaNativeFunction)DelegateCache.Get(typeof(LuaNativeFunction), setMethodCaller);
@@ -384,7 +494,7 @@ namespace SharpLuna
                 var fieldDelType = typeof(FieldDelegate<,>).MakeGenericType(fieldInfo.ReflectedType, fieldInfo.FieldType);
 
                 var getMethodInfo = fieldDelType.GetMethod("Getter", BindingFlags.Static | BindingFlags.Public);
-                var getDel = DelegateCache.GetInvokeer(getMethodInfo, fieldInfo);//(Delegate)getMethodInfo.Invoke(null, new[] { fieldInfo });
+                var getDel = DelegateCache.GetInvokeer(getMethodInfo, fieldInfo);
                 var getCallerType = typeof(FuncCaller<,>).MakeGenericType(fieldInfo.ReflectedType, fieldInfo.FieldType);
                 var getMethodCaller = getCallerType.GetMethod("Call", BindingFlags.Static | BindingFlags.Public);
                 var getLuaDel = (LuaNativeFunction)DelegateCache.Get(typeof(LuaNativeFunction), getMethodCaller);
@@ -392,7 +502,7 @@ namespace SharpLuna
                 SetGetter(fieldInfo.Name, getter);
 
                 var setMethodInfo = fieldDelType.GetMethod("Setter", BindingFlags.Static | BindingFlags.Public);
-                var setDel = DelegateCache.GetInvokeer(setMethodInfo, fieldInfo);//(Delegate)setMethodInfo.Invoke(null, new[] { fieldInfo });
+                var setDel = DelegateCache.GetInvokeer(setMethodInfo, fieldInfo);
                 var setCallerType = typeof(ActionCaller<,>).MakeGenericType(fieldInfo.ReflectedType, fieldInfo.FieldType);
                 var setMethodCaller = setCallerType.GetMethod("Call", BindingFlags.Static | BindingFlags.Public);
                 var setLuaDel = (LuaNativeFunction)DelegateCache.Get(typeof(LuaNativeFunction), setMethodCaller);
@@ -403,22 +513,6 @@ namespace SharpLuna
             return this;
         }
         
-        public SharpClass RegProperty(string name)
-        {
-            return RegProperty(classType, name);
-        }
-
-        public SharpClass RegProperty<T>(string name)
-        {
-            return RegProperty(typeof(T), name);
-        }
-
-        public SharpClass RegProperty(Type classType, string name)
-        {
-            PropertyInfo propertyInfo = classType.GetProperty(name);
-            return RegProperty(propertyInfo);
-        }
-
         public SharpClass RegProperty(PropertyInfo propertyInfo)
         {
             if (classInfo != null)
@@ -558,7 +652,7 @@ namespace SharpLuna
             {
                 if (classInfo.TryGetValue(name, out var methodConfig))
                 {
-                    if (methodConfig.getter != null)
+                    if (methodConfig.func != null)
                     {
                         var fn = LuaRef.CreateFunction(State, methodConfig.func);
                         if (IsTagMethod(name, out var tag))

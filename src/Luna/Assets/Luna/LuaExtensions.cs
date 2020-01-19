@@ -143,6 +143,123 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Get(lua_State L, int index, out bool v)
+        {
+            v = luaL_checkinteger(L, index) != 0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Get(lua_State L, int index, out long v)
+        {
+            v = (long)luaL_checkinteger(L, index);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Get(lua_State L, int index, out ulong v)
+        {
+            v = (ulong)luaL_checkinteger(L, index);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Get(lua_State L, int index, out IntPtr v)
+        {
+            v = (IntPtr)luaL_checkinteger(L, index);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Get(lua_State L, int index, out UIntPtr v)
+        {
+            v = (UIntPtr)luaL_checkinteger(L, index);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Get(lua_State L, int index, out int v)
+        {
+            v = (int)luaL_checkinteger(L, index);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Get(lua_State L, int index, out uint v)
+        {
+            v = (uint)luaL_checkinteger(L, index);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Get(lua_State L, int index, out short v)
+        {
+            v = (short)luaL_checkinteger(L, index);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Get(lua_State L, int index, out ushort v)
+        {
+            v = (ushort)luaL_checkinteger(L, index);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Get(lua_State L, int index, out char v)
+        {
+            v = (char)luaL_checkinteger(L, index);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Get(lua_State L, int index, out sbyte v)
+        {
+            v = (sbyte)luaL_checkinteger(L, index);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Get(lua_State L, int index, out byte v)
+        {
+            v = (byte)luaL_checkinteger(L, index);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Get(lua_State L, int index, out float v)
+        {
+            v = (float)luaL_checknumber(L, index);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Get(lua_State L, int index, out double v)
+        {
+            v = (double)luaL_checknumber(L, index);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Get(lua_State L, int index, out string v)
+        {
+            v = lua_checkstring(L, index);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Get(lua_State L, int index, out LuaNativeFunction v)
+        {
+            v = lua_tocfunction(L, index).ToLuaFunction();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Get(lua_State L, int index, out LuaRef v)
+        {
+            if (lua_isnone(L, index))
+                v = LuaRef.None;
+            else
+                v = new LuaRef(L, index);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Get(lua_State L, int index, out object v)
+        {
+            v = SharpObject.Get(L, index);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Get<T>(lua_State L, int index, out T v)
+        {
+            v = Get<T>(L, index);
+        }
+       
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T Get<T>(lua_State L, int index)
         {
             Type t = typeof(T);

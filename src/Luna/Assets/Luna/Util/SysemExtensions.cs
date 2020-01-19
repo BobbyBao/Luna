@@ -62,6 +62,36 @@ namespace SharpLuna
             return true;
         }
 
+        public static bool ShouldExport(this MethodInfo methodInfo)
+        {
+            if (!methodInfo.IsPublic)
+            {
+                return false;
+            }
+
+            if (methodInfo.IsSpecialName)
+            {
+                return false;
+            }
+
+            if (methodInfo.IsGenericMethod)
+            {
+                return false;
+            }
+
+            if (methodInfo.IsDefined(typeof(ObsoleteAttribute)))
+            {
+                return false;
+            }
+
+            if (methodInfo.IsDefined(typeof(LuaHideAttribute)))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         public static void TryAdd<T>(this HashSet<T> self, T obj)
         {
             if (!self.Contains(obj))

@@ -435,8 +435,7 @@ namespace SharpLuna
             sb.Append("\t[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]\n");
             sb.Append($"\tstatic int {methodInfo[0].Name}(IntPtr L)\n\t{{\n");
 
-            sb.Append($"\t\tint n = lua_gettop(L) - 1;\n");
-            
+            sb.Append($"\t\tint n = lua_gettop(L) - 1;\n");            
 
             bool first = true;
             int idx = 0;
@@ -458,8 +457,24 @@ namespace SharpLuna
                     }
                 }
 
-                if (!method.IsStatic)
+                if(method.IsStatic)
                 {
+                    if (parameters.Length > 0)
+                    {
+                        sb.Append($"\t\t#if LUNA_SCRIPT\n");
+                        sb.Append($"\t\tconst int startStack = 2;\n");
+                        sb.Append($"\t\t#else\n");
+                        sb.Append($"\t\tconst int startStack = 1;\n");
+                        sb.Append($"\t\t#endif\n");
+                    }
+                }
+                else
+                {
+                    if (parameters.Length > 0)
+                    {
+                        sb.Append($"\t\tconst int startStack = 2;\n");
+                    }
+
                     if (type.IsUnManaged())
                     {
                         sb.Append($"\t\tref var obj = ref SharpObject.GetValue<{type.FullName}>(L, 1);\n");
@@ -494,7 +509,7 @@ namespace SharpLuna
                 for (int i = 0; i < parameters.Length; i++)
                 {
                     var paramInfo = parameters[i];
-                    sb.Append($"\t\t\tLua.Get<{GetTypeName(paramInfo.ParameterType)}>(L, {(i + 1)})");
+                    sb.Append($"\t\t\tLua.Get<{GetTypeName(paramInfo.ParameterType)}>(L, {i} + startStack)");
                     if (i != parameters.Length - 1)
                     {
                         sb.Append(",");
