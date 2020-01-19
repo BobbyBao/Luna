@@ -120,7 +120,6 @@ namespace SharpLuna
                 {
                     ctorList.Add(ctor);
                 }
-
                
             }
 
@@ -154,7 +153,6 @@ namespace SharpLuna
             var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
             foreach (var prop in properties)
             {
-
                 if (!prop.ShouldExport())
                 {
                     continue;
@@ -169,7 +167,6 @@ namespace SharpLuna
                 GenerateProperty(type, prop, sb);
                 members.Add((MemberTypes.Property, prop.Name, prop.CanRead, prop.CanWrite));
             }
-
 
             var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
             foreach (var method in methods)
@@ -190,7 +187,7 @@ namespace SharpLuna
                 }
 
                 var memberInfo = type.GetMember(method.Name);
-                List<MethodInfo> methodInfos = new List<MethodInfo>();//[memberInfo.Length];
+                List<MethodInfo> methodInfos = new List<MethodInfo>();
                 foreach (var m in memberInfo)
                 {
                     if (!(m is MethodInfo mi))

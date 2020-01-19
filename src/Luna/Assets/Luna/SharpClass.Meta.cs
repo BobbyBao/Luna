@@ -24,7 +24,7 @@ namespace SharpLuna
         protected static IntPtr ___get_indexed;
         protected static IntPtr ___set_indexed;
 
-        public static void Init()
+        public static void Init(lua_State L)
         {
 #if CS_META
             ___type = Marshal.AllocHGlobal(1);
@@ -35,7 +35,7 @@ namespace SharpLuna
             ___set_indexed = Marshal.AllocHGlobal(1);
 #else      
             LunaData lunaData = new LunaData();
-            luna_init(ref lunaData);
+            luna_init(L, ref lunaData);
             ___type = lunaData.type;
             ___super = lunaData.super;
             ___getters = lunaData.getters;

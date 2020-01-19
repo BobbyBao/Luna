@@ -479,7 +479,7 @@ namespace SharpLuna
         }
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int luna_init(ref LunaData data);
+        public static extern int luna_init(lua_State L, ref LunaData data);
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int luna_class_index(lua_State L);

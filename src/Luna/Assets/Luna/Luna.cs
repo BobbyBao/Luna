@@ -79,7 +79,7 @@ namespace SharpLuna
 
             AddSearcher(LuaLoader);
 
-            SharpClass.Init();
+            SharpClass.Init(L);
             SharpObject.Init(L);
 
             RegisterWraps(this.GetType());
