@@ -129,6 +129,45 @@ public class RaycastHitWrap
 		return 1;
 	}
 
+	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+	static int Equals(IntPtr L)
+	{
+		const int startStack = 2;
+		ref var obj = ref SharpObject.GetValue<UnityEngine.RaycastHit>(L, 1);
+		var ret = obj.Equals(
+			Lua.Get<object>(L, 0 + startStack)
+		);
+		Lua.Push(L, ret);
+		return 1;
+	}
+
+	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+	static int GetHashCode(IntPtr L)
+	{
+		ref var obj = ref SharpObject.GetValue<UnityEngine.RaycastHit>(L, 1);
+		var ret = obj.GetHashCode();
+		Lua.Push(L, ret);
+		return 1;
+	}
+
+	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+	static int ToString(IntPtr L)
+	{
+		ref var obj = ref SharpObject.GetValue<UnityEngine.RaycastHit>(L, 1);
+		var ret = obj.ToString();
+		Lua.Push(L, ret);
+		return 1;
+	}
+
+	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+	static int GetType(IntPtr L)
+	{
+		ref var obj = ref SharpObject.GetValue<UnityEngine.RaycastHit>(L, 1);
+		var ret = obj.GetType();
+		Lua.Push(L, ret);
+		return 1;
+	}
+
 	public static void Register(ClassWraper classWraper)
 	{
 		classWraper.RegProperty("collider", Get_collider);
@@ -142,5 +181,9 @@ public class RaycastHitWrap
 		classWraper.RegProperty("transform", Get_transform);
 		classWraper.RegProperty("rigidbody", Get_rigidbody);
 		classWraper.RegProperty("lightmapCoord", Get_lightmapCoord);
+		classWraper.RegFunction("Equals", Equals);
+		classWraper.RegFunction("GetHashCode", GetHashCode);
+		classWraper.RegFunction("ToString", ToString);
+		classWraper.RegFunction("GetType", GetType);
 	}
 }

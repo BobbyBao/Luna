@@ -38,14 +38,29 @@ namespace SharpLuna
             return result;
         }
 
-        public static bool IsDelegatable(this Type t)
+        public static bool ShouldExport(this Type t)
         {
-            if(t.IsByRef || t.IsPointer)
+            if (t.IsGenericType)
+            {
+                return false;
+            }
+
+            if (t.IsByRef || t.IsPointer)
             {
                 return false;
             }
             
             return true;
+        }
+
+        public static StringBuilder Indent(this StringBuilder sb, int count)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                sb.Append('\t');
+            }
+
+            return sb;
         }
 
         public static bool ShouldExport(this MemberInfo memberInfo)

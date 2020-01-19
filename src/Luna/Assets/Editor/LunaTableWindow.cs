@@ -124,7 +124,7 @@ namespace Assets.Editor
                 string fullPath = "_G";
                 int hash = fullPath.GetHashCode();
                 var item = new LunaTreeViewItem { id = hash, depth = 1, displayName = "_G" };
-                LuaRef luaRef = luna.Global();
+                LuaRef luaRef = luna.Global;
                 item.luaType = luaRef.Type;
                 item.fullPath = fullPath;
                 id2v[hash] = luaRef;

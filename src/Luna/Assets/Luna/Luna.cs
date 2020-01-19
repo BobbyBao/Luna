@@ -19,6 +19,8 @@ namespace SharpLuna
 #endif
         public lua_State State => L;
         private lua_State L;
+        private LuaRef _global;
+
         public bool IsExecuting => _executing;
         private bool _executing;
 
@@ -68,13 +70,14 @@ namespace SharpLuna
             L = Lua.newstate();
             
             luaL_openlibs(L);
-
             lua_atpanic(L, PanicCallback);
 
             Register("print", DoPrint);
             Register("dofile", DoFile);
             Register("loadfile", LoadFile);
 
+            _global = LuaRef.Globals(L);
+            _global.AddRef();
             _binder = new SharpModule(this);
 
             AddSearcher(LuaLoader);
@@ -131,6 +134,8 @@ namespace SharpLuna
 
             _binder.Dispose();
             
+            _global.Release();
+
             RefCountHelper.Clear();
 
             Lua.close(L);
@@ -400,14 +405,11 @@ namespace SharpLuna
             }
         }
 
-        public LuaRef Global()
-        {
-            return LuaRef.Globals(L);
-        }
+        public LuaRef Global => _global;
 
         public LuaRef GetGlobal(string fullPath)
         {
-            return LuaRef.Globals(L).RawGet(fullPath);
+            return _global.RawGet(fullPath);
         }
 
         public string ToString(int index, bool callMetamethod = true)
