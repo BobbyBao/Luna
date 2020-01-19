@@ -23,7 +23,7 @@ public class SampleMain : MonoBehaviour
     {
         var luna = LunaClient.Luna;
 
-        Load("UI/Panel");
+        //Load("UI/Panel");
                 
         if (!string.IsNullOrWhiteSpace(startFile))
         {

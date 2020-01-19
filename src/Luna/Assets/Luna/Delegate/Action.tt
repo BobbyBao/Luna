@@ -16,7 +16,9 @@ namespace SharpLuna
 
     public struct ActionCaller
     {
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int StaticCall(lua_State L) => Call(L);
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int Call(lua_State L)
         {         
             try
@@ -35,7 +37,9 @@ namespace SharpLuna
 <# for(int i= 0; i< typeList.Length ; i ++){ #>
     public struct ActionCaller<<# for(int j= 0; j <= i ; j ++){#><#=typeList[j]#><#if(j != i)#>, <#}#>>
     {
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int Call(lua_State L) => Call(L, 1);
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int StaticCall(lua_State L) => Call(L, 2);
 
         static int Call(lua_State L, int start)

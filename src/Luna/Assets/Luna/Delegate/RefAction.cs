@@ -19,7 +19,9 @@ namespace SharpLuna
 
     public struct RefActionCaller
     {
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int StaticCall(lua_State L) => Call(L);
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int Call(lua_State L)
         {         
             try
@@ -37,7 +39,9 @@ namespace SharpLuna
 
     public struct RefActionCaller<T1> where T1 : struct
     {
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int Call(lua_State L) => Call(L, 1);
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int StaticCall(lua_State L) => Call(L, 2);
 
         static int Call(lua_State L, int start)
@@ -57,7 +61,9 @@ namespace SharpLuna
 
     public struct RefActionCaller<T1, T2> where T1 : struct
     {
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int Call(lua_State L) => Call(L, 1);
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int StaticCall(lua_State L) => Call(L, 2);
 
         static int Call(lua_State L, int start)
@@ -78,7 +84,9 @@ namespace SharpLuna
 
     public struct RefActionCaller<T1, T2, T3> where T1 : struct
     {
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int Call(lua_State L) => Call(L, 1);
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int StaticCall(lua_State L) => Call(L, 2);
 
         static int Call(lua_State L, int start)
@@ -100,7 +108,9 @@ namespace SharpLuna
 
     public struct RefActionCaller<T1, T2, T3, T4> where T1 : struct
     {
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int Call(lua_State L) => Call(L, 1);
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int StaticCall(lua_State L) => Call(L, 2);
 
         static int Call(lua_State L, int start)
@@ -123,7 +133,9 @@ namespace SharpLuna
 
     public struct RefActionCaller<T1, T2, T3, T4, T5> where T1 : struct
     {
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int Call(lua_State L) => Call(L, 1);
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int StaticCall(lua_State L) => Call(L, 2);
 
         static int Call(lua_State L, int start)
@@ -147,7 +159,9 @@ namespace SharpLuna
 
     public struct RefActionCaller<T1, T2, T3, T4, T5, T6> where T1 : struct
     {
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int Call(lua_State L) => Call(L, 1);
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int StaticCall(lua_State L) => Call(L, 2);
 
         static int Call(lua_State L, int start)
@@ -172,7 +186,9 @@ namespace SharpLuna
 
     public struct RefActionCaller<T1, T2, T3, T4, T5, T6, T7> where T1 : struct
     {
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int Call(lua_State L) => Call(L, 1);
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int StaticCall(lua_State L) => Call(L, 2);
 
         static int Call(lua_State L, int start)
@@ -198,7 +214,9 @@ namespace SharpLuna
 
     public struct RefActionCaller<T1, T2, T3, T4, T5, T6, T7, T8> where T1 : struct
     {
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int Call(lua_State L) => Call(L, 1);
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int StaticCall(lua_State L) => Call(L, 2);
 
         static int Call(lua_State L, int start)

@@ -11,6 +11,7 @@ namespace SharpLuna
 
     public struct ConstantVariable
     {
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int Call(lua_State L)
         {
             lua_pushvalue(L, lua_upvalueindex(1));
@@ -20,6 +21,7 @@ namespace SharpLuna
 
     public struct ClassConstructor<T> where T : new()
     {
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int Call(lua_State L)
         {
             try
@@ -44,6 +46,7 @@ namespace SharpLuna
 
     public struct ClassDestructor
     {
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int Call(lua_State L)
         {
             SharpObject.Free(L, 1);
@@ -53,6 +56,7 @@ namespace SharpLuna
 
     public struct PropertyCaller<T1>
     {
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int Getter(lua_State L)
         {
             var a = Lua.ToLightObject<Func<T1>>(L, lua_upvalueindex(2), false);
@@ -61,6 +65,7 @@ namespace SharpLuna
             return 1;
         }
 
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int Setter(lua_State L)
         {
             var a = Lua.ToLightObject<Action<T1>>(L, lua_upvalueindex(3), false);
@@ -74,6 +79,7 @@ namespace SharpLuna
 
     public struct PropertyCaller<T1, T2>
     {
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int Getter(lua_State L)
         {
             var a = Lua.ToLightObject<Func<T1, T2>>(L, lua_upvalueindex(2), false);
@@ -83,6 +89,7 @@ namespace SharpLuna
             return 1;
         }
 
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int Setter(lua_State L, int start)
         {
             var a = Lua.ToLightObject<Action<T1, T2>>(L, lua_upvalueindex(3), false);

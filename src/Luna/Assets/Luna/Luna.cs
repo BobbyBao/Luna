@@ -171,7 +171,7 @@ namespace SharpLuna
         }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        int DoPrint(lua_State L)
+        static int DoPrint(lua_State L)
         {
             int n = lua_gettop(L);
 
@@ -196,7 +196,7 @@ namespace SharpLuna
         }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        int LuaLoader(lua_State L)
+        static int LuaLoader(lua_State L)
         {
             string fileName = lua_tostring(L, 1);
 
@@ -220,7 +220,7 @@ namespace SharpLuna
         }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        private int DoFile(lua_State L)
+        private static int DoFile(lua_State L)
         {
             string fileName = lua_tostring(L, 1);
             int n = lua_gettop(L);
@@ -248,7 +248,7 @@ namespace SharpLuna
         }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        private int LoadFile(lua_State L)
+        private static int LoadFile(lua_State L)
         {
             int oldTop = lua_gettop(L);
             string fileName = lua_tostring(L, 1);

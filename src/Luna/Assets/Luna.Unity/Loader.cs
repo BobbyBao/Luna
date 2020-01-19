@@ -58,17 +58,22 @@ namespace SharpLuna.Unity
             fileName = fileName.Replace(".", "/");
 
             byte[] buffer = null;
-            var bytes = Resources.Load<BytesAsset>(CombinePath(LuaPath, fileName));
+            string filePath = CombinePath(LuaPath, fileName);
+            var bytes = Resources.Load<BytesAsset>(filePath);
             if (bytes != null)
             {
                 buffer = bytes.bytes;
                 Resources.UnloadAsset(bytes);
                 return buffer;
             }
+            else
+            {
+                Debug.LogError(filePath);
+            }
 
             foreach (var path in searchers)
             {
-                string filePath = CombinePath(path, fileName);
+                filePath = CombinePath(path, fileName);
                 bytes = Resources.Load<BytesAsset>(CombinePath(LuaPath, filePath));
 
                 if (bytes != null)
@@ -76,6 +81,10 @@ namespace SharpLuna.Unity
                     buffer = bytes.bytes;
                     Resources.UnloadAsset(bytes);
                     break;
+                }
+                else
+                {
+                    Debug.LogError(filePath);
                 }
             }
             
