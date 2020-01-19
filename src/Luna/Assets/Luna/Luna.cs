@@ -67,7 +67,7 @@ namespace SharpLuna
                 ReadBytes = System.IO.File.ReadAllBytes;
             }
 
-            L = Lua.newstate();
+            L = Lua.NewState();
             
             luaL_openlibs(L);
             lua_atpanic(L, PanicCallback);
@@ -138,7 +138,7 @@ namespace SharpLuna
 
             RefCountHelper.Clear();
 
-            Lua.close(L);
+            Lua.CloseState(L);
             L = IntPtr.Zero;
         }
 

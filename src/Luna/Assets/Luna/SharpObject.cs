@@ -1,4 +1,4 @@
-﻿//#define LUA_WEAKTABLE
+﻿#define LUA_WEAKTABLE
 
 using System;
 using System.Collections.Generic;

@@ -30,30 +30,7 @@ namespace SharpLuna
 
         internal static Encoding Encoding { get; set; } = Encoding.UTF8;
         internal static HashSet<object> savedFn = new HashSet<object>();
-        static ConcurrentDictionary<IntPtr, bool> luaStates = new ConcurrentDictionary<IntPtr, bool>();
-      
-        public static lua_State newstate()
-        {
-            var L = luaL_newstate();
-            luaStates.TryAdd(L, true);
-            return L;
-        }
-
-        public static bool isactive(lua_State L)
-        {
-            return luaStates.ContainsKey(L);
-        }
-
-        public static void close(lua_State L)
-        {
-            if (!luaStates.TryRemove(L, out var state))
-            {
-                assert(false);
-            }
-
-            lua_close(L);
-        }
-        
+       
         public static LuaNativeFunction lua_atpanic(lua_State L, LuaNativeFunction panicFunction)
         {
 #if SAVE_FUNC

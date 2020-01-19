@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -10,7 +11,31 @@ namespace SharpLuna
     using lua_State = IntPtr;
 
     public unsafe static partial class Lua
-    {        
+    {
+        static ConcurrentDictionary<IntPtr, bool> luaStates = new ConcurrentDictionary<IntPtr, bool>();
+
+        public static lua_State NewState()
+        {
+            var L = luaL_newstate();
+            luaStates.TryAdd(L, true);
+            return L;
+        }
+
+        public static bool IsActive(lua_State L)
+        {
+            return luaStates.ContainsKey(L);
+        }
+
+        public static void CloseState(lua_State L)
+        {
+            if (!luaStates.TryRemove(L, out var state))
+            {
+                assert(false);
+            }
+
+            lua_close(L);
+        }
+
         public static unsafe void PushLightObject<T>(lua_State L, T obj)
         {
             GCHandle gc = GCHandle.Alloc(obj, GCHandleType.Normal);
@@ -19,9 +44,6 @@ namespace SharpLuna
 
         public static T ToLightObject<T>(lua_State L, int index, bool freeGCHandle = true)
         {
-            //if (lua_isnil(L, index) || !lua_islightuserdata(L, index))
-            //    return default(T);
-
             IntPtr data = lua_touserdata(L, index);
             if (data == IntPtr.Zero)
                 return default(T);
@@ -339,6 +361,10 @@ namespace SharpLuna
                     return Convert.To<T>(luaL_optinteger(L, index, ival));
                 case ulong ival:
                     return Convert.To<T>((ulong)luaL_optinteger(L, index, (long)ival));
+                case IntPtr ival:
+                    return Convert.To<T>((IntPtr)luaL_optinteger(L, index, (long)ival));
+                case UIntPtr ival:
+                    return Convert.To<T>((UIntPtr)luaL_optinteger(L, index, (long)ival));
                 case float fval:
                     return Convert.To<T>((float)luaL_optnumber(L, index, fval));
                 case double fval:
