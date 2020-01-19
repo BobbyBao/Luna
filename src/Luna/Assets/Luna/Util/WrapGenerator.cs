@@ -19,42 +19,6 @@ namespace SharpLuna
             }
         }
 
-        static string GetTypeName(Type type)
-        {
-            if (type == typeof(bool))
-                return "bool";
-            else if (type == typeof(sbyte))
-                return "sbyte";
-            else if (type == typeof(byte))
-                return "byte";
-            else if (type == typeof(short))
-                return "short";
-            else if (type == typeof(ushort))
-                return "ushort";
-            else if (type == typeof(int))
-                return "int";
-            else if (type == typeof(uint))
-                return "uint";
-            else if (type == typeof(long))
-                return "long";
-            else if (type == typeof(ulong))
-                return "ulong";
-            else if (type == typeof(float))
-                return "float";
-            else if (type == typeof(double))
-                return "double";
-            else if (type == typeof(decimal))
-                return "decimal";
-            else if (type == typeof(char))
-                return "char";
-            else if (type == typeof(string))
-                return "string";
-            else if (type == typeof(object))
-                return "object";
-            else
-                return type.FullName;
-        }
-
         public static void GenerateClassWrap(Type type, string path = "")
         {
             string code = GenerateClass(type);
@@ -329,7 +293,7 @@ namespace SharpLuna
                     for (int i = 1; i <= parameters.Length; i++)
                     {
                         var paramInfo = parameters[i - 1];
-                        sb.Append($"\t\t\tGet(L, {(i + 1)}, out {GetTypeName(paramInfo.ParameterType)} t{i});");                        
+                        sb.Append($"\t\t\tGet(L, {(i + 1)}, out {paramInfo.ParameterType.GetFriendlyName()} t{i});");                        
                         sb.AppendLine();
                     }
 
@@ -406,7 +370,7 @@ namespace SharpLuna
                 
                 if (isStatic)
                 {
-                    sb.Append($"\t\tGet(L, 1, out {GetTypeName(valType)} p1);\n");
+                    sb.Append($"\t\tGet(L, 1, out {valType.GetFriendlyName()} p1);\n");
                     sb.Append($"\t\t{type.FullName}.{name} = p1;\n");
                 }
                 else
@@ -420,7 +384,7 @@ namespace SharpLuna
                         sb.Append($"\t\tvar obj = SharpObject.Get<{type.FullName}>(L, 1);\n");
                     }
 
-                    sb.Append($"\t\tGet(L, 2, out {GetTypeName(valType)} p1);\n");
+                    sb.Append($"\t\tGet(L, 2, out {valType.GetFriendlyName()} p1);\n");
                     sb.Append($"\t\tobj.{name} = p1;\n");
                 }
 
@@ -496,7 +460,7 @@ namespace SharpLuna
                 for (int i = 0; i < parameters.Length; i++)
                 {
                     var paramInfo = parameters[i];
-                    sb.Indent(indent).Append($"Get(L, {i} + startStack, out {GetTypeName(paramInfo.ParameterType)} t{i});");
+                    sb.Indent(indent).Append($"Get(L, {i} + startStack, out {paramInfo.ParameterType.GetFriendlyName()} t{i});");
                     sb.AppendLine();
                 }
 
