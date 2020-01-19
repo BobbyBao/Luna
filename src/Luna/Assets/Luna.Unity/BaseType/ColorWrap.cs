@@ -16,22 +16,20 @@ public class ColorWrap
 		}
 		else if(n == 3)
 		{
-			obj = new UnityEngine.Color(
-				Lua.Get<float>(L, 2),
-				Lua.Get<float>(L, 3),
-				Lua.Get<float>(L, 4)
-			);
+			Get(L, 2, out float t1);
+			Get(L, 3, out float t2);
+			Get(L, 4, out float t3);
+			obj = new UnityEngine.Color(t1, t2, t3);
 		}
 		else if(n == 4)
 		{
-			obj = new UnityEngine.Color(
-				Lua.Get<float>(L, 2),
-				Lua.Get<float>(L, 3),
-				Lua.Get<float>(L, 4),
-				Lua.Get<float>(L, 5)
-			);
+			Get(L, 2, out float t1);
+			Get(L, 3, out float t2);
+			Get(L, 4, out float t3);
+			Get(L, 5, out float t4);
+			obj = new UnityEngine.Color(t1, t2, t3, t4);
 		}
-		Lua.Push(L, obj);
+		Push(L, obj);
 		return 1;
 	}
 
@@ -39,7 +37,7 @@ public class ColorWrap
 	static int Get_r(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Color>(L, 1);
-		Lua.Push(L, obj.r);
+		Push(L, obj.r);
 		return 1;
 	}
 
@@ -47,7 +45,7 @@ public class ColorWrap
 	static int Set_r(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Color>(L, 1);
-		var p1 = Lua.Get<float>(L, 2);
+		Get(L, 2, out float p1);
 		obj.r = p1;
 		return 0;
 	}
@@ -56,7 +54,7 @@ public class ColorWrap
 	static int Get_g(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Color>(L, 1);
-		Lua.Push(L, obj.g);
+		Push(L, obj.g);
 		return 1;
 	}
 
@@ -64,7 +62,7 @@ public class ColorWrap
 	static int Set_g(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Color>(L, 1);
-		var p1 = Lua.Get<float>(L, 2);
+		Get(L, 2, out float p1);
 		obj.g = p1;
 		return 0;
 	}
@@ -73,7 +71,7 @@ public class ColorWrap
 	static int Get_b(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Color>(L, 1);
-		Lua.Push(L, obj.b);
+		Push(L, obj.b);
 		return 1;
 	}
 
@@ -81,7 +79,7 @@ public class ColorWrap
 	static int Set_b(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Color>(L, 1);
-		var p1 = Lua.Get<float>(L, 2);
+		Get(L, 2, out float p1);
 		obj.b = p1;
 		return 0;
 	}
@@ -90,7 +88,7 @@ public class ColorWrap
 	static int Get_a(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Color>(L, 1);
-		Lua.Push(L, obj.a);
+		Push(L, obj.a);
 		return 1;
 	}
 
@@ -98,7 +96,7 @@ public class ColorWrap
 	static int Set_a(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Color>(L, 1);
-		var p1 = Lua.Get<float>(L, 2);
+		Get(L, 2, out float p1);
 		obj.a = p1;
 		return 0;
 	}
@@ -106,77 +104,77 @@ public class ColorWrap
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Get_red(IntPtr L)
 	{
-		Lua.Push(L, UnityEngine.Color.red);
+		Push(L, UnityEngine.Color.red);
 		return 1;
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Get_green(IntPtr L)
 	{
-		Lua.Push(L, UnityEngine.Color.green);
+		Push(L, UnityEngine.Color.green);
 		return 1;
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Get_blue(IntPtr L)
 	{
-		Lua.Push(L, UnityEngine.Color.blue);
+		Push(L, UnityEngine.Color.blue);
 		return 1;
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Get_white(IntPtr L)
 	{
-		Lua.Push(L, UnityEngine.Color.white);
+		Push(L, UnityEngine.Color.white);
 		return 1;
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Get_black(IntPtr L)
 	{
-		Lua.Push(L, UnityEngine.Color.black);
+		Push(L, UnityEngine.Color.black);
 		return 1;
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Get_yellow(IntPtr L)
 	{
-		Lua.Push(L, UnityEngine.Color.yellow);
+		Push(L, UnityEngine.Color.yellow);
 		return 1;
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Get_cyan(IntPtr L)
 	{
-		Lua.Push(L, UnityEngine.Color.cyan);
+		Push(L, UnityEngine.Color.cyan);
 		return 1;
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Get_magenta(IntPtr L)
 	{
-		Lua.Push(L, UnityEngine.Color.magenta);
+		Push(L, UnityEngine.Color.magenta);
 		return 1;
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Get_gray(IntPtr L)
 	{
-		Lua.Push(L, UnityEngine.Color.gray);
+		Push(L, UnityEngine.Color.gray);
 		return 1;
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Get_grey(IntPtr L)
 	{
-		Lua.Push(L, UnityEngine.Color.grey);
+		Push(L, UnityEngine.Color.grey);
 		return 1;
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Get_clear(IntPtr L)
 	{
-		Lua.Push(L, UnityEngine.Color.clear);
+		Push(L, UnityEngine.Color.clear);
 		return 1;
 	}
 
@@ -184,7 +182,7 @@ public class ColorWrap
 	static int Get_grayscale(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Color>(L, 1);
-		Lua.Push(L, obj.grayscale);
+		Push(L, obj.grayscale);
 		return 1;
 	}
 
@@ -192,7 +190,7 @@ public class ColorWrap
 	static int Get_linear(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Color>(L, 1);
-		Lua.Push(L, obj.linear);
+		Push(L, obj.linear);
 		return 1;
 	}
 
@@ -200,7 +198,7 @@ public class ColorWrap
 	static int Get_gamma(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Color>(L, 1);
-		Lua.Push(L, obj.gamma);
+		Push(L, obj.gamma);
 		return 1;
 	}
 
@@ -208,7 +206,7 @@ public class ColorWrap
 	static int Get_maxColorComponent(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Color>(L, 1);
-		Lua.Push(L, obj.maxColorComponent);
+		Push(L, obj.maxColorComponent);
 		return 1;
 	}
 
@@ -220,17 +218,16 @@ public class ColorWrap
 		{
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Color>(L, 1);
 			var ret = obj.ToString();
-			Lua.Push(L, ret);
+			Push(L, ret);
 			return 1;
 		}
 		else if(n == 1)
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Color>(L, 1);
-			var ret = obj.ToString(
-				Lua.Get<string>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out string t0);
+			var ret = obj.ToString(t0);
+			Push(L, ret);
 			return 1;
 		}
 		return 0;
@@ -241,7 +238,7 @@ public class ColorWrap
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Color>(L, 1);
 		var ret = obj.GetHashCode();
-		Lua.Push(L, ret);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -253,20 +250,18 @@ public class ColorWrap
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Color>(L, 1);
-			var ret = obj.Equals(
-				Lua.Get<object>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out object t0);
+			var ret = obj.Equals(t0);
+			Push(L, ret);
 			return 1;
 		}
 		else if(n == 1)
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Color>(L, 1);
-			var ret = obj.Equals(
-				Lua.Get<UnityEngine.Color>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out UnityEngine.Color t0);
+			var ret = obj.Equals(t0);
+			Push(L, ret);
 			return 1;
 		}
 		return 0;
@@ -280,12 +275,11 @@ public class ColorWrap
 		#else
 		const int startStack = 1;
 		#endif
-		var ret = UnityEngine.Color.Lerp(
-			Lua.Get<UnityEngine.Color>(L, 0 + startStack),
-			Lua.Get<UnityEngine.Color>(L, 1 + startStack),
-			Lua.Get<float>(L, 2 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Color t0);
+		Get(L, 1 + startStack, out UnityEngine.Color t1);
+		Get(L, 2 + startStack, out float t2);
+		var ret = UnityEngine.Color.Lerp(t0, t1, t2);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -297,12 +291,11 @@ public class ColorWrap
 		#else
 		const int startStack = 1;
 		#endif
-		var ret = UnityEngine.Color.LerpUnclamped(
-			Lua.Get<UnityEngine.Color>(L, 0 + startStack),
-			Lua.Get<UnityEngine.Color>(L, 1 + startStack),
-			Lua.Get<float>(L, 2 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Color t0);
+		Get(L, 1 + startStack, out UnityEngine.Color t1);
+		Get(L, 2 + startStack, out float t2);
+		var ret = UnityEngine.Color.LerpUnclamped(t0, t1, t2);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -317,12 +310,11 @@ public class ColorWrap
 			#else
 			const int startStack = 1;
 			#endif
-			var ret = UnityEngine.Color.HSVToRGB(
-				Lua.Get<float>(L, 0 + startStack),
-				Lua.Get<float>(L, 1 + startStack),
-				Lua.Get<float>(L, 2 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out float t0);
+			Get(L, 1 + startStack, out float t1);
+			Get(L, 2 + startStack, out float t2);
+			var ret = UnityEngine.Color.HSVToRGB(t0, t1, t2);
+			Push(L, ret);
 			return 1;
 		}
 		else if(n == 4)
@@ -332,13 +324,12 @@ public class ColorWrap
 			#else
 			const int startStack = 1;
 			#endif
-			var ret = UnityEngine.Color.HSVToRGB(
-				Lua.Get<float>(L, 0 + startStack),
-				Lua.Get<float>(L, 1 + startStack),
-				Lua.Get<float>(L, 2 + startStack),
-				Lua.Get<bool>(L, 3 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out float t0);
+			Get(L, 1 + startStack, out float t1);
+			Get(L, 2 + startStack, out float t2);
+			Get(L, 3 + startStack, out bool t3);
+			var ret = UnityEngine.Color.HSVToRGB(t0, t1, t2, t3);
+			Push(L, ret);
 			return 1;
 		}
 		return 0;
@@ -349,7 +340,7 @@ public class ColorWrap
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Color>(L, 1);
 		var ret = obj.GetType();
-		Lua.Push(L, ret);
+		Push(L, ret);
 		return 1;
 	}
 

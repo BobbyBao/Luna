@@ -9,7 +9,7 @@ public class LayerMaskWrap
 	static int Get_value(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.LayerMask>(L, 1);
-		Lua.Push(L, obj.value);
+		Push(L, obj.value);
 		return 1;
 	}
 
@@ -17,7 +17,7 @@ public class LayerMaskWrap
 	static int Set_value(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.LayerMask>(L, 1);
-		var p1 = Lua.Get<int>(L, 2);
+		Get(L, 2, out int p1);
 		obj.value = p1;
 		return 0;
 	}
@@ -30,10 +30,9 @@ public class LayerMaskWrap
 		#else
 		const int startStack = 1;
 		#endif
-		var ret = UnityEngine.LayerMask.LayerToName(
-			Lua.Get<int>(L, 0 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out int t0);
+		var ret = UnityEngine.LayerMask.LayerToName(t0);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -45,10 +44,9 @@ public class LayerMaskWrap
 		#else
 		const int startStack = 1;
 		#endif
-		var ret = UnityEngine.LayerMask.NameToLayer(
-			Lua.Get<string>(L, 0 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out string t0);
+		var ret = UnityEngine.LayerMask.NameToLayer(t0);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -60,10 +58,9 @@ public class LayerMaskWrap
 		#else
 		const int startStack = 1;
 		#endif
-		var ret = UnityEngine.LayerMask.GetMask(
-			Lua.Get<System.String[]>(L, 0 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out System.String[] t0);
+		var ret = UnityEngine.LayerMask.GetMask(t0);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -72,10 +69,9 @@ public class LayerMaskWrap
 	{
 		const int startStack = 2;
 		ref var obj = ref SharpObject.GetValue<UnityEngine.LayerMask>(L, 1);
-		var ret = obj.Equals(
-			Lua.Get<object>(L, 0 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out object t0);
+		var ret = obj.Equals(t0);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -84,7 +80,7 @@ public class LayerMaskWrap
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.LayerMask>(L, 1);
 		var ret = obj.GetHashCode();
-		Lua.Push(L, ret);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -93,7 +89,7 @@ public class LayerMaskWrap
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.LayerMask>(L, 1);
 		var ret = obj.ToString();
-		Lua.Push(L, ret);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -102,7 +98,7 @@ public class LayerMaskWrap
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.LayerMask>(L, 1);
 		var ret = obj.GetType();
-		Lua.Push(L, ret);
+		Push(L, ret);
 		return 1;
 	}
 

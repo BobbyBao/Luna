@@ -16,14 +16,13 @@ public class QuaternionWrap
 		}
 		else if(n == 4)
 		{
-			obj = new UnityEngine.Quaternion(
-				Lua.Get<float>(L, 2),
-				Lua.Get<float>(L, 3),
-				Lua.Get<float>(L, 4),
-				Lua.Get<float>(L, 5)
-			);
+			Get(L, 2, out float t1);
+			Get(L, 3, out float t2);
+			Get(L, 4, out float t3);
+			Get(L, 5, out float t4);
+			obj = new UnityEngine.Quaternion(t1, t2, t3, t4);
 		}
-		Lua.Push(L, obj);
+		Push(L, obj);
 		return 1;
 	}
 
@@ -31,7 +30,7 @@ public class QuaternionWrap
 	static int Get_x(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
-		Lua.Push(L, obj.x);
+		Push(L, obj.x);
 		return 1;
 	}
 
@@ -39,7 +38,7 @@ public class QuaternionWrap
 	static int Set_x(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
-		var p1 = Lua.Get<float>(L, 2);
+		Get(L, 2, out float p1);
 		obj.x = p1;
 		return 0;
 	}
@@ -48,7 +47,7 @@ public class QuaternionWrap
 	static int Get_y(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
-		Lua.Push(L, obj.y);
+		Push(L, obj.y);
 		return 1;
 	}
 
@@ -56,7 +55,7 @@ public class QuaternionWrap
 	static int Set_y(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
-		var p1 = Lua.Get<float>(L, 2);
+		Get(L, 2, out float p1);
 		obj.y = p1;
 		return 0;
 	}
@@ -65,7 +64,7 @@ public class QuaternionWrap
 	static int Get_z(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
-		Lua.Push(L, obj.z);
+		Push(L, obj.z);
 		return 1;
 	}
 
@@ -73,7 +72,7 @@ public class QuaternionWrap
 	static int Set_z(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
-		var p1 = Lua.Get<float>(L, 2);
+		Get(L, 2, out float p1);
 		obj.z = p1;
 		return 0;
 	}
@@ -82,7 +81,7 @@ public class QuaternionWrap
 	static int Get_w(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
-		Lua.Push(L, obj.w);
+		Push(L, obj.w);
 		return 1;
 	}
 
@@ -90,7 +89,7 @@ public class QuaternionWrap
 	static int Set_w(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
-		var p1 = Lua.Get<float>(L, 2);
+		Get(L, 2, out float p1);
 		obj.w = p1;
 		return 0;
 	}
@@ -98,7 +97,7 @@ public class QuaternionWrap
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Get_identity(IntPtr L)
 	{
-		Lua.Push(L, UnityEngine.Quaternion.identity);
+		Push(L, UnityEngine.Quaternion.identity);
 		return 1;
 	}
 
@@ -106,7 +105,7 @@ public class QuaternionWrap
 	static int Get_eulerAngles(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
-		Lua.Push(L, obj.eulerAngles);
+		Push(L, obj.eulerAngles);
 		return 1;
 	}
 
@@ -114,7 +113,7 @@ public class QuaternionWrap
 	static int Set_eulerAngles(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
-		var p1 = Lua.Get<UnityEngine.Vector3>(L, 2);
+		Get(L, 2, out UnityEngine.Vector3 p1);
 		obj.eulerAngles = p1;
 		return 0;
 	}
@@ -123,7 +122,7 @@ public class QuaternionWrap
 	static int Get_normalized(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
-		Lua.Push(L, obj.normalized);
+		Push(L, obj.normalized);
 		return 1;
 	}
 
@@ -135,11 +134,10 @@ public class QuaternionWrap
 		#else
 		const int startStack = 1;
 		#endif
-		var ret = UnityEngine.Quaternion.FromToRotation(
-			Lua.Get<UnityEngine.Vector3>(L, 0 + startStack),
-			Lua.Get<UnityEngine.Vector3>(L, 1 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+		Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
+		var ret = UnityEngine.Quaternion.FromToRotation(t0, t1);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -151,10 +149,9 @@ public class QuaternionWrap
 		#else
 		const int startStack = 1;
 		#endif
-		var ret = UnityEngine.Quaternion.Inverse(
-			Lua.Get<UnityEngine.Quaternion>(L, 0 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Quaternion t0);
+		var ret = UnityEngine.Quaternion.Inverse(t0);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -166,12 +163,11 @@ public class QuaternionWrap
 		#else
 		const int startStack = 1;
 		#endif
-		var ret = UnityEngine.Quaternion.Slerp(
-			Lua.Get<UnityEngine.Quaternion>(L, 0 + startStack),
-			Lua.Get<UnityEngine.Quaternion>(L, 1 + startStack),
-			Lua.Get<float>(L, 2 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Quaternion t0);
+		Get(L, 1 + startStack, out UnityEngine.Quaternion t1);
+		Get(L, 2 + startStack, out float t2);
+		var ret = UnityEngine.Quaternion.Slerp(t0, t1, t2);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -183,12 +179,11 @@ public class QuaternionWrap
 		#else
 		const int startStack = 1;
 		#endif
-		var ret = UnityEngine.Quaternion.SlerpUnclamped(
-			Lua.Get<UnityEngine.Quaternion>(L, 0 + startStack),
-			Lua.Get<UnityEngine.Quaternion>(L, 1 + startStack),
-			Lua.Get<float>(L, 2 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Quaternion t0);
+		Get(L, 1 + startStack, out UnityEngine.Quaternion t1);
+		Get(L, 2 + startStack, out float t2);
+		var ret = UnityEngine.Quaternion.SlerpUnclamped(t0, t1, t2);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -200,12 +195,11 @@ public class QuaternionWrap
 		#else
 		const int startStack = 1;
 		#endif
-		var ret = UnityEngine.Quaternion.Lerp(
-			Lua.Get<UnityEngine.Quaternion>(L, 0 + startStack),
-			Lua.Get<UnityEngine.Quaternion>(L, 1 + startStack),
-			Lua.Get<float>(L, 2 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Quaternion t0);
+		Get(L, 1 + startStack, out UnityEngine.Quaternion t1);
+		Get(L, 2 + startStack, out float t2);
+		var ret = UnityEngine.Quaternion.Lerp(t0, t1, t2);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -217,12 +211,11 @@ public class QuaternionWrap
 		#else
 		const int startStack = 1;
 		#endif
-		var ret = UnityEngine.Quaternion.LerpUnclamped(
-			Lua.Get<UnityEngine.Quaternion>(L, 0 + startStack),
-			Lua.Get<UnityEngine.Quaternion>(L, 1 + startStack),
-			Lua.Get<float>(L, 2 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Quaternion t0);
+		Get(L, 1 + startStack, out UnityEngine.Quaternion t1);
+		Get(L, 2 + startStack, out float t2);
+		var ret = UnityEngine.Quaternion.LerpUnclamped(t0, t1, t2);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -234,11 +227,10 @@ public class QuaternionWrap
 		#else
 		const int startStack = 1;
 		#endif
-		var ret = UnityEngine.Quaternion.AngleAxis(
-			Lua.Get<float>(L, 0 + startStack),
-			Lua.Get<UnityEngine.Vector3>(L, 1 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out float t0);
+		Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
+		var ret = UnityEngine.Quaternion.AngleAxis(t0, t1);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -253,10 +245,9 @@ public class QuaternionWrap
 			#else
 			const int startStack = 1;
 			#endif
-			var ret = UnityEngine.Quaternion.LookRotation(
-				Lua.Get<UnityEngine.Vector3>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+			var ret = UnityEngine.Quaternion.LookRotation(t0);
+			Push(L, ret);
 			return 1;
 		}
 		else if(n == 2)
@@ -266,11 +257,10 @@ public class QuaternionWrap
 			#else
 			const int startStack = 1;
 			#endif
-			var ret = UnityEngine.Quaternion.LookRotation(
-				Lua.Get<UnityEngine.Vector3>(L, 0 + startStack),
-				Lua.Get<UnityEngine.Vector3>(L, 1 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+			Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
+			var ret = UnityEngine.Quaternion.LookRotation(t0, t1);
+			Push(L, ret);
 			return 1;
 		}
 		return 0;
@@ -281,12 +271,11 @@ public class QuaternionWrap
 	{
 		const int startStack = 2;
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
-		obj.Set(
-			Lua.Get<float>(L, 0 + startStack),
-			Lua.Get<float>(L, 1 + startStack),
-			Lua.Get<float>(L, 2 + startStack),
-			Lua.Get<float>(L, 3 + startStack)
-		);
+		Get(L, 0 + startStack, out float t0);
+		Get(L, 1 + startStack, out float t1);
+		Get(L, 2 + startStack, out float t2);
+		Get(L, 3 + startStack, out float t3);
+		obj.Set(t0, t1, t2, t3);
 		return 0;
 	}
 
@@ -298,11 +287,10 @@ public class QuaternionWrap
 		#else
 		const int startStack = 1;
 		#endif
-		var ret = UnityEngine.Quaternion.Dot(
-			Lua.Get<UnityEngine.Quaternion>(L, 0 + startStack),
-			Lua.Get<UnityEngine.Quaternion>(L, 1 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Quaternion t0);
+		Get(L, 1 + startStack, out UnityEngine.Quaternion t1);
+		var ret = UnityEngine.Quaternion.Dot(t0, t1);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -314,19 +302,17 @@ public class QuaternionWrap
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
-			obj.SetLookRotation(
-				Lua.Get<UnityEngine.Vector3>(L, 0 + startStack)
-			);
+			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+			obj.SetLookRotation(t0);
 			return 0;
 		}
 		else if(n == 2)
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
-			obj.SetLookRotation(
-				Lua.Get<UnityEngine.Vector3>(L, 0 + startStack),
-				Lua.Get<UnityEngine.Vector3>(L, 1 + startStack)
-			);
+			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+			Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
+			obj.SetLookRotation(t0, t1);
 			return 0;
 		}
 		return 0;
@@ -340,11 +326,10 @@ public class QuaternionWrap
 		#else
 		const int startStack = 1;
 		#endif
-		var ret = UnityEngine.Quaternion.Angle(
-			Lua.Get<UnityEngine.Quaternion>(L, 0 + startStack),
-			Lua.Get<UnityEngine.Quaternion>(L, 1 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Quaternion t0);
+		Get(L, 1 + startStack, out UnityEngine.Quaternion t1);
+		var ret = UnityEngine.Quaternion.Angle(t0, t1);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -359,10 +344,9 @@ public class QuaternionWrap
 			#else
 			const int startStack = 1;
 			#endif
-			var ret = UnityEngine.Quaternion.Euler(
-				Lua.Get<UnityEngine.Vector3>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+			var ret = UnityEngine.Quaternion.Euler(t0);
+			Push(L, ret);
 			return 1;
 		}
 		else if(n == 3)
@@ -372,12 +356,11 @@ public class QuaternionWrap
 			#else
 			const int startStack = 1;
 			#endif
-			var ret = UnityEngine.Quaternion.Euler(
-				Lua.Get<float>(L, 0 + startStack),
-				Lua.Get<float>(L, 1 + startStack),
-				Lua.Get<float>(L, 2 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out float t0);
+			Get(L, 1 + startStack, out float t1);
+			Get(L, 2 + startStack, out float t2);
+			var ret = UnityEngine.Quaternion.Euler(t0, t1, t2);
+			Push(L, ret);
 			return 1;
 		}
 		return 0;
@@ -388,10 +371,9 @@ public class QuaternionWrap
 	{
 		const int startStack = 2;
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
-		obj.SetFromToRotation(
-			Lua.Get<UnityEngine.Vector3>(L, 0 + startStack),
-			Lua.Get<UnityEngine.Vector3>(L, 1 + startStack)
-		);
+		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+		Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
+		obj.SetFromToRotation(t0, t1);
 		return 0;
 	}
 
@@ -403,12 +385,11 @@ public class QuaternionWrap
 		#else
 		const int startStack = 1;
 		#endif
-		var ret = UnityEngine.Quaternion.RotateTowards(
-			Lua.Get<UnityEngine.Quaternion>(L, 0 + startStack),
-			Lua.Get<UnityEngine.Quaternion>(L, 1 + startStack),
-			Lua.Get<float>(L, 2 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Quaternion t0);
+		Get(L, 1 + startStack, out UnityEngine.Quaternion t1);
+		Get(L, 2 + startStack, out float t2);
+		var ret = UnityEngine.Quaternion.RotateTowards(t0, t1, t2);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -429,10 +410,9 @@ public class QuaternionWrap
 			#else
 			const int startStack = 1;
 			#endif
-			var ret = UnityEngine.Quaternion.Normalize(
-				Lua.Get<UnityEngine.Quaternion>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out UnityEngine.Quaternion t0);
+			var ret = UnityEngine.Quaternion.Normalize(t0);
+			Push(L, ret);
 			return 1;
 		}
 		return 0;
@@ -443,7 +423,7 @@ public class QuaternionWrap
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
 		var ret = obj.GetHashCode();
-		Lua.Push(L, ret);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -455,20 +435,18 @@ public class QuaternionWrap
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
-			var ret = obj.Equals(
-				Lua.Get<object>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out object t0);
+			var ret = obj.Equals(t0);
+			Push(L, ret);
 			return 1;
 		}
 		else if(n == 1)
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
-			var ret = obj.Equals(
-				Lua.Get<UnityEngine.Quaternion>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out UnityEngine.Quaternion t0);
+			var ret = obj.Equals(t0);
+			Push(L, ret);
 			return 1;
 		}
 		return 0;
@@ -482,17 +460,16 @@ public class QuaternionWrap
 		{
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
 			var ret = obj.ToString();
-			Lua.Push(L, ret);
+			Push(L, ret);
 			return 1;
 		}
 		else if(n == 1)
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
-			var ret = obj.ToString(
-				Lua.Get<string>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out string t0);
+			var ret = obj.ToString(t0);
+			Push(L, ret);
 			return 1;
 		}
 		return 0;
@@ -503,7 +480,7 @@ public class QuaternionWrap
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
 		var ret = obj.GetType();
-		Lua.Push(L, ret);
+		Push(L, ret);
 		return 1;
 	}
 

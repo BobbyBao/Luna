@@ -16,27 +16,24 @@ public class PlaneWrap
 		}
 		else if(n == 2)
 		{
-			obj = new UnityEngine.Plane(
-				Lua.Get<UnityEngine.Vector3>(L, 2),
-				Lua.Get<UnityEngine.Vector3>(L, 3)
-			);
+			Get(L, 2, out UnityEngine.Vector3 t1);
+			Get(L, 3, out UnityEngine.Vector3 t2);
+			obj = new UnityEngine.Plane(t1, t2);
 		}
 		else if(n == 2)
 		{
-			obj = new UnityEngine.Plane(
-				Lua.Get<UnityEngine.Vector3>(L, 2),
-				Lua.Get<float>(L, 3)
-			);
+			Get(L, 2, out UnityEngine.Vector3 t1);
+			Get(L, 3, out float t2);
+			obj = new UnityEngine.Plane(t1, t2);
 		}
 		else if(n == 3)
 		{
-			obj = new UnityEngine.Plane(
-				Lua.Get<UnityEngine.Vector3>(L, 2),
-				Lua.Get<UnityEngine.Vector3>(L, 3),
-				Lua.Get<UnityEngine.Vector3>(L, 4)
-			);
+			Get(L, 2, out UnityEngine.Vector3 t1);
+			Get(L, 3, out UnityEngine.Vector3 t2);
+			Get(L, 4, out UnityEngine.Vector3 t3);
+			obj = new UnityEngine.Plane(t1, t2, t3);
 		}
-		Lua.Push(L, obj);
+		Push(L, obj);
 		return 1;
 	}
 
@@ -44,7 +41,7 @@ public class PlaneWrap
 	static int Get_normal(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Plane>(L, 1);
-		Lua.Push(L, obj.normal);
+		Push(L, obj.normal);
 		return 1;
 	}
 
@@ -52,7 +49,7 @@ public class PlaneWrap
 	static int Set_normal(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Plane>(L, 1);
-		var p1 = Lua.Get<UnityEngine.Vector3>(L, 2);
+		Get(L, 2, out UnityEngine.Vector3 p1);
 		obj.normal = p1;
 		return 0;
 	}
@@ -61,7 +58,7 @@ public class PlaneWrap
 	static int Get_distance(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Plane>(L, 1);
-		Lua.Push(L, obj.distance);
+		Push(L, obj.distance);
 		return 1;
 	}
 
@@ -69,7 +66,7 @@ public class PlaneWrap
 	static int Set_distance(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Plane>(L, 1);
-		var p1 = Lua.Get<float>(L, 2);
+		Get(L, 2, out float p1);
 		obj.distance = p1;
 		return 0;
 	}
@@ -78,7 +75,7 @@ public class PlaneWrap
 	static int Get_flipped(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Plane>(L, 1);
-		Lua.Push(L, obj.flipped);
+		Push(L, obj.flipped);
 		return 1;
 	}
 
@@ -87,10 +84,9 @@ public class PlaneWrap
 	{
 		const int startStack = 2;
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Plane>(L, 1);
-		obj.SetNormalAndPosition(
-			Lua.Get<UnityEngine.Vector3>(L, 0 + startStack),
-			Lua.Get<UnityEngine.Vector3>(L, 1 + startStack)
-		);
+		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+		Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
+		obj.SetNormalAndPosition(t0, t1);
 		return 0;
 	}
 
@@ -99,11 +95,10 @@ public class PlaneWrap
 	{
 		const int startStack = 2;
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Plane>(L, 1);
-		obj.Set3Points(
-			Lua.Get<UnityEngine.Vector3>(L, 0 + startStack),
-			Lua.Get<UnityEngine.Vector3>(L, 1 + startStack),
-			Lua.Get<UnityEngine.Vector3>(L, 2 + startStack)
-		);
+		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+		Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
+		Get(L, 2 + startStack, out UnityEngine.Vector3 t2);
+		obj.Set3Points(t0, t1, t2);
 		return 0;
 	}
 
@@ -123,9 +118,8 @@ public class PlaneWrap
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Plane>(L, 1);
-			obj.Translate(
-				Lua.Get<UnityEngine.Vector3>(L, 0 + startStack)
-			);
+			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+			obj.Translate(t0);
 			return 0;
 		}
 		else if(n == 2)
@@ -135,11 +129,10 @@ public class PlaneWrap
 			#else
 			const int startStack = 1;
 			#endif
-			var ret = UnityEngine.Plane.Translate(
-				Lua.Get<UnityEngine.Plane>(L, 0 + startStack),
-				Lua.Get<UnityEngine.Vector3>(L, 1 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out UnityEngine.Plane t0);
+			Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
+			var ret = UnityEngine.Plane.Translate(t0, t1);
+			Push(L, ret);
 			return 1;
 		}
 		return 0;
@@ -150,10 +143,9 @@ public class PlaneWrap
 	{
 		const int startStack = 2;
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Plane>(L, 1);
-		var ret = obj.ClosestPointOnPlane(
-			Lua.Get<UnityEngine.Vector3>(L, 0 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+		var ret = obj.ClosestPointOnPlane(t0);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -162,10 +154,9 @@ public class PlaneWrap
 	{
 		const int startStack = 2;
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Plane>(L, 1);
-		var ret = obj.GetDistanceToPoint(
-			Lua.Get<UnityEngine.Vector3>(L, 0 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+		var ret = obj.GetDistanceToPoint(t0);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -174,10 +165,9 @@ public class PlaneWrap
 	{
 		const int startStack = 2;
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Plane>(L, 1);
-		var ret = obj.GetSide(
-			Lua.Get<UnityEngine.Vector3>(L, 0 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+		var ret = obj.GetSide(t0);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -186,11 +176,10 @@ public class PlaneWrap
 	{
 		const int startStack = 2;
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Plane>(L, 1);
-		var ret = obj.SameSide(
-			Lua.Get<UnityEngine.Vector3>(L, 0 + startStack),
-			Lua.Get<UnityEngine.Vector3>(L, 1 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+		Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
+		var ret = obj.SameSide(t0, t1);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -202,17 +191,16 @@ public class PlaneWrap
 		{
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Plane>(L, 1);
 			var ret = obj.ToString();
-			Lua.Push(L, ret);
+			Push(L, ret);
 			return 1;
 		}
 		else if(n == 1)
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Plane>(L, 1);
-			var ret = obj.ToString(
-				Lua.Get<string>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out string t0);
+			var ret = obj.ToString(t0);
+			Push(L, ret);
 			return 1;
 		}
 		return 0;
@@ -223,10 +211,9 @@ public class PlaneWrap
 	{
 		const int startStack = 2;
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Plane>(L, 1);
-		var ret = obj.Equals(
-			Lua.Get<object>(L, 0 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out object t0);
+		var ret = obj.Equals(t0);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -235,7 +222,7 @@ public class PlaneWrap
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Plane>(L, 1);
 		var ret = obj.GetHashCode();
-		Lua.Push(L, ret);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -244,7 +231,7 @@ public class PlaneWrap
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Plane>(L, 1);
 		var ret = obj.GetType();
-		Lua.Push(L, ret);
+		Push(L, ret);
 		return 1;
 	}
 

@@ -16,12 +16,11 @@ public class RayWrap
 		}
 		else if(n == 2)
 		{
-			obj = new UnityEngine.Ray(
-				Lua.Get<UnityEngine.Vector3>(L, 2),
-				Lua.Get<UnityEngine.Vector3>(L, 3)
-			);
+			Get(L, 2, out UnityEngine.Vector3 t1);
+			Get(L, 3, out UnityEngine.Vector3 t2);
+			obj = new UnityEngine.Ray(t1, t2);
 		}
-		Lua.Push(L, obj);
+		Push(L, obj);
 		return 1;
 	}
 
@@ -29,7 +28,7 @@ public class RayWrap
 	static int Get_origin(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Ray>(L, 1);
-		Lua.Push(L, obj.origin);
+		Push(L, obj.origin);
 		return 1;
 	}
 
@@ -37,7 +36,7 @@ public class RayWrap
 	static int Set_origin(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Ray>(L, 1);
-		var p1 = Lua.Get<UnityEngine.Vector3>(L, 2);
+		Get(L, 2, out UnityEngine.Vector3 p1);
 		obj.origin = p1;
 		return 0;
 	}
@@ -46,7 +45,7 @@ public class RayWrap
 	static int Get_direction(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Ray>(L, 1);
-		Lua.Push(L, obj.direction);
+		Push(L, obj.direction);
 		return 1;
 	}
 
@@ -54,7 +53,7 @@ public class RayWrap
 	static int Set_direction(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Ray>(L, 1);
-		var p1 = Lua.Get<UnityEngine.Vector3>(L, 2);
+		Get(L, 2, out UnityEngine.Vector3 p1);
 		obj.direction = p1;
 		return 0;
 	}
@@ -64,10 +63,9 @@ public class RayWrap
 	{
 		const int startStack = 2;
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Ray>(L, 1);
-		var ret = obj.GetPoint(
-			Lua.Get<float>(L, 0 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out float t0);
+		var ret = obj.GetPoint(t0);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -79,17 +77,16 @@ public class RayWrap
 		{
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Ray>(L, 1);
 			var ret = obj.ToString();
-			Lua.Push(L, ret);
+			Push(L, ret);
 			return 1;
 		}
 		else if(n == 1)
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Ray>(L, 1);
-			var ret = obj.ToString(
-				Lua.Get<string>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out string t0);
+			var ret = obj.ToString(t0);
+			Push(L, ret);
 			return 1;
 		}
 		return 0;
@@ -100,10 +97,9 @@ public class RayWrap
 	{
 		const int startStack = 2;
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Ray>(L, 1);
-		var ret = obj.Equals(
-			Lua.Get<object>(L, 0 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out object t0);
+		var ret = obj.Equals(t0);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -112,7 +108,7 @@ public class RayWrap
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Ray>(L, 1);
 		var ret = obj.GetHashCode();
-		Lua.Push(L, ret);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -121,7 +117,7 @@ public class RayWrap
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Ray>(L, 1);
 		var ret = obj.GetType();
-		Lua.Push(L, ret);
+		Push(L, ret);
 		return 1;
 	}
 

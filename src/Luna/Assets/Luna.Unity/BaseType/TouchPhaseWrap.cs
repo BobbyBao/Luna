@@ -10,10 +10,9 @@ public class TouchPhaseWrap
 	{
 		const int startStack = 2;
 		ref var obj = ref SharpObject.GetValue<UnityEngine.TouchPhase>(L, 1);
-		var ret = obj.Equals(
-			Lua.Get<object>(L, 0 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out object t0);
+		var ret = obj.Equals(t0);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -22,7 +21,7 @@ public class TouchPhaseWrap
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.TouchPhase>(L, 1);
 		var ret = obj.GetHashCode();
-		Lua.Push(L, ret);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -34,17 +33,16 @@ public class TouchPhaseWrap
 		{
 			ref var obj = ref SharpObject.GetValue<UnityEngine.TouchPhase>(L, 1);
 			var ret = obj.ToString();
-			Lua.Push(L, ret);
+			Push(L, ret);
 			return 1;
 		}
 		else if(n == 1)
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.TouchPhase>(L, 1);
-			var ret = obj.ToString(
-				Lua.Get<string>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out string t0);
+			var ret = obj.ToString(t0);
+			Push(L, ret);
 			return 1;
 		}
 		return 0;
@@ -55,10 +53,9 @@ public class TouchPhaseWrap
 	{
 		const int startStack = 2;
 		ref var obj = ref SharpObject.GetValue<UnityEngine.TouchPhase>(L, 1);
-		var ret = obj.CompareTo(
-			Lua.Get<object>(L, 0 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out object t0);
+		var ret = obj.CompareTo(t0);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -67,10 +64,9 @@ public class TouchPhaseWrap
 	{
 		const int startStack = 2;
 		ref var obj = ref SharpObject.GetValue<UnityEngine.TouchPhase>(L, 1);
-		var ret = obj.HasFlag(
-			Lua.Get<System.Enum>(L, 0 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out System.Enum t0);
+		var ret = obj.HasFlag(t0);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -79,7 +75,7 @@ public class TouchPhaseWrap
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.TouchPhase>(L, 1);
 		var ret = obj.GetTypeCode();
-		Lua.Push(L, ret);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -88,7 +84,7 @@ public class TouchPhaseWrap
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.TouchPhase>(L, 1);
 		var ret = obj.GetType();
-		Lua.Push(L, ret);
+		Push(L, ret);
 		return 1;
 	}
 

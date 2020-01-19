@@ -9,7 +9,7 @@ public class RaycastHitWrap
 	static int Get_collider(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.RaycastHit>(L, 1);
-		Lua.Push(L, obj.collider);
+		Push(L, obj.collider);
 		return 1;
 	}
 
@@ -17,7 +17,7 @@ public class RaycastHitWrap
 	static int Get_point(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.RaycastHit>(L, 1);
-		Lua.Push(L, obj.point);
+		Push(L, obj.point);
 		return 1;
 	}
 
@@ -25,7 +25,7 @@ public class RaycastHitWrap
 	static int Set_point(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.RaycastHit>(L, 1);
-		var p1 = Lua.Get<UnityEngine.Vector3>(L, 2);
+		Get(L, 2, out UnityEngine.Vector3 p1);
 		obj.point = p1;
 		return 0;
 	}
@@ -34,7 +34,7 @@ public class RaycastHitWrap
 	static int Get_normal(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.RaycastHit>(L, 1);
-		Lua.Push(L, obj.normal);
+		Push(L, obj.normal);
 		return 1;
 	}
 
@@ -42,7 +42,7 @@ public class RaycastHitWrap
 	static int Set_normal(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.RaycastHit>(L, 1);
-		var p1 = Lua.Get<UnityEngine.Vector3>(L, 2);
+		Get(L, 2, out UnityEngine.Vector3 p1);
 		obj.normal = p1;
 		return 0;
 	}
@@ -51,7 +51,7 @@ public class RaycastHitWrap
 	static int Get_barycentricCoordinate(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.RaycastHit>(L, 1);
-		Lua.Push(L, obj.barycentricCoordinate);
+		Push(L, obj.barycentricCoordinate);
 		return 1;
 	}
 
@@ -59,7 +59,7 @@ public class RaycastHitWrap
 	static int Set_barycentricCoordinate(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.RaycastHit>(L, 1);
-		var p1 = Lua.Get<UnityEngine.Vector3>(L, 2);
+		Get(L, 2, out UnityEngine.Vector3 p1);
 		obj.barycentricCoordinate = p1;
 		return 0;
 	}
@@ -68,7 +68,7 @@ public class RaycastHitWrap
 	static int Get_distance(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.RaycastHit>(L, 1);
-		Lua.Push(L, obj.distance);
+		Push(L, obj.distance);
 		return 1;
 	}
 
@@ -76,7 +76,7 @@ public class RaycastHitWrap
 	static int Set_distance(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.RaycastHit>(L, 1);
-		var p1 = Lua.Get<float>(L, 2);
+		Get(L, 2, out float p1);
 		obj.distance = p1;
 		return 0;
 	}
@@ -85,7 +85,7 @@ public class RaycastHitWrap
 	static int Get_triangleIndex(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.RaycastHit>(L, 1);
-		Lua.Push(L, obj.triangleIndex);
+		Push(L, obj.triangleIndex);
 		return 1;
 	}
 
@@ -93,7 +93,7 @@ public class RaycastHitWrap
 	static int Get_textureCoord(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.RaycastHit>(L, 1);
-		Lua.Push(L, obj.textureCoord);
+		Push(L, obj.textureCoord);
 		return 1;
 	}
 
@@ -101,7 +101,7 @@ public class RaycastHitWrap
 	static int Get_textureCoord2(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.RaycastHit>(L, 1);
-		Lua.Push(L, obj.textureCoord2);
+		Push(L, obj.textureCoord2);
 		return 1;
 	}
 
@@ -109,7 +109,7 @@ public class RaycastHitWrap
 	static int Get_transform(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.RaycastHit>(L, 1);
-		Lua.Push(L, obj.transform);
+		Push(L, obj.transform);
 		return 1;
 	}
 
@@ -117,7 +117,7 @@ public class RaycastHitWrap
 	static int Get_rigidbody(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.RaycastHit>(L, 1);
-		Lua.Push(L, obj.rigidbody);
+		Push(L, obj.rigidbody);
 		return 1;
 	}
 
@@ -125,7 +125,7 @@ public class RaycastHitWrap
 	static int Get_lightmapCoord(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.RaycastHit>(L, 1);
-		Lua.Push(L, obj.lightmapCoord);
+		Push(L, obj.lightmapCoord);
 		return 1;
 	}
 
@@ -134,10 +134,9 @@ public class RaycastHitWrap
 	{
 		const int startStack = 2;
 		ref var obj = ref SharpObject.GetValue<UnityEngine.RaycastHit>(L, 1);
-		var ret = obj.Equals(
-			Lua.Get<object>(L, 0 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out object t0);
+		var ret = obj.Equals(t0);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -146,7 +145,7 @@ public class RaycastHitWrap
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.RaycastHit>(L, 1);
 		var ret = obj.GetHashCode();
-		Lua.Push(L, ret);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -155,7 +154,7 @@ public class RaycastHitWrap
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.RaycastHit>(L, 1);
 		var ret = obj.ToString();
-		Lua.Push(L, ret);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -164,7 +163,7 @@ public class RaycastHitWrap
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.RaycastHit>(L, 1);
 		var ret = obj.GetType();
-		Lua.Push(L, ret);
+		Push(L, ret);
 		return 1;
 	}
 

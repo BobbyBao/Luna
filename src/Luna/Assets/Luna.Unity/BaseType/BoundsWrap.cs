@@ -16,12 +16,11 @@ public class BoundsWrap
 		}
 		else if(n == 2)
 		{
-			obj = new UnityEngine.Bounds(
-				Lua.Get<UnityEngine.Vector3>(L, 2),
-				Lua.Get<UnityEngine.Vector3>(L, 3)
-			);
+			Get(L, 2, out UnityEngine.Vector3 t1);
+			Get(L, 3, out UnityEngine.Vector3 t2);
+			obj = new UnityEngine.Bounds(t1, t2);
 		}
-		Lua.Push(L, obj);
+		Push(L, obj);
 		return 1;
 	}
 
@@ -29,7 +28,7 @@ public class BoundsWrap
 	static int Get_center(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Bounds>(L, 1);
-		Lua.Push(L, obj.center);
+		Push(L, obj.center);
 		return 1;
 	}
 
@@ -37,7 +36,7 @@ public class BoundsWrap
 	static int Set_center(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Bounds>(L, 1);
-		var p1 = Lua.Get<UnityEngine.Vector3>(L, 2);
+		Get(L, 2, out UnityEngine.Vector3 p1);
 		obj.center = p1;
 		return 0;
 	}
@@ -46,7 +45,7 @@ public class BoundsWrap
 	static int Get_size(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Bounds>(L, 1);
-		Lua.Push(L, obj.size);
+		Push(L, obj.size);
 		return 1;
 	}
 
@@ -54,7 +53,7 @@ public class BoundsWrap
 	static int Set_size(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Bounds>(L, 1);
-		var p1 = Lua.Get<UnityEngine.Vector3>(L, 2);
+		Get(L, 2, out UnityEngine.Vector3 p1);
 		obj.size = p1;
 		return 0;
 	}
@@ -63,7 +62,7 @@ public class BoundsWrap
 	static int Get_extents(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Bounds>(L, 1);
-		Lua.Push(L, obj.extents);
+		Push(L, obj.extents);
 		return 1;
 	}
 
@@ -71,7 +70,7 @@ public class BoundsWrap
 	static int Set_extents(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Bounds>(L, 1);
-		var p1 = Lua.Get<UnityEngine.Vector3>(L, 2);
+		Get(L, 2, out UnityEngine.Vector3 p1);
 		obj.extents = p1;
 		return 0;
 	}
@@ -80,7 +79,7 @@ public class BoundsWrap
 	static int Get_min(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Bounds>(L, 1);
-		Lua.Push(L, obj.min);
+		Push(L, obj.min);
 		return 1;
 	}
 
@@ -88,7 +87,7 @@ public class BoundsWrap
 	static int Set_min(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Bounds>(L, 1);
-		var p1 = Lua.Get<UnityEngine.Vector3>(L, 2);
+		Get(L, 2, out UnityEngine.Vector3 p1);
 		obj.min = p1;
 		return 0;
 	}
@@ -97,7 +96,7 @@ public class BoundsWrap
 	static int Get_max(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Bounds>(L, 1);
-		Lua.Push(L, obj.max);
+		Push(L, obj.max);
 		return 1;
 	}
 
@@ -105,7 +104,7 @@ public class BoundsWrap
 	static int Set_max(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Bounds>(L, 1);
-		var p1 = Lua.Get<UnityEngine.Vector3>(L, 2);
+		Get(L, 2, out UnityEngine.Vector3 p1);
 		obj.max = p1;
 		return 0;
 	}
@@ -115,7 +114,7 @@ public class BoundsWrap
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Bounds>(L, 1);
 		var ret = obj.GetHashCode();
-		Lua.Push(L, ret);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -127,20 +126,18 @@ public class BoundsWrap
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Bounds>(L, 1);
-			var ret = obj.Equals(
-				Lua.Get<object>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out object t0);
+			var ret = obj.Equals(t0);
+			Push(L, ret);
 			return 1;
 		}
 		else if(n == 1)
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Bounds>(L, 1);
-			var ret = obj.Equals(
-				Lua.Get<UnityEngine.Bounds>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out UnityEngine.Bounds t0);
+			var ret = obj.Equals(t0);
+			Push(L, ret);
 			return 1;
 		}
 		return 0;
@@ -151,10 +148,9 @@ public class BoundsWrap
 	{
 		const int startStack = 2;
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Bounds>(L, 1);
-		obj.SetMinMax(
-			Lua.Get<UnityEngine.Vector3>(L, 0 + startStack),
-			Lua.Get<UnityEngine.Vector3>(L, 1 + startStack)
-		);
+		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+		Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
+		obj.SetMinMax(t0, t1);
 		return 0;
 	}
 
@@ -166,18 +162,16 @@ public class BoundsWrap
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Bounds>(L, 1);
-			obj.Encapsulate(
-				Lua.Get<UnityEngine.Vector3>(L, 0 + startStack)
-			);
+			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+			obj.Encapsulate(t0);
 			return 0;
 		}
 		else if(n == 1)
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Bounds>(L, 1);
-			obj.Encapsulate(
-				Lua.Get<UnityEngine.Bounds>(L, 0 + startStack)
-			);
+			Get(L, 0 + startStack, out UnityEngine.Bounds t0);
+			obj.Encapsulate(t0);
 			return 0;
 		}
 		return 0;
@@ -191,18 +185,16 @@ public class BoundsWrap
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Bounds>(L, 1);
-			obj.Expand(
-				Lua.Get<float>(L, 0 + startStack)
-			);
+			Get(L, 0 + startStack, out float t0);
+			obj.Expand(t0);
 			return 0;
 		}
 		else if(n == 1)
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Bounds>(L, 1);
-			obj.Expand(
-				Lua.Get<UnityEngine.Vector3>(L, 0 + startStack)
-			);
+			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+			obj.Expand(t0);
 			return 0;
 		}
 		return 0;
@@ -213,10 +205,9 @@ public class BoundsWrap
 	{
 		const int startStack = 2;
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Bounds>(L, 1);
-		var ret = obj.Intersects(
-			Lua.Get<UnityEngine.Bounds>(L, 0 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Bounds t0);
+		var ret = obj.Intersects(t0);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -225,10 +216,9 @@ public class BoundsWrap
 	{
 		const int startStack = 2;
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Bounds>(L, 1);
-		var ret = obj.IntersectRay(
-			Lua.Get<UnityEngine.Ray>(L, 0 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Ray t0);
+		var ret = obj.IntersectRay(t0);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -240,17 +230,16 @@ public class BoundsWrap
 		{
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Bounds>(L, 1);
 			var ret = obj.ToString();
-			Lua.Push(L, ret);
+			Push(L, ret);
 			return 1;
 		}
 		else if(n == 1)
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Bounds>(L, 1);
-			var ret = obj.ToString(
-				Lua.Get<string>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out string t0);
+			var ret = obj.ToString(t0);
+			Push(L, ret);
 			return 1;
 		}
 		return 0;
@@ -261,10 +250,9 @@ public class BoundsWrap
 	{
 		const int startStack = 2;
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Bounds>(L, 1);
-		var ret = obj.Contains(
-			Lua.Get<UnityEngine.Vector3>(L, 0 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+		var ret = obj.Contains(t0);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -273,10 +261,9 @@ public class BoundsWrap
 	{
 		const int startStack = 2;
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Bounds>(L, 1);
-		var ret = obj.SqrDistance(
-			Lua.Get<UnityEngine.Vector3>(L, 0 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+		var ret = obj.SqrDistance(t0);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -285,10 +272,9 @@ public class BoundsWrap
 	{
 		const int startStack = 2;
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Bounds>(L, 1);
-		var ret = obj.ClosestPoint(
-			Lua.Get<UnityEngine.Vector3>(L, 0 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+		var ret = obj.ClosestPoint(t0);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -297,7 +283,7 @@ public class BoundsWrap
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Bounds>(L, 1);
 		var ret = obj.GetType();
-		Lua.Push(L, ret);
+		Push(L, ret);
 		return 1;
 	}
 

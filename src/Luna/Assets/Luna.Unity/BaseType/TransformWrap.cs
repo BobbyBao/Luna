@@ -9,7 +9,7 @@ public class TransformWrap
 	static int Get_position(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		Lua.Push(L, obj.position);
+		Push(L, obj.position);
 		return 1;
 	}
 
@@ -17,7 +17,7 @@ public class TransformWrap
 	static int Set_position(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		var p1 = Lua.Get<UnityEngine.Vector3>(L, 2);
+		Get(L, 2, out UnityEngine.Vector3 p1);
 		obj.position = p1;
 		return 0;
 	}
@@ -26,7 +26,7 @@ public class TransformWrap
 	static int Get_localPosition(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		Lua.Push(L, obj.localPosition);
+		Push(L, obj.localPosition);
 		return 1;
 	}
 
@@ -34,7 +34,7 @@ public class TransformWrap
 	static int Set_localPosition(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		var p1 = Lua.Get<UnityEngine.Vector3>(L, 2);
+		Get(L, 2, out UnityEngine.Vector3 p1);
 		obj.localPosition = p1;
 		return 0;
 	}
@@ -43,7 +43,7 @@ public class TransformWrap
 	static int Get_eulerAngles(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		Lua.Push(L, obj.eulerAngles);
+		Push(L, obj.eulerAngles);
 		return 1;
 	}
 
@@ -51,7 +51,7 @@ public class TransformWrap
 	static int Set_eulerAngles(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		var p1 = Lua.Get<UnityEngine.Vector3>(L, 2);
+		Get(L, 2, out UnityEngine.Vector3 p1);
 		obj.eulerAngles = p1;
 		return 0;
 	}
@@ -60,7 +60,7 @@ public class TransformWrap
 	static int Get_localEulerAngles(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		Lua.Push(L, obj.localEulerAngles);
+		Push(L, obj.localEulerAngles);
 		return 1;
 	}
 
@@ -68,7 +68,7 @@ public class TransformWrap
 	static int Set_localEulerAngles(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		var p1 = Lua.Get<UnityEngine.Vector3>(L, 2);
+		Get(L, 2, out UnityEngine.Vector3 p1);
 		obj.localEulerAngles = p1;
 		return 0;
 	}
@@ -77,7 +77,7 @@ public class TransformWrap
 	static int Get_right(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		Lua.Push(L, obj.right);
+		Push(L, obj.right);
 		return 1;
 	}
 
@@ -85,7 +85,7 @@ public class TransformWrap
 	static int Set_right(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		var p1 = Lua.Get<UnityEngine.Vector3>(L, 2);
+		Get(L, 2, out UnityEngine.Vector3 p1);
 		obj.right = p1;
 		return 0;
 	}
@@ -94,7 +94,7 @@ public class TransformWrap
 	static int Get_up(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		Lua.Push(L, obj.up);
+		Push(L, obj.up);
 		return 1;
 	}
 
@@ -102,7 +102,7 @@ public class TransformWrap
 	static int Set_up(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		var p1 = Lua.Get<UnityEngine.Vector3>(L, 2);
+		Get(L, 2, out UnityEngine.Vector3 p1);
 		obj.up = p1;
 		return 0;
 	}
@@ -111,7 +111,7 @@ public class TransformWrap
 	static int Get_forward(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		Lua.Push(L, obj.forward);
+		Push(L, obj.forward);
 		return 1;
 	}
 
@@ -119,7 +119,7 @@ public class TransformWrap
 	static int Set_forward(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		var p1 = Lua.Get<UnityEngine.Vector3>(L, 2);
+		Get(L, 2, out UnityEngine.Vector3 p1);
 		obj.forward = p1;
 		return 0;
 	}
@@ -128,7 +128,7 @@ public class TransformWrap
 	static int Get_rotation(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		Lua.Push(L, obj.rotation);
+		Push(L, obj.rotation);
 		return 1;
 	}
 
@@ -136,7 +136,7 @@ public class TransformWrap
 	static int Set_rotation(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		var p1 = Lua.Get<UnityEngine.Quaternion>(L, 2);
+		Get(L, 2, out UnityEngine.Quaternion p1);
 		obj.rotation = p1;
 		return 0;
 	}
@@ -145,7 +145,7 @@ public class TransformWrap
 	static int Get_localRotation(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		Lua.Push(L, obj.localRotation);
+		Push(L, obj.localRotation);
 		return 1;
 	}
 
@@ -153,7 +153,7 @@ public class TransformWrap
 	static int Set_localRotation(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		var p1 = Lua.Get<UnityEngine.Quaternion>(L, 2);
+		Get(L, 2, out UnityEngine.Quaternion p1);
 		obj.localRotation = p1;
 		return 0;
 	}
@@ -162,7 +162,7 @@ public class TransformWrap
 	static int Get_localScale(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		Lua.Push(L, obj.localScale);
+		Push(L, obj.localScale);
 		return 1;
 	}
 
@@ -170,7 +170,7 @@ public class TransformWrap
 	static int Set_localScale(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		var p1 = Lua.Get<UnityEngine.Vector3>(L, 2);
+		Get(L, 2, out UnityEngine.Vector3 p1);
 		obj.localScale = p1;
 		return 0;
 	}
@@ -179,7 +179,7 @@ public class TransformWrap
 	static int Get_parent(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		Lua.Push(L, obj.parent);
+		Push(L, obj.parent);
 		return 1;
 	}
 
@@ -187,7 +187,7 @@ public class TransformWrap
 	static int Set_parent(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		var p1 = Lua.Get<UnityEngine.Transform>(L, 2);
+		Get(L, 2, out UnityEngine.Transform p1);
 		obj.parent = p1;
 		return 0;
 	}
@@ -196,7 +196,7 @@ public class TransformWrap
 	static int Get_worldToLocalMatrix(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		Lua.Push(L, obj.worldToLocalMatrix);
+		Push(L, obj.worldToLocalMatrix);
 		return 1;
 	}
 
@@ -204,7 +204,7 @@ public class TransformWrap
 	static int Get_localToWorldMatrix(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		Lua.Push(L, obj.localToWorldMatrix);
+		Push(L, obj.localToWorldMatrix);
 		return 1;
 	}
 
@@ -212,7 +212,7 @@ public class TransformWrap
 	static int Get_root(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		Lua.Push(L, obj.root);
+		Push(L, obj.root);
 		return 1;
 	}
 
@@ -220,7 +220,7 @@ public class TransformWrap
 	static int Get_childCount(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		Lua.Push(L, obj.childCount);
+		Push(L, obj.childCount);
 		return 1;
 	}
 
@@ -228,7 +228,7 @@ public class TransformWrap
 	static int Get_lossyScale(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		Lua.Push(L, obj.lossyScale);
+		Push(L, obj.lossyScale);
 		return 1;
 	}
 
@@ -236,7 +236,7 @@ public class TransformWrap
 	static int Get_hasChanged(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		Lua.Push(L, obj.hasChanged);
+		Push(L, obj.hasChanged);
 		return 1;
 	}
 
@@ -244,7 +244,7 @@ public class TransformWrap
 	static int Set_hasChanged(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		var p1 = Lua.Get<bool>(L, 2);
+		Get(L, 2, out bool p1);
 		obj.hasChanged = p1;
 		return 0;
 	}
@@ -253,7 +253,7 @@ public class TransformWrap
 	static int Get_hierarchyCapacity(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		Lua.Push(L, obj.hierarchyCapacity);
+		Push(L, obj.hierarchyCapacity);
 		return 1;
 	}
 
@@ -261,7 +261,7 @@ public class TransformWrap
 	static int Set_hierarchyCapacity(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		var p1 = Lua.Get<int>(L, 2);
+		Get(L, 2, out int p1);
 		obj.hierarchyCapacity = p1;
 		return 0;
 	}
@@ -270,7 +270,7 @@ public class TransformWrap
 	static int Get_hierarchyCount(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		Lua.Push(L, obj.hierarchyCount);
+		Push(L, obj.hierarchyCount);
 		return 1;
 	}
 
@@ -278,7 +278,7 @@ public class TransformWrap
 	static int Get_transform(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		Lua.Push(L, obj.transform);
+		Push(L, obj.transform);
 		return 1;
 	}
 
@@ -286,7 +286,7 @@ public class TransformWrap
 	static int Get_gameObject(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		Lua.Push(L, obj.gameObject);
+		Push(L, obj.gameObject);
 		return 1;
 	}
 
@@ -294,7 +294,7 @@ public class TransformWrap
 	static int Get_tag(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		Lua.Push(L, obj.tag);
+		Push(L, obj.tag);
 		return 1;
 	}
 
@@ -302,7 +302,7 @@ public class TransformWrap
 	static int Set_tag(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		var p1 = Lua.Get<string>(L, 2);
+		Get(L, 2, out string p1);
 		obj.tag = p1;
 		return 0;
 	}
@@ -311,7 +311,7 @@ public class TransformWrap
 	static int Get_name(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		Lua.Push(L, obj.name);
+		Push(L, obj.name);
 		return 1;
 	}
 
@@ -319,7 +319,7 @@ public class TransformWrap
 	static int Set_name(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		var p1 = Lua.Get<string>(L, 2);
+		Get(L, 2, out string p1);
 		obj.name = p1;
 		return 0;
 	}
@@ -328,7 +328,7 @@ public class TransformWrap
 	static int Get_hideFlags(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		Lua.Push(L, obj.hideFlags);
+		Push(L, obj.hideFlags);
 		return 1;
 	}
 
@@ -336,7 +336,7 @@ public class TransformWrap
 	static int Set_hideFlags(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		var p1 = Lua.Get<UnityEngine.HideFlags>(L, 2);
+		Get(L, 2, out UnityEngine.HideFlags p1);
 		obj.hideFlags = p1;
 		return 0;
 	}
@@ -349,19 +349,17 @@ public class TransformWrap
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.SetParent(
-				Lua.Get<UnityEngine.Transform>(L, 0 + startStack)
-			);
+			Get(L, 0 + startStack, out UnityEngine.Transform t0);
+			obj.SetParent(t0);
 			return 0;
 		}
 		else if(n == 2)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.SetParent(
-				Lua.Get<UnityEngine.Transform>(L, 0 + startStack),
-				Lua.Get<bool>(L, 1 + startStack)
-			);
+			Get(L, 0 + startStack, out UnityEngine.Transform t0);
+			Get(L, 1 + startStack, out bool t1);
+			obj.SetParent(t0, t1);
 			return 0;
 		}
 		return 0;
@@ -372,10 +370,9 @@ public class TransformWrap
 	{
 		const int startStack = 2;
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		obj.SetPositionAndRotation(
-			Lua.Get<UnityEngine.Vector3>(L, 0 + startStack),
-			Lua.Get<UnityEngine.Quaternion>(L, 1 + startStack)
-		);
+		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+		Get(L, 1 + startStack, out UnityEngine.Quaternion t1);
+		obj.SetPositionAndRotation(t0, t1);
 		return 0;
 	}
 
@@ -387,64 +384,58 @@ public class TransformWrap
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.Translate(
-				Lua.Get<UnityEngine.Vector3>(L, 0 + startStack)
-			);
+			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+			obj.Translate(t0);
 			return 0;
 		}
 		else if(n == 2)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.Translate(
-				Lua.Get<UnityEngine.Vector3>(L, 0 + startStack),
-				Lua.Get<UnityEngine.Space>(L, 1 + startStack)
-			);
+			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+			Get(L, 1 + startStack, out UnityEngine.Space t1);
+			obj.Translate(t0, t1);
 			return 0;
 		}
 		else if(n == 2)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.Translate(
-				Lua.Get<UnityEngine.Vector3>(L, 0 + startStack),
-				Lua.Get<UnityEngine.Transform>(L, 1 + startStack)
-			);
+			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+			Get(L, 1 + startStack, out UnityEngine.Transform t1);
+			obj.Translate(t0, t1);
 			return 0;
 		}
 		else if(n == 3)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.Translate(
-				Lua.Get<float>(L, 0 + startStack),
-				Lua.Get<float>(L, 1 + startStack),
-				Lua.Get<float>(L, 2 + startStack)
-			);
+			Get(L, 0 + startStack, out float t0);
+			Get(L, 1 + startStack, out float t1);
+			Get(L, 2 + startStack, out float t2);
+			obj.Translate(t0, t1, t2);
 			return 0;
 		}
 		else if(n == 4)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.Translate(
-				Lua.Get<float>(L, 0 + startStack),
-				Lua.Get<float>(L, 1 + startStack),
-				Lua.Get<float>(L, 2 + startStack),
-				Lua.Get<UnityEngine.Space>(L, 3 + startStack)
-			);
+			Get(L, 0 + startStack, out float t0);
+			Get(L, 1 + startStack, out float t1);
+			Get(L, 2 + startStack, out float t2);
+			Get(L, 3 + startStack, out UnityEngine.Space t3);
+			obj.Translate(t0, t1, t2, t3);
 			return 0;
 		}
 		else if(n == 4)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.Translate(
-				Lua.Get<float>(L, 0 + startStack),
-				Lua.Get<float>(L, 1 + startStack),
-				Lua.Get<float>(L, 2 + startStack),
-				Lua.Get<UnityEngine.Transform>(L, 3 + startStack)
-			);
+			Get(L, 0 + startStack, out float t0);
+			Get(L, 1 + startStack, out float t1);
+			Get(L, 2 + startStack, out float t2);
+			Get(L, 3 + startStack, out UnityEngine.Transform t3);
+			obj.Translate(t0, t1, t2, t3);
 			return 0;
 		}
 		return 0;
@@ -458,63 +449,57 @@ public class TransformWrap
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.Rotate(
-				Lua.Get<UnityEngine.Vector3>(L, 0 + startStack)
-			);
+			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+			obj.Rotate(t0);
 			return 0;
 		}
 		else if(n == 2)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.Rotate(
-				Lua.Get<UnityEngine.Vector3>(L, 0 + startStack),
-				Lua.Get<UnityEngine.Space>(L, 1 + startStack)
-			);
+			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+			Get(L, 1 + startStack, out UnityEngine.Space t1);
+			obj.Rotate(t0, t1);
 			return 0;
 		}
 		else if(n == 2)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.Rotate(
-				Lua.Get<UnityEngine.Vector3>(L, 0 + startStack),
-				Lua.Get<float>(L, 1 + startStack)
-			);
+			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+			Get(L, 1 + startStack, out float t1);
+			obj.Rotate(t0, t1);
 			return 0;
 		}
 		else if(n == 3)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.Rotate(
-				Lua.Get<float>(L, 0 + startStack),
-				Lua.Get<float>(L, 1 + startStack),
-				Lua.Get<float>(L, 2 + startStack)
-			);
+			Get(L, 0 + startStack, out float t0);
+			Get(L, 1 + startStack, out float t1);
+			Get(L, 2 + startStack, out float t2);
+			obj.Rotate(t0, t1, t2);
 			return 0;
 		}
 		else if(n == 3)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.Rotate(
-				Lua.Get<UnityEngine.Vector3>(L, 0 + startStack),
-				Lua.Get<float>(L, 1 + startStack),
-				Lua.Get<UnityEngine.Space>(L, 2 + startStack)
-			);
+			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+			Get(L, 1 + startStack, out float t1);
+			Get(L, 2 + startStack, out UnityEngine.Space t2);
+			obj.Rotate(t0, t1, t2);
 			return 0;
 		}
 		else if(n == 4)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.Rotate(
-				Lua.Get<float>(L, 0 + startStack),
-				Lua.Get<float>(L, 1 + startStack),
-				Lua.Get<float>(L, 2 + startStack),
-				Lua.Get<UnityEngine.Space>(L, 3 + startStack)
-			);
+			Get(L, 0 + startStack, out float t0);
+			Get(L, 1 + startStack, out float t1);
+			Get(L, 2 + startStack, out float t2);
+			Get(L, 3 + startStack, out UnityEngine.Space t3);
+			obj.Rotate(t0, t1, t2, t3);
 			return 0;
 		}
 		return 0;
@@ -525,11 +510,10 @@ public class TransformWrap
 	{
 		const int startStack = 2;
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		obj.RotateAround(
-			Lua.Get<UnityEngine.Vector3>(L, 0 + startStack),
-			Lua.Get<UnityEngine.Vector3>(L, 1 + startStack),
-			Lua.Get<float>(L, 2 + startStack)
-		);
+		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+		Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
+		Get(L, 2 + startStack, out float t2);
+		obj.RotateAround(t0, t1, t2);
 		return 0;
 	}
 
@@ -541,38 +525,34 @@ public class TransformWrap
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.LookAt(
-				Lua.Get<UnityEngine.Transform>(L, 0 + startStack)
-			);
+			Get(L, 0 + startStack, out UnityEngine.Transform t0);
+			obj.LookAt(t0);
 			return 0;
 		}
 		else if(n == 1)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.LookAt(
-				Lua.Get<UnityEngine.Vector3>(L, 0 + startStack)
-			);
+			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+			obj.LookAt(t0);
 			return 0;
 		}
 		else if(n == 2)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.LookAt(
-				Lua.Get<UnityEngine.Transform>(L, 0 + startStack),
-				Lua.Get<UnityEngine.Vector3>(L, 1 + startStack)
-			);
+			Get(L, 0 + startStack, out UnityEngine.Transform t0);
+			Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
+			obj.LookAt(t0, t1);
 			return 0;
 		}
 		else if(n == 2)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.LookAt(
-				Lua.Get<UnityEngine.Vector3>(L, 0 + startStack),
-				Lua.Get<UnityEngine.Vector3>(L, 1 + startStack)
-			);
+			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+			Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
+			obj.LookAt(t0, t1);
 			return 0;
 		}
 		return 0;
@@ -586,22 +566,20 @@ public class TransformWrap
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			var ret = obj.TransformDirection(
-				Lua.Get<UnityEngine.Vector3>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+			var ret = obj.TransformDirection(t0);
+			Push(L, ret);
 			return 1;
 		}
 		else if(n == 3)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			var ret = obj.TransformDirection(
-				Lua.Get<float>(L, 0 + startStack),
-				Lua.Get<float>(L, 1 + startStack),
-				Lua.Get<float>(L, 2 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out float t0);
+			Get(L, 1 + startStack, out float t1);
+			Get(L, 2 + startStack, out float t2);
+			var ret = obj.TransformDirection(t0, t1, t2);
+			Push(L, ret);
 			return 1;
 		}
 		return 0;
@@ -615,22 +593,20 @@ public class TransformWrap
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			var ret = obj.InverseTransformDirection(
-				Lua.Get<UnityEngine.Vector3>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+			var ret = obj.InverseTransformDirection(t0);
+			Push(L, ret);
 			return 1;
 		}
 		else if(n == 3)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			var ret = obj.InverseTransformDirection(
-				Lua.Get<float>(L, 0 + startStack),
-				Lua.Get<float>(L, 1 + startStack),
-				Lua.Get<float>(L, 2 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out float t0);
+			Get(L, 1 + startStack, out float t1);
+			Get(L, 2 + startStack, out float t2);
+			var ret = obj.InverseTransformDirection(t0, t1, t2);
+			Push(L, ret);
 			return 1;
 		}
 		return 0;
@@ -644,22 +620,20 @@ public class TransformWrap
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			var ret = obj.TransformVector(
-				Lua.Get<UnityEngine.Vector3>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+			var ret = obj.TransformVector(t0);
+			Push(L, ret);
 			return 1;
 		}
 		else if(n == 3)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			var ret = obj.TransformVector(
-				Lua.Get<float>(L, 0 + startStack),
-				Lua.Get<float>(L, 1 + startStack),
-				Lua.Get<float>(L, 2 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out float t0);
+			Get(L, 1 + startStack, out float t1);
+			Get(L, 2 + startStack, out float t2);
+			var ret = obj.TransformVector(t0, t1, t2);
+			Push(L, ret);
 			return 1;
 		}
 		return 0;
@@ -673,22 +647,20 @@ public class TransformWrap
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			var ret = obj.InverseTransformVector(
-				Lua.Get<UnityEngine.Vector3>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+			var ret = obj.InverseTransformVector(t0);
+			Push(L, ret);
 			return 1;
 		}
 		else if(n == 3)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			var ret = obj.InverseTransformVector(
-				Lua.Get<float>(L, 0 + startStack),
-				Lua.Get<float>(L, 1 + startStack),
-				Lua.Get<float>(L, 2 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out float t0);
+			Get(L, 1 + startStack, out float t1);
+			Get(L, 2 + startStack, out float t2);
+			var ret = obj.InverseTransformVector(t0, t1, t2);
+			Push(L, ret);
 			return 1;
 		}
 		return 0;
@@ -702,22 +674,20 @@ public class TransformWrap
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			var ret = obj.TransformPoint(
-				Lua.Get<UnityEngine.Vector3>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+			var ret = obj.TransformPoint(t0);
+			Push(L, ret);
 			return 1;
 		}
 		else if(n == 3)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			var ret = obj.TransformPoint(
-				Lua.Get<float>(L, 0 + startStack),
-				Lua.Get<float>(L, 1 + startStack),
-				Lua.Get<float>(L, 2 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out float t0);
+			Get(L, 1 + startStack, out float t1);
+			Get(L, 2 + startStack, out float t2);
+			var ret = obj.TransformPoint(t0, t1, t2);
+			Push(L, ret);
 			return 1;
 		}
 		return 0;
@@ -731,22 +701,20 @@ public class TransformWrap
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			var ret = obj.InverseTransformPoint(
-				Lua.Get<UnityEngine.Vector3>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
+			var ret = obj.InverseTransformPoint(t0);
+			Push(L, ret);
 			return 1;
 		}
 		else if(n == 3)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			var ret = obj.InverseTransformPoint(
-				Lua.Get<float>(L, 0 + startStack),
-				Lua.Get<float>(L, 1 + startStack),
-				Lua.Get<float>(L, 2 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out float t0);
+			Get(L, 1 + startStack, out float t1);
+			Get(L, 2 + startStack, out float t2);
+			var ret = obj.InverseTransformPoint(t0, t1, t2);
+			Push(L, ret);
 			return 1;
 		}
 		return 0;
@@ -781,9 +749,8 @@ public class TransformWrap
 	{
 		const int startStack = 2;
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		obj.SetSiblingIndex(
-			Lua.Get<int>(L, 0 + startStack)
-		);
+		Get(L, 0 + startStack, out int t0);
+		obj.SetSiblingIndex(t0);
 		return 0;
 	}
 
@@ -792,7 +759,7 @@ public class TransformWrap
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 		var ret = obj.GetSiblingIndex();
-		Lua.Push(L, ret);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -801,10 +768,9 @@ public class TransformWrap
 	{
 		const int startStack = 2;
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		var ret = obj.Find(
-			Lua.Get<string>(L, 0 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out string t0);
+		var ret = obj.Find(t0);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -813,10 +779,9 @@ public class TransformWrap
 	{
 		const int startStack = 2;
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		var ret = obj.IsChildOf(
-			Lua.Get<UnityEngine.Transform>(L, 0 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Transform t0);
+		var ret = obj.IsChildOf(t0);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -825,7 +790,7 @@ public class TransformWrap
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 		var ret = obj.GetEnumerator();
-		Lua.Push(L, ret);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -834,10 +799,9 @@ public class TransformWrap
 	{
 		const int startStack = 2;
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		var ret = obj.GetChild(
-			Lua.Get<int>(L, 0 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out int t0);
+		var ret = obj.GetChild(t0);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -849,20 +813,18 @@ public class TransformWrap
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			var ret = obj.GetComponent(
-				Lua.Get<System.Type>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out System.Type t0);
+			var ret = obj.GetComponent(t0);
+			Push(L, ret);
 			return 1;
 		}
 		else if(n == 1)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			var ret = obj.GetComponent(
-				Lua.Get<string>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out string t0);
+			var ret = obj.GetComponent(t0);
+			Push(L, ret);
 			return 1;
 		}
 		return 0;
@@ -876,21 +838,19 @@ public class TransformWrap
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			var ret = obj.GetComponentInChildren(
-				Lua.Get<System.Type>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out System.Type t0);
+			var ret = obj.GetComponentInChildren(t0);
+			Push(L, ret);
 			return 1;
 		}
 		else if(n == 2)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			var ret = obj.GetComponentInChildren(
-				Lua.Get<System.Type>(L, 0 + startStack),
-				Lua.Get<bool>(L, 1 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out System.Type t0);
+			Get(L, 1 + startStack, out bool t1);
+			var ret = obj.GetComponentInChildren(t0, t1);
+			Push(L, ret);
 			return 1;
 		}
 		return 0;
@@ -904,21 +864,19 @@ public class TransformWrap
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			var ret = obj.GetComponentsInChildren(
-				Lua.Get<System.Type>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out System.Type t0);
+			var ret = obj.GetComponentsInChildren(t0);
+			Push(L, ret);
 			return 1;
 		}
 		else if(n == 2)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			var ret = obj.GetComponentsInChildren(
-				Lua.Get<System.Type>(L, 0 + startStack),
-				Lua.Get<bool>(L, 1 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out System.Type t0);
+			Get(L, 1 + startStack, out bool t1);
+			var ret = obj.GetComponentsInChildren(t0, t1);
+			Push(L, ret);
 			return 1;
 		}
 		return 0;
@@ -929,10 +887,9 @@ public class TransformWrap
 	{
 		const int startStack = 2;
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		var ret = obj.GetComponentInParent(
-			Lua.Get<System.Type>(L, 0 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out System.Type t0);
+		var ret = obj.GetComponentInParent(t0);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -944,21 +901,19 @@ public class TransformWrap
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			var ret = obj.GetComponentsInParent(
-				Lua.Get<System.Type>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out System.Type t0);
+			var ret = obj.GetComponentsInParent(t0);
+			Push(L, ret);
 			return 1;
 		}
 		else if(n == 2)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			var ret = obj.GetComponentsInParent(
-				Lua.Get<System.Type>(L, 0 + startStack),
-				Lua.Get<bool>(L, 1 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out System.Type t0);
+			Get(L, 1 + startStack, out bool t1);
+			var ret = obj.GetComponentsInParent(t0, t1);
+			Push(L, ret);
 			return 1;
 		}
 		return 0;
@@ -969,10 +924,9 @@ public class TransformWrap
 	{
 		const int startStack = 2;
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		var ret = obj.GetComponents(
-			Lua.Get<System.Type>(L, 0 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out System.Type t0);
+		var ret = obj.GetComponents(t0);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -981,10 +935,9 @@ public class TransformWrap
 	{
 		const int startStack = 2;
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		var ret = obj.CompareTag(
-			Lua.Get<string>(L, 0 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out string t0);
+		var ret = obj.CompareTag(t0);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -996,40 +949,36 @@ public class TransformWrap
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.SendMessageUpwards(
-				Lua.Get<string>(L, 0 + startStack)
-			);
+			Get(L, 0 + startStack, out string t0);
+			obj.SendMessageUpwards(t0);
 			return 0;
 		}
 		else if(n == 2)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.SendMessageUpwards(
-				Lua.Get<string>(L, 0 + startStack),
-				Lua.Get<object>(L, 1 + startStack)
-			);
+			Get(L, 0 + startStack, out string t0);
+			Get(L, 1 + startStack, out object t1);
+			obj.SendMessageUpwards(t0, t1);
 			return 0;
 		}
 		else if(n == 2)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.SendMessageUpwards(
-				Lua.Get<string>(L, 0 + startStack),
-				Lua.Get<UnityEngine.SendMessageOptions>(L, 1 + startStack)
-			);
+			Get(L, 0 + startStack, out string t0);
+			Get(L, 1 + startStack, out UnityEngine.SendMessageOptions t1);
+			obj.SendMessageUpwards(t0, t1);
 			return 0;
 		}
 		else if(n == 3)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.SendMessageUpwards(
-				Lua.Get<string>(L, 0 + startStack),
-				Lua.Get<object>(L, 1 + startStack),
-				Lua.Get<UnityEngine.SendMessageOptions>(L, 2 + startStack)
-			);
+			Get(L, 0 + startStack, out string t0);
+			Get(L, 1 + startStack, out object t1);
+			Get(L, 2 + startStack, out UnityEngine.SendMessageOptions t2);
+			obj.SendMessageUpwards(t0, t1, t2);
 			return 0;
 		}
 		return 0;
@@ -1043,40 +992,36 @@ public class TransformWrap
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.SendMessage(
-				Lua.Get<string>(L, 0 + startStack)
-			);
+			Get(L, 0 + startStack, out string t0);
+			obj.SendMessage(t0);
 			return 0;
 		}
 		else if(n == 2)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.SendMessage(
-				Lua.Get<string>(L, 0 + startStack),
-				Lua.Get<object>(L, 1 + startStack)
-			);
+			Get(L, 0 + startStack, out string t0);
+			Get(L, 1 + startStack, out object t1);
+			obj.SendMessage(t0, t1);
 			return 0;
 		}
 		else if(n == 2)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.SendMessage(
-				Lua.Get<string>(L, 0 + startStack),
-				Lua.Get<UnityEngine.SendMessageOptions>(L, 1 + startStack)
-			);
+			Get(L, 0 + startStack, out string t0);
+			Get(L, 1 + startStack, out UnityEngine.SendMessageOptions t1);
+			obj.SendMessage(t0, t1);
 			return 0;
 		}
 		else if(n == 3)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.SendMessage(
-				Lua.Get<string>(L, 0 + startStack),
-				Lua.Get<object>(L, 1 + startStack),
-				Lua.Get<UnityEngine.SendMessageOptions>(L, 2 + startStack)
-			);
+			Get(L, 0 + startStack, out string t0);
+			Get(L, 1 + startStack, out object t1);
+			Get(L, 2 + startStack, out UnityEngine.SendMessageOptions t2);
+			obj.SendMessage(t0, t1, t2);
 			return 0;
 		}
 		return 0;
@@ -1090,40 +1035,36 @@ public class TransformWrap
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.BroadcastMessage(
-				Lua.Get<string>(L, 0 + startStack)
-			);
+			Get(L, 0 + startStack, out string t0);
+			obj.BroadcastMessage(t0);
 			return 0;
 		}
 		else if(n == 2)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.BroadcastMessage(
-				Lua.Get<string>(L, 0 + startStack),
-				Lua.Get<object>(L, 1 + startStack)
-			);
+			Get(L, 0 + startStack, out string t0);
+			Get(L, 1 + startStack, out object t1);
+			obj.BroadcastMessage(t0, t1);
 			return 0;
 		}
 		else if(n == 2)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.BroadcastMessage(
-				Lua.Get<string>(L, 0 + startStack),
-				Lua.Get<UnityEngine.SendMessageOptions>(L, 1 + startStack)
-			);
+			Get(L, 0 + startStack, out string t0);
+			Get(L, 1 + startStack, out UnityEngine.SendMessageOptions t1);
+			obj.BroadcastMessage(t0, t1);
 			return 0;
 		}
 		else if(n == 3)
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-			obj.BroadcastMessage(
-				Lua.Get<string>(L, 0 + startStack),
-				Lua.Get<object>(L, 1 + startStack),
-				Lua.Get<UnityEngine.SendMessageOptions>(L, 2 + startStack)
-			);
+			Get(L, 0 + startStack, out string t0);
+			Get(L, 1 + startStack, out object t1);
+			Get(L, 2 + startStack, out UnityEngine.SendMessageOptions t2);
+			obj.BroadcastMessage(t0, t1, t2);
 			return 0;
 		}
 		return 0;
@@ -1134,7 +1075,7 @@ public class TransformWrap
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 		var ret = obj.GetInstanceID();
-		Lua.Push(L, ret);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -1143,7 +1084,7 @@ public class TransformWrap
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 		var ret = obj.GetHashCode();
-		Lua.Push(L, ret);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -1152,10 +1093,9 @@ public class TransformWrap
 	{
 		const int startStack = 2;
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		var ret = obj.Equals(
-			Lua.Get<object>(L, 0 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out object t0);
+		var ret = obj.Equals(t0);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -1164,7 +1104,7 @@ public class TransformWrap
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 		var ret = obj.ToString();
-		Lua.Push(L, ret);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -1173,7 +1113,7 @@ public class TransformWrap
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 		var ret = obj.GetType();
-		Lua.Push(L, ret);
+		Push(L, ret);
 		return 1;
 	}
 

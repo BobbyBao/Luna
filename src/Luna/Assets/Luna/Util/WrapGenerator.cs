@@ -100,17 +100,7 @@ namespace SharpLuna
                 bool gen = true;
                 foreach (var p in ctor.GetParameters())
                 {
-                    if (p.ParameterType.IsByRef)
-                    {
-                        gen = false;
-                    }
-
-                    if (p.ParameterType.IsPointer)
-                    {
-                        gen = false;
-                    }
-
-                    if (p.ParameterType.IsGenericType)
+                    if (!p.ParameterType.ShouldExport())
                     {
                         gen = false;
                     }
@@ -226,7 +216,6 @@ namespace SharpLuna
                     methodInfos.Sort((a, b) => a.GetParameters().Length - b.GetParameters().Length);
                     GenerateMethod(type, methodInfos.ToArray(), sb);
                     members.Add((MemberTypes.Method, method.Name, false, false));
-
                 }
             }
 
@@ -337,27 +326,33 @@ namespace SharpLuna
                         sb.Append($"\t\t}}\n\t\telse if(n == {parameters.Length})\n\t\t{{\n");
                     }
 
-                    sb.Append($"\t\t\tobj = new {type.FullName}(\n");
+                    for (int i = 1; i <= parameters.Length; i++)
+                    {
+                        var paramInfo = parameters[i - 1];
+                        sb.Append($"\t\t\tGet(L, {(i + 1)}, out {GetTypeName(paramInfo.ParameterType)} t{i});");                        
+                        sb.AppendLine();
+                    }
+
+                    sb.Append($"\t\t\tobj = new {type.FullName}(");
 
                     for (int i = 1; i <= parameters.Length; i++)
                     {
                         var paramInfo = parameters[i - 1];
-                        sb.Append($"\t\t\t\tLua.Get<{GetTypeName(paramInfo.ParameterType)}>(L, {(i+1)})");
+                        sb.Append($"t{i}");
                         if (i != parameters.Length)
                         {
-                            sb.Append(",");
+                            sb.Append(", ");
                         }
-                        sb.AppendLine();
                     }
 
-                    sb.Append("\t\t\t);\n");
+                    sb.Append(");\n");
                 }
 
                 if(idx == ctorList.Count)
                     sb.Append("\t\t}\n");
             }         
 
-            sb.Append("\t\tLua.Push(L, obj);\n");
+            sb.Append("\t\tPush(L, obj);\n");
             sb.Append("\t\treturn 1;\n");
             sb.Append("\t}\n");
             sb.AppendLine();
@@ -383,7 +378,7 @@ namespace SharpLuna
 
                 if (isStatic)
                 {
-                    sb.Append($"\t\tLua.Push(L, {type.FullName}.{name});\n");
+                    sb.Append($"\t\tPush(L, {type.FullName}.{name});\n");
                 }
                 else
                 {
@@ -396,7 +391,7 @@ namespace SharpLuna
                         sb.Append($"\t\tvar obj = SharpObject.Get<{type.FullName}>(L, 1);\n");
                     }
 
-                    sb.Append($"\t\tLua.Push(L, obj.{name});\n");
+                    sb.Append($"\t\tPush(L, obj.{name});\n");
                 }
 
                 sb.Append("\t\treturn 1;\n");
@@ -411,7 +406,7 @@ namespace SharpLuna
                 
                 if (isStatic)
                 {
-                    sb.Append($"\t\tvar p1 = Lua.Get<{GetTypeName(valType)}>(L, 1);\n");
+                    sb.Append($"\t\tGet(L, 1, out {GetTypeName(valType)} p1);\n");
                     sb.Append($"\t\t{type.FullName}.{name} = p1;\n");
                 }
                 else
@@ -425,7 +420,7 @@ namespace SharpLuna
                         sb.Append($"\t\tvar obj = SharpObject.Get<{type.FullName}>(L, 1);\n");
                     }
 
-                    sb.Append($"\t\tvar p1 = Lua.Get<{GetTypeName(valType)}>(L, 2);\n");
+                    sb.Append($"\t\tGet(L, 2, out {GetTypeName(valType)} p1);\n");
                     sb.Append($"\t\tobj.{name} = p1;\n");
                 }
 
@@ -498,6 +493,13 @@ namespace SharpLuna
                     }
                 }
 
+                for (int i = 0; i < parameters.Length; i++)
+                {
+                    var paramInfo = parameters[i];
+                    sb.Indent(indent).Append($"Get(L, {i} + startStack, out {GetTypeName(paramInfo.ParameterType)} t{i});");
+                    sb.AppendLine();
+                }
+
                 if (method.ReturnType != typeof(void))
                 {
                     sb.Indent(indent).Append("var ret = ");
@@ -513,35 +515,22 @@ namespace SharpLuna
                     else
                         sb.Indent(indent).Append($"obj.{method.Name}(");                    
                 }
-
-                if (parameters.Length > 0)
-                {
-                    sb.Append("\n");
-                }
                    
                 for (int i = 0; i < parameters.Length; i++)
                 {
                     var paramInfo = parameters[i];
-                    sb.Indent(indent).Append($"\tLua.Get<{GetTypeName(paramInfo.ParameterType)}>(L, {i} + startStack)");
+                    sb.Append($"t{i}");
                     if (i != parameters.Length - 1)
                     {
-                        sb.Append(",");
+                        sb.Append(", ");
                     }
-                    sb.AppendLine();
                 }
-
-                if (parameters.Length > 0)
-                {
-                    sb.Indent(indent).Append(");\n");
-                }
-                else
-                {
-                    sb.Append(");\n");
-                }
+               
+                sb.Append(");\n");
 
                 if (method.ReturnType != typeof(void))
                 {
-                    sb.Indent(indent).Append("Lua.Push(L, ret);\n");
+                    sb.Indent(indent).Append("Push(L, ret);\n");
                     sb.Indent(indent).Append("return 1;\n");
                 }
                 else

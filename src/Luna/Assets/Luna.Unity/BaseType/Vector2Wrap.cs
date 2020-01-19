@@ -16,12 +16,11 @@ public class Vector2Wrap
 		}
 		else if(n == 2)
 		{
-			obj = new UnityEngine.Vector2(
-				Lua.Get<float>(L, 2),
-				Lua.Get<float>(L, 3)
-			);
+			Get(L, 2, out float t1);
+			Get(L, 3, out float t2);
+			obj = new UnityEngine.Vector2(t1, t2);
 		}
-		Lua.Push(L, obj);
+		Push(L, obj);
 		return 1;
 	}
 
@@ -29,7 +28,7 @@ public class Vector2Wrap
 	static int Get_x(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Vector2>(L, 1);
-		Lua.Push(L, obj.x);
+		Push(L, obj.x);
 		return 1;
 	}
 
@@ -37,7 +36,7 @@ public class Vector2Wrap
 	static int Set_x(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Vector2>(L, 1);
-		var p1 = Lua.Get<float>(L, 2);
+		Get(L, 2, out float p1);
 		obj.x = p1;
 		return 0;
 	}
@@ -46,7 +45,7 @@ public class Vector2Wrap
 	static int Get_y(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Vector2>(L, 1);
-		Lua.Push(L, obj.y);
+		Push(L, obj.y);
 		return 1;
 	}
 
@@ -54,7 +53,7 @@ public class Vector2Wrap
 	static int Set_y(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Vector2>(L, 1);
-		var p1 = Lua.Get<float>(L, 2);
+		Get(L, 2, out float p1);
 		obj.y = p1;
 		return 0;
 	}
@@ -63,7 +62,7 @@ public class Vector2Wrap
 	static int Get_normalized(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Vector2>(L, 1);
-		Lua.Push(L, obj.normalized);
+		Push(L, obj.normalized);
 		return 1;
 	}
 
@@ -71,7 +70,7 @@ public class Vector2Wrap
 	static int Get_magnitude(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Vector2>(L, 1);
-		Lua.Push(L, obj.magnitude);
+		Push(L, obj.magnitude);
 		return 1;
 	}
 
@@ -79,63 +78,63 @@ public class Vector2Wrap
 	static int Get_sqrMagnitude(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Vector2>(L, 1);
-		Lua.Push(L, obj.sqrMagnitude);
+		Push(L, obj.sqrMagnitude);
 		return 1;
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Get_zero(IntPtr L)
 	{
-		Lua.Push(L, UnityEngine.Vector2.zero);
+		Push(L, UnityEngine.Vector2.zero);
 		return 1;
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Get_one(IntPtr L)
 	{
-		Lua.Push(L, UnityEngine.Vector2.one);
+		Push(L, UnityEngine.Vector2.one);
 		return 1;
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Get_up(IntPtr L)
 	{
-		Lua.Push(L, UnityEngine.Vector2.up);
+		Push(L, UnityEngine.Vector2.up);
 		return 1;
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Get_down(IntPtr L)
 	{
-		Lua.Push(L, UnityEngine.Vector2.down);
+		Push(L, UnityEngine.Vector2.down);
 		return 1;
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Get_left(IntPtr L)
 	{
-		Lua.Push(L, UnityEngine.Vector2.left);
+		Push(L, UnityEngine.Vector2.left);
 		return 1;
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Get_right(IntPtr L)
 	{
-		Lua.Push(L, UnityEngine.Vector2.right);
+		Push(L, UnityEngine.Vector2.right);
 		return 1;
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Get_positiveInfinity(IntPtr L)
 	{
-		Lua.Push(L, UnityEngine.Vector2.positiveInfinity);
+		Push(L, UnityEngine.Vector2.positiveInfinity);
 		return 1;
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Get_negativeInfinity(IntPtr L)
 	{
-		Lua.Push(L, UnityEngine.Vector2.negativeInfinity);
+		Push(L, UnityEngine.Vector2.negativeInfinity);
 		return 1;
 	}
 
@@ -144,10 +143,9 @@ public class Vector2Wrap
 	{
 		const int startStack = 2;
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Vector2>(L, 1);
-		obj.Set(
-			Lua.Get<float>(L, 0 + startStack),
-			Lua.Get<float>(L, 1 + startStack)
-		);
+		Get(L, 0 + startStack, out float t0);
+		Get(L, 1 + startStack, out float t1);
+		obj.Set(t0, t1);
 		return 0;
 	}
 
@@ -159,12 +157,11 @@ public class Vector2Wrap
 		#else
 		const int startStack = 1;
 		#endif
-		var ret = UnityEngine.Vector2.Lerp(
-			Lua.Get<UnityEngine.Vector2>(L, 0 + startStack),
-			Lua.Get<UnityEngine.Vector2>(L, 1 + startStack),
-			Lua.Get<float>(L, 2 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Vector2 t0);
+		Get(L, 1 + startStack, out UnityEngine.Vector2 t1);
+		Get(L, 2 + startStack, out float t2);
+		var ret = UnityEngine.Vector2.Lerp(t0, t1, t2);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -176,12 +173,11 @@ public class Vector2Wrap
 		#else
 		const int startStack = 1;
 		#endif
-		var ret = UnityEngine.Vector2.LerpUnclamped(
-			Lua.Get<UnityEngine.Vector2>(L, 0 + startStack),
-			Lua.Get<UnityEngine.Vector2>(L, 1 + startStack),
-			Lua.Get<float>(L, 2 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Vector2 t0);
+		Get(L, 1 + startStack, out UnityEngine.Vector2 t1);
+		Get(L, 2 + startStack, out float t2);
+		var ret = UnityEngine.Vector2.LerpUnclamped(t0, t1, t2);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -193,12 +189,11 @@ public class Vector2Wrap
 		#else
 		const int startStack = 1;
 		#endif
-		var ret = UnityEngine.Vector2.MoveTowards(
-			Lua.Get<UnityEngine.Vector2>(L, 0 + startStack),
-			Lua.Get<UnityEngine.Vector2>(L, 1 + startStack),
-			Lua.Get<float>(L, 2 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Vector2 t0);
+		Get(L, 1 + startStack, out UnityEngine.Vector2 t1);
+		Get(L, 2 + startStack, out float t2);
+		var ret = UnityEngine.Vector2.MoveTowards(t0, t1, t2);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -210,9 +205,8 @@ public class Vector2Wrap
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Vector2>(L, 1);
-			obj.Scale(
-				Lua.Get<UnityEngine.Vector2>(L, 0 + startStack)
-			);
+			Get(L, 0 + startStack, out UnityEngine.Vector2 t0);
+			obj.Scale(t0);
 			return 0;
 		}
 		else if(n == 2)
@@ -222,11 +216,10 @@ public class Vector2Wrap
 			#else
 			const int startStack = 1;
 			#endif
-			var ret = UnityEngine.Vector2.Scale(
-				Lua.Get<UnityEngine.Vector2>(L, 0 + startStack),
-				Lua.Get<UnityEngine.Vector2>(L, 1 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out UnityEngine.Vector2 t0);
+			Get(L, 1 + startStack, out UnityEngine.Vector2 t1);
+			var ret = UnityEngine.Vector2.Scale(t0, t1);
+			Push(L, ret);
 			return 1;
 		}
 		return 0;
@@ -248,17 +241,16 @@ public class Vector2Wrap
 		{
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Vector2>(L, 1);
 			var ret = obj.ToString();
-			Lua.Push(L, ret);
+			Push(L, ret);
 			return 1;
 		}
 		else if(n == 1)
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Vector2>(L, 1);
-			var ret = obj.ToString(
-				Lua.Get<string>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out string t0);
+			var ret = obj.ToString(t0);
+			Push(L, ret);
 			return 1;
 		}
 		return 0;
@@ -269,7 +261,7 @@ public class Vector2Wrap
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Vector2>(L, 1);
 		var ret = obj.GetHashCode();
-		Lua.Push(L, ret);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -281,20 +273,18 @@ public class Vector2Wrap
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Vector2>(L, 1);
-			var ret = obj.Equals(
-				Lua.Get<object>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out object t0);
+			var ret = obj.Equals(t0);
+			Push(L, ret);
 			return 1;
 		}
 		else if(n == 1)
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Vector2>(L, 1);
-			var ret = obj.Equals(
-				Lua.Get<UnityEngine.Vector2>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out UnityEngine.Vector2 t0);
+			var ret = obj.Equals(t0);
+			Push(L, ret);
 			return 1;
 		}
 		return 0;
@@ -308,11 +298,10 @@ public class Vector2Wrap
 		#else
 		const int startStack = 1;
 		#endif
-		var ret = UnityEngine.Vector2.Reflect(
-			Lua.Get<UnityEngine.Vector2>(L, 0 + startStack),
-			Lua.Get<UnityEngine.Vector2>(L, 1 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Vector2 t0);
+		Get(L, 1 + startStack, out UnityEngine.Vector2 t1);
+		var ret = UnityEngine.Vector2.Reflect(t0, t1);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -324,10 +313,9 @@ public class Vector2Wrap
 		#else
 		const int startStack = 1;
 		#endif
-		var ret = UnityEngine.Vector2.Perpendicular(
-			Lua.Get<UnityEngine.Vector2>(L, 0 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Vector2 t0);
+		var ret = UnityEngine.Vector2.Perpendicular(t0);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -339,11 +327,10 @@ public class Vector2Wrap
 		#else
 		const int startStack = 1;
 		#endif
-		var ret = UnityEngine.Vector2.Dot(
-			Lua.Get<UnityEngine.Vector2>(L, 0 + startStack),
-			Lua.Get<UnityEngine.Vector2>(L, 1 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Vector2 t0);
+		Get(L, 1 + startStack, out UnityEngine.Vector2 t1);
+		var ret = UnityEngine.Vector2.Dot(t0, t1);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -355,11 +342,10 @@ public class Vector2Wrap
 		#else
 		const int startStack = 1;
 		#endif
-		var ret = UnityEngine.Vector2.Angle(
-			Lua.Get<UnityEngine.Vector2>(L, 0 + startStack),
-			Lua.Get<UnityEngine.Vector2>(L, 1 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Vector2 t0);
+		Get(L, 1 + startStack, out UnityEngine.Vector2 t1);
+		var ret = UnityEngine.Vector2.Angle(t0, t1);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -371,11 +357,10 @@ public class Vector2Wrap
 		#else
 		const int startStack = 1;
 		#endif
-		var ret = UnityEngine.Vector2.SignedAngle(
-			Lua.Get<UnityEngine.Vector2>(L, 0 + startStack),
-			Lua.Get<UnityEngine.Vector2>(L, 1 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Vector2 t0);
+		Get(L, 1 + startStack, out UnityEngine.Vector2 t1);
+		var ret = UnityEngine.Vector2.SignedAngle(t0, t1);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -387,11 +372,10 @@ public class Vector2Wrap
 		#else
 		const int startStack = 1;
 		#endif
-		var ret = UnityEngine.Vector2.Distance(
-			Lua.Get<UnityEngine.Vector2>(L, 0 + startStack),
-			Lua.Get<UnityEngine.Vector2>(L, 1 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Vector2 t0);
+		Get(L, 1 + startStack, out UnityEngine.Vector2 t1);
+		var ret = UnityEngine.Vector2.Distance(t0, t1);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -403,11 +387,10 @@ public class Vector2Wrap
 		#else
 		const int startStack = 1;
 		#endif
-		var ret = UnityEngine.Vector2.ClampMagnitude(
-			Lua.Get<UnityEngine.Vector2>(L, 0 + startStack),
-			Lua.Get<float>(L, 1 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Vector2 t0);
+		Get(L, 1 + startStack, out float t1);
+		var ret = UnityEngine.Vector2.ClampMagnitude(t0, t1);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -419,7 +402,7 @@ public class Vector2Wrap
 		{
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Vector2>(L, 1);
 			var ret = obj.SqrMagnitude();
-			Lua.Push(L, ret);
+			Push(L, ret);
 			return 1;
 		}
 		else if(n == 1)
@@ -429,10 +412,9 @@ public class Vector2Wrap
 			#else
 			const int startStack = 1;
 			#endif
-			var ret = UnityEngine.Vector2.SqrMagnitude(
-				Lua.Get<UnityEngine.Vector2>(L, 0 + startStack)
-			);
-			Lua.Push(L, ret);
+			Get(L, 0 + startStack, out UnityEngine.Vector2 t0);
+			var ret = UnityEngine.Vector2.SqrMagnitude(t0);
+			Push(L, ret);
 			return 1;
 		}
 		return 0;
@@ -446,11 +428,10 @@ public class Vector2Wrap
 		#else
 		const int startStack = 1;
 		#endif
-		var ret = UnityEngine.Vector2.Min(
-			Lua.Get<UnityEngine.Vector2>(L, 0 + startStack),
-			Lua.Get<UnityEngine.Vector2>(L, 1 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Vector2 t0);
+		Get(L, 1 + startStack, out UnityEngine.Vector2 t1);
+		var ret = UnityEngine.Vector2.Min(t0, t1);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -462,11 +443,10 @@ public class Vector2Wrap
 		#else
 		const int startStack = 1;
 		#endif
-		var ret = UnityEngine.Vector2.Max(
-			Lua.Get<UnityEngine.Vector2>(L, 0 + startStack),
-			Lua.Get<UnityEngine.Vector2>(L, 1 + startStack)
-		);
-		Lua.Push(L, ret);
+		Get(L, 0 + startStack, out UnityEngine.Vector2 t0);
+		Get(L, 1 + startStack, out UnityEngine.Vector2 t1);
+		var ret = UnityEngine.Vector2.Max(t0, t1);
+		Push(L, ret);
 		return 1;
 	}
 
@@ -475,7 +455,7 @@ public class Vector2Wrap
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Vector2>(L, 1);
 		var ret = obj.GetType();
-		Lua.Push(L, ret);
+		Push(L, ret);
 		return 1;
 	}
 
