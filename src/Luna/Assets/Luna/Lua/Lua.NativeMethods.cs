@@ -470,12 +470,12 @@ namespace SharpLuna
 
         public struct LunaData
         {
-            public IntPtr type;
-            public IntPtr super;
-            public IntPtr getters;
-            public IntPtr setters;
-            public IntPtr get_indexed;
-            public IntPtr set_indexed;
+            public int type;
+            public int super;
+            public int getters;
+            public int setters;
+            public int get_indexed;
+            public int set_indexed;
         }
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]

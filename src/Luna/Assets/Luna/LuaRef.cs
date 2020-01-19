@@ -618,22 +618,23 @@ namespace SharpLuna
             switch(t)
             {
                 case LuaType.Boolean:
-                    return ToValue<bool>().ToString();
-                    
+                    return ToValue<bool>().ToString();                    
                 case LuaType.LightUserData:
                     return ToPtr().ToString();
                 case LuaType.Number:
+                    //lua_rawgeti(L, LUA_REGISTRYINDEX, _ref);
+                    //return lua_tostring(L, -1);
                     return ToValue<double>().ToString();
                 case LuaType.String:
                     return ToValue<string>();
                 case LuaType.Table:
-                    return ToValue<string>();
+                    return "Table";
                 case LuaType.Function:
-                    return ToValue<string>();
+                    return "Function";
                 case LuaType.UserData:
-                    return ToPtr().ToString();                    
+                    return "UserData";
                 case LuaType.Thread:
-                    return ToValue<string>();                    
+                    return "Thread";
                 default:
                     return "nil";
             }
