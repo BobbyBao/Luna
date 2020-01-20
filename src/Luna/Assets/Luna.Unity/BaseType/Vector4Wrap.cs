@@ -225,7 +225,7 @@ public class Vector4Wrap
 	static int Scale(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1 && CheckType<UnityEngine.Vector4>(L, 1))
+		if(n == 1)
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Vector4>(L, 1);
@@ -233,7 +233,7 @@ public class Vector4Wrap
 			obj.Scale(t0);
 			return 0;
 		}
-		else if(n == 2 && CheckType<UnityEngine.Vector4, UnityEngine.Vector4>(L, 1))
+		else if(n == 2)
 		{
 			#if LUNA_SCRIPT
 			const int startStack = 2;
@@ -293,7 +293,7 @@ public class Vector4Wrap
 			obj.Normalize();
 			return 0;
 		}
-		else if(n == 1 && CheckType<UnityEngine.Vector4>(L, 1))
+		else if(n == 1)
 		{
 			#if LUNA_SCRIPT
 			const int startStack = 2;
@@ -408,7 +408,7 @@ public class Vector4Wrap
 			Push(L, ret);
 			return 1;
 		}
-		else if(n == 1 && CheckType<string>(L, 1))
+		else if(n == 1)
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Vector4>(L, 1);
@@ -431,7 +431,7 @@ public class Vector4Wrap
 			Push(L, ret);
 			return 1;
 		}
-		else if(n == 1 && CheckType<UnityEngine.Vector4>(L, 1))
+		else if(n == 1)
 		{
 			#if LUNA_SCRIPT
 			const int startStack = 2;

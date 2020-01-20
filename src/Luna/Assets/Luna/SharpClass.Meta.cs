@@ -1,4 +1,4 @@
-﻿//#define C_API
+﻿#define C_API
 
 using System;
 using System.Runtime.InteropServices;

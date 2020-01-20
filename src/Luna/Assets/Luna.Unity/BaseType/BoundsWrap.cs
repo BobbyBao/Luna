@@ -234,7 +234,7 @@ public class BoundsWrap
 			Push(L, ret);
 			return 1;
 		}
-		else if(n == 1 && CheckType<string>(L, 1))
+		else if(n == 1)
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Bounds>(L, 1);

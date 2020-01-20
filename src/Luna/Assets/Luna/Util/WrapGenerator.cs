@@ -147,6 +147,7 @@ namespace SharpLuna
                 }
 
                 var memberInfo = type.GetMember(method.Name);
+                int[] paraments = new int[16];
                 List<MethodInfo> methodInfos = new List<MethodInfo>();
                 foreach (var m in memberInfo)
                 {
@@ -166,7 +167,8 @@ namespace SharpLuna
                     }
 
                     bool gen = true;
-                    foreach (var p in mi.GetParameters())
+                    var paramments = mi.GetParameters();
+                    foreach (var p in paramments)
                     {
                         if (!p.ParameterType.ShouldExport())
                         {
@@ -176,6 +178,7 @@ namespace SharpLuna
 
                     if (gen)
                     {
+                        paraments[paramments.Length] = paraments[paramments.Length] + 1;
                         methodInfos.Add((MethodInfo)m);
                     }
                 }
@@ -183,7 +186,7 @@ namespace SharpLuna
                 if (methodInfos.Count > 0)
                 {
                     methodInfos.Sort((a, b) => a.GetParameters().Length - b.GetParameters().Length);
-                    GenerateMethod(type, methodInfos.ToArray(), sb);
+                    GenerateMethod(type, methodInfos.ToArray(), paraments, sb);
                     members.Add((MemberTypes.Method, method.Name, false, false));
                 }
             }
@@ -400,7 +403,7 @@ namespace SharpLuna
             
         }
 
-        static void GenerateMethod(Type type, MethodInfo[] methodInfo, StringBuilder sb)
+        static void GenerateMethod(Type type, MethodInfo[] methodInfo, int[] paraments, StringBuilder sb)
         {
             sb.Append("\t[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]\n");
             sb.Append($"\tstatic int {methodInfo[0].Name}(IntPtr L)\n\t{{\n");
@@ -426,7 +429,7 @@ namespace SharpLuna
                     {
                         first = false;
                         sb.Append($"\t\tif(n == {parameters.Length}");
-                        if (parameters.Length > 0)
+                        if (paraments[parameters.Length] > 1)
                         {
                             sb.Append(" && CheckType<");
                             for (int i = 0; i < parameters.Length; i++)
@@ -445,7 +448,7 @@ namespace SharpLuna
                     else
                     {
                         sb.Append($"\t\t}}\n\t\telse if(n == {parameters.Length}");
-                        if (parameters.Length > 0)
+                        if (paraments[parameters.Length] > 1)
                         {
                             sb.Append(" && CheckType<");
                             for (int i = 0; i < parameters.Length; i++)

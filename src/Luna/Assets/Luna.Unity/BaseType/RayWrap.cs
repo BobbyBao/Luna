@@ -81,7 +81,7 @@ public class RayWrap
 			Push(L, ret);
 			return 1;
 		}
-		else if(n == 1 && CheckType<string>(L, 1))
+		else if(n == 1)
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Ray>(L, 1);

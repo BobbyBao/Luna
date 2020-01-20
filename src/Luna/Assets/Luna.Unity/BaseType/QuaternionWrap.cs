@@ -239,7 +239,7 @@ public class QuaternionWrap
 	static int LookRotation(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1 && CheckType<UnityEngine.Vector3>(L, 1))
+		if(n == 1)
 		{
 			#if LUNA_SCRIPT
 			const int startStack = 2;
@@ -251,7 +251,7 @@ public class QuaternionWrap
 			Push(L, ret);
 			return 1;
 		}
-		else if(n == 2 && CheckType<UnityEngine.Vector3, UnityEngine.Vector3>(L, 1))
+		else if(n == 2)
 		{
 			#if LUNA_SCRIPT
 			const int startStack = 2;
@@ -299,7 +299,7 @@ public class QuaternionWrap
 	static int SetLookRotation(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1 && CheckType<UnityEngine.Vector3>(L, 1))
+		if(n == 1)
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
@@ -307,7 +307,7 @@ public class QuaternionWrap
 			obj.SetLookRotation(t0);
 			return 0;
 		}
-		else if(n == 2 && CheckType<UnityEngine.Vector3, UnityEngine.Vector3>(L, 1))
+		else if(n == 2)
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
@@ -338,7 +338,7 @@ public class QuaternionWrap
 	static int Euler(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1 && CheckType<UnityEngine.Vector3>(L, 1))
+		if(n == 1)
 		{
 			#if LUNA_SCRIPT
 			const int startStack = 2;
@@ -350,7 +350,7 @@ public class QuaternionWrap
 			Push(L, ret);
 			return 1;
 		}
-		else if(n == 3 && CheckType<float, float, float>(L, 1))
+		else if(n == 3)
 		{
 			#if LUNA_SCRIPT
 			const int startStack = 2;
@@ -404,7 +404,7 @@ public class QuaternionWrap
 			obj.Normalize();
 			return 0;
 		}
-		else if(n == 1 && CheckType<UnityEngine.Quaternion>(L, 1))
+		else if(n == 1)
 		{
 			#if LUNA_SCRIPT
 			const int startStack = 2;
@@ -464,7 +464,7 @@ public class QuaternionWrap
 			Push(L, ret);
 			return 1;
 		}
-		else if(n == 1 && CheckType<string>(L, 1))
+		else if(n == 1)
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Quaternion>(L, 1);
