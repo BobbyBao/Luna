@@ -1,5 +1,6 @@
 using System;
 using SharpLuna;
+using System.Collections.Generic;
 using static SharpLuna.Lua;
 
 [WrapClass(typeof(UnityEngine.Ray))]
@@ -64,7 +65,7 @@ public class RayWrap
 		const int startStack = 2;
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Ray>(L, 1);
 		Get(L, 0 + startStack, out float t0);
-		var ret = obj.GetPoint(t0);
+		UnityEngine.Vector3 ret = obj.GetPoint(t0);
 		Push(L, ret);
 		return 1;
 	}
@@ -76,16 +77,16 @@ public class RayWrap
 		if(n == 0)
 		{
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Ray>(L, 1);
-			var ret = obj.ToString();
+			string ret = obj.ToString();
 			Push(L, ret);
 			return 1;
 		}
-		else if(n == 1)
+		else if(n == 1 && CheckType<string>(L, 1))
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Ray>(L, 1);
 			Get(L, 0 + startStack, out string t0);
-			var ret = obj.ToString(t0);
+			string ret = obj.ToString(t0);
 			Push(L, ret);
 			return 1;
 		}
@@ -98,7 +99,7 @@ public class RayWrap
 		const int startStack = 2;
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Ray>(L, 1);
 		Get(L, 0 + startStack, out object t0);
-		var ret = obj.Equals(t0);
+		bool ret = obj.Equals(t0);
 		Push(L, ret);
 		return 1;
 	}
@@ -107,7 +108,7 @@ public class RayWrap
 	static int GetHashCode(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Ray>(L, 1);
-		var ret = obj.GetHashCode();
+		int ret = obj.GetHashCode();
 		Push(L, ret);
 		return 1;
 	}
@@ -116,7 +117,7 @@ public class RayWrap
 	static int GetType(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Ray>(L, 1);
-		var ret = obj.GetType();
+		System.Type ret = obj.GetType();
 		Push(L, ret);
 		return 1;
 	}

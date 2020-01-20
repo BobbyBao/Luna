@@ -1,5 +1,6 @@
 using System;
 using SharpLuna;
+using System.Collections.Generic;
 using static SharpLuna.Lua;
 
 [WrapClass(typeof(UnityEngine.RaycastHit))]
@@ -135,7 +136,7 @@ public class RaycastHitWrap
 		const int startStack = 2;
 		ref var obj = ref SharpObject.GetValue<UnityEngine.RaycastHit>(L, 1);
 		Get(L, 0 + startStack, out object t0);
-		var ret = obj.Equals(t0);
+		bool ret = obj.Equals(t0);
 		Push(L, ret);
 		return 1;
 	}
@@ -144,7 +145,7 @@ public class RaycastHitWrap
 	static int GetHashCode(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.RaycastHit>(L, 1);
-		var ret = obj.GetHashCode();
+		int ret = obj.GetHashCode();
 		Push(L, ret);
 		return 1;
 	}
@@ -153,7 +154,7 @@ public class RaycastHitWrap
 	static int ToString(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.RaycastHit>(L, 1);
-		var ret = obj.ToString();
+		string ret = obj.ToString();
 		Push(L, ret);
 		return 1;
 	}
@@ -162,7 +163,7 @@ public class RaycastHitWrap
 	static int GetType(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.RaycastHit>(L, 1);
-		var ret = obj.GetType();
+		System.Type ret = obj.GetType();
 		Push(L, ret);
 		return 1;
 	}

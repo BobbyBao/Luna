@@ -1,5 +1,6 @@
 using System;
 using SharpLuna;
+using System.Collections.Generic;
 using static SharpLuna.Lua;
 
 [WrapClass(typeof(UnityEngine.Transform))]
@@ -345,7 +346,7 @@ public class TransformWrap
 	static int SetParent(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1)
+		if(n == 1 && CheckType<UnityEngine.Transform>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -353,7 +354,7 @@ public class TransformWrap
 			obj.SetParent(t0);
 			return 0;
 		}
-		else if(n == 2)
+		else if(n == 2 && CheckType<UnityEngine.Transform, bool>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -380,7 +381,7 @@ public class TransformWrap
 	static int Translate(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1)
+		if(n == 1 && CheckType<UnityEngine.Vector3>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -388,7 +389,7 @@ public class TransformWrap
 			obj.Translate(t0);
 			return 0;
 		}
-		else if(n == 2)
+		else if(n == 2 && CheckType<UnityEngine.Vector3, UnityEngine.Space>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -397,7 +398,7 @@ public class TransformWrap
 			obj.Translate(t0, t1);
 			return 0;
 		}
-		else if(n == 2)
+		else if(n == 2 && CheckType<UnityEngine.Vector3, UnityEngine.Transform>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -406,7 +407,7 @@ public class TransformWrap
 			obj.Translate(t0, t1);
 			return 0;
 		}
-		else if(n == 3)
+		else if(n == 3 && CheckType<float, float, float>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -416,7 +417,7 @@ public class TransformWrap
 			obj.Translate(t0, t1, t2);
 			return 0;
 		}
-		else if(n == 4)
+		else if(n == 4 && CheckType<float, float, float, UnityEngine.Space>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -427,7 +428,7 @@ public class TransformWrap
 			obj.Translate(t0, t1, t2, t3);
 			return 0;
 		}
-		else if(n == 4)
+		else if(n == 4 && CheckType<float, float, float, UnityEngine.Transform>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -445,7 +446,7 @@ public class TransformWrap
 	static int Rotate(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1)
+		if(n == 1 && CheckType<UnityEngine.Vector3>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -453,7 +454,7 @@ public class TransformWrap
 			obj.Rotate(t0);
 			return 0;
 		}
-		else if(n == 2)
+		else if(n == 2 && CheckType<UnityEngine.Vector3, UnityEngine.Space>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -462,7 +463,7 @@ public class TransformWrap
 			obj.Rotate(t0, t1);
 			return 0;
 		}
-		else if(n == 2)
+		else if(n == 2 && CheckType<UnityEngine.Vector3, float>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -471,7 +472,7 @@ public class TransformWrap
 			obj.Rotate(t0, t1);
 			return 0;
 		}
-		else if(n == 3)
+		else if(n == 3 && CheckType<float, float, float>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -481,7 +482,7 @@ public class TransformWrap
 			obj.Rotate(t0, t1, t2);
 			return 0;
 		}
-		else if(n == 3)
+		else if(n == 3 && CheckType<UnityEngine.Vector3, float, UnityEngine.Space>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -491,7 +492,7 @@ public class TransformWrap
 			obj.Rotate(t0, t1, t2);
 			return 0;
 		}
-		else if(n == 4)
+		else if(n == 4 && CheckType<float, float, float, UnityEngine.Space>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -521,7 +522,7 @@ public class TransformWrap
 	static int LookAt(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1)
+		if(n == 1 && CheckType<UnityEngine.Transform>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -529,7 +530,7 @@ public class TransformWrap
 			obj.LookAt(t0);
 			return 0;
 		}
-		else if(n == 1)
+		else if(n == 1 && CheckType<UnityEngine.Vector3>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -537,7 +538,7 @@ public class TransformWrap
 			obj.LookAt(t0);
 			return 0;
 		}
-		else if(n == 2)
+		else if(n == 2 && CheckType<UnityEngine.Transform, UnityEngine.Vector3>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -546,7 +547,7 @@ public class TransformWrap
 			obj.LookAt(t0, t1);
 			return 0;
 		}
-		else if(n == 2)
+		else if(n == 2 && CheckType<UnityEngine.Vector3, UnityEngine.Vector3>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -562,23 +563,23 @@ public class TransformWrap
 	static int TransformDirection(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1)
+		if(n == 1 && CheckType<UnityEngine.Vector3>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
-			var ret = obj.TransformDirection(t0);
+			UnityEngine.Vector3 ret = obj.TransformDirection(t0);
 			Push(L, ret);
 			return 1;
 		}
-		else if(n == 3)
+		else if(n == 3 && CheckType<float, float, float>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 			Get(L, 0 + startStack, out float t0);
 			Get(L, 1 + startStack, out float t1);
 			Get(L, 2 + startStack, out float t2);
-			var ret = obj.TransformDirection(t0, t1, t2);
+			UnityEngine.Vector3 ret = obj.TransformDirection(t0, t1, t2);
 			Push(L, ret);
 			return 1;
 		}
@@ -589,23 +590,23 @@ public class TransformWrap
 	static int InverseTransformDirection(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1)
+		if(n == 1 && CheckType<UnityEngine.Vector3>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
-			var ret = obj.InverseTransformDirection(t0);
+			UnityEngine.Vector3 ret = obj.InverseTransformDirection(t0);
 			Push(L, ret);
 			return 1;
 		}
-		else if(n == 3)
+		else if(n == 3 && CheckType<float, float, float>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 			Get(L, 0 + startStack, out float t0);
 			Get(L, 1 + startStack, out float t1);
 			Get(L, 2 + startStack, out float t2);
-			var ret = obj.InverseTransformDirection(t0, t1, t2);
+			UnityEngine.Vector3 ret = obj.InverseTransformDirection(t0, t1, t2);
 			Push(L, ret);
 			return 1;
 		}
@@ -616,23 +617,23 @@ public class TransformWrap
 	static int TransformVector(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1)
+		if(n == 1 && CheckType<UnityEngine.Vector3>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
-			var ret = obj.TransformVector(t0);
+			UnityEngine.Vector3 ret = obj.TransformVector(t0);
 			Push(L, ret);
 			return 1;
 		}
-		else if(n == 3)
+		else if(n == 3 && CheckType<float, float, float>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 			Get(L, 0 + startStack, out float t0);
 			Get(L, 1 + startStack, out float t1);
 			Get(L, 2 + startStack, out float t2);
-			var ret = obj.TransformVector(t0, t1, t2);
+			UnityEngine.Vector3 ret = obj.TransformVector(t0, t1, t2);
 			Push(L, ret);
 			return 1;
 		}
@@ -643,23 +644,23 @@ public class TransformWrap
 	static int InverseTransformVector(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1)
+		if(n == 1 && CheckType<UnityEngine.Vector3>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
-			var ret = obj.InverseTransformVector(t0);
+			UnityEngine.Vector3 ret = obj.InverseTransformVector(t0);
 			Push(L, ret);
 			return 1;
 		}
-		else if(n == 3)
+		else if(n == 3 && CheckType<float, float, float>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 			Get(L, 0 + startStack, out float t0);
 			Get(L, 1 + startStack, out float t1);
 			Get(L, 2 + startStack, out float t2);
-			var ret = obj.InverseTransformVector(t0, t1, t2);
+			UnityEngine.Vector3 ret = obj.InverseTransformVector(t0, t1, t2);
 			Push(L, ret);
 			return 1;
 		}
@@ -670,23 +671,23 @@ public class TransformWrap
 	static int TransformPoint(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1)
+		if(n == 1 && CheckType<UnityEngine.Vector3>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
-			var ret = obj.TransformPoint(t0);
+			UnityEngine.Vector3 ret = obj.TransformPoint(t0);
 			Push(L, ret);
 			return 1;
 		}
-		else if(n == 3)
+		else if(n == 3 && CheckType<float, float, float>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 			Get(L, 0 + startStack, out float t0);
 			Get(L, 1 + startStack, out float t1);
 			Get(L, 2 + startStack, out float t2);
-			var ret = obj.TransformPoint(t0, t1, t2);
+			UnityEngine.Vector3 ret = obj.TransformPoint(t0, t1, t2);
 			Push(L, ret);
 			return 1;
 		}
@@ -697,23 +698,23 @@ public class TransformWrap
 	static int InverseTransformPoint(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1)
+		if(n == 1 && CheckType<UnityEngine.Vector3>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
-			var ret = obj.InverseTransformPoint(t0);
+			UnityEngine.Vector3 ret = obj.InverseTransformPoint(t0);
 			Push(L, ret);
 			return 1;
 		}
-		else if(n == 3)
+		else if(n == 3 && CheckType<float, float, float>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 			Get(L, 0 + startStack, out float t0);
 			Get(L, 1 + startStack, out float t1);
 			Get(L, 2 + startStack, out float t2);
-			var ret = obj.InverseTransformPoint(t0, t1, t2);
+			UnityEngine.Vector3 ret = obj.InverseTransformPoint(t0, t1, t2);
 			Push(L, ret);
 			return 1;
 		}
@@ -758,7 +759,7 @@ public class TransformWrap
 	static int GetSiblingIndex(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		var ret = obj.GetSiblingIndex();
+		int ret = obj.GetSiblingIndex();
 		Push(L, ret);
 		return 1;
 	}
@@ -769,7 +770,7 @@ public class TransformWrap
 		const int startStack = 2;
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 		Get(L, 0 + startStack, out string t0);
-		var ret = obj.Find(t0);
+		UnityEngine.Transform ret = obj.Find(t0);
 		Push(L, ret);
 		return 1;
 	}
@@ -780,7 +781,7 @@ public class TransformWrap
 		const int startStack = 2;
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 		Get(L, 0 + startStack, out UnityEngine.Transform t0);
-		var ret = obj.IsChildOf(t0);
+		bool ret = obj.IsChildOf(t0);
 		Push(L, ret);
 		return 1;
 	}
@@ -789,7 +790,7 @@ public class TransformWrap
 	static int GetEnumerator(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		var ret = obj.GetEnumerator();
+		System.Collections.IEnumerator ret = obj.GetEnumerator();
 		Push(L, ret);
 		return 1;
 	}
@@ -800,7 +801,7 @@ public class TransformWrap
 		const int startStack = 2;
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 		Get(L, 0 + startStack, out int t0);
-		var ret = obj.GetChild(t0);
+		UnityEngine.Transform ret = obj.GetChild(t0);
 		Push(L, ret);
 		return 1;
 	}
@@ -809,21 +810,21 @@ public class TransformWrap
 	static int GetComponent(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1)
+		if(n == 1 && CheckType<System.Type>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 			Get(L, 0 + startStack, out System.Type t0);
-			var ret = obj.GetComponent(t0);
+			UnityEngine.Component ret = obj.GetComponent(t0);
 			Push(L, ret);
 			return 1;
 		}
-		else if(n == 1)
+		else if(n == 1 && CheckType<string>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 			Get(L, 0 + startStack, out string t0);
-			var ret = obj.GetComponent(t0);
+			UnityEngine.Component ret = obj.GetComponent(t0);
 			Push(L, ret);
 			return 1;
 		}
@@ -834,22 +835,22 @@ public class TransformWrap
 	static int GetComponentInChildren(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1)
+		if(n == 1 && CheckType<System.Type>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 			Get(L, 0 + startStack, out System.Type t0);
-			var ret = obj.GetComponentInChildren(t0);
+			UnityEngine.Component ret = obj.GetComponentInChildren(t0);
 			Push(L, ret);
 			return 1;
 		}
-		else if(n == 2)
+		else if(n == 2 && CheckType<System.Type, bool>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 			Get(L, 0 + startStack, out System.Type t0);
 			Get(L, 1 + startStack, out bool t1);
-			var ret = obj.GetComponentInChildren(t0, t1);
+			UnityEngine.Component ret = obj.GetComponentInChildren(t0, t1);
 			Push(L, ret);
 			return 1;
 		}
@@ -860,22 +861,22 @@ public class TransformWrap
 	static int GetComponentsInChildren(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1)
+		if(n == 1 && CheckType<System.Type>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 			Get(L, 0 + startStack, out System.Type t0);
-			var ret = obj.GetComponentsInChildren(t0);
+			UnityEngine.Component[] ret = obj.GetComponentsInChildren(t0);
 			Push(L, ret);
 			return 1;
 		}
-		else if(n == 2)
+		else if(n == 2 && CheckType<System.Type, bool>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 			Get(L, 0 + startStack, out System.Type t0);
 			Get(L, 1 + startStack, out bool t1);
-			var ret = obj.GetComponentsInChildren(t0, t1);
+			UnityEngine.Component[] ret = obj.GetComponentsInChildren(t0, t1);
 			Push(L, ret);
 			return 1;
 		}
@@ -888,7 +889,7 @@ public class TransformWrap
 		const int startStack = 2;
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 		Get(L, 0 + startStack, out System.Type t0);
-		var ret = obj.GetComponentInParent(t0);
+		UnityEngine.Component ret = obj.GetComponentInParent(t0);
 		Push(L, ret);
 		return 1;
 	}
@@ -897,22 +898,22 @@ public class TransformWrap
 	static int GetComponentsInParent(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1)
+		if(n == 1 && CheckType<System.Type>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 			Get(L, 0 + startStack, out System.Type t0);
-			var ret = obj.GetComponentsInParent(t0);
+			UnityEngine.Component[] ret = obj.GetComponentsInParent(t0);
 			Push(L, ret);
 			return 1;
 		}
-		else if(n == 2)
+		else if(n == 2 && CheckType<System.Type, bool>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 			Get(L, 0 + startStack, out System.Type t0);
 			Get(L, 1 + startStack, out bool t1);
-			var ret = obj.GetComponentsInParent(t0, t1);
+			UnityEngine.Component[] ret = obj.GetComponentsInParent(t0, t1);
 			Push(L, ret);
 			return 1;
 		}
@@ -925,7 +926,7 @@ public class TransformWrap
 		const int startStack = 2;
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 		Get(L, 0 + startStack, out System.Type t0);
-		var ret = obj.GetComponents(t0);
+		UnityEngine.Component[] ret = obj.GetComponents(t0);
 		Push(L, ret);
 		return 1;
 	}
@@ -936,7 +937,7 @@ public class TransformWrap
 		const int startStack = 2;
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 		Get(L, 0 + startStack, out string t0);
-		var ret = obj.CompareTag(t0);
+		bool ret = obj.CompareTag(t0);
 		Push(L, ret);
 		return 1;
 	}
@@ -945,7 +946,7 @@ public class TransformWrap
 	static int SendMessageUpwards(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1)
+		if(n == 1 && CheckType<string>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -953,7 +954,7 @@ public class TransformWrap
 			obj.SendMessageUpwards(t0);
 			return 0;
 		}
-		else if(n == 2)
+		else if(n == 2 && CheckType<string, object>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -962,7 +963,7 @@ public class TransformWrap
 			obj.SendMessageUpwards(t0, t1);
 			return 0;
 		}
-		else if(n == 2)
+		else if(n == 2 && CheckType<string, UnityEngine.SendMessageOptions>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -971,7 +972,7 @@ public class TransformWrap
 			obj.SendMessageUpwards(t0, t1);
 			return 0;
 		}
-		else if(n == 3)
+		else if(n == 3 && CheckType<string, object, UnityEngine.SendMessageOptions>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -988,7 +989,7 @@ public class TransformWrap
 	static int SendMessage(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1)
+		if(n == 1 && CheckType<string>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -996,7 +997,7 @@ public class TransformWrap
 			obj.SendMessage(t0);
 			return 0;
 		}
-		else if(n == 2)
+		else if(n == 2 && CheckType<string, object>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -1005,7 +1006,7 @@ public class TransformWrap
 			obj.SendMessage(t0, t1);
 			return 0;
 		}
-		else if(n == 2)
+		else if(n == 2 && CheckType<string, UnityEngine.SendMessageOptions>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -1014,7 +1015,7 @@ public class TransformWrap
 			obj.SendMessage(t0, t1);
 			return 0;
 		}
-		else if(n == 3)
+		else if(n == 3 && CheckType<string, object, UnityEngine.SendMessageOptions>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -1031,7 +1032,7 @@ public class TransformWrap
 	static int BroadcastMessage(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1)
+		if(n == 1 && CheckType<string>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -1039,7 +1040,7 @@ public class TransformWrap
 			obj.BroadcastMessage(t0);
 			return 0;
 		}
-		else if(n == 2)
+		else if(n == 2 && CheckType<string, object>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -1048,7 +1049,7 @@ public class TransformWrap
 			obj.BroadcastMessage(t0, t1);
 			return 0;
 		}
-		else if(n == 2)
+		else if(n == 2 && CheckType<string, UnityEngine.SendMessageOptions>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -1057,7 +1058,7 @@ public class TransformWrap
 			obj.BroadcastMessage(t0, t1);
 			return 0;
 		}
-		else if(n == 3)
+		else if(n == 3 && CheckType<string, object, UnityEngine.SendMessageOptions>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
@@ -1074,7 +1075,7 @@ public class TransformWrap
 	static int GetInstanceID(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		var ret = obj.GetInstanceID();
+		int ret = obj.GetInstanceID();
 		Push(L, ret);
 		return 1;
 	}
@@ -1083,7 +1084,7 @@ public class TransformWrap
 	static int GetHashCode(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		var ret = obj.GetHashCode();
+		int ret = obj.GetHashCode();
 		Push(L, ret);
 		return 1;
 	}
@@ -1094,7 +1095,7 @@ public class TransformWrap
 		const int startStack = 2;
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
 		Get(L, 0 + startStack, out object t0);
-		var ret = obj.Equals(t0);
+		bool ret = obj.Equals(t0);
 		Push(L, ret);
 		return 1;
 	}
@@ -1103,7 +1104,7 @@ public class TransformWrap
 	static int ToString(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		var ret = obj.ToString();
+		string ret = obj.ToString();
 		Push(L, ret);
 		return 1;
 	}
@@ -1112,7 +1113,7 @@ public class TransformWrap
 	static int GetType(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.Transform>(L, 1);
-		var ret = obj.GetType();
+		System.Type ret = obj.GetType();
 		Push(L, ret);
 		return 1;
 	}

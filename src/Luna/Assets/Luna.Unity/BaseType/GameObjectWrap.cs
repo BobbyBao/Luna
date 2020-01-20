@@ -1,5 +1,6 @@
 using System;
 using SharpLuna;
+using System.Collections.Generic;
 using static SharpLuna.Lua;
 
 [WrapClass(typeof(UnityEngine.GameObject))]
@@ -163,7 +164,7 @@ public class GameObjectWrap
 		const int startStack = 1;
 		#endif
 		Get(L, 0 + startStack, out UnityEngine.PrimitiveType t0);
-		var ret = UnityEngine.GameObject.CreatePrimitive(t0);
+		UnityEngine.GameObject ret = UnityEngine.GameObject.CreatePrimitive(t0);
 		Push(L, ret);
 		return 1;
 	}
@@ -172,21 +173,21 @@ public class GameObjectWrap
 	static int GetComponent(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1)
+		if(n == 1 && CheckType<System.Type>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.GameObject>(L, 1);
 			Get(L, 0 + startStack, out System.Type t0);
-			var ret = obj.GetComponent(t0);
+			UnityEngine.Component ret = obj.GetComponent(t0);
 			Push(L, ret);
 			return 1;
 		}
-		else if(n == 1)
+		else if(n == 1 && CheckType<string>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.GameObject>(L, 1);
 			Get(L, 0 + startStack, out string t0);
-			var ret = obj.GetComponent(t0);
+			UnityEngine.Component ret = obj.GetComponent(t0);
 			Push(L, ret);
 			return 1;
 		}
@@ -197,22 +198,22 @@ public class GameObjectWrap
 	static int GetComponentInChildren(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1)
+		if(n == 1 && CheckType<System.Type>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.GameObject>(L, 1);
 			Get(L, 0 + startStack, out System.Type t0);
-			var ret = obj.GetComponentInChildren(t0);
+			UnityEngine.Component ret = obj.GetComponentInChildren(t0);
 			Push(L, ret);
 			return 1;
 		}
-		else if(n == 2)
+		else if(n == 2 && CheckType<System.Type, bool>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.GameObject>(L, 1);
 			Get(L, 0 + startStack, out System.Type t0);
 			Get(L, 1 + startStack, out bool t1);
-			var ret = obj.GetComponentInChildren(t0, t1);
+			UnityEngine.Component ret = obj.GetComponentInChildren(t0, t1);
 			Push(L, ret);
 			return 1;
 		}
@@ -225,7 +226,7 @@ public class GameObjectWrap
 		const int startStack = 2;
 		var obj = SharpObject.Get<UnityEngine.GameObject>(L, 1);
 		Get(L, 0 + startStack, out System.Type t0);
-		var ret = obj.GetComponentInParent(t0);
+		UnityEngine.Component ret = obj.GetComponentInParent(t0);
 		Push(L, ret);
 		return 1;
 	}
@@ -236,7 +237,7 @@ public class GameObjectWrap
 		const int startStack = 2;
 		var obj = SharpObject.Get<UnityEngine.GameObject>(L, 1);
 		Get(L, 0 + startStack, out System.Type t0);
-		var ret = obj.GetComponents(t0);
+		UnityEngine.Component[] ret = obj.GetComponents(t0);
 		Push(L, ret);
 		return 1;
 	}
@@ -245,22 +246,22 @@ public class GameObjectWrap
 	static int GetComponentsInChildren(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1)
+		if(n == 1 && CheckType<System.Type>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.GameObject>(L, 1);
 			Get(L, 0 + startStack, out System.Type t0);
-			var ret = obj.GetComponentsInChildren(t0);
+			UnityEngine.Component[] ret = obj.GetComponentsInChildren(t0);
 			Push(L, ret);
 			return 1;
 		}
-		else if(n == 2)
+		else if(n == 2 && CheckType<System.Type, bool>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.GameObject>(L, 1);
 			Get(L, 0 + startStack, out System.Type t0);
 			Get(L, 1 + startStack, out bool t1);
-			var ret = obj.GetComponentsInChildren(t0, t1);
+			UnityEngine.Component[] ret = obj.GetComponentsInChildren(t0, t1);
 			Push(L, ret);
 			return 1;
 		}
@@ -271,22 +272,22 @@ public class GameObjectWrap
 	static int GetComponentsInParent(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1)
+		if(n == 1 && CheckType<System.Type>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.GameObject>(L, 1);
 			Get(L, 0 + startStack, out System.Type t0);
-			var ret = obj.GetComponentsInParent(t0);
+			UnityEngine.Component[] ret = obj.GetComponentsInParent(t0);
 			Push(L, ret);
 			return 1;
 		}
-		else if(n == 2)
+		else if(n == 2 && CheckType<System.Type, bool>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.GameObject>(L, 1);
 			Get(L, 0 + startStack, out System.Type t0);
 			Get(L, 1 + startStack, out bool t1);
-			var ret = obj.GetComponentsInParent(t0, t1);
+			UnityEngine.Component[] ret = obj.GetComponentsInParent(t0, t1);
 			Push(L, ret);
 			return 1;
 		}
@@ -302,7 +303,7 @@ public class GameObjectWrap
 		const int startStack = 1;
 		#endif
 		Get(L, 0 + startStack, out string t0);
-		var ret = UnityEngine.GameObject.FindWithTag(t0);
+		UnityEngine.GameObject ret = UnityEngine.GameObject.FindWithTag(t0);
 		Push(L, ret);
 		return 1;
 	}
@@ -311,7 +312,7 @@ public class GameObjectWrap
 	static int SendMessageUpwards(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1)
+		if(n == 1 && CheckType<string>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.GameObject>(L, 1);
@@ -319,7 +320,7 @@ public class GameObjectWrap
 			obj.SendMessageUpwards(t0);
 			return 0;
 		}
-		else if(n == 2)
+		else if(n == 2 && CheckType<string, UnityEngine.SendMessageOptions>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.GameObject>(L, 1);
@@ -328,7 +329,7 @@ public class GameObjectWrap
 			obj.SendMessageUpwards(t0, t1);
 			return 0;
 		}
-		else if(n == 2)
+		else if(n == 2 && CheckType<string, object>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.GameObject>(L, 1);
@@ -337,7 +338,7 @@ public class GameObjectWrap
 			obj.SendMessageUpwards(t0, t1);
 			return 0;
 		}
-		else if(n == 3)
+		else if(n == 3 && CheckType<string, object, UnityEngine.SendMessageOptions>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.GameObject>(L, 1);
@@ -354,7 +355,7 @@ public class GameObjectWrap
 	static int SendMessage(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1)
+		if(n == 1 && CheckType<string>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.GameObject>(L, 1);
@@ -362,7 +363,7 @@ public class GameObjectWrap
 			obj.SendMessage(t0);
 			return 0;
 		}
-		else if(n == 2)
+		else if(n == 2 && CheckType<string, UnityEngine.SendMessageOptions>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.GameObject>(L, 1);
@@ -371,7 +372,7 @@ public class GameObjectWrap
 			obj.SendMessage(t0, t1);
 			return 0;
 		}
-		else if(n == 2)
+		else if(n == 2 && CheckType<string, object>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.GameObject>(L, 1);
@@ -380,7 +381,7 @@ public class GameObjectWrap
 			obj.SendMessage(t0, t1);
 			return 0;
 		}
-		else if(n == 3)
+		else if(n == 3 && CheckType<string, object, UnityEngine.SendMessageOptions>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.GameObject>(L, 1);
@@ -397,7 +398,7 @@ public class GameObjectWrap
 	static int BroadcastMessage(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1)
+		if(n == 1 && CheckType<string>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.GameObject>(L, 1);
@@ -405,7 +406,7 @@ public class GameObjectWrap
 			obj.BroadcastMessage(t0);
 			return 0;
 		}
-		else if(n == 2)
+		else if(n == 2 && CheckType<string, UnityEngine.SendMessageOptions>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.GameObject>(L, 1);
@@ -414,7 +415,7 @@ public class GameObjectWrap
 			obj.BroadcastMessage(t0, t1);
 			return 0;
 		}
-		else if(n == 2)
+		else if(n == 2 && CheckType<string, object>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.GameObject>(L, 1);
@@ -423,7 +424,7 @@ public class GameObjectWrap
 			obj.BroadcastMessage(t0, t1);
 			return 0;
 		}
-		else if(n == 3)
+		else if(n == 3 && CheckType<string, object, UnityEngine.SendMessageOptions>(L, 1))
 		{
 			const int startStack = 2;
 			var obj = SharpObject.Get<UnityEngine.GameObject>(L, 1);
@@ -442,7 +443,7 @@ public class GameObjectWrap
 		const int startStack = 2;
 		var obj = SharpObject.Get<UnityEngine.GameObject>(L, 1);
 		Get(L, 0 + startStack, out System.Type t0);
-		var ret = obj.AddComponent(t0);
+		UnityEngine.Component ret = obj.AddComponent(t0);
 		Push(L, ret);
 		return 1;
 	}
@@ -463,7 +464,7 @@ public class GameObjectWrap
 		const int startStack = 2;
 		var obj = SharpObject.Get<UnityEngine.GameObject>(L, 1);
 		Get(L, 0 + startStack, out string t0);
-		var ret = obj.CompareTag(t0);
+		bool ret = obj.CompareTag(t0);
 		Push(L, ret);
 		return 1;
 	}
@@ -477,7 +478,7 @@ public class GameObjectWrap
 		const int startStack = 1;
 		#endif
 		Get(L, 0 + startStack, out string t0);
-		var ret = UnityEngine.GameObject.FindGameObjectWithTag(t0);
+		UnityEngine.GameObject ret = UnityEngine.GameObject.FindGameObjectWithTag(t0);
 		Push(L, ret);
 		return 1;
 	}
@@ -491,7 +492,7 @@ public class GameObjectWrap
 		const int startStack = 1;
 		#endif
 		Get(L, 0 + startStack, out string t0);
-		var ret = UnityEngine.GameObject.FindGameObjectsWithTag(t0);
+		UnityEngine.GameObject[] ret = UnityEngine.GameObject.FindGameObjectsWithTag(t0);
 		Push(L, ret);
 		return 1;
 	}
@@ -505,7 +506,7 @@ public class GameObjectWrap
 		const int startStack = 1;
 		#endif
 		Get(L, 0 + startStack, out string t0);
-		var ret = UnityEngine.GameObject.Find(t0);
+		UnityEngine.GameObject ret = UnityEngine.GameObject.Find(t0);
 		Push(L, ret);
 		return 1;
 	}
@@ -514,7 +515,7 @@ public class GameObjectWrap
 	static int GetInstanceID(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.GameObject>(L, 1);
-		var ret = obj.GetInstanceID();
+		int ret = obj.GetInstanceID();
 		Push(L, ret);
 		return 1;
 	}
@@ -523,7 +524,7 @@ public class GameObjectWrap
 	static int GetHashCode(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.GameObject>(L, 1);
-		var ret = obj.GetHashCode();
+		int ret = obj.GetHashCode();
 		Push(L, ret);
 		return 1;
 	}
@@ -534,7 +535,7 @@ public class GameObjectWrap
 		const int startStack = 2;
 		var obj = SharpObject.Get<UnityEngine.GameObject>(L, 1);
 		Get(L, 0 + startStack, out object t0);
-		var ret = obj.Equals(t0);
+		bool ret = obj.Equals(t0);
 		Push(L, ret);
 		return 1;
 	}
@@ -543,7 +544,7 @@ public class GameObjectWrap
 	static int ToString(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.GameObject>(L, 1);
-		var ret = obj.ToString();
+		string ret = obj.ToString();
 		Push(L, ret);
 		return 1;
 	}
@@ -552,7 +553,7 @@ public class GameObjectWrap
 	static int GetType(IntPtr L)
 	{
 		var obj = SharpObject.Get<UnityEngine.GameObject>(L, 1);
-		var ret = obj.GetType();
+		System.Type ret = obj.GetType();
 		Push(L, ret);
 		return 1;
 	}

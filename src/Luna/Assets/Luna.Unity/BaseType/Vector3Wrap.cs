@@ -1,5 +1,6 @@
 using System;
 using SharpLuna;
+using System.Collections.Generic;
 using static SharpLuna.Lua;
 
 [WrapClass(typeof(UnityEngine.Vector3))]
@@ -187,7 +188,7 @@ public class Vector3Wrap
 		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
 		Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
 		Get(L, 2 + startStack, out float t2);
-		var ret = UnityEngine.Vector3.Slerp(t0, t1, t2);
+		UnityEngine.Vector3 ret = UnityEngine.Vector3.Slerp(t0, t1, t2);
 		Push(L, ret);
 		return 1;
 	}
@@ -203,7 +204,7 @@ public class Vector3Wrap
 		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
 		Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
 		Get(L, 2 + startStack, out float t2);
-		var ret = UnityEngine.Vector3.SlerpUnclamped(t0, t1, t2);
+		UnityEngine.Vector3 ret = UnityEngine.Vector3.SlerpUnclamped(t0, t1, t2);
 		Push(L, ret);
 		return 1;
 	}
@@ -220,7 +221,7 @@ public class Vector3Wrap
 		Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
 		Get(L, 2 + startStack, out float t2);
 		Get(L, 3 + startStack, out float t3);
-		var ret = UnityEngine.Vector3.RotateTowards(t0, t1, t2, t3);
+		UnityEngine.Vector3 ret = UnityEngine.Vector3.RotateTowards(t0, t1, t2, t3);
 		Push(L, ret);
 		return 1;
 	}
@@ -236,7 +237,7 @@ public class Vector3Wrap
 		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
 		Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
 		Get(L, 2 + startStack, out float t2);
-		var ret = UnityEngine.Vector3.Lerp(t0, t1, t2);
+		UnityEngine.Vector3 ret = UnityEngine.Vector3.Lerp(t0, t1, t2);
 		Push(L, ret);
 		return 1;
 	}
@@ -252,7 +253,7 @@ public class Vector3Wrap
 		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
 		Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
 		Get(L, 2 + startStack, out float t2);
-		var ret = UnityEngine.Vector3.LerpUnclamped(t0, t1, t2);
+		UnityEngine.Vector3 ret = UnityEngine.Vector3.LerpUnclamped(t0, t1, t2);
 		Push(L, ret);
 		return 1;
 	}
@@ -268,7 +269,7 @@ public class Vector3Wrap
 		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
 		Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
 		Get(L, 2 + startStack, out float t2);
-		var ret = UnityEngine.Vector3.MoveTowards(t0, t1, t2);
+		UnityEngine.Vector3 ret = UnityEngine.Vector3.MoveTowards(t0, t1, t2);
 		Push(L, ret);
 		return 1;
 	}
@@ -289,7 +290,7 @@ public class Vector3Wrap
 	static int Scale(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1)
+		if(n == 1 && CheckType<UnityEngine.Vector3>(L, 1))
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Vector3>(L, 1);
@@ -297,7 +298,7 @@ public class Vector3Wrap
 			obj.Scale(t0);
 			return 0;
 		}
-		else if(n == 2)
+		else if(n == 2 && CheckType<UnityEngine.Vector3, UnityEngine.Vector3>(L, 1))
 		{
 			#if LUNA_SCRIPT
 			const int startStack = 2;
@@ -306,7 +307,7 @@ public class Vector3Wrap
 			#endif
 			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
 			Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
-			var ret = UnityEngine.Vector3.Scale(t0, t1);
+			UnityEngine.Vector3 ret = UnityEngine.Vector3.Scale(t0, t1);
 			Push(L, ret);
 			return 1;
 		}
@@ -323,7 +324,7 @@ public class Vector3Wrap
 		#endif
 		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
 		Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
-		var ret = UnityEngine.Vector3.Cross(t0, t1);
+		UnityEngine.Vector3 ret = UnityEngine.Vector3.Cross(t0, t1);
 		Push(L, ret);
 		return 1;
 	}
@@ -332,7 +333,7 @@ public class Vector3Wrap
 	static int GetHashCode(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Vector3>(L, 1);
-		var ret = obj.GetHashCode();
+		int ret = obj.GetHashCode();
 		Push(L, ret);
 		return 1;
 	}
@@ -341,21 +342,21 @@ public class Vector3Wrap
 	static int Equals(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1)
+		if(n == 1 && CheckType<object>(L, 1))
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Vector3>(L, 1);
 			Get(L, 0 + startStack, out object t0);
-			var ret = obj.Equals(t0);
+			bool ret = obj.Equals(t0);
 			Push(L, ret);
 			return 1;
 		}
-		else if(n == 1)
+		else if(n == 1 && CheckType<UnityEngine.Vector3>(L, 1))
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Vector3>(L, 1);
 			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
-			var ret = obj.Equals(t0);
+			bool ret = obj.Equals(t0);
 			Push(L, ret);
 			return 1;
 		}
@@ -372,7 +373,7 @@ public class Vector3Wrap
 		#endif
 		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
 		Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
-		var ret = UnityEngine.Vector3.Reflect(t0, t1);
+		UnityEngine.Vector3 ret = UnityEngine.Vector3.Reflect(t0, t1);
 		Push(L, ret);
 		return 1;
 	}
@@ -387,7 +388,7 @@ public class Vector3Wrap
 			obj.Normalize();
 			return 0;
 		}
-		else if(n == 1)
+		else if(n == 1 && CheckType<UnityEngine.Vector3>(L, 1))
 		{
 			#if LUNA_SCRIPT
 			const int startStack = 2;
@@ -395,7 +396,7 @@ public class Vector3Wrap
 			const int startStack = 1;
 			#endif
 			Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
-			var ret = UnityEngine.Vector3.Normalize(t0);
+			UnityEngine.Vector3 ret = UnityEngine.Vector3.Normalize(t0);
 			Push(L, ret);
 			return 1;
 		}
@@ -412,7 +413,7 @@ public class Vector3Wrap
 		#endif
 		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
 		Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
-		var ret = UnityEngine.Vector3.Dot(t0, t1);
+		float ret = UnityEngine.Vector3.Dot(t0, t1);
 		Push(L, ret);
 		return 1;
 	}
@@ -427,7 +428,7 @@ public class Vector3Wrap
 		#endif
 		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
 		Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
-		var ret = UnityEngine.Vector3.Project(t0, t1);
+		UnityEngine.Vector3 ret = UnityEngine.Vector3.Project(t0, t1);
 		Push(L, ret);
 		return 1;
 	}
@@ -442,7 +443,7 @@ public class Vector3Wrap
 		#endif
 		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
 		Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
-		var ret = UnityEngine.Vector3.ProjectOnPlane(t0, t1);
+		UnityEngine.Vector3 ret = UnityEngine.Vector3.ProjectOnPlane(t0, t1);
 		Push(L, ret);
 		return 1;
 	}
@@ -457,7 +458,7 @@ public class Vector3Wrap
 		#endif
 		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
 		Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
-		var ret = UnityEngine.Vector3.Angle(t0, t1);
+		float ret = UnityEngine.Vector3.Angle(t0, t1);
 		Push(L, ret);
 		return 1;
 	}
@@ -473,7 +474,7 @@ public class Vector3Wrap
 		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
 		Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
 		Get(L, 2 + startStack, out UnityEngine.Vector3 t2);
-		var ret = UnityEngine.Vector3.SignedAngle(t0, t1, t2);
+		float ret = UnityEngine.Vector3.SignedAngle(t0, t1, t2);
 		Push(L, ret);
 		return 1;
 	}
@@ -488,7 +489,7 @@ public class Vector3Wrap
 		#endif
 		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
 		Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
-		var ret = UnityEngine.Vector3.Distance(t0, t1);
+		float ret = UnityEngine.Vector3.Distance(t0, t1);
 		Push(L, ret);
 		return 1;
 	}
@@ -503,7 +504,7 @@ public class Vector3Wrap
 		#endif
 		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
 		Get(L, 1 + startStack, out float t1);
-		var ret = UnityEngine.Vector3.ClampMagnitude(t0, t1);
+		UnityEngine.Vector3 ret = UnityEngine.Vector3.ClampMagnitude(t0, t1);
 		Push(L, ret);
 		return 1;
 	}
@@ -517,7 +518,7 @@ public class Vector3Wrap
 		const int startStack = 1;
 		#endif
 		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
-		var ret = UnityEngine.Vector3.Magnitude(t0);
+		float ret = UnityEngine.Vector3.Magnitude(t0);
 		Push(L, ret);
 		return 1;
 	}
@@ -531,7 +532,7 @@ public class Vector3Wrap
 		const int startStack = 1;
 		#endif
 		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
-		var ret = UnityEngine.Vector3.SqrMagnitude(t0);
+		float ret = UnityEngine.Vector3.SqrMagnitude(t0);
 		Push(L, ret);
 		return 1;
 	}
@@ -546,7 +547,7 @@ public class Vector3Wrap
 		#endif
 		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
 		Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
-		var ret = UnityEngine.Vector3.Min(t0, t1);
+		UnityEngine.Vector3 ret = UnityEngine.Vector3.Min(t0, t1);
 		Push(L, ret);
 		return 1;
 	}
@@ -561,7 +562,7 @@ public class Vector3Wrap
 		#endif
 		Get(L, 0 + startStack, out UnityEngine.Vector3 t0);
 		Get(L, 1 + startStack, out UnityEngine.Vector3 t1);
-		var ret = UnityEngine.Vector3.Max(t0, t1);
+		UnityEngine.Vector3 ret = UnityEngine.Vector3.Max(t0, t1);
 		Push(L, ret);
 		return 1;
 	}
@@ -573,16 +574,16 @@ public class Vector3Wrap
 		if(n == 0)
 		{
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Vector3>(L, 1);
-			var ret = obj.ToString();
+			string ret = obj.ToString();
 			Push(L, ret);
 			return 1;
 		}
-		else if(n == 1)
+		else if(n == 1 && CheckType<string>(L, 1))
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Vector3>(L, 1);
 			Get(L, 0 + startStack, out string t0);
-			var ret = obj.ToString(t0);
+			string ret = obj.ToString(t0);
 			Push(L, ret);
 			return 1;
 		}
@@ -593,7 +594,7 @@ public class Vector3Wrap
 	static int GetType(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Vector3>(L, 1);
-		var ret = obj.GetType();
+		System.Type ret = obj.GetType();
 		Push(L, ret);
 		return 1;
 	}

@@ -1,5 +1,6 @@
 using System;
 using SharpLuna;
+using System.Collections.Generic;
 using static SharpLuna.Lua;
 
 [WrapClass(typeof(UnityEngine.Vector4))]
@@ -183,7 +184,7 @@ public class Vector4Wrap
 		Get(L, 0 + startStack, out UnityEngine.Vector4 t0);
 		Get(L, 1 + startStack, out UnityEngine.Vector4 t1);
 		Get(L, 2 + startStack, out float t2);
-		var ret = UnityEngine.Vector4.Lerp(t0, t1, t2);
+		UnityEngine.Vector4 ret = UnityEngine.Vector4.Lerp(t0, t1, t2);
 		Push(L, ret);
 		return 1;
 	}
@@ -199,7 +200,7 @@ public class Vector4Wrap
 		Get(L, 0 + startStack, out UnityEngine.Vector4 t0);
 		Get(L, 1 + startStack, out UnityEngine.Vector4 t1);
 		Get(L, 2 + startStack, out float t2);
-		var ret = UnityEngine.Vector4.LerpUnclamped(t0, t1, t2);
+		UnityEngine.Vector4 ret = UnityEngine.Vector4.LerpUnclamped(t0, t1, t2);
 		Push(L, ret);
 		return 1;
 	}
@@ -215,7 +216,7 @@ public class Vector4Wrap
 		Get(L, 0 + startStack, out UnityEngine.Vector4 t0);
 		Get(L, 1 + startStack, out UnityEngine.Vector4 t1);
 		Get(L, 2 + startStack, out float t2);
-		var ret = UnityEngine.Vector4.MoveTowards(t0, t1, t2);
+		UnityEngine.Vector4 ret = UnityEngine.Vector4.MoveTowards(t0, t1, t2);
 		Push(L, ret);
 		return 1;
 	}
@@ -224,7 +225,7 @@ public class Vector4Wrap
 	static int Scale(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1)
+		if(n == 1 && CheckType<UnityEngine.Vector4>(L, 1))
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Vector4>(L, 1);
@@ -232,7 +233,7 @@ public class Vector4Wrap
 			obj.Scale(t0);
 			return 0;
 		}
-		else if(n == 2)
+		else if(n == 2 && CheckType<UnityEngine.Vector4, UnityEngine.Vector4>(L, 1))
 		{
 			#if LUNA_SCRIPT
 			const int startStack = 2;
@@ -241,7 +242,7 @@ public class Vector4Wrap
 			#endif
 			Get(L, 0 + startStack, out UnityEngine.Vector4 t0);
 			Get(L, 1 + startStack, out UnityEngine.Vector4 t1);
-			var ret = UnityEngine.Vector4.Scale(t0, t1);
+			UnityEngine.Vector4 ret = UnityEngine.Vector4.Scale(t0, t1);
 			Push(L, ret);
 			return 1;
 		}
@@ -252,7 +253,7 @@ public class Vector4Wrap
 	static int GetHashCode(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Vector4>(L, 1);
-		var ret = obj.GetHashCode();
+		int ret = obj.GetHashCode();
 		Push(L, ret);
 		return 1;
 	}
@@ -261,21 +262,21 @@ public class Vector4Wrap
 	static int Equals(IntPtr L)
 	{
 		int n = lua_gettop(L) - 1;
-		if(n == 1)
+		if(n == 1 && CheckType<object>(L, 1))
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Vector4>(L, 1);
 			Get(L, 0 + startStack, out object t0);
-			var ret = obj.Equals(t0);
+			bool ret = obj.Equals(t0);
 			Push(L, ret);
 			return 1;
 		}
-		else if(n == 1)
+		else if(n == 1 && CheckType<UnityEngine.Vector4>(L, 1))
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Vector4>(L, 1);
 			Get(L, 0 + startStack, out UnityEngine.Vector4 t0);
-			var ret = obj.Equals(t0);
+			bool ret = obj.Equals(t0);
 			Push(L, ret);
 			return 1;
 		}
@@ -292,7 +293,7 @@ public class Vector4Wrap
 			obj.Normalize();
 			return 0;
 		}
-		else if(n == 1)
+		else if(n == 1 && CheckType<UnityEngine.Vector4>(L, 1))
 		{
 			#if LUNA_SCRIPT
 			const int startStack = 2;
@@ -300,7 +301,7 @@ public class Vector4Wrap
 			const int startStack = 1;
 			#endif
 			Get(L, 0 + startStack, out UnityEngine.Vector4 t0);
-			var ret = UnityEngine.Vector4.Normalize(t0);
+			UnityEngine.Vector4 ret = UnityEngine.Vector4.Normalize(t0);
 			Push(L, ret);
 			return 1;
 		}
@@ -317,7 +318,7 @@ public class Vector4Wrap
 		#endif
 		Get(L, 0 + startStack, out UnityEngine.Vector4 t0);
 		Get(L, 1 + startStack, out UnityEngine.Vector4 t1);
-		var ret = UnityEngine.Vector4.Dot(t0, t1);
+		float ret = UnityEngine.Vector4.Dot(t0, t1);
 		Push(L, ret);
 		return 1;
 	}
@@ -332,7 +333,7 @@ public class Vector4Wrap
 		#endif
 		Get(L, 0 + startStack, out UnityEngine.Vector4 t0);
 		Get(L, 1 + startStack, out UnityEngine.Vector4 t1);
-		var ret = UnityEngine.Vector4.Project(t0, t1);
+		UnityEngine.Vector4 ret = UnityEngine.Vector4.Project(t0, t1);
 		Push(L, ret);
 		return 1;
 	}
@@ -347,7 +348,7 @@ public class Vector4Wrap
 		#endif
 		Get(L, 0 + startStack, out UnityEngine.Vector4 t0);
 		Get(L, 1 + startStack, out UnityEngine.Vector4 t1);
-		var ret = UnityEngine.Vector4.Distance(t0, t1);
+		float ret = UnityEngine.Vector4.Distance(t0, t1);
 		Push(L, ret);
 		return 1;
 	}
@@ -361,7 +362,7 @@ public class Vector4Wrap
 		const int startStack = 1;
 		#endif
 		Get(L, 0 + startStack, out UnityEngine.Vector4 t0);
-		var ret = UnityEngine.Vector4.Magnitude(t0);
+		float ret = UnityEngine.Vector4.Magnitude(t0);
 		Push(L, ret);
 		return 1;
 	}
@@ -376,7 +377,7 @@ public class Vector4Wrap
 		#endif
 		Get(L, 0 + startStack, out UnityEngine.Vector4 t0);
 		Get(L, 1 + startStack, out UnityEngine.Vector4 t1);
-		var ret = UnityEngine.Vector4.Min(t0, t1);
+		UnityEngine.Vector4 ret = UnityEngine.Vector4.Min(t0, t1);
 		Push(L, ret);
 		return 1;
 	}
@@ -391,7 +392,7 @@ public class Vector4Wrap
 		#endif
 		Get(L, 0 + startStack, out UnityEngine.Vector4 t0);
 		Get(L, 1 + startStack, out UnityEngine.Vector4 t1);
-		var ret = UnityEngine.Vector4.Max(t0, t1);
+		UnityEngine.Vector4 ret = UnityEngine.Vector4.Max(t0, t1);
 		Push(L, ret);
 		return 1;
 	}
@@ -403,16 +404,16 @@ public class Vector4Wrap
 		if(n == 0)
 		{
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Vector4>(L, 1);
-			var ret = obj.ToString();
+			string ret = obj.ToString();
 			Push(L, ret);
 			return 1;
 		}
-		else if(n == 1)
+		else if(n == 1 && CheckType<string>(L, 1))
 		{
 			const int startStack = 2;
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Vector4>(L, 1);
 			Get(L, 0 + startStack, out string t0);
-			var ret = obj.ToString(t0);
+			string ret = obj.ToString(t0);
 			Push(L, ret);
 			return 1;
 		}
@@ -426,11 +427,11 @@ public class Vector4Wrap
 		if(n == 0)
 		{
 			ref var obj = ref SharpObject.GetValue<UnityEngine.Vector4>(L, 1);
-			var ret = obj.SqrMagnitude();
+			float ret = obj.SqrMagnitude();
 			Push(L, ret);
 			return 1;
 		}
-		else if(n == 1)
+		else if(n == 1 && CheckType<UnityEngine.Vector4>(L, 1))
 		{
 			#if LUNA_SCRIPT
 			const int startStack = 2;
@@ -438,7 +439,7 @@ public class Vector4Wrap
 			const int startStack = 1;
 			#endif
 			Get(L, 0 + startStack, out UnityEngine.Vector4 t0);
-			var ret = UnityEngine.Vector4.SqrMagnitude(t0);
+			float ret = UnityEngine.Vector4.SqrMagnitude(t0);
 			Push(L, ret);
 			return 1;
 		}
@@ -449,7 +450,7 @@ public class Vector4Wrap
 	static int GetType(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Vector4>(L, 1);
-		var ret = obj.GetType();
+		System.Type ret = obj.GetType();
 		Push(L, ret);
 		return 1;
 	}

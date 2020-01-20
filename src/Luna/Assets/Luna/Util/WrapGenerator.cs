@@ -38,7 +38,12 @@ namespace SharpLuna
             StringBuilder sb = new StringBuilder();
             sb.Append("using System;\n");
             sb.Append("using SharpLuna;\n");
+            sb.Append("using System.Collections.Generic;\n");
+#if UNITY_EDITOR
+            //sb.Append("using UnityEngine;\n");
+#endif
             sb.Append("using static SharpLuna.Lua;\n");
+
             sb.AppendLine();
 
             sb.Append("[WrapClass(typeof(" + type.FullName + "))]\n");
@@ -420,11 +425,41 @@ namespace SharpLuna
                     if (first)
                     {
                         first = false;
-                        sb.Append($"\t\tif(n == {parameters.Length})\n\t\t{{\n");
+                        sb.Append($"\t\tif(n == {parameters.Length}");
+                        if (parameters.Length > 0)
+                        {
+                            sb.Append(" && CheckType<");
+                            for (int i = 0; i < parameters.Length; i++)
+                            {
+                                var paramInfo = parameters[i];
+                                sb.Append($"{paramInfo.ParameterType.GetFriendlyName()}");
+                                if (i != parameters.Length - 1)
+                                {
+                                    sb.Append(", ");
+                                }
+                            }
+                            sb.Append(">(L, 1)");
+                        }
+                        sb.Append(")\n\t\t{\n");
                     }                    
                     else
                     {
-                        sb.Append($"\t\t}}\n\t\telse if(n == {parameters.Length})\n\t\t{{\n");
+                        sb.Append($"\t\t}}\n\t\telse if(n == {parameters.Length}");
+                        if (parameters.Length > 0)
+                        {
+                            sb.Append(" && CheckType<");
+                            for (int i = 0; i < parameters.Length; i++)
+                            {
+                                var paramInfo = parameters[i];
+                                sb.Append($"{paramInfo.ParameterType.GetFriendlyName()}");
+                                if (i != parameters.Length - 1)
+                                {
+                                    sb.Append(", ");
+                                }
+                            }
+                            sb.Append(">(L, 1)");
+                        }
+                        sb.Append(")\n\t\t{\n");;
                     }
 
                 }
@@ -466,7 +501,7 @@ namespace SharpLuna
 
                 if (method.ReturnType != typeof(void))
                 {
-                    sb.Indent(indent).Append("var ret = ");
+                    sb.Indent(indent).Append($"{method.ReturnType.GetFriendlyName()} ret = ");
                     if (method.IsStatic)
                         sb.Append($"{type.FullName}.{method.Name}(");
                     else
