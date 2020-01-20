@@ -120,15 +120,8 @@ namespace SharpLuna
                         lua_pushnil(L);
                     }
                     break;
-                default:
-                    //if (SharpClass.IsRegistered<T>())
-                    {
-                        SharpObject.PushToStack(L, v);
-                    }
-//                     else
-//                     {
-//                         PushLightObject(L, v);
-//                     }
+                default:                      
+                    SharpObject.PushToStack(L, v);
                     break;
             }
         }
@@ -162,6 +155,99 @@ namespace SharpLuna
                 default:
                     return null;
             }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool CheckType(lua_State L, int index, Type t)
+        {
+            LuaType luaType = lua_type(L, index);
+            
+            if (t == typeof(bool))
+                return luaType == LuaType.Boolean;
+            else if (t == typeof(string))
+                return luaType == LuaType.String;
+            else if (t.IsPrimitive)
+                return luaType == LuaType.Number;              
+            else if (t == typeof(LuaNativeFunction))
+                return luaType == LuaType.Function;           
+            else if (t == typeof(IntPtr))
+                return luaType == LuaType.Number;
+            else if (t == typeof(UIntPtr))
+                return luaType == LuaType.Number;
+            else if (t == typeof(LuaRef))
+            {
+                return luaType == LuaType.Table || luaType == LuaType.Function;
+            }
+            else
+            {
+                return luaType == LuaType.UserData;
+            }
+
+        }
+
+        public static bool CheckType(lua_State L, int index, Type[] types)
+        {
+            for (int i = 0; i < types.Length; i++)
+            {
+                if (!CheckType(L, index, types[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool CheckType<T>(lua_State L, int index)
+        {
+            return CheckType(L, index, typeof(T));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool CheckType<T1, T2>(lua_State L, int index)
+        {
+            return CheckType(L, index, typeof(T1)) && CheckType(L, index + 1, typeof(T2));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool CheckType<T1, T2, T3>(lua_State L, int index)
+        {
+            return CheckType(L, index, typeof(T1)) && CheckType(L, index + 1, typeof(T2)) && CheckType(L, index + 2, typeof(T3));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool CheckType<T1, T2, T3, T4>(lua_State L, int index)
+        {
+            return CheckType(L, index, typeof(T1)) && CheckType(L, index + 1, typeof(T2)) && CheckType(L, index + 2, typeof(T3)) && CheckType(L, index + 3, typeof(T4));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool CheckType<T1, T2, T3, T4, T5>(lua_State L, int index)
+        {
+            return CheckType(L, index, typeof(T1)) && CheckType(L, index + 1, typeof(T2)) && CheckType(L, index + 2, typeof(T3)) && CheckType(L, index + 3, typeof(T4)) 
+                && CheckType(L, index + 4, typeof(T5));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool CheckType<T1, T2, T3, T4, T5, T6>(lua_State L, int index)
+        {
+            return CheckType(L, index, typeof(T1)) && CheckType(L, index + 1, typeof(T2)) && CheckType(L, index + 2, typeof(T3)) && CheckType(L, index + 3, typeof(T4))
+                && CheckType(L, index + 4, typeof(T5)) && CheckType(L, index + 5, typeof(T6));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool CheckType<T1, T2, T3, T4, T5, T6, T7>(lua_State L, int index)
+        {
+            return CheckType(L, index, typeof(T1)) && CheckType(L, index + 1, typeof(T2)) && CheckType(L, index + 2, typeof(T3)) && CheckType(L, index + 3, typeof(T4))
+                && CheckType(L, index + 4, typeof(T5)) && CheckType(L, index + 5, typeof(T6)) && CheckType(L, index + 6, typeof(T7));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool CheckType<T1, T2, T3, T4, T5, T6, T7, T8>(lua_State L, int index)
+        {
+            return CheckType(L, index, typeof(T1)) && CheckType(L, index + 1, typeof(T2)) && CheckType(L, index + 2, typeof(T3)) && CheckType(L, index + 3, typeof(T4))
+                && CheckType(L, index + 4, typeof(T5)) && CheckType(L, index + 5, typeof(T6)) && CheckType(L, index + 6, typeof(T7)) && CheckType(L, index + 7, typeof(T8));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
