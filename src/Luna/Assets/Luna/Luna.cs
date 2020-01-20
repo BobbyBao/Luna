@@ -10,6 +10,12 @@ namespace SharpLuna
     using static Lua;
     using lua_State = IntPtr;
 
+    public class LunaConfig
+    {
+        public Dictionary<string, Type[]> modules;
+        public Dictionary<Type, string[]> excludes;
+    }
+
     public sealed class Luna : IDisposable
     {
 #if LUNA_SCRIPT
@@ -477,7 +483,7 @@ namespace SharpLuna
 
         public SharpClass RegisterModel(string name, Type[] types)
         {
-            var model = _binder.CreateModule(name);
+            var model = _binder.GetModule(name);
             foreach (Type t in types)
             {
                 model.RegClass(t);

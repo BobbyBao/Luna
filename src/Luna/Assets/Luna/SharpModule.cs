@@ -43,7 +43,7 @@ namespace SharpLuna
             m_meta = create_module(parentMeta.State, parentMeta, name);
         }
 
-        public SharpModule CreateModule(string name)
+        public SharpModule GetModule(string name)
         {
             if (registeredModule == null)
             {

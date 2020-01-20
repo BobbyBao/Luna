@@ -1,4 +1,6 @@
 
+var s = String.Concat("123", "456")
+print(s)
 
 print "static : "
 

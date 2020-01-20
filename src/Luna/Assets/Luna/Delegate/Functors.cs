@@ -216,53 +216,31 @@ namespace SharpLuna
     public struct Method
     {
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        public static int StaticCall(lua_State L)
-        {
-            try
-            {
-                int n = lua_gettop(L);
-                MethodInfo methodInfo = ToLightObject<MethodInfo>(L, lua_upvalueindex(1), false);
-#if LUNA_SCRIPT
-                const int StackStart = 2;
-#else
-                const int StackStart = 1;
-#endif
-                object[] args = new object[n - 1];
-                for (int i = StackStart; i <= n; i++)
-                {
-                    args[i - StackStart] = GetObject(L, i);
-                }
-
-                object ret = methodInfo.Invoke(null, args);
-                if (methodInfo.ReturnType != typeof(void))
-                {
-                    Push(L, ret);
-                    return 1;
-                }
-                else
-                {
-                    return 0;
-                }
-
-            }
-            catch (Exception e)
-            {
-                return luaL_error(L, e.Message);
-            }
-        }
-
-        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int Call(lua_State L)
         {
             try
             {
                 int n = lua_gettop(L);
-                MethodInfo methodInfo = ToLightObject<MethodInfo>(L, lua_upvalueindex(1), false);
-                object obj = GetObject(L, 1);
-                object[] args = new object[n - 1];
-                for (int i = 2; i <= n; i++)
+                MethodInfo methodInfo = null;
+                MethodInfo[] methodInfos = ToLightObject<MethodInfo[]>(L, lua_upvalueindex(1), false);
+                foreach (var m in methodInfos)
                 {
-                    args[i - 2] = GetObject(L, i);
+                    if (m.GetParameters().Length == n)
+                    {
+                        methodInfo = m;
+                        break;
+                    }
+                }
+#if LUNA_SCRIPT
+                int StackStart = 1;
+#else
+                int StackStart = methodInfo.IsStatic ? 1 : 2;
+#endif
+                object obj = methodInfo.IsStatic ? null : GetObject(L, 1);
+                object[] args = new object[n];
+                for (int i = StackStart; i <= n; i++)
+                {
+                    args[i - StackStart] = GetObject(L, i);
                 }
 
                 object ret = methodInfo.Invoke(obj, args);
