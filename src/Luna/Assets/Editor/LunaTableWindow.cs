@@ -64,7 +64,7 @@ namespace Assets.Editor
             m_TableTreeView.OnGUI(new Rect(0, 0, position.width, position.height));
         }
 
-        [MenuItem("Luna/Table View")]
+        [MenuItem("Luna/Global Table View")]
         static void ShowWindow()
         {
             // Get existing open window or if none, make a new one:
@@ -177,7 +177,14 @@ namespace Assets.Editor
                 {
                     id2v[hash] = v;
                     id2fullPath[hash] = fullPath;
-                    tvi = new LunaTreeViewItem { id = hash, depth = parent.depth + 1, displayName = k };
+
+                    string strDisplay = k;
+                    if(v.Type == LuaType.String)
+                    {
+                        strDisplay += (" : " + v.ToString());
+                    }
+
+                    tvi = new LunaTreeViewItem { id = hash, depth = parent.depth + 1, displayName = strDisplay };
                     tvi.fullPath = fullPath;
                     tvi.luaType = v.Type;
                     treeViewItems[hash] = tvi;

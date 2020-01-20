@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Collections;
 
 namespace SharpLuna
 {
@@ -12,8 +13,7 @@ namespace SharpLuna
 
     public class LunaConfig
     {
-        public Dictionary<string, Type[]> modules;
-        public Dictionary<Type, string[]> excludes;
+        public List<(string, ClassInfo[])> modules;
     }
 
     public sealed class Luna : IDisposable
@@ -42,13 +42,25 @@ namespace SharpLuna
         public event EventHandler<HookExceptionEventArgs> HookException;
         public event EventHandler<DebugHookEventArgs> DebugHook;
         private KyHookFunction _hookCallback;
-
+      
+        private LunaConfig _config;
         private SharpModule _binder;
         private readonly Dictionary<Type, ClassWraper> _classWrapers = new Dictionary<Type, ClassWraper>();
+        
+        public static readonly ClassInfo[] systemClasses = new []
+        {            
+            new ClassInfo(typeof(object)),
+            new ClassInfo(typeof(Enum)),
+            new ClassInfo(typeof(string))
+            {
+                "GetEnumerator"
+            },
+            new ClassInfo(typeof(Delegate)),           
+        };
 
-
-        public Luna()
+        public Luna(LunaConfig config = null)
         {
+            _config = config;
         }
 
         ~Luna()
@@ -593,6 +605,33 @@ namespace SharpLuna
 #endregion
 
 
+    }
+
+    public class ClassInfo : System.Collections.IEnumerable
+    {
+        public Type type;
+        public string Alias;
+        public List<string> excludeMembers;
+
+        public ClassInfo(Type type, string alias = "")
+        {
+            this.type = type;
+        }
+
+        public void Add(string exclude)
+        {
+            if(excludeMembers == null)
+            {
+                excludeMembers = new List<string>();
+            }
+             
+            excludeMembers.Add(exclude);
+        }
+
+        public IEnumerator GetEnumerator()
+        {
+            return excludeMembers.GetEnumerator();
+        }
     }
 
 
