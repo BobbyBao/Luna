@@ -1,11 +1,6 @@
-﻿//#define CS_META
+﻿#define C_API
 
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Runtime.InteropServices;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 
 namespace SharpLuna
 {
@@ -23,14 +18,7 @@ namespace SharpLuna
 
         public static void Init(lua_State L)
         {
-#if CS_META
-            ___type =  Marshal.StringToHGlobalAnsi("___type");
-            ___super = Marshal.StringToHGlobalAnsi("___super");
-            ___getters = Marshal.StringToHGlobalAnsi("___getters");
-            ___setters = Marshal.StringToHGlobalAnsi("___setters");
-            ___get_indexed = Marshal.StringToHGlobalAnsi("___get_indexed");
-            ___set_indexed = Marshal.StringToHGlobalAnsi("___set_indexed");
-#else      
+#if C_API
             LunaData lunaData = new LunaData();
             luna_init(L, ref lunaData);
             ___type = lunaData.type;
@@ -39,6 +27,13 @@ namespace SharpLuna
             ___setters = lunaData.setters;
             ___get_indexed = lunaData.get_indexed;
             ___set_indexed = lunaData.set_indexed;
+#else      
+            ___type =  Marshal.StringToHGlobalAnsi("___type");
+            ___super = Marshal.StringToHGlobalAnsi("___super");
+            ___getters = Marshal.StringToHGlobalAnsi("___getters");
+            ___setters = Marshal.StringToHGlobalAnsi("___setters");
+            ___get_indexed = Marshal.StringToHGlobalAnsi("___get_indexed");
+            ___set_indexed = Marshal.StringToHGlobalAnsi("___set_indexed");
 #endif
         }
 
@@ -58,13 +53,9 @@ namespace SharpLuna
             LuaRef cls = LuaRef.CreateTable(L);
             cls.SetMetaTable(cls);
 
-#if CS_META
             cls.RawSet("__index", (LuaNativeFunction)class_index);
             cls.RawSet("__newindex", (LuaNativeFunction)class_newindex);
-#else
-            cls.RawSet("__index", (LuaNativeFunction)luna_class_index);
-            cls.RawSet("__newindex", (LuaNativeFunction)luna_class_newindex);
-#endif
+
             cls.RawSet(___getters, LuaRef.CreateTable(L));
             cls.RawSet(___setters, LuaRef.CreateTable(L));
             cls.RawSet(___type, type_name);
@@ -98,14 +89,8 @@ namespace SharpLuna
             LuaRef module = LuaRef.CreateTable(L);
             module.SetMetaTable(module);
 
-#if CS_META
             module.RawSet("__index", (LuaNativeFunction)module_index);
             module.RawSet("__newindex", (LuaNativeFunction)module_newindex);
-
-#else
-            module.RawSet("__index", (LuaNativeFunction)luna_module_index);
-            module.RawSet("__newindex", (LuaNativeFunction)luna_module_newindex);
-#endif
             module.RawSet(___getters, LuaRef.CreateTable(L));
             module.RawSet(___setters, LuaRef.CreateTable(L));
             module.RawSet(___type, type_name);
@@ -118,6 +103,9 @@ namespace SharpLuna
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int class_index(lua_State L)
         {
+#if C_API
+            return luna_class_index(L);
+#else
             // <SP:1> -> table or userdata
             // <SP:2> -> key
 
@@ -211,11 +199,15 @@ namespace SharpLuna
             }
 
             return 1;
+#endif
         }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int class_newindex(lua_State L)
         {
+#if C_API
+            return luna_class_newindex(L);
+#else
             // <SP:1> -> table or userdata
             // <SP:2> -> key
             // <SP:3> -> value
@@ -299,11 +291,15 @@ namespace SharpLuna
             }
 
             return 0;
+#endif
         }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int module_index(lua_State L)
         {
+#if C_API
+            return luna_module_index(L);
+#else
             // <SP:1> -> table
             // <SP:2> -> key
 
@@ -335,11 +331,15 @@ namespace SharpLuna
             }
 
             return 1;
+#endif
         }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int module_newindex(lua_State L)
         {
+#if C_API
+            return luna_module_newindex(L);
+#else
             // <SP:1> -> table
             // <SP:2> -> key
             // <SP:3> -> value
@@ -371,6 +371,7 @@ namespace SharpLuna
                 lua_rawset(L, 1);
             }
             return 0;
+#endif
         }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]

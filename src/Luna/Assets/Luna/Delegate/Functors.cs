@@ -9,17 +9,36 @@ namespace SharpLuna
     using static Lua;
     using lua_State = IntPtr;
 
-    public struct ConstantVariable
+    public struct Constructor
     {
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int Call(lua_State L)
         {
-            lua_pushvalue(L, lua_upvalueindex(1));
-            return 1;
+            try
+            {
+                int n = lua_gettop(L);
+                ConstructorInfo fn = ToLightObject<ConstructorInfo>(L, lua_upvalueindex(1), false);
+                //忽略self
+                object[] args = new object[n - 1];
+                for (int i = 2; i <= n; i++)
+                {
+                    args[i - 2] = GetObject(L, i);
+                }
+
+                object ret = fn.Invoke(args);
+                Push(L, ret);
+                return 1;
+
+            }
+            catch (Exception e)
+            {
+                return luaL_error(L, e.Message);
+            }
         }
+
     }
 
-    public struct ClassConstructor<T> where T : new()
+    public struct Constructor<T> where T : new()
     {
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int Call(lua_State L)
@@ -30,7 +49,7 @@ namespace SharpLuna
                 if (n == 1)
                 {
                     var v = new T();
-                    Lua.Push(L, v);
+                    Push(L, v);
                     return 1;
                 }
                 lua_pushnil(L);
@@ -44,101 +63,226 @@ namespace SharpLuna
 
     }
 
-    public struct ClassDestructor
+    public struct Destructor
     {
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int Call(lua_State L)
         {
             SharpObject.Free(L, 1);
-            return 0;            
+            return 0;
         }
     }
 
-    public struct PropertyCaller<T1>
+    public struct Field
     {
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+        public static int StaticGetter(lua_State L)
+        {
+            try
+            {
+                FieldInfo fieldInfo = ToLightObject<FieldInfo>(L, lua_upvalueindex(1), false);
+                object v = fieldInfo.GetValue(null);
+                Push(L, v);
+                return 1;
+            }
+            catch (Exception e)
+            {
+                return luaL_error(L, e.Message);
+            }
+        }
+
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+        public static int StaticSetter(lua_State L)
+        {
+            try
+            {
+                FieldInfo fieldInfo = ToLightObject<FieldInfo>(L, lua_upvalueindex(1), false);
+                object v = GetObject(L, 1);
+                fieldInfo.SetValue(null, v);
+                return 0;
+            }
+            catch (Exception e)
+            {
+                return luaL_error(L, e.Message);
+            }
+        }
+
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int Getter(lua_State L)
         {
-            var a = Lua.ToLightObject<Func<T1>>(L, lua_upvalueindex(2), false);
-            var r = a();
-            Lua.Push(L, r);
-            return 1;
+            try
+            {
+                FieldInfo fieldInfo = ToLightObject<FieldInfo>(L, lua_upvalueindex(1), false);
+                object obj = GetObject(L, 1);
+                object v = fieldInfo.GetValue(obj);
+                Push(L, v);
+                return 1;
+            }
+            catch (Exception e)
+            {
+                return luaL_error(L, e.Message);
+            }
         }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int Setter(lua_State L)
         {
-            var a = Lua.ToLightObject<Action<T1>>(L, lua_upvalueindex(3), false);
-            a(
-                Lua.Get<T1>(L, 1)
-            );
-            return 0;
+            try
+            {
+                FieldInfo fieldInfo = ToLightObject<FieldInfo>(L, lua_upvalueindex(1), false);
+                object obj = GetObject(L, 1);
+                object v = GetObject(L, 2);
+                fieldInfo.SetValue(obj, v);
+                return 0;
+            }
+            catch (Exception e)
+            {
+                return luaL_error(L, e.Message);
+            }
         }
 
     }
 
-    public struct PropertyCaller<T1, T2>
+    public struct Property
     {
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+        public static int StaticGetter(lua_State L)
+        {
+            try
+            {
+                PropertyInfo propertyInfo = ToLightObject<PropertyInfo>(L, lua_upvalueindex(1), false);
+                object v = propertyInfo.GetValue(null);
+                Push(L, v);
+                return 1;
+            }
+            catch (Exception e)
+            {
+                return luaL_error(L, e.Message);
+            }
+        }
+
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+        public static int StaticSetter(lua_State L)
+        {
+            try
+            {
+                PropertyInfo propertyInfo = ToLightObject<PropertyInfo>(L, lua_upvalueindex(1), false);
+                object v = GetObject(L, 1);
+                propertyInfo.SetValue(null, v);
+                return 0;
+            }
+            catch (Exception e)
+            {
+                return luaL_error(L, e.Message);
+            }
+        }
+
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int Getter(lua_State L)
         {
-            var a = Lua.ToLightObject<Func<T1, T2>>(L, lua_upvalueindex(2), false);
-            var p1 = SharpObject.Get<T1>(L, 1);
-            var r = a(p1);
-            Lua.Push(L, r);
-            return 1;
+            try
+            {
+                PropertyInfo propertyInfo = ToLightObject<PropertyInfo>(L, lua_upvalueindex(1), false);
+                object obj = GetObject(L, 1);
+                object v = propertyInfo.GetValue(obj);
+                Push(L, v);
+                return 1;
+            }
+            catch (Exception e)
+            {
+                return luaL_error(L, e.Message);
+            }
         }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        public static int Setter(lua_State L, int start)
+        public static int Setter(lua_State L)
         {
-            var a = Lua.ToLightObject<Action<T1, T2>>(L, lua_upvalueindex(3), false);
-            a(
-                Lua.Get<T1>(L, 1), Lua.Get<T2>(L, 2)
-            );
-            return 0;
+            try
+            {
+                PropertyInfo propertyInfo = ToLightObject<PropertyInfo>(L, lua_upvalueindex(1), false);
+                object obj = GetObject(L, 1);
+                object v = GetObject(L, 2);
+                propertyInfo.SetValue(obj, v);
+                return 0;
+            }
+            catch (Exception e)
+            {
+                return luaL_error(L, e.Message);
+            }
         }
 
     }
 
-    //低效率版本的field
-    public struct FieldDelegate<V>
+    public struct Method
     {
-        public static Func<V> Getter(FieldInfo fieldInfo)
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+        public static int StaticCall(lua_State L)
         {
-            return delegate ()
+            try
             {
-                return (V)fieldInfo.GetValue(null);
-            };
+                int n = lua_gettop(L);
+                MethodInfo methodInfo = ToLightObject<MethodInfo>(L, lua_upvalueindex(1), false);
+#if LUNA_SCRIPT
+                const int StackStart = 2;
+#else
+                const int StackStart = 1;
+#endif
+                object[] args = new object[n - 1];
+                for (int i = StackStart; i <= n; i++)
+                {
+                    args[i - StackStart] = GetObject(L, i);
+                }
+
+                object ret = methodInfo.Invoke(null, args);
+                if (methodInfo.ReturnType != typeof(void))
+                {
+                    Push(L, ret);
+                    return 1;
+                }
+                else
+                {
+                    return 0;
+                }
+
+            }
+            catch (Exception e)
+            {
+                return luaL_error(L, e.Message);
+            }
         }
 
-        public static Action<V> Setter(FieldInfo fieldInfo)
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+        public static int Call(lua_State L)
         {
-            return delegate (V v)
+            try
             {
-                fieldInfo.SetValue(null, v);
-            };
+                int n = lua_gettop(L);
+                MethodInfo methodInfo = ToLightObject<MethodInfo>(L, lua_upvalueindex(1), false);
+                object obj = GetObject(L, 1);
+                object[] args = new object[n - 1];
+                for (int i = 2; i <= n; i++)
+                {
+                    args[i - 2] = GetObject(L, i);
+                }
+
+                object ret = methodInfo.Invoke(obj, args);
+                if (methodInfo.ReturnType != typeof(void))
+                {
+                    Push(L, ret);
+                    return 1;
+                }
+                else
+                {
+                    return 0;
+                }
+
+            }
+            catch (Exception e)
+            {
+                return luaL_error(L, e.Message);
+            }
         }
+
     }
-
-    public struct FieldDelegate<T, V>
-    {
-        public static Func<T,V> Getter(FieldInfo fieldInfo)
-        {
-            return delegate (T obj)
-            {
-                return (V)fieldInfo.GetValue(obj);
-            };
-        }
-
-        public static Action<T, V> Setter(FieldInfo fieldInfo)
-        {
-            return delegate (T obj, V v)
-            {
-                fieldInfo.SetValue(obj, v);
-            };
-        }
-    }
-
 
 }

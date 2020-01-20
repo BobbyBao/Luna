@@ -57,6 +57,11 @@ namespace SharpLuna
                 Print = Console.WriteLine;
             }
 
+            if (Warning == null)
+            {
+                Warning = Console.WriteLine;
+            }
+
             if (Error == null)
             {
                 Error = Console.WriteLine;
