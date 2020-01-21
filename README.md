@@ -35,8 +35,6 @@
 具有Modern语法风格的面向对象脚本语言，类似Swift，支持class，继承以及 zero based数组，既能享受lua脚本的效率，又可以优雅的进行面向对象编程
 
 ```
-import "class"
-
 
 class GameObj {
 	var name = ""
