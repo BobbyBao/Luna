@@ -66,13 +66,17 @@ class Character : GameObj {
 
 }
 
+```
+支持let关键字，成员函数调用，和静态方法调用统一用".",不再有":"和"."选择的问题
+
+```
 let c = Character("test name")
 c.testFunc("test arg")
 
 
 ```
 
-支持 0 based 数组
+0 based 数组
 
 ```
 var a = [1, 2, 3, 4, 5]
@@ -90,3 +94,4 @@ for i = 0, 4 {
 }
 ```
 
+由于采用了lua的虚拟机，执行效率上和lua一样，没有变化
