@@ -1,5 +1,5 @@
 # Luna
-基于Lua虚拟机的C#/Unity热更新系统，提供简洁，高效的C# lua互访接口，可将C#类快速导出到Lua，支持Unity3D,.NetCore和.NetFramework等各个平台
+基于Lua虚拟机的脚本语言，支持C#/Unity热更新系统，提供简洁，高效的C# lua互访接口，可将C#类快速导出给Lua VM调用，支持Unity3D,.NetCore和.NetFramework等各个平台
 
 ## 主要特点
 
