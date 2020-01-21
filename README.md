@@ -32,7 +32,7 @@
 ```
 ## Luna脚本语言
 
-具有Modern语法的面向对象脚本语言，类似Swift，支持class，继承以及 zero based数组，既能享受lua脚本的效率，又可以优雅的进行面向对象编程
+具有Modern语法风格的面向对象脚本语言，类似Swift，支持class，继承以及 zero based数组，既能享受lua脚本的效率，又可以优雅的进行面向对象编程
 
 ```
 import "class"
@@ -67,7 +67,7 @@ class Character : GameObj {
 }
 
 ```
-支持let关键字，成员函数调用，和静态方法调用统一用".",不再有":"和"."选择的问题
+支持var,let关键字，成员函数调用，和静态方法调用统一用".",不再有":"和"."选择的问题
 
 ```
 let c = Character("test name")
@@ -93,5 +93,44 @@ for i = 0, 4 {
 	print(i, a[i])
 }
 ```
+去掉do..end,用C风格的{}代替
 
+```
+func test() {
+    var i = 3
+
+    while not i {
+        if true {
+            break
+        }
+        
+    }
+
+    for a = 1, 8 {
+        print(a)
+       
+        if a == 3 {
+            print "111"
+        }
+    
+        elseif a == 4 {
+            print "1111"
+            if a == 4 {
+            }
+        }
+        else if a == 5 {
+
+            print "11111"
+        } 
+        else
+        if a == 6 {
+
+            print "111111"
+        } else {
+            print "11111111"
+        }
+    }
+}
+
+```
 由于采用了lua5.4的虚拟机，执行效率上保持和lua一样，比同类其他(Python,Ruby,Wren等)脚本都高出一截
