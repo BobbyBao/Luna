@@ -20,9 +20,9 @@ class GameObj {
 class Character : GameObj {
 		
 	init(n) {
-		//print("GameObj name:", self.name)
+		print("GameObj name:", self.name)
 		super.init(n)
-		//print("GameObj name:", self.name)
+		print("GameObj name:", self.name)
 	}
 
 	func testFunc(a) {

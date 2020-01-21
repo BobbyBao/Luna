@@ -3,8 +3,9 @@ guid: 904991002b6ffab44ae38aa03a63e531
 ScriptedImporter:
   fileIDToRecycleName:
     11400000: Vector3
+    2186277476908879412: ImportLogs
   externalObjects: {}
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-  script: {instanceID: 0}
+  script: {fileID: 11500000, guid: 8c8bb0eda8f80364892e0855d811753a, type: 3}

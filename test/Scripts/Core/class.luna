@@ -52,7 +52,7 @@ func __class(c, className, base) {
     c.class_of = class_of
 
     if c._class_init {
-        c:_class_init(mt)
+        c._class_init(mt)
         return c
     }
     
@@ -60,7 +60,7 @@ func __class(c, className, base) {
         var obj  = {}
         if c.init {
             setmetatable(obj, c)
-            obj:init(...)
+            obj.init(...)
         } else {
             var args = {...}
 			
@@ -83,7 +83,7 @@ func __class(c, className, base) {
 		setmetatable(self,nil)
 		var str = tostring(self)
 		setmetatable(self,mt)
-		if name { str = name ..str:gsub('table','') }
+		if name { str = name ..str.gsub('table','') }
 		return str
     }
 
