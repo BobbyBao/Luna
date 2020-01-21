@@ -195,4 +195,4 @@ if i || j {
 ```
 
 
-由于采用了lua5.4的虚拟机，执行效率上保持和lua一样，比同类其他(Python,Ruby,Wren等)脚本都高出一截
+由于采用了lua5.4的虚拟机，执行效率上保持和lua一样，比同类其他脚本(Python,Ruby,Wren,AngleScript等)都高出一截
