@@ -1,0 +1,78 @@
+
+import "class"
+
+
+
+class BaseObj {
+	var name = ""
+	var id = 1
+	
+	func print() {
+		print(self.name, self.id)
+	}
+}
+
+//DSL风格构造
+let baseObj = BaseObj {
+	name = "object1",
+
+	test = BaseObj	{
+		name = "object2",
+		id = 2,
+	}
+}
+	
+baseObj.print()
+
+//构造函数
+class Obj : BaseObj {	
+	init(n, id) {
+		self.name = n
+		self.id = id
+	}
+
+}
+
+var tt = Obj("Object3", 111)
+tt.print()
+
+class GameObj : BaseObj {
+	var name = ""
+
+	init(n) {
+		self.name = n
+	}
+
+	func testFunc(a) {
+		print("GameObj testFunc", a)
+	}
+
+	func __close() {	
+		print("object close")	
+	}
+}
+
+//测试using关键字
+do {
+	using t = GameObj("GameObject")
+	print(t)
+}
+
+//测试super关键字
+class Character : GameObj {
+		
+	init(n) {
+		print("character init", n)
+		super.init(n)
+	}
+
+	func testFunc(a) {
+		super.testFunc(a)
+		print("Character testFunc", a)
+	}
+
+}
+
+let t = Character("test name")
+t.testFunc("test arg")
+

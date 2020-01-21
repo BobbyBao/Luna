@@ -1,0 +1,20 @@
+
+func TestIndex(){	
+
+    let GameObject = UnityEngine.GameObject
+
+	var t = os.clock()
+    var go = GameObject()
+	
+    let node = go.transform
+
+	for i = 1,100000 {		
+        //go = GameObject()
+		go = node.gameObject				
+	}
+	
+	t = os.clock() - t
+	print("TestIndex luna cost time: ", t)	
+}
+
+TestIndex()
