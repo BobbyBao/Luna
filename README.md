@@ -32,6 +32,8 @@
 ```
 ## Luna脚本语言
 
+面向对象的脚本语言，类似Swift的语法，支持class和继承 zero based数组
+
 ```
 import "class"
 
