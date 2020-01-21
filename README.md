@@ -32,6 +32,42 @@
 ```
 ## Luna脚本语言
 
+```
+import "class"
 
+
+class GameObj {
+	var name = ""
+	var id = 1
+
+	init(n) {
+		self.name = n
+		print("GameObj name:", self.name)
+	}
+
+	func testFunc(a) {
+		print("GameObj testFunc", a)
+	}
+
+}
+
+class Character : GameObj {
+		
+	init(n) {
+		super.init(n)
+	}
+
+	func testFunc(a) {
+		super.testFunc(a)
+		print("Character testFunc", a)
+	}
+
+}
+
+let c = Character("test name")
+c.testFunc("test arg")
+
+
+```
 
 
