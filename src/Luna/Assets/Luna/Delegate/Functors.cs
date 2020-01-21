@@ -220,7 +220,7 @@ namespace SharpLuna
         {
             try
             {
-                int n = lua_gettop(L);
+                int n = lua_gettop(L) - 1;
                 MethodInfo methodInfo = null;
                 MethodInfo[] methodInfos = ToLightObject<MethodInfo[]>(L, lua_upvalueindex(1), false);
                 foreach (var m in methodInfos)
@@ -238,7 +238,7 @@ namespace SharpLuna
 #endif
                 object obj = methodInfo.IsStatic ? null : GetObject(L, 1);
                 object[] args = new object[n];
-                for (int i = StackStart; i <= n; i++)
+                for (int i = StackStart; i <= n + 1; i++)
                 {
                     args[i - StackStart] = GetObject(L, i);
                 }

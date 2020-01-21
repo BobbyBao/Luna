@@ -204,8 +204,7 @@ namespace SharpLuna
             PushToStack();
             r.PushToStack();
             int d = lua_compare(L, -2, -1, LuaCompare.Equal)
-                ? 0
-                : (lua_compare(L, -2, -1, LuaCompare.LessThen) ? -1 : 1);
+                ? 0 : (lua_compare(L, -2, -1, LuaCompare.LessThen) ? -1 : 1);
             lua_pop(L, 2);
             return d;
         }
@@ -253,7 +252,7 @@ namespace SharpLuna
 
         public static implicit operator bool(LuaRef luaRef)
         {
-            return luaRef.L != IntPtr.Zero && luaRef._ref != LUA_NOREF && luaRef._ref != LUA_REFNIL;
+            return IsActive(luaRef.L) && luaRef._ref != LUA_NOREF && luaRef._ref != LUA_REFNIL;
         }
 
         public void PushToStack()

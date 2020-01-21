@@ -23,6 +23,11 @@ namespace SharpLuna
 
         public static bool IsActive(lua_State L)
         {
+            if (L == IntPtr.Zero)
+            {
+                return false;
+            }
+
             return luaStates.ContainsKey(L);
         }
 

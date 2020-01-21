@@ -22,7 +22,7 @@ let baseObj = BaseObj {
 	}
 }
 	
-baseObj.print()
+//baseObj.print()
 
 //构造函数
 class Obj : BaseObj {	

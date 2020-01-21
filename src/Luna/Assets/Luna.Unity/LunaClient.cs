@@ -85,6 +85,7 @@ namespace SharpLuna.Unity
             typeof(Component),
             typeof(MonoBehaviour),
             typeof(Transform),
+            typeof(Resources)
         };
 
         void OnPostInit()

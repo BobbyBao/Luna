@@ -1,7 +1,7 @@
 
-func TestIndex(){	
+let GameObject = UnityEngine.GameObject
 
-    let GameObject = UnityEngine.GameObject
+func TestIndex(){	
 
 	var t = os.clock()
     var go = GameObject()
@@ -17,4 +17,7 @@ func TestIndex(){
 	print("TestIndex luna cost time: ", t)	
 }
 
-TestIndex()
+//TestIndex()
+
+let obj = UnityEngine.Resources.Load("UI/Panel")
+let go = GameObject.Instantiate(obj)
