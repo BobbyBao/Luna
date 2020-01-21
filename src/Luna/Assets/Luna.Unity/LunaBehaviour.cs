@@ -57,7 +57,7 @@ namespace SharpLuna.Unity
                 if(metaTable)
                 {                  
                     var ctor = metaTable.RawGet("__call");
-                    luaInstance = ctor.Call<LuaRef>();
+                    luaInstance = ctor.Call<LuaRef>(metaTable);
                     luaInstance.AddRef();
                     metaTable.Dispose();
                 }
