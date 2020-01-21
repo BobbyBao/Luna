@@ -72,4 +72,21 @@ c.testFunc("test arg")
 
 ```
 
+支持 0 based 数组
+
+```
+var a = [1, 2, 3, 4, 5]
+
+print "iter():"
+
+for v in a.iter() {
+	print(v)
+}
+
+print "range:"
+
+for i = 0, 4 {
+	print(i, a[i])
+}
+```
 
