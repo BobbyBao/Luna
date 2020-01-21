@@ -32,7 +32,7 @@
 ```
 ## Luna脚本语言
 
-面向对象的脚本语言，类似Swift的语法，支持class和继承 zero based数组
+具有Modern语法的面向对象脚本语言，类似Swift，支持class，继承以及 zero based数组，既能享受lua脚本的效率，又可以优雅的进行面向对象编程
 
 ```
 import "class"
@@ -94,4 +94,4 @@ for i = 0, 4 {
 }
 ```
 
-由于采用了lua5.4的虚拟机，执行效率上保持和lua一样，比同类其他(Python,Ruby,Wren等)脚本都高出2-3倍以上
+由于采用了lua5.4的虚拟机，执行效率上保持和lua一样，比同类其他(Python,Ruby,Wren等)脚本都高出一截
