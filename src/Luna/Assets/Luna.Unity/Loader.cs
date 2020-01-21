@@ -12,7 +12,7 @@ namespace SharpLuna.Unity
     {
         protected List<string> searchers = new List<string>();
 
-        public string LuaPath { get; set; } = "lua/";
+        public string ScriptPath { get; set; } = "lua/";
 
         public Loader AddSearchPath(string path)
         {
@@ -50,7 +50,7 @@ namespace SharpLuna.Unity
     {
         public override byte[] ReadBytes(string fileName)
         {
-            if (fileName.EndsWith(".lua"))
+            if (fileName.EndsWith(Luna.Ext))
             {
                 fileName = fileName.Remove(fileName.Length - 4, 4);
             }
@@ -58,7 +58,7 @@ namespace SharpLuna.Unity
             fileName = fileName.Replace(".", "/");
 
             byte[] buffer = null;
-            string filePath = CombinePath(LuaPath, fileName);
+            string filePath = CombinePath(ScriptPath, fileName);
             var bytes = Resources.Load<BytesAsset>(filePath);
             if (bytes != null)
             {
@@ -66,25 +66,17 @@ namespace SharpLuna.Unity
                 Resources.UnloadAsset(bytes);
                 return buffer;
             }
-            else
-            {
-                Debug.LogError(filePath);
-            }
 
             foreach (var path in searchers)
             {
                 filePath = CombinePath(path, fileName);
-                bytes = Resources.Load<BytesAsset>(CombinePath(LuaPath, filePath));
+                bytes = Resources.Load<BytesAsset>(CombinePath(ScriptPath, filePath));
 
                 if (bytes != null)
                 {
                     buffer = bytes.bytes;
                     Resources.UnloadAsset(bytes);
                     break;
-                }
-                else
-                {
-                    Debug.LogError(filePath);
                 }
             }
             

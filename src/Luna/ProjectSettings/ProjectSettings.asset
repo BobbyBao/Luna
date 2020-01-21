@@ -521,7 +521,7 @@ PlayerSettings:
   webGLLinkerTarget: 1
   webGLThreadsSupport: 0
   scriptingDefineSymbols:
-    1: NETSTANDARD
+    1: LUNA_SCRIPT
   platformArchitecture: {}
   scriptingBackend:
     Standalone: 1

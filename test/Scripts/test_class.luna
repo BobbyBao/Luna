@@ -45,7 +45,10 @@ class Obj : BaseObj {
 		self.name = n
 		self.id = id
 	}
-
+	
+	func print() {
+		super.print()
+	}
 }
 
 

@@ -34,7 +34,15 @@ namespace SharpLuna.Unity
             luna.PreInit += OnPreInit;
             luna.PostInit += OnPostInit;
 
-            loader = new ResLoader();
+            loader = new ResLoader
+            {
+#if LUNA_SCRIPT
+                ScriptPath = "luna/"
+#else
+                ScriptPath = "lua/"
+#endif
+            };
+
             loader.AddSearchPath("core");
 
             luna.Run();
@@ -77,6 +85,7 @@ namespace SharpLuna.Unity
             typeof(Component),
             typeof(MonoBehaviour),
             typeof(Transform),
+            typeof(Resources)
         };
 
         void OnPostInit()

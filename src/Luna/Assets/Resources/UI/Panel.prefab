@@ -285,4 +285,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a13780d820c78cf408de137fd4623f3d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  luaPath: test/TestBehaviour.lua
+  luaPath: test/TestBehaviour

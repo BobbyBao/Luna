@@ -1,0 +1,91 @@
+
+local func is_a(self,klass) {
+    if klass == nil {
+        return getmetatable(self)
+    }
+    
+    var m = getmetatable(self)
+    if not m { return false }
+    while m {
+        if m == klass { return true }
+        m = rawget(m,'_base')
+    }
+    return false
+}
+
+local func class_of(klass,obj) {
+    if type(klass) != 'table' or not rawget(klass,'is_a') { return false }
+    return klass.is_a(obj,klass)
+}
+
+local func cast (klass, obj) {
+    return setmetatable(obj,klass)
+}
+
+local func copyProperties(td, ts) {
+    for k,v in pairs(ts) {
+        if td[k] == nil {
+            td[k] = v
+        }
+    }
+}
+
+func __class(c, className, base) {
+    var mt = {}
+    c = c or {}
+
+    //print("class name : ", className)
+
+    if type(base) == 'table' {
+		copyProperties(c, base)
+        c._base = base
+    } elseif base != nil {
+        error("must derive from a table type", 3)
+    }
+
+    c.__index = c
+    setmetatable(c,mt)
+
+    c._class = c
+    c.name = className
+    c.is_a = is_a
+    c.class_of = class_of
+
+    if c._class_init {
+        c:_class_init(mt)
+        return c
+    }
+    
+    mt.__call = func(class_tbl, ...) {
+        var obj  = {}
+        if c.init {
+            setmetatable(obj, c)
+            obj:init(...)
+        } else {
+            var args = {...}
+			
+            if #args == 1 and type(args[1]) == 'table' {
+                obj = args[1]
+            }
+           
+            setmetatable(obj, c)
+        }
+
+        return obj
+    }
+
+    mt.__close = func() {
+    }
+
+    mt.__tostring = func(self){
+    	let mt = self._class
+		let name = mt.name
+		setmetatable(self,nil)
+		var str = tostring(self)
+		setmetatable(self,mt)
+		if name { str = name ..str:gsub('table','') }
+		return str
+    }
+
+    return c
+}

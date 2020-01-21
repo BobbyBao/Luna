@@ -25,7 +25,15 @@ namespace SharpLuna.Unity
 
 
                 int index = luaPath.LastIndexOf(".");
-                className = luaPath.Remove(index);
+                if (index != -1)
+                {
+                    className = luaPath.Remove(index);
+                }
+                else
+                {
+                    className = luaPath;
+                }
+
                 index = className.LastIndexOf("/");
                 if(index != -1)
                 {
@@ -49,7 +57,7 @@ namespace SharpLuna.Unity
                 if(metaTable)
                 {                  
                     var ctor = metaTable.RawGet("__call");
-                    luaInstance = ctor.Call<LuaRef>(luaClass);
+                    luaInstance = ctor.Call<LuaRef>(metaTable);
                     luaInstance.AddRef();
                     metaTable.Dispose();
                 }
@@ -83,7 +91,7 @@ namespace SharpLuna.Unity
 
         void Update()
         {
-            //CallLuaFunc("Update");
+            //CallFunc("Update");
         }
 
         protected virtual void OnEnable()

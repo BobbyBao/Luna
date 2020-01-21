@@ -1,0 +1,22 @@
+
+import "class"
+
+class TestBehaviour {
+
+	func Awake() {
+		print "Awake"
+	}
+	
+	func Start() {
+		print "Start"
+	}
+	
+	func Update() {
+		print "Update"
+	}
+	
+	func OnDestroy() {
+		print "OnDestroy"
+	}
+
+}
