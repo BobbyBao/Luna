@@ -136,7 +136,6 @@ namespace SharpLuna
             SharpClass.SetAlias(typeof(object), "object");
 
             RegisterClass<object>();
-
             RegisterClass<Enum>();
             RegisterClass<string>();
             RegisterClass<Delegate>();

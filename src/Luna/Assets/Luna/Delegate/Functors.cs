@@ -232,7 +232,7 @@ namespace SharpLuna
                     }
                 }
 #if LUNA_SCRIPT
-                int StackStart = 1;
+                int StackStart = 2;
 #else
                 int StackStart = methodInfo.IsStatic ? 1 : 2;
 #endif
