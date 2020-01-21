@@ -93,7 +93,7 @@ for i = 0, 4 {
 	print(i, a[i])
 }
 ```
-去掉do..end,用C风格的{}代替
+去掉do..end,用C风格的{}代替, if else 语句更加自由
 
 ```
 func test() {
@@ -107,8 +107,7 @@ func test() {
     }
 
     for a = 1, 8 {
-        print(a)
-       
+
         if a == 3 {
             print "111"
         }
@@ -133,4 +132,63 @@ func test() {
 }
 
 ```
+
+操作符的风格也做了相应的改变，注释风格也向C系靠拢
+
+```
+var x = 1
+
+//+=
+x += 2
+print(x)
+
+//-=
+x -= 2
+print(x)
+
+//*=
+x*= 2
+print(x)
+
+// /=
+x /= 2
+
+print(x)
+
+let i = 0
+let j = 1
+
+let t = nil
+
+if !i {
+    print "not"
+} else {
+    print(i)
+}
+
+if !t || !t.aaa {
+    print("not", t)
+}
+
+if i != 1 {
+    print "not eq"
+}
+
+let i = false
+
+if !i {
+    print("not", i)
+}
+
+if i && j {
+    print("and", i, j)
+}
+
+if i || j {
+    print("or", i, j)
+}
+
+```
+
+
 由于采用了lua5.4的虚拟机，执行效率上保持和lua一样，比同类其他(Python,Ruby,Wren等)脚本都高出一截
