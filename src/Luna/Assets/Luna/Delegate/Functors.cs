@@ -213,23 +213,51 @@ namespace SharpLuna
 
     }
 
-    public struct Method
+    public class Method
     {
+        public string methodName;
+        public MethodInfo[] methodInfo;
+        public Type[][] paraments;
+        public int[] count;
+
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int Call(lua_State L)
         {
             try
             {
-                int n = lua_gettop(L) - 1;
+                int n = lua_gettop(L);
                 MethodInfo methodInfo = null;
                 MethodInfo[] methodInfos = ToLightObject<MethodInfo[]>(L, lua_upvalueindex(1), false);
                 foreach (var m in methodInfos)
                 {
-                    if (m.GetParameters().Length == n)
+                    if(m.IsStatic)
                     {
-                        methodInfo = m;
-                        break;
+#if LUNA_SCRIPT
+                        if (m.GetParameters().Length == n - 1)
+                        {
+                            methodInfo = m;
+                            n -= 1;
+                            break;
+                        }
+#else                        
+                        if (m.GetParameters().Length == n)
+                        {
+                            methodInfo = m;
+                            break;
+                        }
+#endif
                     }
+                    else
+                    {
+                        if (m.GetParameters().Length == n - 1)
+                        {
+                            methodInfo = m;
+                            n -= 1;
+                            break;
+                        }
+
+                    }
+            
                 }
 #if LUNA_SCRIPT
                 int StackStart = 2;
@@ -238,9 +266,9 @@ namespace SharpLuna
 #endif
                 object obj = methodInfo.IsStatic ? null : GetObject(L, 1);
                 object[] args = new object[n];
-                for (int i = StackStart; i <= n + 1; i++)
+                for (int i = 0; i < n; i++)
                 {
-                    args[i - StackStart] = GetObject(L, i);
+                    args[i] = GetObject(L, i + StackStart);
                 }
 
                 object ret = methodInfo.Invoke(obj, args);

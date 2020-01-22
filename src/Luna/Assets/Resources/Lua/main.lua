@@ -1,5 +1,7 @@
 
-require "test/test_perf"
 
+local GameObject = UnityEngine.GameObject
+local Resources = UnityEngine.Resources
 
-Test4()
+local obj = Resources.Load("UI/Panel")
+local go = GameObject.Instantiate(obj)

@@ -1,23 +1,23 @@
 using System;
+using System.Diagnostics;
+using System.Reflection;
+using System.Text;
 
 namespace SharpLuna
 {
     using static Lua;
-    /// <summary>
-    /// Exceptions thrown by the Lua runtime
-    /// </summary>
-    [Serializable]
-	public class LuaException : Exception
-	{
-		public LuaException (string message) : base(message)
-		{
-		}
 
-		public LuaException (string message, Exception innerException) : base(message, innerException)
-		{
-		}
+    public class LuaException : Exception
+    {
+        public LuaException(string message) : base(message)
+        {
+        }
 
-        public LuaException(IntPtr L) 
+        public LuaException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        public LuaException(IntPtr L)
             : base((lua_gettop(L) > 0) ? lua_tostring(L, -1) : "unknown error")
         {
         }
@@ -42,5 +42,7 @@ namespace SharpLuna
             lua_call(L, 1, 1);      // call debug.traceback
             return 1;
         }
+
     }
+
 }

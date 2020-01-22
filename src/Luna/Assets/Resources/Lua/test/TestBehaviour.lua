@@ -1,22 +1,22 @@
 
-require "class"
 
-class TestBehaviour
+class = require "pl.class"
 
-	function Awake()
-		print "Awake"
-	end
-	
-	function Start()
-		print "Start"
-	end
-	
-	function Update()
-		print "Update"
-	end
-	
-	function OnDestroy()
-		print "OnDestroy"
-	end
+class.TestBehaviour()
 
+function TestBehaviour:Awake()
+	print "Awake"
 end
+
+function TestBehaviour:Start()
+	print "Start"
+end
+
+function TestBehaviour:Update()
+	print "Update"
+end
+
+function TestBehaviour:OnDestroy()
+	print "OnDestroy"
+end
+

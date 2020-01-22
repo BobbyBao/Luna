@@ -1,9 +1,8 @@
 fileFormatVersion: 2
-guid: 675fd1d3eb393d3449960071dcf19c30
+guid: 2c73366a5ba9dcb4aa9f4f10ca429008
 ScriptedImporter:
   fileIDToRecycleName:
-    11400000: list
-    2186277476908879412: ImportLogs
+    11400000: compat
   externalObjects: {}
   userData: 
   assetBundleName: 

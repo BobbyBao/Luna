@@ -1,9 +1,8 @@
 fileFormatVersion: 2
-guid: b1632b0802cb5884688cc887b8cc8e66
+guid: 6925fa27f8eee5f44a7a36943d108557
 ScriptedImporter:
   fileIDToRecycleName:
-    11400000: test_class
-    2186277476908879412: ImportLogs
+    11400000: class
   externalObjects: {}
   userData: 
   assetBundleName: 
