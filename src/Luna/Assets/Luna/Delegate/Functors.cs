@@ -217,8 +217,20 @@ namespace SharpLuna
     {
         public string methodName;
         public MethodInfo[] methodInfo;
-        public Type[][] paraments;
-        public int[] count;
+        public ParameterInfo[][] parameters;
+        public object[][] args;
+        public Method(MethodInfo[] methodInfo)
+        {
+            methodName = methodInfo[0].Name;
+            this.methodInfo = methodInfo;
+            parameters = new ParameterInfo[methodInfo.Length][];
+            args = new object[methodInfo.Length][]; //非线程安全
+            for (int i = 0; i < methodInfo.Length; i++)
+            {
+                parameters[i] = methodInfo[i].GetParameters();
+                args[i] = new object[parameters[i].Length];
+            }
+        }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int Call(lua_State L)
@@ -227,32 +239,40 @@ namespace SharpLuna
             {
                 int n = lua_gettop(L);
                 MethodInfo methodInfo = null;
-                MethodInfo[] methodInfos = ToLightObject<MethodInfo[]>(L, lua_upvalueindex(1), false);
-                foreach (var m in methodInfos)
+                ParameterInfo[] parameterInfo = null;
+                object[] args = null;
+                Method method = ToLightObject<Method>(L, lua_upvalueindex(1), false);
+                for(int i = 0; i < method.methodInfo.Length; i++)
                 {
-                    if(m.IsStatic)
+                    var m = method.methodInfo[i];
+                    var paramInfo = method.parameters[i];
+                    if (m.IsStatic)
                     {
 #if LUNA_SCRIPT
-                        if (m.GetParameters().Length == n - 1)
+                        if (paramInfo.Length == n - 1)
                         {
-                            methodInfo = m;
-                            n -= 1;
+                            methodInfo = m; 
+                            parameterInfo = paramInfo;
+                            args = method.args[i];
                             break;
                         }
 #else                        
-                        if (m.GetParameters().Length == n)
+                        if (paramInfo.Length == n)
                         {
                             methodInfo = m;
+                            parameterInfo = paramInfo;
+                            args = method.args[i];
                             break;
                         }
 #endif
                     }
                     else
                     {
-                        if (m.GetParameters().Length == n - 1)
+                        if (paramInfo.Length == n - 1)
                         {
                             methodInfo = m;
-                            n -= 1;
+                            parameterInfo = paramInfo;
+                            args = method.args[i];
                             break;
                         }
 
@@ -265,13 +285,14 @@ namespace SharpLuna
                 int StackStart = methodInfo.IsStatic ? 1 : 2;
 #endif
                 object obj = methodInfo.IsStatic ? null : GetObject(L, 1);
-                object[] args = new object[n];
-                for (int i = 0; i < n; i++)
+                //object[] args = new object[parameterInfo.Length];
+                for (int i = 0; i < args.Length; i++)
                 {
-                    args[i] = GetObject(L, i + StackStart);
+                    args[i] = GetObject(L, i + StackStart, parameterInfo[i].ParameterType);
                 }
 
                 object ret = methodInfo.Invoke(obj, args);
+                Array.Clear(args, 0, args.Length);
                 if (methodInfo.ReturnType != typeof(void))
                 {
                     Push(L, ret);

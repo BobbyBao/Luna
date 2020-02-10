@@ -132,7 +132,7 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static object GetObject(lua_State L, int index)
+        internal static object GetObject(lua_State L, int index, Type objtype = null)
         {
             LuaType type = lua_type(L, index);
 
@@ -140,15 +140,48 @@ namespace SharpLuna
             {
                 case LuaType.Number:
                     {
+                        if(objtype != null)
+                        {
+                            if(objtype == typeof(int))
+                            {
+                                return (int)lua_tonumber(L, index);
+                            }
+                            else if (objtype == typeof(uint))
+                            {
+                                return (uint)lua_tonumber(L, index);
+                            }
+                            else if (objtype == typeof(short))
+                            {
+                                return (short)lua_tonumber(L, index);
+                            }
+                            else if (objtype == typeof(ushort))
+                            {
+                                return (ushort)lua_tonumber(L, index);
+                            }
+                            else if (objtype == typeof(sbyte))
+                            {
+                                return (sbyte)lua_tonumber(L, index);
+                            }
+                            else if (objtype == typeof(byte))
+                            {
+                                return (byte)lua_tonumber(L, index);
+                            }
+                            else if (objtype == typeof(float))
+                            {
+                                return (float)lua_tonumber(L, index);
+                            }
+                        }                        
+                     
                         if (lua_isinteger(L, index))
                             return lua_tointeger(L, index);
 
-                        return lua_tonumber(L, index);
+                        return lua_tonumber(L, index);                       
+                        
                     }
                 case LuaType.String:
                     return lua_tostring(L, index);
                 case LuaType.Boolean:
-                    return lua_toboolean(L, index);
+                    return (bool)(lua_toboolean(L, index) != 0);
                 case LuaType.Table:
                     return Get<LuaRef>(L, index);
                 case LuaType.Function:

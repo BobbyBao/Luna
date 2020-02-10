@@ -602,6 +602,7 @@ namespace SharpLuna
         {
             LuaRef luaFun = LuaRef.Empty;
             string name = methodInfo[0].Name;
+            /*
             if (methodInfo.Length == 1)
             {                  
                 luaFun = RegMethod(methodInfo[0], false);          
@@ -610,12 +611,13 @@ namespace SharpLuna
             {
                 //todo同名函数处理
                 //Luna.Log($"{name}存在同名函数" );
-            }
+            }*/
 
             if (!luaFun)
             {
-                Luna.Log("退化成反射方式实现");
-                luaFun = LuaRef.CreateFunction(State, Method.Call, methodInfo);
+                //Luna.Log("退化成反射方式实现");
+                Method method = new Method(methodInfo);
+                luaFun = LuaRef.CreateFunction(State, Method.Call, method);// methodInfo);
             }
 
             if (luaFun)
