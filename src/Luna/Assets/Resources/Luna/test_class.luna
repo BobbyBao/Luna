@@ -13,12 +13,17 @@ class GameObj {
 
 	func testFunc(a) {
 		print("GameObj testFunc", a)
+		print("GameObj name:", self.name, ", id", self.id)
 	}
 
+	func print() {		
+		print(self.name, self.id)
+	}
 }
 
 class Character : GameObj {
-		
+	var characterID = 100
+
 	init(n) {
 		print("GameObj name:", self.name)
 		super.init(n)
@@ -30,8 +35,12 @@ class Character : GameObj {
 		print("Character testFunc", a)
 	}
 
+	func print() {
+		super.print()
+		print("character id ", self.characterID)
+	}
 }
 
 let c = Character("test name")
 c.testFunc("test arg")
-
+c.print()
