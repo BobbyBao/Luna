@@ -14,28 +14,6 @@ namespace SharpLuna
     public class LunaTools
     {
 
-        static readonly ModuleInfo baseTypes = new ModuleInfo
-        {
-            new ClassInfo(typeof(GameObject)),
-            new ClassInfo(typeof(Transform)),
-            new ClassInfo(typeof(Vector2)),
-            new ClassInfo(typeof(Vector3)),
-            new ClassInfo(typeof(Vector4)),
-            new ClassInfo(typeof(Quaternion)),
-            new ClassInfo(typeof(Plane)),
-            new ClassInfo(typeof(LayerMask)),
-            new ClassInfo(typeof(Ray)),
-            new ClassInfo(typeof(Bounds)),
-            new ClassInfo(typeof(Color)),
-            new ClassInfo(typeof(Touch)),
-            new ClassInfo(typeof(RaycastHit)),
-            new ClassInfo(typeof(TouchPhase)),
-        };
-
-        public static ModuleInfo customTypes = new ModuleInfo
-        {
-        };
-
         [MenuItem("Luna/生成WrapFile")]
         public static void GenerateWraps()
         {
@@ -53,7 +31,8 @@ namespace SharpLuna
                 Directory.Delete(path, true);
             }
 
-            GenerateModule(baseTypes, path);
+            GenerateModule(LunaClient.mathTypes, path);
+            GenerateModule(LunaClient.baseTypes, path);
 
             path = Application.dataPath + "/Luna.Unity/CustomType/";
             if (Directory.Exists(path))
@@ -61,7 +40,7 @@ namespace SharpLuna
                 Directory.Delete(path, true);
             }
 
-            GenerateModule(customTypes, path);
+            GenerateModule(LunaClient.customTypes, path);
 
             AssetDatabase.Refresh();
         }
@@ -70,7 +49,7 @@ namespace SharpLuna
         {
             WrapGenerator.ExportPath = path;
 
-            foreach (var t in customTypes)
+            foreach (var t in moduleInfo)
             {
                 WrapGenerator.GenerateClassWrap(t.type, t.excludeMembers);
             }

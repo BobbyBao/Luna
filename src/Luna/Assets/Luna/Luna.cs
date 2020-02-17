@@ -494,7 +494,7 @@ namespace SharpLuna
 
         public SharpClass RegisterModel(ModuleInfo moduleInfo)
         {
-            var model = string.IsNullOrEmpty(moduleInfo.name) ? _binder : _binder.GetModule(moduleInfo.name);
+            var model = string.IsNullOrEmpty(moduleInfo.Name) ? _binder : _binder.GetModule(moduleInfo.Name);
             foreach (var t in moduleInfo)
             {
                 model.RegClass(t.type);
@@ -803,42 +803,14 @@ func __array(c, len) {
 #endif
     }
 
-    public class ModuleInfo : List<ClassInfo>//IEnumerable<Type>
+    public class ModuleInfo : List<ClassInfo>
     {
-        public string name;
-        //public List<ClassInfo> classes = new List<ClassInfo>();
+        public string Name { get; }
+
         public ModuleInfo(string name = "")
         {
-            this.name = name;
+            Name = name;
         }
-        /*
-        public void Add(object obj)
-        {
-            if(obj is ClassInfo cls)
-            {
-                classes.Add(cls);
-            }
-            else if(obj is Type t)
-            {
-                classes.Add(new ClassInfo(t));
-            }
-        }
-
-        public IEnumerator<Type> GetEnumerator()
-        {
-            foreach (var c in classes)
-            {
-                yield return c.type;
-            }
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            foreach (var c in classes)
-            {
-                yield return c.type;
-            }
-        }*/
     }
 
     public class ClassInfo : System.Collections.IEnumerable

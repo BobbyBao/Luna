@@ -15,6 +15,36 @@ namespace SharpLuna.Unity
 
         public static Luna Luna => Instance?.luna;
 
+        public static readonly ModuleInfo mathTypes = new ModuleInfo
+        {
+            new ClassInfo(typeof(Vector2)),
+            new ClassInfo(typeof(Vector3)),
+            new ClassInfo(typeof(Vector4)),
+            new ClassInfo(typeof(Quaternion)),
+            new ClassInfo(typeof(Plane)),
+            new ClassInfo(typeof(LayerMask)),
+            new ClassInfo(typeof(Ray)),
+            new ClassInfo(typeof(Bounds)),
+            new ClassInfo(typeof(Color)),
+            new ClassInfo(typeof(Touch)),
+            new ClassInfo(typeof(RaycastHit)),
+            new ClassInfo(typeof(TouchPhase)),
+        };
+
+        public static readonly ModuleInfo baseTypes = new ModuleInfo("UnityEngine")
+        {
+            new ClassInfo(typeof(GameObject)),
+            new ClassInfo(typeof(Component)),
+            new ClassInfo(typeof(MonoBehaviour)),
+            new ClassInfo(typeof(Transform)),
+            new ClassInfo(typeof(Resources)),
+        };
+
+        public static ModuleInfo customTypes = new ModuleInfo
+        {
+            new ClassInfo(typeof(LunaBehaviour))
+        };
+
         private Luna luna;
         public Loader loader { get; set; }
 
@@ -76,30 +106,13 @@ namespace SharpLuna.Unity
 
         void OnPreInit()
         {
-            //luna.RegisterWraps(this.GetType());
         }
-
-        static Type[] unityModule =
-        {
-            typeof(UnityEngine.Object),
-            typeof(GameObject),
-            typeof(Component),
-            typeof(MonoBehaviour),
-            typeof(Transform),
-            typeof(Resources)
-        };
 
         void OnPostInit()
         {
-            luna.RegisterModel("UnityEngine", unityModule);
-
-            luna.RegisterClass<Vector2>();
-            luna.RegisterClass<Vector3>();
-            luna.RegisterClass<Vector4>();
-            luna.RegisterClass<Quaternion>();
-
-
-            luna.RegisterClass<LunaBehaviour>();
+            luna.RegisterModel(mathTypes);
+            luna.RegisterModel(baseTypes);
+            luna.RegisterModel(customTypes);
 
         }
 
