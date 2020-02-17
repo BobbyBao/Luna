@@ -19,21 +19,13 @@ namespace SharpLuna
             }
         }
 
-        public static void GenerateClassWrap(Type type, string path = "")
+        public static void GenerateClassWrap(Type type, List<string> excludeMembers = null)
         {
-            string code = GenerateClass(type);
-
-            if(!string.IsNullOrEmpty(path))
-            {
-                File.WriteAllText(path, code);
-            }
-            else
-            {
-                File.WriteAllText(Path.Combine(exportPath, type.Name + "Wrap.cs"), code);
-            }
+            string code = GenerateClass(type, excludeMembers);
+            File.WriteAllText(Path.Combine(exportPath, type.Name + "Wrap.cs"), code);
         }
 
-        public static string GenerateClass(Type type)
+        public static string GenerateClass(Type type, List<string> excludeMembers)
         {      
             StringBuilder sb = new StringBuilder();
             sb.Append("using System;\n");
@@ -94,15 +86,17 @@ namespace SharpLuna
                 var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
                 foreach (var field in fields)
                 {
-                    //常量不生成
-                    if (field.IsLiteral)
+                    if (!field.ShouldExport())
                     {
                         continue;
                     }
 
-                    if (!field.ShouldExport())
+                    if (excludeMembers != null)
                     {
-                        continue;
+                        if (excludeMembers.Contains(field.Name))
+                        {
+                            continue;
+                        }
                     }
 
                     GenerateField(type, field, sb);
@@ -116,6 +110,14 @@ namespace SharpLuna
                 if (!prop.ShouldExport())
                 {
                     continue;
+                }
+
+                if (excludeMembers != null)
+                {
+                    if (excludeMembers.Contains(prop.Name))
+                    {
+                        continue;
+                    }
                 }
 
                 //indexer 暂时不支持
@@ -144,6 +146,14 @@ namespace SharpLuna
                 if (members.FindIndex((t) => t.Item2 == method.Name) != -1)
                 {
                     continue;
+                }
+
+                if (excludeMembers != null)
+                {
+                    if (excludeMembers.Contains(method.Name))
+                    {
+                        continue;
+                    }
                 }
 
                 var memberInfo = type.GetMember(method.Name);
@@ -332,7 +342,7 @@ namespace SharpLuna
 
         static void GenerateField(Type type, FieldInfo field, StringBuilder sb)
         {
-            GenerateVariable(type, field.Name, field.IsStatic, field.FieldType, sb, true, true);
+            GenerateVariable(type, field.Name, field.IsStatic, field.FieldType, sb, true, !field.IsInitOnly && !field.IsLiteral);
         }
 
         static void GenerateProperty(Type type, PropertyInfo propertyInfo, StringBuilder sb)

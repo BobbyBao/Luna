@@ -41,6 +41,13 @@ public class Vector4Wrap
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+	static int Get_kEpsilon(IntPtr L)
+	{
+		Push(L, UnityEngine.Vector4.kEpsilon);
+		return 1;
+	}
+
+	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Get_x(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Vector4>(L, 1);
@@ -458,6 +465,7 @@ public class Vector4Wrap
 	public static void Register(ClassWraper classWraper)
 	{
 		classWraper.RegConstructor(Constructor);
+		classWraper.RegField("kEpsilon", Get_kEpsilon);
 		classWraper.RegField("x", Get_x, Set_x);
 		classWraper.RegField("y", Get_y, Set_y);
 		classWraper.RegField("z", Get_z, Set_z);

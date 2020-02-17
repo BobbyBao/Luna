@@ -60,6 +60,20 @@ public class Vector2Wrap
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+	static int Get_kEpsilon(IntPtr L)
+	{
+		Push(L, UnityEngine.Vector2.kEpsilon);
+		return 1;
+	}
+
+	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+	static int Get_kEpsilonNormalSqrt(IntPtr L)
+	{
+		Push(L, UnityEngine.Vector2.kEpsilonNormalSqrt);
+		return 1;
+	}
+
+	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Get_normalized(IntPtr L)
 	{
 		ref var obj = ref SharpObject.GetValue<UnityEngine.Vector2>(L, 1);
@@ -465,6 +479,8 @@ public class Vector2Wrap
 		classWraper.RegConstructor(Constructor);
 		classWraper.RegField("x", Get_x, Set_x);
 		classWraper.RegField("y", Get_y, Set_y);
+		classWraper.RegField("kEpsilon", Get_kEpsilon);
+		classWraper.RegField("kEpsilonNormalSqrt", Get_kEpsilonNormalSqrt);
 		classWraper.RegProperty("normalized", Get_normalized);
 		classWraper.RegProperty("magnitude", Get_magnitude);
 		classWraper.RegProperty("sqrMagnitude", Get_sqrMagnitude);

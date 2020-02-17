@@ -96,6 +96,13 @@ public class QuaternionWrap
 	}
 
 	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+	static int Get_kEpsilon(IntPtr L)
+	{
+		Push(L, UnityEngine.Quaternion.kEpsilon);
+		return 1;
+	}
+
+	[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
 	static int Get_identity(IntPtr L)
 	{
 		Push(L, UnityEngine.Quaternion.identity);
@@ -492,6 +499,7 @@ public class QuaternionWrap
 		classWraper.RegField("y", Get_y, Set_y);
 		classWraper.RegField("z", Get_z, Set_z);
 		classWraper.RegField("w", Get_w, Set_w);
+		classWraper.RegField("kEpsilon", Get_kEpsilon);
 		classWraper.RegProperty("identity", Get_identity);
 		classWraper.RegProperty("eulerAngles", Get_eulerAngles, Set_eulerAngles);
 		classWraper.RegProperty("normalized", Get_normalized);

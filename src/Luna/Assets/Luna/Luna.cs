@@ -11,11 +11,6 @@ namespace SharpLuna
     using static Lua;
     using lua_State = IntPtr;
 
-    public class LunaConfig
-    {
-        public List<(string, ClassInfo[])> modules;
-    }
-
     public sealed class Luna : IDisposable
     {
 #if LUNA_SCRIPT
@@ -43,24 +38,25 @@ namespace SharpLuna
         public event EventHandler<DebugHookEventArgs> DebugHook;
         private KyHookFunction _hookCallback;
       
-        private LunaConfig _config;
+        private List<ModuleInfo> _config;
         private SharpModule _binder;
         private readonly Dictionary<Type, ClassWraper> _classWrapers = new Dictionary<Type, ClassWraper>();
-        
-        public static readonly ClassInfo[] systemClasses = new []
-        {            
+
+        public static ModuleInfo systemModule = new ModuleInfo
+        {   
             new ClassInfo(typeof(object)),
             new ClassInfo(typeof(Enum)),
             new ClassInfo(typeof(string))
             {
+                "Chars",
                 "GetEnumerator"
             },
-            new ClassInfo(typeof(Delegate)),           
+            new ClassInfo(typeof(Delegate)),            
         };
-
-        public Luna(LunaConfig config = null)
+        
+        public Luna(List<ModuleInfo> config = null)
         {
-            _config = config;
+            _config = config ?? new List<ModuleInfo>();
         }
 
         ~Luna()
@@ -100,7 +96,6 @@ namespace SharpLuna
             Register("loadfile", LoadFile);
 
 #if LUNA_SCRIPT
-
             DoString(classSource);
             DoString(listSource);
 #endif
@@ -139,12 +134,11 @@ namespace SharpLuna
 
         private void Init()
         {
-            SharpClass.SetAlias(typeof(object), "object");
 
-            RegisterClass<object>();
-            RegisterClass<Enum>();
-            RegisterClass<string>();
-            RegisterClass<Delegate>();
+            foreach(var moduleInfo in this._config)
+            {                
+                this.RegisterModel(moduleInfo);                
+            }
 
         }
 
@@ -498,7 +492,17 @@ namespace SharpLuna
             method?.Invoke(null, new object[] { classWrapper });           
         }
 
-        public SharpClass RegisterModel(string name, Type[] types)
+        public SharpClass RegisterModel(ModuleInfo moduleInfo)
+        {
+            var model = string.IsNullOrEmpty(moduleInfo.name) ? _binder : _binder.GetModule(moduleInfo.name);
+            foreach (var t in moduleInfo)
+            {
+                model.RegClass(t.type);
+            }
+            return model;
+        }
+
+        public SharpClass RegisterModel(string name, IEnumerable<Type> types)
         {
             var model = _binder.GetModule(name);
             foreach (Type t in types)
@@ -650,7 +654,7 @@ func __class(c, className, base) {
 		copyProperties(c, base)
         c._base = base
     } elseif base != nil {
-        //error(""must derive from a table type"", 3)
+        error(""must derive from a table type"", 3)
     }
 
     c.__index = c
@@ -686,30 +690,30 @@ func __class(c, className, base) {
         }
 
         return obj
-}
-
-mt.__close = func()
-{
-}
-
-mt.__tostring = func(self)
-{
-    let mt = self._class
-
-        let name = mt.name
-
-        setmetatable(self, nil)
-
-        var str = tostring(self)
-
-        setmetatable(self, mt)
-
-        if name { str = name..str.gsub('table', '') }
-    return str
     }
 
-    return c
-}
+    mt.__close = func()
+    {
+    }
+
+    mt.__tostring = func(self)
+    {
+        let mt = self._class
+
+            let name = mt.name
+
+            setmetatable(self, nil)
+
+            var str = tostring(self)
+
+            setmetatable(self, mt)
+
+            if name { str = name..str.gsub('table', '') }
+        return str
+        }
+
+        return c
+    }
 
 ";
        
@@ -799,6 +803,44 @@ func __array(c, len) {
 #endif
     }
 
+    public class ModuleInfo : List<ClassInfo>//IEnumerable<Type>
+    {
+        public string name;
+        //public List<ClassInfo> classes = new List<ClassInfo>();
+        public ModuleInfo(string name = "")
+        {
+            this.name = name;
+        }
+        /*
+        public void Add(object obj)
+        {
+            if(obj is ClassInfo cls)
+            {
+                classes.Add(cls);
+            }
+            else if(obj is Type t)
+            {
+                classes.Add(new ClassInfo(t));
+            }
+        }
+
+        public IEnumerator<Type> GetEnumerator()
+        {
+            foreach (var c in classes)
+            {
+                yield return c.type;
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            foreach (var c in classes)
+            {
+                yield return c.type;
+            }
+        }*/
+    }
+
     public class ClassInfo : System.Collections.IEnumerable
     {
         public Type type;
@@ -808,6 +850,7 @@ func __array(c, len) {
         public ClassInfo(Type type, string alias = "")
         {
             this.type = type;
+            this.Alias = alias;
         }
 
         public void Add(string exclude)

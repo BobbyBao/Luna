@@ -14,61 +14,78 @@ namespace SharpLuna
     public class LunaTools
     {
 
-        static readonly (Type classType, MemberTypes memberTypes)[] baseTypes =
+        static readonly ModuleInfo baseTypes = new ModuleInfo
         {
-            (typeof(GameObject), MemberTypes.Constructor |  MemberTypes.Field),
-            (typeof(Transform), MemberTypes.Constructor |  MemberTypes.Field),
-            (typeof(Vector2), MemberTypes.Constructor |  MemberTypes.Field),
-            (typeof(Vector3), MemberTypes.Constructor |  MemberTypes.Field),
-            (typeof(Vector4), MemberTypes.Constructor |  MemberTypes.Field),
-            (typeof(Quaternion), MemberTypes.Constructor |  MemberTypes.Field),
-            (typeof(Plane), MemberTypes.Constructor |  MemberTypes.Field),
-            (typeof(LayerMask), MemberTypes.Constructor |  MemberTypes.Field),
-            (typeof(Ray), MemberTypes.Constructor |  MemberTypes.Field),
-            (typeof(Bounds), MemberTypes.Constructor |  MemberTypes.Field),
-            (typeof(Color), MemberTypes.Constructor |  MemberTypes.Field),
-            (typeof(Touch), MemberTypes.Constructor |  MemberTypes.Field),
-            (typeof(RaycastHit), MemberTypes.Constructor |  MemberTypes.Field),
-            (typeof(TouchPhase), MemberTypes.Constructor |  MemberTypes.Field),
+            new ClassInfo(typeof(GameObject)),
+            new ClassInfo(typeof(Transform)),
+            new ClassInfo(typeof(Vector2)),
+            new ClassInfo(typeof(Vector3)),
+            new ClassInfo(typeof(Vector4)),
+            new ClassInfo(typeof(Quaternion)),
+            new ClassInfo(typeof(Plane)),
+            new ClassInfo(typeof(LayerMask)),
+            new ClassInfo(typeof(Ray)),
+            new ClassInfo(typeof(Bounds)),
+            new ClassInfo(typeof(Color)),
+            new ClassInfo(typeof(Touch)),
+            new ClassInfo(typeof(RaycastHit)),
+            new ClassInfo(typeof(TouchPhase)),
         };
 
-        static readonly (Type classType, MemberTypes memberTypes)[] customTypes =
+        public static ModuleInfo customTypes = new ModuleInfo
         {
         };
-
 
         [MenuItem("Luna/生成WrapFile")]
         public static void GenerateWraps()
         {
-            var path = Application.dataPath + "/Luna.Unity/BaseType/";
-
+            var path = Application.dataPath + "/Luna.Unity/SystemType/";
             if (Directory.Exists(path))
             {
                 Directory.Delete(path, true);
             }
 
-            WrapGenerator.ExportPath = path;
+            GenerateModule(Luna.systemModule, path);
 
-            foreach (var (type, member) in baseTypes)
+            path = Application.dataPath + "/Luna.Unity/BaseType/";
+            if (Directory.Exists(path))
             {
-                WrapGenerator.GenerateClassWrap(type);
+                Directory.Delete(path, true);
             }
+
+            GenerateModule(baseTypes, path);
 
             path = Application.dataPath + "/Luna.Unity/CustomType/";
-
             if (Directory.Exists(path))
             {
                 Directory.Delete(path, true);
             }
 
-            WrapGenerator.ExportPath = path;
-
-            foreach (var (type, member) in customTypes)
-            {
-                WrapGenerator.GenerateClassWrap(type);
-            }
+            GenerateModule(customTypes, path);
 
             AssetDatabase.Refresh();
+        }
+
+        static void GenerateModule(ModuleInfo moduleInfo, string path)
+        {
+            WrapGenerator.ExportPath = path;
+
+            foreach (var t in customTypes)
+            {
+                WrapGenerator.GenerateClassWrap(t.type, t.excludeMembers);
+            }
+
+        }
+
+        static void GenerateModule(Type[] types, string path)
+        {
+            WrapGenerator.ExportPath = path;
+
+            foreach (var t in types)
+            {
+                WrapGenerator.GenerateClassWrap(t, null);
+            }
+
         }
     }
 }
