@@ -44,6 +44,7 @@ namespace SharpLuna.Unity
             };
 
             loader.AddSearchPath("core");
+            loader.AddSearchPath("math");
 
             luna.Run();
 

@@ -1,9 +1,8 @@
 fileFormatVersion: 2
-guid: 904991002b6ffab44ae38aa03a63e531
+guid: 703d05394177c4e428e0a336c6c1e3bd
 ScriptedImporter:
   fileIDToRecycleName:
-    11400000: Vector3
-    2186277476908879412: ImportLogs
+    11400000: test_math
   externalObjects: {}
   userData: 
   assetBundleName: 
