@@ -1,7 +1,4 @@
 
-import "class"
-
-
 class GameObj {
 	var name = ""
 	var id = 1

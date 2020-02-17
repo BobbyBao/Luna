@@ -481,6 +481,15 @@ namespace SharpLuna
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int luna_init(lua_State L, ref LunaData data);
 
+#if LUNA_SCRIPT
+
+        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int luna_try_getuserdata(lua_State L, long key, int cache_ref);
+
+        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int luna_cacheuserdata(lua_State L, long key, int cache_ref);
+#endif
+
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int luna_class_index(lua_State L);
 
@@ -492,6 +501,7 @@ namespace SharpLuna
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int luna_module_newindex(lua_State L);
+
 #pragma warning restore IDE1006 // Naming Styles
 
 

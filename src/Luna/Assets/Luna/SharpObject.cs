@@ -1,4 +1,5 @@
 ﻿#define LUA_WEAKTABLE
+#define C_API
 
 using System;
 using System.Collections.Generic;
@@ -276,6 +277,9 @@ namespace SharpLuna
 #if LUA_WEAKTABLE
         static int TryGetUserData(lua_State L, long key, int cache_ref)
         {
+#if C_API
+            return luna_try_getuserdata(L, key, cache_ref);
+#else
             lua_rawgeti(L, LUA_REGISTRYINDEX, cache_ref);
             lua_rawgeti(L, -1, key);
             if (!lua_isnil(L, -1))
@@ -285,15 +289,20 @@ namespace SharpLuna
             }
             lua_pop(L, 2);
             return 0;
+#endif
         }
 
         static void CacheUserData(lua_State L, long key, int cache_ref)
         {
+#if C_API
+            luna_cacheuserdata(L, key, cache_ref);
+#else
             lua_rawgeti(L, LUA_REGISTRYINDEX, cache_ref);
             lua_pushvalue(L, -2);
             lua_rawseti(L, -2, key);
             lua_pop(L, 1);
+#endif
         }
 #endif
+        }
     }
-}

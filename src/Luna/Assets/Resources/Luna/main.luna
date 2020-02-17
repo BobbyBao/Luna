@@ -4,8 +4,7 @@ let GameObject = UnityEngine.GameObject
 func TestIndex(){	
 
 	var t = os.clock()
-    var go = GameObject()
-	
+    var go = GameObject()	
     let node = go.transform
 
 	for i = 1,100000 {		

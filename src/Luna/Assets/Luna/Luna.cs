@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
@@ -98,6 +98,12 @@ namespace SharpLuna
             Register("print", DoPrint);
             Register("dofile", DoFile);
             Register("loadfile", LoadFile);
+
+#if LUNA_SCRIPT
+
+            DoString(classSource);
+            DoString(listSource);
+#endif
 
             _global = LuaRef.Globals(L);
             _global.AddRef();
@@ -601,9 +607,196 @@ namespace SharpLuna
                 temp(this, e);
         }
 
-#endregion
+        #endregion
+
+#if LUNA_SCRIPT
+        const string classSource = @"
+local func is_a(self,klass) {
+    if klass == nil {
+        return getmetatable(self)
+    }
+    
+    var m = getmetatable(self)
+    if not m { return false }
+    while m {
+        if m == klass { return true }
+        m = rawget(m,'_base')
+    }
+    return false
+}
+
+local func class_of(klass,obj) {
+    if type(klass) != 'table' or not rawget(klass,'is_a') { return false }
+    return klass.is_a(obj,klass)
+}
+
+local func cast (klass, obj) {
+    return setmetatable(obj,klass)
+}
+
+local func copyProperties(td, ts) {
+    for k,v in pairs(ts) {
+        if td[k] == nil {
+            td[k] = v
+        }
+    }
+}
+
+func __class(c, className, base) {
+    var mt = {}
+    c = c or {}
+
+    if type(base) == 'table' {
+		copyProperties(c, base)
+        c._base = base
+    } elseif base != nil {
+        //error(""must derive from a table type"", 3)
+    }
+
+    c.__index = c
+    setmetatable(c, mt)
+
+    c._class = c
+    c.name = className
+    c.is_a = is_a
+    c.class_of = class_of
+
+    if c._class_init {
+        c._class_init(mt)
+        return c
+    }
+
+    mt.__call = func(class_tbl, ...)
+    {
+        var obj = { }
+        if c.init {
+            setmetatable(obj, c)
+            obj.init(...)
+        }
+        else
+        {
+            var args = { ...}
 
 
+            if #args == 1 and type(args[1]) == 'table' {
+                obj = args[1]
+            }
+
+        setmetatable(obj, c)
+        }
+
+        return obj
+}
+
+mt.__close = func()
+{
+}
+
+mt.__tostring = func(self)
+{
+    let mt = self._class
+
+        let name = mt.name
+
+        setmetatable(self, nil)
+
+        var str = tostring(self)
+
+        setmetatable(self, mt)
+
+        if name { str = name..str.gsub('table', '') }
+    return str
+    }
+
+    return c
+}
+
+";
+       
+        const string listSource = @"
+class List {
+	var len_ = 0
+	
+	init(n) {
+		self.len_ = n
+	}
+
+	func len() {
+		return self.len_
+	}
+
+	func __len() {
+		return self.len_
+	}
+
+	func push(i) {
+		self[self.len_] = i
+		self.len_ = self.len_ + 1
+	}
+
+	func append(i) {
+		self:push(i)
+		return self
+	}
+
+	func insert(i, x) {
+		var idx = self.len_
+		while i <= idx {
+
+			if idx == i {				
+				self[i] = x
+				self.len_ = self.len_ + 1
+				break
+			}
+
+			self[idx] = self[idx - 1]
+			idx = idx - 1
+		} 
+		
+		return self
+	}
+
+	func remove (idx) {
+		
+		repeat {
+			self[idx] = self[idx + 1]
+			idx = idx + 1
+		} until(idx == self.len_ - 1)
+
+		table.remove(self, self.len_ - 1)
+		self.len_ = self.len_ - 1
+		return self
+	}
+
+	func clear() {
+
+		while self.len_ > 0 {
+			self.len_ = self.len_ - 1
+			table.remove(self, self.len_)
+		} 
+
+	}
+
+	func iter() {
+		var k = -1
+		return func (t) {
+			k = k + 1
+			if k < t.len_ {
+				return t[k]
+			}
+			
+		}, self
+	}
+	
+}
+
+func __array(c, len) {
+	setmetatable(c, List)
+	c.len_ = len
+}
+";
+
+#endif
     }
 
     public class ClassInfo : System.Collections.IEnumerable

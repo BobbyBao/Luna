@@ -1,6 +1,4 @@
 
-import "class"
-
 class TestBehaviour {
 
 	func Awake() {
