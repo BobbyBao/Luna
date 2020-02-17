@@ -65,7 +65,7 @@ class Character : GameObj {
 }
 
 ```
-支持var,let关键字，成员函数调用，和静态方法调用统一用".",不再有":"和"."选择的问题
+支持var, let关键字，成员函数调用和静态方法调用统一用".",不再有":"和"."选择的问题
 
 ```
 let c = Character("test name")
@@ -192,5 +192,47 @@ if i || j {
 
 ```
 
+更加直观的操作符重载
+
+```
+class vec3 {
+    var x = 0, y = 0, z = 0
+
+    init(x, y, z) {
+        self.x = x
+        self.y = y
+        self.z = z
+    }
+
+    func + (v1, v2) {
+        return vec3(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z)
+    }
+
+    func - (v1, v2) {
+        return vec3(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z)
+    }
+
+    func * (v1, v2) {
+        return vec3(v1.x * v2, v1.y * v2, v1.z * v2)
+    }
+
+    func / (v1, v2) {
+        return vec3(v1.x / v2, v1.y / v2, v1.z / v2)
+    }
+
+    func == (v1, v2) {
+        return v1.x == v2.x && v1.y == v2.y && v1.z == v2.z
+    }
+
+    func < (v1, v2) {
+        return v1.x < v2.x && v1.y < v2.y && v1.z < v2.z
+    }
+
+    func <= (v1, v2) {
+        return v1.x <= v2.x && v1.y <= v2.y && v1.z <= v2.z
+    }
+}
+
+```
 
 由于采用了lua5.4的虚拟机，执行效率上保持和lua一样，比同类其他脚本(Python,Ruby,Wren,AngleScript等)都高出一截
