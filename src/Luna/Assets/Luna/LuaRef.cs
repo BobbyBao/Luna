@@ -12,12 +12,12 @@ namespace SharpLuna
     using lua_State = System.IntPtr;
     using static Lua;
 
-    public struct LuaRef : IRefCount, IEquatable<LuaRef>, IComparable<LuaRef>, IEnumerable<TableKeyValuePair>
+    public class LuaRef : IEquatable<LuaRef>, IComparable<LuaRef>, IEnumerable<TableKeyValuePair>
     {
         private readonly lua_State L;
         private readonly int _ref;
 
-        public static readonly LuaRef Empty = new LuaRef();
+        public static readonly LuaRef Empty = new LuaRef(0);
         public static readonly LuaRef None = new LuaRef(LUA_NOREF);
         public static readonly LuaRef Nil = new LuaRef(LUA_REFNIL);
         
@@ -26,8 +26,6 @@ namespace SharpLuna
             L = state;
             lua_pushvalue(L, index);
             _ref = luaL_ref(L, LUA_REGISTRYINDEX);
-            Handle = 0;
-            Handle = this.Alloc();
         }
 
         public LuaRef(lua_State state, string name)
@@ -35,33 +33,29 @@ namespace SharpLuna
             L = state;
             PushGlobal(L, name);
             _ref = luaL_ref(L, LUA_REGISTRYINDEX);
-            Handle = 0;
-            Handle = this.Alloc();
         }
 
         public LuaRef(lua_State state)
         {
             L = state;
             _ref = luaL_ref(state, LUA_REGISTRYINDEX); 
-            Handle = 0;
-            Handle = this.Alloc();
         }
 
         private LuaRef(int luaRef)
         {
             L = IntPtr.Zero;
             _ref = luaRef;
-            Handle = 0;
+        }
+
+        ~LuaRef()
+        {
+            if (IsActive(L))
+            {
+                luaL_unref(L, LUA_REGISTRYINDEX, _ref);
+            }
         }
 
         public void Dispose()
-        {
-            this.Release();
-        }
-
-        public uint Handle { get; set; }
-
-        public void InternalRelease()
         {
             if (L != IntPtr.Zero)
             {

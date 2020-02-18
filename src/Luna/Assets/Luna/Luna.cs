@@ -38,7 +38,7 @@ namespace SharpLuna
         public event EventHandler<DebugHookEventArgs> DebugHook;
         private KyHookFunction _hookCallback;
       
-        private List<ModuleInfo> _config;
+        private List<ModuleInfo> _config = new List<ModuleInfo>();
         private SharpModule _binder;
         private readonly Dictionary<Type, ClassWraper> _classWrapers = new Dictionary<Type, ClassWraper>();
 
@@ -54,9 +54,9 @@ namespace SharpLuna
             new ClassInfo(typeof(Delegate)),            
         };
         
-        public Luna(List<ModuleInfo> config = null)
+        public Luna()
         {
-            _config = config ?? new List<ModuleInfo>();
+            _config.Add(systemModule);
         }
 
         ~Luna()
@@ -101,7 +101,6 @@ namespace SharpLuna
 #endif
 
             _global = LuaRef.Globals(L);
-            _global.AddRef();
             _binder = new SharpModule(this);
 
             AddSearcher(LuaLoader);
@@ -156,7 +155,7 @@ namespace SharpLuna
 
             _binder.Dispose();
             
-            _global.Release();
+            _global.Dispose();
 
             RefCountHelper.Clear();
 

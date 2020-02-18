@@ -45,18 +45,17 @@ namespace SharpLuna
         protected SharpClass(LuaRef meta)
         {
             m_meta = meta;
-            m_meta.AddRef();
             m_meta.CheckTable();
         }
 
         ~SharpClass()
         {
-            m_meta.Release();
+            m_meta.Dispose();
         }
 
         public void Dispose()
         {
-            m_meta.Release();
+            m_meta.Dispose();
 
             GC.SuppressFinalize(this);
         }

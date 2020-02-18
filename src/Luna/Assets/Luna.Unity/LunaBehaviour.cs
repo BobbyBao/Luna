@@ -50,15 +50,12 @@ namespace SharpLuna.Unity
                         return;
                     }
                 }
-
-                luaClass.AddRef();
-
+                
                 var metaTable = luaClass.GetMetaTable();             
                 if(metaTable)
                 {                  
                     var ctor = metaTable.RawGet("__call");
                     luaInstance = ctor.Call<LuaRef>(metaTable);
-                    luaInstance.AddRef();
                     metaTable.Dispose();
                 }
                 else
