@@ -1,8 +1,8 @@
 fileFormatVersion: 2
-guid: eb6a73a6ef51bc547bb7d437ce967127
+guid: d35776ead09721649b5d26a53880a55c
 ScriptedImporter:
   fileIDToRecycleName:
-    11400000: test_class
+    11400000: test_math
   externalObjects: {}
   userData: 
   assetBundleName: 

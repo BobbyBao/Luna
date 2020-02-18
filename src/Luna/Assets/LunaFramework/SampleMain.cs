@@ -14,8 +14,11 @@ public class SampleMain : MonoBehaviour
     void Awake()
     {
         instance = this;
-        DontDestroyOnLoad(gameObject);        
+        DontDestroyOnLoad(gameObject);      
+        
+        gameObject.AddComponent<ResourceMananger>();
         luaClient = gameObject.AddComponent<LunaClient>();
+
     }
 
     // Start is called before the first frame update
@@ -23,8 +26,6 @@ public class SampleMain : MonoBehaviour
     {
         var luna = LunaClient.Luna;
 
-        //Load("UI/Panel");
-                
         if (!string.IsNullOrWhiteSpace(startFile))
         {
             luaClient.Run(startFile); 
@@ -33,15 +34,8 @@ public class SampleMain : MonoBehaviour
         yield return null;
     }
 
-    public void Load(string file)
-    {
-        var obj = Object.Instantiate(Resources.Load<GameObject>(file));
-        obj.transform.SetParent(this.transform, false);
-    }
-
     // Update is called once per frame
     void Update()
-    {
-        
+    {        
     }
 }

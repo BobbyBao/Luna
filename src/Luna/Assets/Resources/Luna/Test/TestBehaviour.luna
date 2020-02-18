@@ -1,20 +1,20 @@
 
 class TestBehaviour {
 
-	func Awake() {
-		print "Awake"
+	func awake() {
+		print "awake"
 	}
 	
-	func Start() {
-		print "Start"
+	func start() {
+		print "start"
 	}
 	
-	func Update() {
-		print "Update"
+	func update() {
+		print "update"
 	}
 	
-	func OnDestroy() {
-		print "OnDestroy"
+	func onDestroy() {
+		print "onDestroy"
 	}
 
 }

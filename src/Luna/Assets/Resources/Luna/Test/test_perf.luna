@@ -1,0 +1,52 @@
+
+let GameObject = UnityEngine.GameObject
+
+func test4(){	
+
+	var t = os.clock()
+    var go = GameObject()	
+    let node = go.transform
+
+	for i = 1,100000 {		
+        //go = GameObject()
+		go = node.gameObject				
+	}
+	
+	t = os.clock() - t
+	print("TestIndex luna cost time: ", t)	
+}
+
+func test9() {
+	var total = 0
+	var t = os.clock()
+
+	for i = 0, 1000000 {
+		total = total + i - (i/2) * (i + 3) / (i + 5)
+	}
+
+	print("math cal cost: ", os.clock() - t)		
+}
+
+func testTable() {
+	var array = {}
+
+	for i = 1, 1024 {
+		array[i] = i
+	}
+
+	var total = 0
+	var t = os.clock()
+		
+	for j = 1, 100000 {
+		for i = 1, 1024 {
+			total = total + array[i]
+		}			
+	}
+		
+	print("Array cost time: ", os.clock() - t)	
+}
+
+
+test4()
+test9() 
+testTable()

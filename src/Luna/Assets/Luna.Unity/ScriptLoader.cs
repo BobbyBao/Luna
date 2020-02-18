@@ -1,20 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace SharpLuna.Unity
 {
-
-    public abstract class Loader
+    public abstract class ScriptLoader
     {
         protected List<string> searchers = new List<string>();
 
         public string ScriptPath { get; set; } = "lua/";
 
-        public Loader AddSearchPath(string path)
+        public bool Loaded { get; protected set; } = false;
+
+        public ScriptLoader AddSearchPath(string path)
         {
             searchers.Add(path);
             return this;
@@ -42,12 +40,17 @@ namespace SharpLuna.Unity
             }
         }
 
-
+        public virtual void PreLoad() { }
         public abstract byte[] ReadBytes(string fileName);
     }
 
-    public class ResLoader : Loader
+    public class ResScriptLoader : ScriptLoader
     {
+        public override void PreLoad()
+        {
+            Loaded = true;
+        }
+
         public override byte[] ReadBytes(string fileName)
         {
             if (fileName.EndsWith(Luna.Ext))
@@ -84,11 +87,59 @@ namespace SharpLuna.Unity
         }
     }
 
-    public class ABLoader : Loader
+    public class ABScriptLoader : ScriptLoader
     {
+        public const string BundleResPath = "/Res";
+        public readonly static string BundleStreamingPath = Application.dataPath + "/StreamingAssets" + BundleResPath;
+        public static string BundlePath(string subPath) => $"Assets{BundleResPath}/{subPath}";
+
+        Dictionary<string, AssetBundle> boundles = new Dictionary<string, AssetBundle>();
+
+        public override void PreLoad()
+        {
+            foreach (var searcher in searchers)
+            {
+                var path = CombinePath(ScriptPath, searcher);
+                var bundle = AssetBundle.LoadFromFile(path);
+                boundles.Add(searcher, bundle);
+            }
+
+            Loaded = true;
+        }
+
         public override byte[] ReadBytes(string fileName)
         {
-            throw new NotImplementedException();
+            if (!Loaded)
+            {
+                return null;
+            }
+
+            foreach (var it in boundles)
+            {
+                var abName = it.Key;
+                var ab = it.Value;
+                string path = fileName;
+                if (!path.StartsWith(abName, StringComparison.OrdinalIgnoreCase))
+                {
+                    path = abName + "/" + fileName;
+                }
+
+                var assetName = BundlePath(path);
+                if (!ab.Contains(assetName))
+                {
+                    continue;
+                }
+
+                var ba = ab.LoadAsset<BytesAsset>(path);
+                if (ba)
+                {
+                    var bytes = ba.bytes;
+                    Resources.UnloadAsset(ba);
+                    return bytes;
+                }
+            }
+
+            return null;
         }
     }
 }

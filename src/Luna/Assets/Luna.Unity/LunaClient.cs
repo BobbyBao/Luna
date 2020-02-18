@@ -42,11 +42,13 @@ namespace SharpLuna.Unity
 
         public static ModuleInfo customTypes = new ModuleInfo
         {
-            new ClassInfo(typeof(LunaBehaviour))
+            new ClassInfo(typeof(LunaBehaviour)),
+
+            //new ClassInfo(typeof(ResourceMananger))
         };
 
         private Luna luna;
-        public Loader loader { get; set; }
+        public ScriptLoader loader { get; set; }
 
         public string startFile;
 
@@ -64,7 +66,7 @@ namespace SharpLuna.Unity
             luna.PreInit += OnPreInit;
             luna.PostInit += OnPostInit;
 
-            loader = new ResLoader
+            loader = new ResScriptLoader
             {
 #if LUNA_SCRIPT
                 ScriptPath = "luna/"
@@ -81,27 +83,16 @@ namespace SharpLuna.Unity
             LunaCreate?.Invoke(luna);
         }
 
+        private byte[] ReadBytes(string fileName) => loader?.ReadBytes(fileName);
+
         private void Start()
         {
+            loader?.PreLoad();
+
             if (!string.IsNullOrWhiteSpace(startFile))
             {
                 Run(startFile);
             }
-        }
-
-        public void Run(string file)
-        {
-            luna.DoFile(file);
-        }
-
-        private byte[] ReadBytes(string fileName) => loader?.ReadBytes(fileName);
-
-        private void OnDestroy()
-        {
-            LunaDestroy?.Invoke(luna);
-            luna?.Dispose();
-            luna = null;
-            Instance = null;
         }
 
         void OnPreInit()
@@ -115,6 +106,20 @@ namespace SharpLuna.Unity
             luna.RegisterModel(customTypes);
 
         }
+
+        public void Run(string file)
+        {
+            luna.DoFile(file);
+        }
+
+        private void OnDestroy()
+        {
+            LunaDestroy?.Invoke(luna);
+            luna?.Dispose();
+            luna = null;
+            Instance = null;
+        }
+
 
     }
 

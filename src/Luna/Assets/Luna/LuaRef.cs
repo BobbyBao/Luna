@@ -51,15 +51,17 @@ namespace SharpLuna
         {
             if (IsActive(L))
             {
-                luaL_unref(L, LUA_REGISTRYINDEX, _ref);
+                if (_ref != LUA_NOREF)
+                    luaL_unref(L, LUA_REGISTRYINDEX, _ref);
             }
         }
 
         public void Dispose()
         {
-            if (L != IntPtr.Zero)
+            if (IsActive(L))
             {
-                luaL_unref(L, LUA_REGISTRYINDEX, _ref);
+                if (_ref != LUA_NOREF)
+                    luaL_unref(L, LUA_REGISTRYINDEX, _ref);
             }
 
             GC.SuppressFinalize(this);

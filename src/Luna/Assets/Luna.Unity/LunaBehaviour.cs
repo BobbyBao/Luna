@@ -13,8 +13,10 @@ namespace SharpLuna.Unity
         public string luaPath;
 
         string className;
-        LuaRef luaClass;
-        LuaRef luaInstance;
+        LuaRef scriptClass;
+        LuaRef scriptInstance;
+
+        public LuaRef ScriptInstance => scriptInstance;
 
         void Awake()
         {
@@ -40,22 +42,22 @@ namespace SharpLuna.Unity
                     className = className.Substring(index + 1);
                 }
                 
-                luaClass = luna.GetGlobal(className);
-                if (!luaClass)
+                scriptClass = luna.GetGlobal(className);
+                if (!scriptClass)
                 {
                     luna.DoFile(luaPath);
-                    luaClass = luna.GetGlobal(className);
-                    if (!luaClass)
+                    scriptClass = luna.GetGlobal(className);
+                    if (!scriptClass)
                     {
                         return;
                     }
                 }
                 
-                var metaTable = luaClass.GetMetaTable();             
+                var metaTable = scriptClass.GetMetaTable();             
                 if(metaTable)
                 {                  
                     var ctor = metaTable.RawGet("__call");
-                    luaInstance = ctor.Call<LuaRef>(metaTable);
+                    scriptInstance = ctor.Call<LuaRef>(metaTable);
                     metaTable.Dispose();
                 }
                 else
@@ -63,19 +65,19 @@ namespace SharpLuna.Unity
                     Debug.Log("GetMetaTable failed : " + className);
                 }
 
-                CallFunc("Awake");
+                CallFunc("awake");
                 
             }
         }
 
         protected void CallFunc(string name)
         {
-            if(luaInstance)
+            if(scriptInstance)
             {
-                var fn = luaClass.Get(name);
+                var fn = scriptClass.Get(name);
                 if (fn)
                 {
-                    fn.Call(luaInstance);
+                    fn.Call(scriptInstance);
                     fn.Dispose();
                 }
             }
@@ -83,22 +85,22 @@ namespace SharpLuna.Unity
 
         void Start()
         {
-            CallFunc("Start");
+            CallFunc("start");
         }
 
         void Update()
         {
-            //CallFunc("Update");
+            //CallFunc("update");
         }
 
         protected virtual void OnEnable()
         {
-            CallFunc("OnEnable");
+            CallFunc("onEnable");
         }
 
         protected virtual void OnDisable()
         {
-            CallFunc("OnDisable");
+            CallFunc("onDisable");
         }
 
         void OnDestroy()
@@ -106,10 +108,10 @@ namespace SharpLuna.Unity
             if(LunaClient.Luna != null)
             {
 
-                CallFunc("OnDestroy");
+                CallFunc("onDestroy");
 
-                luaClass.Dispose();
-                luaInstance.Dispose();
+                scriptClass.Dispose();
+                scriptInstance.Dispose();
             }
         }
 
