@@ -7,9 +7,9 @@ using System.Text;
 
 namespace SharpLuna
 {
-    /// <summary>
-    /// struct类型转化成 T, 避免box
-    /// </summary>
+    using static Lua;
+    using lua_State = IntPtr;
+
     public static class Convert
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

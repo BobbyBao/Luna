@@ -12,7 +12,7 @@ namespace SharpLuna
 
     public partial class SharpClass : IDisposable
     {
-        protected LuaRef m_meta;
+        protected LuaRef meta;
         protected SharpClass parent;
         protected Type classType;
 
@@ -44,18 +44,18 @@ namespace SharpLuna
 
         protected SharpClass(LuaRef meta)
         {
-            m_meta = meta;
-            m_meta.CheckTable();
+            this.meta = meta;
+            this.meta.CheckTable();
         }
 
         ~SharpClass()
         {
-            m_meta.Dispose();
+            meta.Dispose();
         }
 
         public void Dispose()
         {
-            m_meta.Dispose();
+            meta.Dispose();
 
             GC.SuppressFinalize(this);
         }
@@ -65,9 +65,9 @@ namespace SharpLuna
             get { return parent.Luna;}
         }
 
-        public lua_State State => m_meta.State;
+        public lua_State State => meta.State;
 
-        public LuaRef Meta => m_meta;
+        public LuaRef Meta => meta;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsRegistered<T>()
@@ -226,18 +226,18 @@ namespace SharpLuna
         
         public void SetGetter(string name, LuaRef getter)
         {
-            m_meta.RawGet(___getters).RawSet(name, getter);
+            meta.RawGet(___getters).RawSet(name, getter);
         }
 
         public void SetSetter(string name, LuaRef setter)
         {
-            LuaRef meta_class = m_meta;
+            LuaRef meta_class = meta;
             meta_class.RawGet(___setters).RawSet(name, setter);
         }
 
         public void SetReadOnly(string name)
         {
-            LuaRef meta_class = m_meta;
+            LuaRef meta_class = meta;
             string full_name = GetMemberName(meta_class, name);
             LuaRef err = LuaRef.CreateFunctionWith(State, ErrorReadOnly, full_name);
 
@@ -246,12 +246,12 @@ namespace SharpLuna
 
         public void SetMemberFunction(IntPtr name, LuaRef proc)
         {
-            m_meta.RawSet(name, proc);
+            meta.RawSet(name, proc);
         }
 
         public void SetMemberFunction(string name, LuaRef proc)
         {
-            m_meta.RawSet(name, proc);
+            meta.RawSet(name, proc);
         }
 
         #region 自动绑定
@@ -300,7 +300,7 @@ namespace SharpLuna
                 {
                     if (methodConfig.func != null)
                     {
-                        m_meta.RawSet("__call", LuaRef.CreateFunction(State, methodConfig.func));
+                        meta.RawSet("__call", LuaRef.CreateFunction(State, methodConfig.func));
                         wrapCtor = true;
                     }
 
@@ -360,11 +360,11 @@ namespace SharpLuna
                         var fn = LuaRef.CreateFunction(State, methodConfig.func);
                         if (IsTagMethod(m.Name, out var tag))
                         {
-                            m_meta.RawSet(tag, fn);
+                            meta.RawSet(tag, fn);
                         }
                         else
                         {
-                            m_meta.RawSet(m.Name, fn);
+                            meta.RawSet(m.Name, fn);
                         }
                     }
 
@@ -421,7 +421,7 @@ namespace SharpLuna
                     var callerType = typeof(Constructor<>).MakeGenericType(type);
                     MethodInfo CallInnerDelegateMethod = callerType.GetMethod("Call", BindingFlags.Static | BindingFlags.Public);
                     var luaFunc = (LuaNativeFunction)DelegateCache.Get(typeof(LuaNativeFunction), CallInnerDelegateMethod);
-                    m_meta.RawSet("__call", LuaRef.CreateFunction(State, luaFunc));
+                    meta.RawSet("__call", LuaRef.CreateFunction(State, luaFunc));
                     return this;
                 }
             }
@@ -431,7 +431,7 @@ namespace SharpLuna
             }
 
             Luna.LogWarning("注册反射版的Constructor : " + type.Name);
-            m_meta.RawSet("__call", LuaRef.CreateFunction(State, Constructor.Call, constructorInfo));
+            meta.RawSet("__call", LuaRef.CreateFunction(State, Constructor.Call, constructorInfo));
             return this;
         }
 
@@ -623,11 +623,11 @@ namespace SharpLuna
             {
                 if (IsTagMethod(name, out var tag))
                 {
-                    m_meta.RawSet(tag, luaFun);
+                    meta.RawSet(tag, luaFun);
                 }
                 else
                 {
-                    m_meta.RawSet(name, luaFun);
+                    meta.RawSet(name, luaFun);
                 }
 
             }

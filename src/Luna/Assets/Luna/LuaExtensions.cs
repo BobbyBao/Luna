@@ -63,7 +63,67 @@ namespace SharpLuna
                 handle.Free();
 
             return reference;
-        }        
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Push(lua_State L, object obj)
+        {
+            Type t = obj.GetType();
+            if (t.IsPrimitive)
+            {
+                if (t == typeof(bool))
+                    lua_pushboolean(L, ((bool)obj) ? 1 : 0);
+                else if (t == typeof(long))
+                    lua_pushinteger(L, (long)obj);
+                else if (t == typeof(ulong))
+                    lua_pushinteger(L, (long)(ulong)obj);
+                else if (t == typeof(sbyte))
+                    lua_pushinteger(L, (long)(sbyte)obj);
+                else if (t == typeof(byte))
+                    lua_pushnumber(L, (double)(byte)obj);
+                else if (t == typeof(short))
+                    lua_pushnumber(L, (double)(short)obj);
+                else if (t == typeof(ushort))
+                    lua_pushnumber(L, (double)(ushort)obj);
+                else if (t == typeof(char))
+                    lua_pushnumber(L, (double)(char)obj);
+                else if (t == typeof(int))
+                    lua_pushnumber(L, (double)(int)obj);
+                else if (t == typeof(uint))
+                    lua_pushnumber(L, (double)(uint)obj);
+                else if (t == typeof(float))
+                    lua_pushnumber(L, (double)(float)obj);
+                else if (t == typeof(double))
+                    lua_pushnumber(L, (double)obj);
+                else
+                    throw new Exception("未知类型");
+            }
+            else if (t == typeof(IntPtr))
+                lua_pushinteger(L, (long)(IntPtr)obj);
+            else if (t == typeof(UIntPtr))
+                lua_pushinteger(L, (long)(UIntPtr)obj);
+            else if (t == typeof(string))
+                lua_pushstring(L, (string)obj);
+            else if (t == typeof(LuaNativeFunction))
+                lua_pushcfunction(L, (LuaNativeFunction)obj);
+            else if (t == typeof(LuaRef))
+            {
+                var luaRef = (LuaRef)obj;
+                if (luaRef.IsValid)
+                {
+                    luaRef.PushToStack();
+                }
+                else
+                {
+                    lua_pushnil(L);
+                }
+            }
+            else
+            {
+                SharpObject.PushToStack(L, obj);
+            }
+
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Push<T>(lua_State L, T v)
@@ -409,39 +469,40 @@ namespace SharpLuna
         public static T Get<T>(lua_State L, int index)
         {
             Type t = typeof(T);
+            
             if (t.IsPrimitive)
             {
                 if (t == typeof(bool))
-                    return Convert.To<T>(luaL_checkinteger(L, index) == 0 ? false : true);
-                else if (t == typeof(long))
-                    return Convert.To<T>(luaL_checkinteger(L, index));
-                else if (t == typeof(ulong))
-                    return Convert.To<T>((ulong)luaL_checkinteger(L, index));
-                else if (t == typeof(sbyte))
-                    return Convert.To<T>((sbyte)luaL_checkinteger(L, index));
-                else if (t == typeof(byte))
-                    return Convert.To<T>((byte)luaL_checkinteger(L, index));
-                else if (t == typeof(short))
-                    return Convert.To<T>((short)luaL_checkinteger(L, index));
-                else if (t == typeof(ushort))
-                    return Convert.To<T>((ushort)luaL_checkinteger(L, index));
+                    return (T)(object)(bool)(lua_toboolean(L, index) != 0);
                 else if (t == typeof(char))
-                    return Convert.To<T>((char)luaL_checkinteger(L, index));
+                    return (T)(object)(char)luaL_checkinteger(L, index);
+                else if (t == typeof(sbyte))
+                    return (T)(object)(sbyte)luaL_checkinteger(L, index);
+                else if (t == typeof(byte))
+                    return (T)(object)(byte)luaL_checkinteger(L, index);
+                else if (t == typeof(short))
+                    return (T)(object)(short)luaL_checkinteger(L, index);
+                else if (t == typeof(ushort))
+                    return (T)(object)(ushort)luaL_checkinteger(L, index);
                 else if (t == typeof(int))
-                    return Convert.To<T>((int)luaL_checkinteger(L, index));
+                    return (T)(object)(int)luaL_checkinteger(L, index);
                 else if (t == typeof(uint))
-                    return Convert.To<T>((uint)luaL_checkinteger(L, index));
+                    return (T)(object)(uint)luaL_checkinteger(L, index);
+                else if (t == typeof(long))
+                    return (T)(object)(long)luaL_checkinteger(L, index);
+                else if (t == typeof(ulong))
+                    return (T)(object)(ulong)luaL_checkinteger(L, index);
                 else if (t == typeof(float))
-                    return Convert.To<T>((float)luaL_checknumber(L, index));
+                    return (T)(object)(float)luaL_checknumber(L, index);
                 else if (t == typeof(double))
-                    return Convert.To<T>(luaL_checknumber(L, index));
+                    return (T)(object)luaL_checknumber(L, index);
                 else
-                    throw new Exception("未知类型");
+                    throw new Exception("Error type");
             }
             else if (t == typeof(IntPtr))
-                return Convert.To<T>((IntPtr)luaL_checkinteger(L, index));
+                return (T)(object)(IntPtr)luaL_checkinteger(L, index);
             else if (t == typeof(UIntPtr))
-                return Convert.To<T>((UIntPtr)luaL_checkinteger(L, index));
+                return (T)(object)(UIntPtr)luaL_checkinteger(L, index);
             else if (t == typeof(string))
                 return (T)(object)lua_checkstring(L, index);
             else if (t == typeof(LuaNativeFunction))
@@ -457,9 +518,9 @@ namespace SharpLuna
             {                  
                 return SharpObject.Get<T>(L, index);              
             }
-
+            
         }
-
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T Opt<T>(lua_State L, int index, T def)
         {

@@ -61,6 +61,8 @@ namespace SharpLuna
             {
                 luaL_unref(L, LUA_REGISTRYINDEX, _ref);
             }
+
+            GC.SuppressFinalize(this);
         }
 
         public lua_State State => L;

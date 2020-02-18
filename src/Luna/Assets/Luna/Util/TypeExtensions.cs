@@ -6,16 +6,6 @@ using System.Text;
 
 namespace SharpLuna
 {
-    public class TypeData
-    {
-        public int signature;
-        public bool registered;
-        public bool isUnmanaged;
-        public LuaNativeFunction pushFn;
-        public LuaNativeFunction getFn;
-        public LuaNativeFunction optFn;
-    }
-
     public static class TypeExtensions
     {
         private static Dictionary<Type, bool> cachedTypes = new Dictionary<Type, bool>();

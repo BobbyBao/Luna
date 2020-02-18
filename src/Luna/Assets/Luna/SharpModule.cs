@@ -35,12 +35,12 @@ namespace SharpLuna
             LuaRef @ref = parentMeta.RawGet(name);
             if (@ref)
             {
-                m_meta = @ref;
+                meta = @ref;
                 return;
             }
 
             this.parent = parent;
-            m_meta = create_module(parentMeta.State, parentMeta, name);
+            meta = create_module(parentMeta.State, parentMeta, name);
         }
 
         public SharpModule GetModule(string name)
@@ -55,7 +55,7 @@ namespace SharpLuna
                 return module;
             }
 
-            module = new SharpModule(this, m_meta, name);
+            module = new SharpModule(this, meta, name);
             registeredModule.Add(name, module);
             return module;
         }
