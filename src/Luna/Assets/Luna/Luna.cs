@@ -807,6 +807,7 @@ func __array(c, len) {
     public class ModuleInfo : IEnumerable<ClassInfo>
     {
         public string Name { get; }
+
         List<ClassInfo> classes = new List<ClassInfo>();
 
         public ModuleInfo(string name = "")
@@ -840,12 +841,14 @@ func __array(c, len) {
     public class ClassInfo : System.Collections.IEnumerable
     {
         public Type type;
+        public bool generateSuperMembers = false;
         public string Alias;
         public List<string> excludeMembers;
 
-        public ClassInfo(Type type, string alias = "")
+        public ClassInfo(Type type, bool genSuperMembers = false, string alias = "")
         {
             this.type = type;
+            generateSuperMembers = genSuperMembers;
             this.Alias = alias;
         }
 

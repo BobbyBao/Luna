@@ -13,7 +13,6 @@ public class SampleClient : LunaClient
         typeof(ResourceMananger),
     };
 
-    // Start is called before the first frame update
     protected override void OnInit()
     {          
         gameObject.AddComponent<ResourceMananger>();
@@ -22,7 +21,6 @@ public class SampleClient : LunaClient
 
     }
 
-    // Start is called before the first frame update
     protected override IEnumerator OnStart()
     {
 

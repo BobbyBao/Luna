@@ -8,6 +8,8 @@ namespace SharpLuna
 {
     public class WrapGenerator
     {
+        static HashSet<Type> generatedTypes = new HashSet<Type>();
+
         static string exportPath = "";        
         public static string ExportPath
         {
@@ -19,9 +21,14 @@ namespace SharpLuna
             }
         }
 
-        public static void GenerateClassWrap(string module, Type type, List<string> excludeMembers = null)
+        public static void Clear()
         {
-            string code = GenerateClass(module, type, excludeMembers);
+            generatedTypes.Clear();
+        }
+
+        public static void GenerateClassWrap(string module, Type type, bool genSuper, List<string> excludeMembers = null)
+        {
+            string code = GenerateClass(module, type, genSuper, excludeMembers);
             string fileName = type.Name + "Wrap.cs";
             if(!string.IsNullOrEmpty(module))
             {
@@ -31,8 +38,8 @@ namespace SharpLuna
             File.WriteAllText(Path.Combine(exportPath, fileName), code);
         }
 
-        public static string GenerateClass(string module, Type type, List<string> excludeMembers)
-        {      
+        static string GenerateClass(string module, Type type, bool genSuper, List<string> excludeMembers)
+        {
             StringBuilder sb = new StringBuilder();
             sb.Append("using System;\n");
             sb.Append("using SharpLuna;\n");
@@ -57,7 +64,89 @@ namespace SharpLuna
             List<(MemberTypes memberType, string name, bool hasGetter, bool hasSetter)> members =
                 new List<(MemberTypes memberType, string name, bool hasGetter, bool hasSetter)>();
 
-            var ctors = type.GetConstructors();
+            if (genSuper)
+            {
+                Type currentType = type;
+                do
+                {
+                    currentType = currentType.BaseType;
+
+                    if (generatedTypes.Contains(currentType))
+                    {
+                        break;
+                    }
+
+                    GenerateClassWrap(type, excludeMembers, sb, members);
+
+                } while (currentType != null);
+
+            }
+               
+            GenerateClassWrap(type, excludeMembers, sb, members);
+
+
+            sb.Append($"\tpublic static void Register(ClassWraper classWraper)\n\t{{\n");
+
+            foreach (var (memberType, name, hasGetter, hasSetter) in members)
+            {
+                if (memberType == MemberTypes.Constructor)
+                {
+                    sb.Append($"\t\tclassWraper.RegConstructor(Constructor);\n");
+                }
+                else if (memberType == MemberTypes.Field)
+                {
+                    if (hasGetter || hasSetter)
+                    {
+                        sb.Append($"\t\tclassWraper.RegField(\"{name}\"");
+
+                        if (hasGetter)
+                        {
+                            sb.Append($", Get_{name}");
+                        }
+
+                        if (hasSetter)
+                        {
+                            sb.Append($", Set_{name}");
+                        }
+
+                        sb.Append($");\n");
+                    }
+                }
+                else if (memberType == MemberTypes.Property)
+                {
+                    if (hasGetter || hasSetter)
+                    {
+                        sb.Append($"\t\tclassWraper.RegProperty(\"{name}\"");
+
+                        if (hasGetter)
+                        {
+                            sb.Append($", Get_{name}");
+                        }
+
+                        if (hasSetter)
+                        {
+                            sb.Append($", Set_{name}");
+                        }
+
+                        sb.Append($");\n");
+                    }
+                }
+                else if (memberType == MemberTypes.Method)
+                {
+                    sb.Append($"\t\tclassWraper.RegFunction(\"{name}\", {name});\n");
+                }
+            }
+
+            sb.Append("\t}\n");
+
+            sb.Append("}");
+            return sb.ToString();
+
+        }
+
+        private static void GenerateClassWrap(Type type, List<string> excludeMembers, StringBuilder sb, List<(MemberTypes memberType, string name, bool hasGetter, bool hasSetter)> members)
+        {
+            var ctors = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
             List<ConstructorInfo> ctorList = new List<ConstructorInfo>();
             foreach (var ctor in ctors)
             {
@@ -66,7 +155,7 @@ namespace SharpLuna
                     continue;
                 }
 
-                if(!ctor.IsPublic)
+                if (!ctor.IsPublic)
                 {
                     continue;
                 }
@@ -84,7 +173,7 @@ namespace SharpLuna
                 {
                     ctorList.Add(ctor);
                 }
-               
+
             }
 
             if (ctorList.Count > 0)
@@ -94,9 +183,9 @@ namespace SharpLuna
                 members.Add((MemberTypes.Constructor, "ctor", false, false));
             }
 
-            if(!type.IsEnum)
+            if (!type.IsEnum)
             {
-                var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
+                var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
                 foreach (var field in fields)
                 {
                     if (!field.ShouldExport())
@@ -117,7 +206,7 @@ namespace SharpLuna
                 }
             }
 
-            var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
+            var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
             foreach (var prop in properties)
             {
                 if (!prop.ShouldExport())
@@ -143,7 +232,7 @@ namespace SharpLuna
                 members.Add((MemberTypes.Property, prop.Name, prop.CanRead, prop.CanWrite));
             }
 
-            var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
+            var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
             foreach (var method in methods)
             {
                 if (method.IsSpecialName)
@@ -214,64 +303,7 @@ namespace SharpLuna
                 }
             }
 
-
-            sb.Append($"\tpublic static void Register(ClassWraper classWraper)\n\t{{\n");
-
-            foreach (var (memberType, name, hasGetter, hasSetter) in members)
-            {
-                if (memberType == MemberTypes.Constructor)
-                {
-                    sb.Append($"\t\tclassWraper.RegConstructor(Constructor);\n");
-                }
-                else if (memberType == MemberTypes.Field)
-                {
-                    if (hasGetter || hasSetter)
-                    {
-                        sb.Append($"\t\tclassWraper.RegField(\"{name}\"");
-
-                        if (hasGetter)
-                        {
-                            sb.Append($", Get_{name}");
-                        }
-
-                        if (hasSetter)
-                        {
-                            sb.Append($", Set_{name}");
-                        }
-
-                        sb.Append($");\n");
-                    }
-                }
-                else if (memberType == MemberTypes.Property)
-                {
-                    if (hasGetter || hasSetter)
-                    {
-                        sb.Append($"\t\tclassWraper.RegProperty(\"{name}\"");
-
-                        if (hasGetter)
-                        {
-                            sb.Append($", Get_{name}");
-                        }
-
-                        if (hasSetter)
-                        {
-                            sb.Append($", Set_{name}");
-                        }
-
-                        sb.Append($");\n");
-                    }
-                }
-                else if (memberType == MemberTypes.Method)
-                {
-                    sb.Append($"\t\tclassWraper.RegFunction(\"{name}\", {name});\n");
-                }
-            }
-
-            sb.Append("\t}\n");
-
-            sb.Append("}");
-            return sb.ToString();
-
+            generatedTypes.Add(type);
         }
 
         static void GenerateConstructor(Type type, List<ConstructorInfo> ctorList, StringBuilder sb)

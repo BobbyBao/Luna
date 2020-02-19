@@ -17,6 +17,8 @@ namespace SharpLuna
         [MenuItem("Luna/生成WrapFile")]
         public static void GenerateWraps()
         {
+            WrapGenerator.Clear();
+
             var path = Application.dataPath + "/LunaFramework/SystemType/";
             if (Directory.Exists(path))
             {
@@ -74,20 +76,10 @@ namespace SharpLuna
 
             foreach (var t in moduleInfo)
             {
-                WrapGenerator.GenerateClassWrap(moduleInfo.Name, t.type, t.excludeMembers);
+                WrapGenerator.GenerateClassWrap(moduleInfo.Name, t.type, t.generateSuperMembers, t.excludeMembers);
             }
 
         }
 
-        static void GenerateModule(Type[] types, string path)
-        {
-            WrapGenerator.ExportPath = path;
-
-            foreach (var t in types)
-            {
-                WrapGenerator.GenerateClassWrap("", t, null);
-            }
-
-        }
     }
 }
