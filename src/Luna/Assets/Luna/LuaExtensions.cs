@@ -12,16 +12,16 @@ namespace SharpLuna
 
     public unsafe static partial class Lua
     {
-        static ConcurrentDictionary<IntPtr, bool> luaStates = new ConcurrentDictionary<IntPtr, bool>();
+        static ConcurrentDictionary<IntPtr, List<IDisposable>> luaStates = new ConcurrentDictionary<IntPtr, List<IDisposable>>();
 
         public static lua_State NewState()
         {
             var L = luaL_newstate();
-            luaStates.TryAdd(L, true);
+            luaStates.TryAdd(L, new List<IDisposable>());
             return L;
         }
 
-        public static bool IsActive(lua_State L)
+        public static bool IsActive(this lua_State L)
         {
             if (L == IntPtr.Zero)
             {
@@ -31,7 +31,7 @@ namespace SharpLuna
             return luaStates.ContainsKey(L);
         }
 
-        public static void CloseState(lua_State L)
+        public static void CloseState(this lua_State L)
         {
             if (!luaStates.TryRemove(L, out var state))
             {
@@ -39,6 +39,34 @@ namespace SharpLuna
             }
 
             lua_close(L);
+        }
+
+        public static void AddRef(this lua_State L, IDisposable r)
+        {
+            if (luaStates.TryGetValue(L, out var refs))
+            {
+                refs.Add(r);
+            }
+        }
+
+        public static void RemoveRef(this lua_State L, IDisposable r)
+        {
+            if (luaStates.TryGetValue(L, out var refs))
+            {
+                refs.Remove(r);
+            }
+        }
+
+        public static void RemoveAll(this lua_State L)
+        {
+            if (luaStates.TryGetValue(L, out var refs))
+            {
+                while (refs.Count != 0)
+                {
+                    var r = refs[refs.Count - 1];
+                    r.Dispose();
+                }
+            }
         }
 
         public static unsafe void PushLightObject<T>(lua_State L, T obj)

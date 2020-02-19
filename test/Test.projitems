@@ -9,13 +9,7 @@
     <Import_RootNamespace>Test</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)Scripts\Core\class.luna">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
     <None Include="$(MSBuildThisFileDirectory)Scripts\fib.luna">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)Scripts\Core\list.luna">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Scripts\Test.luna">
@@ -42,7 +36,6 @@
     <None Include="$(MSBuildThisFileDirectory)Scripts\test_perf.luna" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="$(MSBuildThisFileDirectory)Scripts\Core\" />
     <Folder Include="$(MSBuildThisFileDirectory)Scripts\Math\" />
   </ItemGroup>
 </Project>

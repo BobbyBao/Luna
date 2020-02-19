@@ -12,7 +12,7 @@ namespace SharpLuna
     using lua_State = System.IntPtr;
     using static Lua;
 
-    public class LuaRef : IEquatable<LuaRef>, IComparable<LuaRef>, IEnumerable<TableKeyValuePair>
+    public class LuaRef : IEquatable<LuaRef>, IComparable<LuaRef>, IEnumerable<TableKeyValuePair>, IDisposable
     {
         private readonly lua_State L;
         private readonly int _ref;
@@ -20,12 +20,13 @@ namespace SharpLuna
         public static readonly LuaRef Empty = new LuaRef(0);
         public static readonly LuaRef None = new LuaRef(LUA_NOREF);
         public static readonly LuaRef Nil = new LuaRef(LUA_REFNIL);
-        
+
         public LuaRef(lua_State state, int index)
         {
             L = state;
             lua_pushvalue(L, index);
             _ref = luaL_ref(L, LUA_REGISTRYINDEX);
+            state.AddRef(this);
         }
 
         public LuaRef(lua_State state, string name)
@@ -33,12 +34,14 @@ namespace SharpLuna
             L = state;
             PushGlobal(L, name);
             _ref = luaL_ref(L, LUA_REGISTRYINDEX);
+            state.AddRef(this);
         }
 
         public LuaRef(lua_State state)
         {
             L = state;
-            _ref = luaL_ref(state, LUA_REGISTRYINDEX); 
+            _ref = luaL_ref(state, LUA_REGISTRYINDEX);
+            state.AddRef(this);
         }
 
         private LuaRef(int luaRef)
@@ -49,24 +52,30 @@ namespace SharpLuna
 
         ~LuaRef()
         {
-            if (IsActive(L))
+            if (L.IsActive())
             {
                 if (_ref != LUA_NOREF)
+                {
                     luaL_unref(L, LUA_REGISTRYINDEX, _ref);
+                    L.RemoveRef(this);
+                }
             }
         }
 
         public void Dispose()
         {
-            if (IsActive(L))
+            if (L.IsActive())
             {
                 if (_ref != LUA_NOREF)
+                {
                     luaL_unref(L, LUA_REGISTRYINDEX, _ref);
+                    L.RemoveRef(this);
+                }
             }
 
             GC.SuppressFinalize(this);
         }
-
+        
         public lua_State State => L;
         public bool IsValid => _ref != LUA_NOREF;
         public bool IsTable => Type == LuaType.Table;
@@ -250,7 +259,7 @@ namespace SharpLuna
 
         public static implicit operator bool(LuaRef luaRef)
         {
-            return IsActive(luaRef.L) && luaRef._ref != LUA_NOREF && luaRef._ref != LUA_REFNIL;
+            return Lua.IsActive(luaRef.L) && luaRef._ref != LUA_NOREF && luaRef._ref != LUA_REFNIL;
         }
 
         public void PushToStack()

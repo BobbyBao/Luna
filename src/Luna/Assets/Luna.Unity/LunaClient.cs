@@ -33,6 +33,7 @@ namespace SharpLuna.Unity
 
         public static readonly ModuleInfo baseTypes = new ModuleInfo("UnityEngine")
         {
+            new ClassInfo(typeof(UnityEngine.Object)),
             new ClassInfo(typeof(GameObject)),
             new ClassInfo(typeof(Component)),
             new ClassInfo(typeof(MonoBehaviour)),

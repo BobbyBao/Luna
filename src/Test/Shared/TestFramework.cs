@@ -108,8 +108,8 @@ namespace Tests
      
             WrapGenerator.ExportPath = path;
             //WrapGenerator.GenerateClassWrap(typeof(string));
-            WrapGenerator.GenerateClassWrap(typeof(TestStruct));
-            WrapGenerator.GenerateClassWrap(typeof(TestClass));
+            WrapGenerator.GenerateClassWrap("", typeof(TestStruct));
+            WrapGenerator.GenerateClassWrap("", typeof(TestClass));
 
             luna.RegisterWraps(this.GetType());
         }

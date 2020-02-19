@@ -19,13 +19,19 @@ namespace SharpLuna
             }
         }
 
-        public static void GenerateClassWrap(Type type, List<string> excludeMembers = null)
+        public static void GenerateClassWrap(string module, Type type, List<string> excludeMembers = null)
         {
-            string code = GenerateClass(type, excludeMembers);
-            File.WriteAllText(Path.Combine(exportPath, type.Name + "Wrap.cs"), code);
+            string code = GenerateClass(module, type, excludeMembers);
+            string fileName = type.Name + "Wrap.cs";
+            if(!string.IsNullOrEmpty(module))
+            {
+                fileName = module + "_" + fileName;
+            }
+
+            File.WriteAllText(Path.Combine(exportPath, fileName), code);
         }
 
-        public static string GenerateClass(Type type, List<string> excludeMembers)
+        public static string GenerateClass(string module, Type type, List<string> excludeMembers)
         {      
             StringBuilder sb = new StringBuilder();
             sb.Append("using System;\n");
@@ -39,7 +45,14 @@ namespace SharpLuna
             sb.AppendLine();
 
             sb.Append("[WrapClass(typeof(" + type.FullName + "))]\n");
-            sb.Append("public class ").Append(type.Name).Append("Wrap\n{\n");
+            sb.Append("public class ");
+
+            if (!string.IsNullOrEmpty(module))
+            {
+                sb.Append(module).Append("_");
+            }
+
+            sb.Append(type.Name).Append("Wrap\n{\n");
 
             List<(MemberTypes memberType, string name, bool hasGetter, bool hasSetter)> members =
                 new List<(MemberTypes memberType, string name, bool hasGetter, bool hasSetter)>();

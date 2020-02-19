@@ -1,8 +1,4 @@
 
-import "class"
-
-
-
 class BaseObj {
 	var name = ""
 	var id = 1

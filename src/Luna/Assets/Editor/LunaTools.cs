@@ -51,7 +51,7 @@ namespace SharpLuna
 
             foreach (var t in moduleInfo)
             {
-                WrapGenerator.GenerateClassWrap(t.type, t.excludeMembers);
+                WrapGenerator.GenerateClassWrap(moduleInfo.Name, t.type, t.excludeMembers);
             }
 
         }
@@ -62,7 +62,7 @@ namespace SharpLuna
 
             foreach (var t in types)
             {
-                WrapGenerator.GenerateClassWrap(t, null);
+                WrapGenerator.GenerateClassWrap("", t, null);
             }
 
         }
