@@ -45,9 +45,9 @@ public class ResourceMananger : MonoBehaviour
         instance.StartCoroutine(assetLoader.Load<T>(filePath, finishLoad));
     }
 
-    public static void LoadScene(string sceneName, Action<AsyncOperation> loadCallback, UnityEngine.SceneManagement.LoadSceneMode mode = UnityEngine.SceneManagement.LoadSceneMode.Single)
+    public static void LoadScene(string sceneName, Action<AsyncOperation> loadCallback, bool addtive = false)
     {
-        instance.StartCoroutine(assetLoader.LoadScene(sceneName, loadCallback, mode));
+        instance.StartCoroutine(assetLoader.LoadScene(sceneName, loadCallback, addtive ? UnityEngine.SceneManagement.LoadSceneMode.Additive : UnityEngine.SceneManagement.LoadSceneMode.Single));
     }
 
 }

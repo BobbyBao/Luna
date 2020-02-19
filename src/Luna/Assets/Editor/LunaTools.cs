@@ -17,7 +17,7 @@ namespace SharpLuna
         [MenuItem("Luna/生成WrapFile")]
         public static void GenerateWraps()
         {
-            var path = Application.dataPath + "/Luna.Unity/SystemType/";
+            var path = Application.dataPath + "/LunaFramework/SystemType/";
             if (Directory.Exists(path))
             {
                 Directory.Delete(path, true);
@@ -25,7 +25,7 @@ namespace SharpLuna
 
             GenerateModule(Luna.systemModule, path);
 
-            path = Application.dataPath + "/Luna.Unity/BaseType/";
+            path = Application.dataPath + "/LunaFramework/BaseType/";
             if (Directory.Exists(path))
             {
                 Directory.Delete(path, true);
@@ -34,13 +34,36 @@ namespace SharpLuna
             GenerateModule(LunaClient.mathTypes, path);
             GenerateModule(LunaClient.baseTypes, path);
 
-            path = Application.dataPath + "/Luna.Unity/CustomType/";
+            path = Application.dataPath + "/LunaFramework/CustomType/";
             if (Directory.Exists(path))
             {
                 Directory.Delete(path, true);
             }
 
-            GenerateModule(LunaClient.customTypes, path);
+            //GenerateModule(LunaClient.customTypes, path);
+
+            var types = typeof(LunaClient).Assembly.GetTypes();
+            foreach (var t in types)
+            {
+                if (!t.IsSubclassOf(typeof(LunaClient)))
+                {
+                    continue;
+                }
+
+                var fields = t.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+                foreach (var fieldInfo in fields)
+                {
+                    var attr = fieldInfo.GetCustomAttribute(typeof(SharpLuna.LunaExportAttribute));
+                    if (attr != null)
+                    {
+                        var moduleInfo = fieldInfo.GetValue(null) as ModuleInfo;
+                        if(moduleInfo != null)
+                        {
+                            GenerateModule(moduleInfo, path);
+                        }
+                    }
+                }
+            }
 
             AssetDatabase.Refresh();
         }

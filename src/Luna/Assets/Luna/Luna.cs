@@ -32,7 +32,6 @@ namespace SharpLuna
         public static Action<string> Error { get; set; }
         public static Func<string, byte[]> ReadBytes { get; set; }
 
-        public event Action PreInit;
         public event Action PostInit;
         public event EventHandler<HookExceptionEventArgs> HookException;
         public event EventHandler<DebugHookEventArgs> DebugHook;
@@ -44,19 +43,24 @@ namespace SharpLuna
 
         public static ModuleInfo systemModule = new ModuleInfo
         {   
-            new ClassInfo(typeof(object)),
-            new ClassInfo(typeof(Enum)),
+            typeof(object),
+            typeof(Enum),
             new ClassInfo(typeof(string))
             {
                 "Chars",
                 "GetEnumerator"
             },
-            new ClassInfo(typeof(Delegate)),            
+            typeof(Delegate),            
         };
         
-        public Luna()
+        public Luna(params ModuleInfo[] modules)
         {
             _config.Add(systemModule);
+
+            foreach(var m in modules)
+            {
+                _config.Add(m);
+            }
         }
 
         ~Luna()
@@ -109,8 +113,6 @@ namespace SharpLuna
             SharpObject.Init(L);
 
             RegisterWraps(this.GetType());
-
-            PreInit?.Invoke();
 
             Init(); 
 
@@ -802,13 +804,36 @@ func __array(c, len) {
 #endif
     }
 
-    public class ModuleInfo : List<ClassInfo>
+    public class ModuleInfo : IEnumerable<ClassInfo>
     {
         public string Name { get; }
+        List<ClassInfo> classes = new List<ClassInfo>();
 
         public ModuleInfo(string name = "")
         {
             Name = name;
+        }
+
+        public IEnumerator<ClassInfo> GetEnumerator()
+        {
+            return classes.GetEnumerator();
+        }
+
+        public void Add(object obj)
+        {
+            if (obj is ClassInfo cls)
+            {
+                classes.Add(cls);
+            }
+            else if(obj is Type t)
+            {
+                classes.Add(new ClassInfo(t));
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable<ClassInfo>)classes).GetEnumerator();
         }
     }
 

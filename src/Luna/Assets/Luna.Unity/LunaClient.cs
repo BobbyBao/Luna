@@ -17,35 +17,29 @@ namespace SharpLuna.Unity
 
         public static readonly ModuleInfo mathTypes = new ModuleInfo
         {
-            new ClassInfo(typeof(Vector2)),
-            new ClassInfo(typeof(Vector3)),
-            new ClassInfo(typeof(Vector4)),
-            new ClassInfo(typeof(Quaternion)),
-            new ClassInfo(typeof(Plane)),
-            new ClassInfo(typeof(LayerMask)),
-            new ClassInfo(typeof(Ray)),
-            new ClassInfo(typeof(Bounds)),
-            new ClassInfo(typeof(Color)),
-            new ClassInfo(typeof(Touch)),
-            new ClassInfo(typeof(RaycastHit)),
-            new ClassInfo(typeof(TouchPhase)),
+            typeof(Vector2),
+            typeof(Vector3),
+            typeof(Vector4),
+            typeof(Quaternion),
+            typeof(Plane),
+            typeof(LayerMask),
+            typeof(Ray),
+            typeof(Bounds),
+            typeof(Color),
+            typeof(Touch),
+            typeof(RaycastHit),
+            typeof(TouchPhase),
         };
 
         public static readonly ModuleInfo baseTypes = new ModuleInfo("UnityEngine")
         {
-            new ClassInfo(typeof(UnityEngine.Object)),
-            new ClassInfo(typeof(GameObject)),
-            new ClassInfo(typeof(Component)),
-            new ClassInfo(typeof(MonoBehaviour)),
-            new ClassInfo(typeof(Transform)),
-            new ClassInfo(typeof(Resources)),
-        };
-
-        public static ModuleInfo customTypes = new ModuleInfo
-        {
-            new ClassInfo(typeof(LunaBehaviour)),
-
-            //new ClassInfo(typeof(ResourceMananger))
+            typeof(UnityEngine.Object),
+            typeof(GameObject),
+            typeof(Component),
+            typeof(MonoBehaviour),
+            typeof(Transform),
+            typeof(Resources),
+            typeof(LunaBehaviour),
         };
 
         private Luna luna;
@@ -53,18 +47,24 @@ namespace SharpLuna.Unity
 
         public string startFile;
 
-        void Awake()
+        private List<ModuleInfo> modules = new List<ModuleInfo>
+        {
+            mathTypes, baseTypes
+        };
+
+        private void Awake()
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+
+            OnInit();
 
             Luna.Print = Debug.Log;
             Luna.Warning = Debug.LogWarning;
             Luna.Error = Debug.LogError;
             Luna.ReadBytes = ReadBytes;
 
-            luna = new Luna();
-            luna.PreInit += OnPreInit;
+            luna = new Luna(modules.ToArray());
             luna.PostInit += OnPostInit;
 
             loader = new ResScriptLoader
@@ -84,9 +84,11 @@ namespace SharpLuna.Unity
             LunaCreate?.Invoke(luna);
         }
 
+        public void AddModule(ModuleInfo moduleInfo) => this.modules.Add(moduleInfo);
+
         private byte[] ReadBytes(string fileName) => loader?.ReadBytes(fileName);
 
-        private void Start()
+        private IEnumerator Start()
         {
             loader?.PreLoad();
 
@@ -94,18 +96,21 @@ namespace SharpLuna.Unity
             {
                 Run(startFile);
             }
+
+            yield return OnStart();
         }
 
-        void OnPreInit()
+        protected virtual void OnInit()
         {
         }
 
-        void OnPostInit()
+        protected virtual void OnPostInit()
         {
-            luna.RegisterModel(mathTypes);
-            luna.RegisterModel(baseTypes);
-            luna.RegisterModel(customTypes);
+        }
 
+        protected virtual IEnumerator OnStart()
+        {
+            yield return null;
         }
 
         public void Run(string file)
