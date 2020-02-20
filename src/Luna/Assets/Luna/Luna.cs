@@ -129,7 +129,6 @@ namespace SharpLuna
 
             _classWrapers.Clear();
 
-            RefCountHelper.Collect();
             
         }
 
@@ -159,7 +158,6 @@ namespace SharpLuna
             
             _global.Dispose();
 
-            RefCountHelper.Clear();
             L.RemoveAll();
             Lua.CloseState(L);
             L = IntPtr.Zero;

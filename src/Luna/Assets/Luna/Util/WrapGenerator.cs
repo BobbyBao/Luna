@@ -26,7 +26,7 @@ namespace SharpLuna
             generatedTypes.Clear();
         }
 
-        public static void GenerateClassWrap(string module, Type type, bool genSuper, List<string> excludeMembers = null)
+        public static void GenerateClassWrap(string module, Type type, bool genSuper = false, List<string> excludeMembers = null)
         {
             string code = GenerateClass(module, type, genSuper, excludeMembers);
             string fileName = type.Name + "Wrap.cs";

@@ -653,7 +653,7 @@ namespace SharpLuna
         }
     }
 
-    public struct LuaTableRef : IRefCount
+    public class LuaTableRef : IDisposable
     {
         lua_State L;
         int _table;
@@ -664,20 +664,24 @@ namespace SharpLuna
             L = state;
             _table = table;
             _key = key;
-            Handle = 0;
-            Handle = this.Alloc();
+            L.AddRef(this);
         }
 
-        public uint Handle { get; set; }
-
+        ~LuaTableRef()
+        {
+            if(L.IsActive())
+            {
+                luaL_unref(L, LUA_REGISTRYINDEX, _key);
+                L.RemoveRef(this);
+            }
+        }
+        
         public void Dispose()
         {
-            this.Release();
-        }
-
-        public void InternalRelease()
-        {
             luaL_unref(L, LUA_REGISTRYINDEX, _key);
+            L.RemoveRef(this);
+
+            GC.SuppressFinalize(this);
         }
 
         public K Key<K>()
@@ -746,7 +750,7 @@ namespace SharpLuna
 
     }
 
-    public struct LuaTableEnumerator : IEnumerator<TableKeyValuePair>, IRefCount
+    public class LuaTableEnumerator : IEnumerator<TableKeyValuePair>//, IDisposable
     {
         lua_State L;
         int _table;
@@ -762,8 +766,17 @@ namespace SharpLuna
             _table = table;
             _key = LUA_NOREF;
             _value = LUA_NOREF;
-            Handle = 0;
-            Handle = this.Alloc();
+            L.AddRef(this);
+        }
+
+        ~LuaTableEnumerator()
+        {
+            if(L.IsActive())
+            {
+                luaL_unref(L, LUA_REGISTRYINDEX, _key);
+                luaL_unref(L, LUA_REGISTRYINDEX, _value);
+                L.RemoveRef(this);
+            }
         }
 
         public bool MoveNext()
@@ -797,20 +810,16 @@ namespace SharpLuna
             _value = LUA_NOREF;
         }
 
-        public uint Handle { get; set; }
-
         public void Dispose()
-        {
-            this.Release();
-        }
-
-        public void InternalRelease()
         {
             if (L != IntPtr.Zero)
             {
                 luaL_unref(L, LUA_REGISTRYINDEX, _key);
                 luaL_unref(L, LUA_REGISTRYINDEX, _value);
+                L.RemoveRef(this);
             }
+
+            GC.SuppressFinalize(this);
         }
 
     }

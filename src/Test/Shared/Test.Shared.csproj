@@ -23,10 +23,6 @@
     <ProjectReference Include="..\..\Luna\Assets\Luna\Luna.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Generate\" />
-  </ItemGroup>
-
   <Import Project="..\..\..\test\Test.projitems" Label="Shared" />
 
 </Project>

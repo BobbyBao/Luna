@@ -9,8 +9,9 @@ public class SampleClient : LunaClient
     [LunaExport]
     static ModuleInfo customTypes = new ModuleInfo
     {
-        typeof(LunaBehaviour),
         typeof(ResourceMananger),
+        typeof(LunaBehaviour),
+        typeof(Utility),
     };
 
     protected override void OnInit()

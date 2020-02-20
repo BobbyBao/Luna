@@ -39,7 +39,6 @@ namespace SharpLuna.Unity
             typeof(MonoBehaviour),
             typeof(Transform),
             typeof(Resources),
-            typeof(LunaBehaviour),
         };
 
         private Luna luna;

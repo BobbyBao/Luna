@@ -21,8 +21,10 @@ namespace Tests
             Luna.ReadBytes = ReadBytes;
 
             luna = new Luna();
-            luna.PreInit += Luna_PreInit;
             luna.PostInit += Luna_PostInit;
+            
+            GenerateWraps();
+
             luna.Run();
             luna.AddSearcher(Loader);           
         }
@@ -89,14 +91,9 @@ namespace Tests
         public void Run()
         {
             luna.DoFile("test.luna");
-
-            Luna.Log("LiveCount:", RefCountHelper.LiveCount, "FreeCount:", RefCountHelper.FreeCount);
-            RefCountHelper.Collect();
-
-            Luna.Log("LiveCount:", RefCountHelper.LiveCount, "FreeCount:", RefCountHelper.FreeCount);
         }
 
-        private void Luna_PreInit()
+        private void GenerateWraps()
         {
             string path = "../../../../Test/Shared/Generate/";
 
@@ -155,7 +152,7 @@ namespace Tests
                 Luna.Log(e.Key<string>());
             }
 
-            Luna.Log("LiveCount:", RefCountHelper.LiveCount, "FreeCount:", RefCountHelper.FreeCount);
+            it.Dispose();
         }
 
     }

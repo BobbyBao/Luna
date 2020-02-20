@@ -159,16 +159,17 @@ namespace Assets.Editor
 
             string parentPath = parent.fullPath;
 
-            foreach (var t in parentLuaRef)
+            var it = parentLuaRef.GetEnumerator();
+            while (it.MoveNext())
             {
-                var key = t.Key();
+                var key = it.Current.Key();
                 var k = key.ToString();
                 if (k == "_G")
                 {
                     continue;
                 }
 
-                var v = t.Value();
+                var v = it.Current.Value();
 
                 string fullPath = string.Join(".", parentPath, k);
                 int hash = fullPath.GetHashCode();
@@ -198,6 +199,8 @@ namespace Assets.Editor
                 }
 
             }
+            
+            it.Dispose();
 
             parent.children?.Sort();
         }
