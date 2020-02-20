@@ -5,10 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class ResourceMananger : MonoBehaviour
+public class ResourceManager : MonoBehaviour
 {
     static IAssetLoader assetLoader;
-    static ResourceMananger instance;
+    static ResourceManager instance;
     private void Awake()
     {
         instance = this;      

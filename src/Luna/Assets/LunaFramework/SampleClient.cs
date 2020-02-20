@@ -9,15 +9,18 @@ public class SampleClient : LunaClient
     [LunaExport]
     static ModuleInfo customTypes = new ModuleInfo
     {
-        typeof(ResourceMananger),
-        typeof(LunaBehaviour),
-        typeof(Utility),
+        typeof(ResourceManager),
+        //typeof(LunaBehaviour),
+        typeof(LunaHelper),
+        typeof(UIManager),
+        //typeof(UIPanel),
     };
 
     protected override void OnInit()
     {          
-        gameObject.AddComponent<ResourceMananger>();
-        
+        gameObject.AddComponent<ResourceManager>();
+        gameObject.AddComponent<UIManager>();
+
         this.AddModule(customTypes);
 
     }

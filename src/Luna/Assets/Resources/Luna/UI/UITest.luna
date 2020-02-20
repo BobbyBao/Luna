@@ -1,0 +1,39 @@
+
+import "UIPanel"
+
+class UITest : UIPanel {
+
+    init(uiFile) {
+        super.init("Test", uiFile)
+    }
+
+    func enter() {
+    
+        if self.gameObject == nil {
+             UIManager.Instance.OpenPanel("UI/TestPanel", self.onLoad, self)
+        }
+
+    }
+
+    func onLoad(go) {
+        self.gameObject = go
+        print("onload", self.gameObject)
+        
+        //print(getmetatable(self.gameObject))
+        print(self.gameObject.name)
+        self.gameObject.SetActive(true)
+    }
+
+    func exit() {  
+
+        if self.gameObject != nil {  
+            self.gameObject.SetActive(false)    
+        }
+
+    }
+
+	func shutdown() {
+		print "shutdown"
+	}
+
+}

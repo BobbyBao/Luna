@@ -16,9 +16,13 @@ namespace SharpLuna.Unity
         LuaRef scriptClass;
         LuaRef scriptInstance;
 
+        LuaRef onEnableFn;
+        LuaRef onDisableFn;
+        LuaRef updateFn;
+
         public LuaRef ScriptInstance => scriptInstance;
 
-        void Awake()
+        protected virtual void Awake()
         {
             if(!string.IsNullOrEmpty(luaPath))
             {
@@ -52,7 +56,8 @@ namespace SharpLuna.Unity
                         return;
                     }
                 }
-                
+
+
                 var metaTable = scriptClass.GetMetaTable();             
                 if(metaTable)
                 {                  
@@ -65,8 +70,15 @@ namespace SharpLuna.Unity
                     Debug.Log("GetMetaTable failed : " + className);
                 }
 
+                //scriptInstance.Set("gameObject", gameObject);
+                //scriptInstance.Set("transform", gameObject.transform);
+                //scriptInstance.Set("behaviour", this);
+
+                onEnableFn = scriptClass.Get("onEnable");
+                onDisableFn = scriptClass.Get("onDisable");
+                updateFn = scriptClass.Get("update");
+
                 CallFunc("awake");
-                
             }
         }
 
@@ -90,25 +102,31 @@ namespace SharpLuna.Unity
 
         void Update()
         {
-            //CallFunc("update");
+            if(updateFn)
+                updateFn.Call(scriptInstance);
         }
 
         protected virtual void OnEnable()
         {
-            CallFunc("onEnable");
+            if (onEnableFn)
+                onEnableFn.Call(scriptInstance);
         }
 
         protected virtual void OnDisable()
         {
-            CallFunc("onDisable");
+            if (onDisableFn)
+                onDisableFn.Call(scriptInstance);
         }
 
-        void OnDestroy()
+        protected virtual void OnDestroy()
         {
             if(LunaClient.Luna != null)
             {
-
                 CallFunc("onDestroy");
+                
+                updateFn?.Dispose();
+                onEnableFn?.Dispose();
+                onDisableFn?.Dispose();
 
                 scriptClass.Dispose();
                 scriptInstance.Dispose();

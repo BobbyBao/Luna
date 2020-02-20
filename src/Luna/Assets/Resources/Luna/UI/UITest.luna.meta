@@ -1,0 +1,10 @@
+fileFormatVersion: 2
+guid: 63a0c598e9568a84fbd082d934982535
+ScriptedImporter:
+  fileIDToRecycleName:
+    11400000: UITest
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 8c8bb0eda8f80364892e0855d811753a, type: 3}

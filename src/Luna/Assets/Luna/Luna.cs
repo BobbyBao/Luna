@@ -738,7 +738,7 @@ class List {
 	}
 
 	func append(i) {
-		self:push(i)
+		self.push(i)
 		return self
 	}
 

@@ -1,0 +1,16 @@
+import "Behaviour"
+
+class UIPanel : Behaviour {
+    var gameObject = nil
+    var uiFile = nil
+
+    init(n, uiFile) {
+        //super.init(n)
+        self.name = n
+        self.uiFile = uiFile
+        self.gameObject = nil
+    }
+
+
+
+}

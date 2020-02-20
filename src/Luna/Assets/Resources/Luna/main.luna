@@ -1,22 +1,15 @@
+import "Behaviour"
+import "GameState"
+import "UI/UITest"
 
-let GameObject = UnityEngine.GameObject
+let MainState = GameState("main")
+let test = UITest("UI/TestPanel")
 
-func TestIndex(){	
+print(MainState.name)
 
-	var t = os.clock()
-    var go = GameObject()	
-    let node = go.transform
+MainState.addChild(test)
+MainState.transit(test)
 
-	for i = 1,100000 {		
-        //go = GameObject()
-		go = node.gameObject				
-	}
-	
-	t = os.clock() - t
-	print("TestIndex luna cost time: ", t)	
-}
 
-//TestIndex()
-
-let obj = UnityEngine.Resources.Load("UI/Panel")
-let go = GameObject.Instantiate(obj)
+let obj = UnityEngine.Resources.Load("UI/TestPanel")
+let go = UnityEngine.GameObject.Instantiate(obj)
