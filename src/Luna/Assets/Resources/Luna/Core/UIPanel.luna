@@ -8,8 +8,71 @@ class UIPanel : Behaviour {
         super.init(n)
         self.uiFile = uiFile
         self.gameObject = nil
+        self.eventObjects = {}
     }
 
+    func addClickByName(name, clickFn) {
+        var child = LunaHelper.FindChild(self.gameObject, name)
+        self.eventObjects[child] = 1
+        LunaHelper.AddClick(child, clickFn, self)
+        return child
+    }
+
+    func addClick(child, clickFn) {
+        self.eventObjects[child] = 1
+        LunaHelper.AddClick(child, clickFn, self)
+    }
+    
+    func removeEvent(child, evtFn) {
+        LunaHelper.RemoveAction(child, evtFn)
+    }
+
+    func removeAllEvent(child) {
+        LunaHelper.RemoveAction(child, nil)
+    }
+
+    func removeAllEvents() {
+        for k, _ in pairs(self.eventObjects) {
+            LunaHelper.RemoveAction(k, nil)
+            table.remove(self.eventObjects, k)
+        }
+    }
+
+    func remove(evtFn) {
+        LunaHelper.RemoveAction(self, evtFn)
+    }
+
+    func enter() {
+    
+        if self.gameObject == nil {
+            UIManager.Instance.OpenPanel(self.uiFile, self.Load, self)
+        }
+
+    }
+
+    func Load(go) {
+     
+        self.gameObject = go
+        self.gameObject.SetActive(true)
+
+        self.onLoad(go)
+    }
+
+    func onLoad(go) {
+        
+    }
+
+    func exit() {  
+
+        if self.gameObject != nil {  
+            self.gameObject.SetActive(false)    
+        }
+
+    }
+
+	func shutdown() {
+        removeAllEvents()
+	}
 
 
 }

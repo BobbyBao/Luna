@@ -120,7 +120,7 @@ namespace SharpLuna
                 return;
             }
 #endif
-            AllocObject(L, Signature<T>(), obj);
+            AllocObject(L, Signature(obj), obj);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

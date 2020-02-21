@@ -573,11 +573,12 @@ namespace SharpLuna
             lua_pushcfunction(L, LuaException.traceback);
             f.PushToStack();
             PushArg(L, args);
-            if (lua_pcall(L, args.Length, 1, -args.Length + 2) != (int)LuaStatus.OK)
+            if (lua_pcall(L, args.Length, 0, -args.Length + 2) != (int)LuaStatus.OK)
             {
                 lua_remove(L, -2);
                 throw new LuaException(L);
             }
+            lua_pop(L, 1);
         }
 
         static R Invoke<R>(lua_State L, LuaRef f, params object[] args)

@@ -17,85 +17,14 @@ namespace SharpLuna.Unity
     {
         private static Dictionary<object, List<LuaRef>> actions = new Dictionary<object, List<LuaRef>>();
 
-
-        private static Assembly assembly_Current;
-        private static Assembly assembly_UnityEngine;
-        private static Assembly assembly_UnityEngineUI;
-        private static Assembly assembly_Code;
-
-        public static Component AddComponent(GameObject go, string typeName, string nameSpace)
+        public static Component AddComponent(GameObject go, string type, string nameSpace)
         {
-            Type type = null;
-            if (string.IsNullOrEmpty(nameSpace))
-            {
-                type = Type.GetType(typeName);
-                if (type == null)
-                {
-                    type = Type.GetType("UnityEngine." + typeName);
-                    if (type == null)
-                        type = Type.GetType("UnityEngine.UI" + typeName);
-                }
-            }
-            else
-            {
-                type = Type.GetType(nameSpace + "." + typeName);
-            }
-
-            if (type == null)
-            {
-                if (assembly_Current == null)
-                    assembly_Current = Assembly.GetExecutingAssembly();
-                type = TryGetType(assembly_Current, typeName, nameSpace);
-                if (type == null)
-                {
-                    if (assembly_UnityEngine == null)
-                        assembly_UnityEngine = Assembly.Load("UnityEngine");
-                    type = TryGetType(assembly_UnityEngine, typeName, nameSpace);
-                    if (type == null)
-                    {
-                        if (assembly_UnityEngineUI == null)
-                            assembly_UnityEngineUI = Assembly.Load("UnityEngine.UI");
-                        type = TryGetType(assembly_UnityEngineUI, typeName, nameSpace);
-                    }
-                }
-                if (type == null)
-                {
-                    Debug.LogError("我尽力了~~~取不到这个类型：" + typeName);
-                    return null;
-                }
-                else
-                {
-                    return go.AddComponent(type);
-                }
-            }
-            else
-            {
-                return go.AddComponent(type);
-            }
+            return UnityHelper.AddComponent(go, type, null);
         }
 
         public static Component AddComponent(GameObject go, string type)
         {
-            return AddComponent(go, type, null);
-        }
-
-        private static Type TryGetType(Assembly assembly, string typeName, string nameSpace)
-        {
-            if (string.IsNullOrEmpty(nameSpace))
-            {
-                Type type = null;
-                type = assembly.GetType(typeName);
-                if (type == null)
-                    type = assembly.GetType("UnityEngine." + typeName);
-                if (type == null)
-                    type = assembly.GetType("UnityEngine.UI." + typeName);
-                return type;
-            }
-            else
-            {
-                string fullName = nameSpace + "." + typeName;
-                return assembly.GetType(fullName);
-            }
+            return UnityHelper.AddComponent(go, type, null);
         }
 
         public static Component GetOrAddComponent(GameObject go, string type, string nameSpace)
@@ -119,30 +48,20 @@ namespace SharpLuna.Unity
             return go.FindChild(name);
         }
 
+        public static Component FindComponent(GameObject go, string name, string type)
+        {
+            return go.FindComponent(name, type);
+        }
+
         public static void AddChild(GameObject parent, GameObject child)
         {
             child.transform.SetParent(parent.transform, false);
         }
 
-        public static void SetLayer(GameObject go, string layerName)
-        {
-            SetLayer(go, LayerMask.NameToLayer(layerName));
-        }
-
-        public static void SetLayer(GameObject go, int layer)
-        {
-            go.layer = layer;
-
-            UnityHelper.RecurseAll<int>(go.transform, (t, l) =>
-            {
-                t.gameObject.layer = l;
-            }, layer);
-        }
-
-        private static void CacheLuaFunction(object go, LuaFunction luaFunc)
+        private static void CacheLuaFunction(object obj, LuaFunction luaFunc)
         {
             List<LuaFunction> functions = null;
-            if (actions.TryGetValue(go, out functions))
+            if (actions.TryGetValue(obj, out functions))
             {
                 functions.Add(luaFunc);
             }
@@ -150,23 +69,16 @@ namespace SharpLuna.Unity
             {
                 functions = new List<LuaFunction>();
                 functions.Add(luaFunc);
-                actions.Add(go, functions);
+                actions.Add(obj, functions);
             }
         }
 
-        public static void AddClick(LuaRef self, GameObject go, LuaFunction luaFunc)
-        {
-            CacheLuaFunction(self, luaFunc);
-
-            go.GetComponent<Button>().onClick.AddListener(() => luaFunc.Call(self, go));
-        }
-
-        public static void AddEventTrigger(LuaRef self, GameObject go, EventTriggerType eventTriggerType, LuaFunction luaFunc)
+        public static void AddEventTrigger(GameObject go, EventTriggerType eventTriggerType, LuaFunction luaFunc, LuaRef self)
         {
             if (go == null || luaFunc == null)
                 return;
 
-            CacheLuaFunction(self, luaFunc);
+            CacheLuaFunction(go, luaFunc);
 
             UnityAction<BaseEventData> click = (data) =>
             {
@@ -194,7 +106,7 @@ namespace SharpLuna.Unity
             trigger.triggers.Add(eventTrigger);
         }
 
-        public static void RemoveEventTrigger(LuaRef self, GameObject go, EventTriggerType eventTriggerType, LuaFunction luaFunc)
+        public static void RemoveEventTrigger(GameObject go, EventTriggerType eventTriggerType, LuaFunction luaFunc)
         {
             if (go == null)
                 return;
@@ -219,20 +131,20 @@ namespace SharpLuna.Unity
             {
                 eventTrigger.callback.RemoveAllListeners();
                 trigger.triggers.Remove(eventTrigger);
-                RemoveAction(self, luaFunc);
+                RemoveAction(go, luaFunc);
             }
         }
 
-        public static void RemoveAction(LuaRef self, LuaFunction luaFunc)
+        public static void RemoveAction(GameObject go, LuaFunction luaFunc)
         {
             List<LuaFunction> luafuncs = null;
-            if (actions.TryGetValue(self, out luafuncs))
+            if (actions.TryGetValue(go, out luafuncs))
             {
-                if(luaFunc == null)
+                if (luaFunc == null)
                 {
                     for (int i = 0; i < luafuncs.Count; i++)
                     {
-                        luafuncs[i].Dispose();                            
+                        luafuncs[i].Dispose();
                     }
 
                     luafuncs.Clear();
@@ -268,6 +180,88 @@ namespace SharpLuna.Unity
 
             actions.Clear();
         }
+
+        public static void AddClick(GameObject go, LuaFunction luaFunc, LuaRef self)
+        {
+            CacheLuaFunction(go, luaFunc);
+            go.GetComponent<Button>().onClick.AddListener(() => luaFunc.Call(self, go));
+        }
+
+        public static void ButtonListener(Button btn, LuaFunction luaFunc, LuaRef self)
+        {
+            CacheLuaFunction(btn, luaFunc);
+            btn.onClick.AddListener(() => luaFunc.Call(self));
+        }
+
+        public static void DropdownListener(Dropdown dropdown, LuaFunction func, LuaRef self)
+        {
+            CacheLuaFunction(dropdown, func);
+            dropdown.onValueChanged.RemoveAllListeners();
+            dropdown.onValueChanged.AddListener((val) =>
+            {
+                func.Call(self, val);
+            });
+        }
+
+        public static void SliderListener(Slider slider, LuaFunction func, LuaRef self)
+        {
+            CacheLuaFunction(slider, func);
+            slider.onValueChanged.RemoveAllListeners();
+            slider.onValueChanged.AddListener((val) =>
+            {
+                func.Call(self, val);
+            });
+        }
+
+        public static void ToggleListener(Toggle toggle, LuaFunction func, LuaRef self)
+        {
+            CacheLuaFunction(toggle, func);
+            toggle.onValueChanged.RemoveAllListeners();
+            toggle.onValueChanged.AddListener((val) =>
+            {
+                func.Call(self, val);
+            });
+        }
+
+        public static void InputFieldListener(InputField inputfield, LuaFunction func, LuaRef self)
+        {
+            CacheLuaFunction(inputfield, func);
+            inputfield.onValueChanged.RemoveAllListeners();
+            inputfield.onValueChanged.AddListener((val) =>
+            {
+                func.Call(self, val);
+            });
+        }
+
+        public static void ScrollbarListener(Scrollbar scrollbar, LuaFunction func, LuaRef self)
+        {
+            CacheLuaFunction(scrollbar, func);
+            scrollbar.onValueChanged.RemoveAllListeners();
+            scrollbar.onValueChanged.AddListener((val) =>
+            {
+                func.Call(self, val);
+            });
+        }
+
+        public static void ScrollRectListener(ScrollRect sr, LuaFunction func, LuaRef self)
+        {
+            CacheLuaFunction(sr, func);
+            sr.onValueChanged.AddListener((vc2) =>
+            {
+                func.Call(self, vc2);
+            });
+        }
+
+        public static void InputFieldEndEdit(InputField inputfield, LuaFunction func, LuaRef self)
+        {
+            CacheLuaFunction(inputfield, func);
+            inputfield.onEndEdit.RemoveAllListeners();
+            inputfield.onEndEdit.AddListener((val) =>
+            {
+                func.Call(self, val);
+            });
+        }
+
 
     }
 }

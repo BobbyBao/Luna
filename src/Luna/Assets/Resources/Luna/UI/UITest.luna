@@ -2,41 +2,27 @@
 import "UIPanel"
 
 class UITest : UIPanel {
+    var btn1 = nil
+    var btn2 = nil
+    var btn3 = nil
+    var btn4 = nil
 
     init(uiFile) {
         super.init("Test", uiFile)
     }
 
-    func enter() {
-    
-        if self.gameObject == nil {
-            self.gameObject = UIManager.Instance.LoadPanel("UI/TestPanel")
-
-        }
-         
-        self.gameObject.SetActive(true)
-
-    }
-
     func onLoad(go) {
-        self.gameObject = go
-        print("onload", self.gameObject)
-        
-        //print(getmetatable(self.gameObject))
-        print(self.gameObject.name)
-        self.gameObject.SetActive(true)
+        super.onLoad(go)
+
+        self.btn1 = self.addClickByName("Buttons/Button1", self.onButtonClick)
+        self.btn2 = self.addClickByName("Buttons/Button2", self.onButtonClick)
+        self.btn3 = self.addClickByName("Buttons/Button3", self.onButtonClick)
+        self.btn4 = self.addClickByName("Buttons/Button4", self.onButtonClick)
+        self.btn5 = self.addClickByName("Buttons/Button5", self.onButtonClick)
+        self.btn6 = self.addClickByName("Buttons/Button6", self.onButtonClick)
     }
 
-    func exit() {  
-
-        if self.gameObject != nil {  
-            self.gameObject.SetActive(false)    
-        }
-
+    func onButtonClick(go) {
+        print(go.name)
     }
-
-	func shutdown() {
-		print "shutdown"
-	}
-
 }
