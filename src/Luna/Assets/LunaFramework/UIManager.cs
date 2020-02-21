@@ -16,6 +16,14 @@ public class UIManager : MonoBehaviour
 
     }
 
+    public GameObject LoadPanel(string filePath)
+    {
+        var go = ResourceManager.LoadObject(filePath);       
+        m_uiMap[filePath] = go;
+        go.transform.SetParent(transform, false);
+        return go;
+    }
+
     public void OpenPanel(string filePath, LuaRef fn, LuaRef inst)
     {
         OpenPanel(filePath, (go)=>

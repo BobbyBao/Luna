@@ -10,8 +10,11 @@ class UITest : UIPanel {
     func enter() {
     
         if self.gameObject == nil {
-             UIManager.Instance.OpenPanel("UI/TestPanel", self.onLoad, self)
+            self.gameObject = UIManager.Instance.LoadPanel("UI/TestPanel")
+
         }
+         
+        self.gameObject.SetActive(true)
 
     }
 

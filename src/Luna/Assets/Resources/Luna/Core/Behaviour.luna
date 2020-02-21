@@ -10,11 +10,13 @@ class Behaviour {
     var name = ""
     var parent = nil
     var state = 0
-    var children = nil
-    var activeList = nil
+    //var children = nil
+    //var activeList = nil
 
     init(n) {
         self.name = n
+        self.children = List()
+        self.activeList = List()
     }
 
     func enter() {
@@ -27,24 +29,16 @@ class Behaviour {
     }
 
     func addChild(child) {
-        if self.children == nil {
-            self.children = List()
-        }
         child.parent = self
         self.children.append(child)
     }
 
     func removeChild(child) {
-        if self.children != nil {
-            child.parent = nil
-            self.children.remove(child)
-        }
+        child.parent = nil
+        self.children.remove(child)    
     }
 
     func transit(behaviour) {    
-        if self.activeList == nil {
-            self.activeList = List()
-        }
         self.activeList.push(behaviour)
         behaviour.enter()
     }

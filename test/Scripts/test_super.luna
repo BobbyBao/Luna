@@ -1,0 +1,52 @@
+//测试super关键字
+
+class BaseObj {
+	var id = 0
+
+	init() {
+		self.id = 1000
+	}
+
+	func testFunc(a) {
+		print("BaseObj testFunc", a)
+	}
+}
+
+class GameObj : BaseObj {
+	var name = ""
+
+	init(n) {
+		super.init()
+		self.name = n
+	}
+
+	func testFunc(a) {
+		super.testFunc(a)
+		print("GameObj testFunc", a)
+	}
+
+}
+
+class Character : GameObj {
+		
+	init(n) {
+
+		print("character init", self.name)
+
+		super.init(n)
+		
+		print("character init", self.name)
+
+	}
+
+	func testFunc(a) {
+
+		super.testFunc(a)
+
+		print("Character testFunc", a)
+	}
+
+}
+
+let t = Character("test name")
+t.testFunc("test arg")

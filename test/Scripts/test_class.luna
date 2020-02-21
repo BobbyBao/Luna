@@ -45,6 +45,10 @@ class Obj : BaseObj {
 	func print() {
 		super.print()
 	}
+
+	func __close() {	
+		print("obj close")	
+	}
 }
 
 
@@ -56,53 +60,10 @@ print(tt.staticVar)
 
 t.print()
 
-class GameObj : BaseObj {
-	var name = ""
-
-	init(n) {
-		self.name = n
-	}
-
-	func testFunc(a) {
-		print("GameObj testFunc", a)
-	}
-
-	func __close() {	
-		print("object close")	
-	}
-}
-
 //测试using关键字
 do {
-	using t = GameObj("GameObject")
+	using t = Obj("Object4", 444)
 	print(t)
 }
 
-//测试super关键字
-class Character : GameObj {
-		
-	init(n) {
-		print("character init", n)
-		super.init(n)
-	}
 
-	func testFunc(a) {
-		super.testFunc(a)
-		print("Character testFunc", a)
-	}
-
-}
-
-let t = Character("test name")
-t.testFunc("test arg")
-
-
-import "vec3"
-
-let t = """
-shader {
-	name = "test"
-}
-""";
-
-print(t)

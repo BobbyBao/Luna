@@ -70,9 +70,9 @@ namespace SharpLuna.Unity
                     Debug.Log("GetMetaTable failed : " + className);
                 }
 
-                //scriptInstance.Set("gameObject", gameObject);
-                //scriptInstance.Set("transform", gameObject.transform);
-                //scriptInstance.Set("behaviour", this);
+                scriptInstance.Set("gameObject", gameObject);
+                scriptInstance.Set("transform", gameObject.transform);
+                scriptInstance.Set("behaviour", this);
 
                 onEnableFn = scriptClass.Get("onEnable");
                 onDisableFn = scriptClass.Get("onDisable");

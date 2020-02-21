@@ -379,7 +379,7 @@ namespace SharpLuna
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Get(lua_State L, int index, out bool v)
         {
-            v = luaL_checkinteger(L, index) != 0;
+            v = lua_toboolean(L, index) != 0;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

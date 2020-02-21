@@ -5,8 +5,7 @@ class UIPanel : Behaviour {
     var uiFile = nil
 
     init(n, uiFile) {
-        //super.init(n)
-        self.name = n
+        super.init(n)
         self.uiFile = uiFile
         self.gameObject = nil
     }

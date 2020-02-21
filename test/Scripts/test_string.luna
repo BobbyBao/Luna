@@ -1,0 +1,8 @@
+
+let t = """
+shader {
+	name = "test"
+}
+""";
+
+print(t)
