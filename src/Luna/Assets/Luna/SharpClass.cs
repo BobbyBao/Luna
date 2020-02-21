@@ -310,20 +310,34 @@ namespace SharpLuna
             if (!wrapCtor)
             {
                 var ctors = classType.GetConstructors();
-                foreach (var ctor in ctors)
+                List<MethodBase> memberInfo = new List<MethodBase>();
+                foreach (var constructorInfo in ctors)
                 {
-                    if (!ctor.IsPublic)
+                    if (!constructorInfo.IsPublic)
                     {
                         continue;
                     }
 
-                    if (!ctor.ShouldExport())
+                    if (!constructorInfo.ShouldExport())
                     {
                         continue;
                     }
 
-                    RegConstructor(classType, ctor);
+                    var paramInfos = constructorInfo.GetParameters();
+                    foreach (var info in paramInfos)
+                    {
+                        if (!info.ParameterType.ShouldExport())
+                        {
+                            continue;
+                        }
+                    }
+
+                    memberInfo.Add(constructorInfo);
+                    //RegConstructor(classType, ctor);
                 }
+
+                if(memberInfo.Count > 0)
+                    RegMethod("__call", memberInfo.ToArray());
             }
 
             var props = classType.GetProperties();
@@ -377,11 +391,11 @@ namespace SharpLuna
                     continue;
                 }
 
-                var memberInfo = classType.GetMember(m.Name).Cast<MethodInfo>().ToArray();               
+                var memberInfo = classType.GetMember(m.Name).Cast<MethodBase>().ToArray();               
                 registered.Add(m.Name);
                 if (memberInfo.Length > 0)
                 {
-                    RegMethod(memberInfo);
+                    RegMethod(m.Name, memberInfo);
                 }
             }
         }
@@ -403,6 +417,7 @@ namespace SharpLuna
             return this;
         }
 
+       /*
         public SharpClass RegConstructor(Type type, ConstructorInfo constructorInfo)
         {
             var paramInfos = constructorInfo.GetParameters();
@@ -413,7 +428,7 @@ namespace SharpLuna
                     return this;
                 }
             }
-
+     
             try
             {
                 if (paramInfos.Length == 0)
@@ -431,9 +446,10 @@ namespace SharpLuna
             }
 
             Luna.LogWarning("注册反射版的Constructor : " + type.Name);
+
             meta.RawSet("__call", LuaRef.CreateFunction(State, Constructor.Call, constructorInfo));
             return this;
-        }
+        }*/
 
         public SharpClass RegField(FieldInfo fieldInfo)
         {
@@ -458,7 +474,7 @@ namespace SharpLuna
                 return this;
             }
           
-            Luna.LogWarning("注册反射版的field : " + fieldInfo.Name);
+            //Luna.LogWarning("注册反射版的field : " + fieldInfo.Name);
 
             if (fieldInfo.IsStatic)
             {
@@ -531,6 +547,8 @@ namespace SharpLuna
                 SetReadOnly(propertyInfo.Name);
             }
 
+            //todo: Reflection
+
             return this;
         }
 
@@ -597,10 +615,9 @@ namespace SharpLuna
             return this;
         }
 
-        public SharpClass RegMethod(MethodInfo[] methodInfo)
+        public SharpClass RegMethod(string name, MethodBase[] methodInfo)
         {
             LuaRef luaFun = LuaRef.Empty;
-            string name = methodInfo[0].Name;
             /*
             if (methodInfo.Length == 1)
             {                  

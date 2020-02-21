@@ -9,35 +9,6 @@ namespace SharpLuna
     using static Lua;
     using lua_State = IntPtr;
 
-    public struct Constructor
-    {
-        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        public static int Call(lua_State L)
-        {
-            try
-            {
-                int n = lua_gettop(L);
-                ConstructorInfo fn = ToLightObject<ConstructorInfo>(L, lua_upvalueindex(1), false);
-                //忽略self
-                object[] args = new object[n - 1];
-                for (int i = 2; i <= n; i++)
-                {
-                    args[i - 2] = GetObject(L, i);
-                }
-
-                object ret = fn.Invoke(args);
-                Push(L, ret);
-                return 1;
-
-            }
-            catch (Exception e)
-            {
-                return luaL_error(L, e.Message);
-            }
-        }
-
-    }
-
     public struct Constructor<T> where T : new()
     {
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
@@ -216,10 +187,10 @@ namespace SharpLuna
     public class Method
     {
         public string methodName;
-        public MethodInfo[] methodInfo;
+        public MethodBase[] methodInfo;
         public ParameterInfo[][] parameters;
         public object[][] args;
-        public Method(MethodInfo[] methodInfo)
+        public Method(MethodBase[] methodInfo)
         {
             methodName = methodInfo[0].Name;
             this.methodInfo = methodInfo;
@@ -238,7 +209,7 @@ namespace SharpLuna
             try
             {
                 int n = lua_gettop(L);
-                MethodInfo methodInfo = null;
+                MethodBase methodInfo = null;
                 ParameterInfo[] parameterInfo = null;
                 object[] args = null;
                 Method method = ToLightObject<Method>(L, lua_upvalueindex(1), false);
@@ -291,17 +262,29 @@ namespace SharpLuna
                     args[i] = GetObject(L, i + StackStart, parameterInfo[i].ParameterType);
                 }
 
-                object ret = methodInfo.Invoke(obj, args);
-                Array.Clear(args, 0, args.Length);
-                if (methodInfo.ReturnType != typeof(void))
+                if(methodInfo.IsConstructor)
                 {
+                    object ret = ((ConstructorInfo)methodInfo).Invoke(args);
+                    Array.Clear(args, 0, args.Length);
                     Push(L, ret);
                     return 1;
                 }
                 else
                 {
-                    return 0;
+                    object ret = methodInfo.Invoke(obj, args);
+                    Array.Clear(args, 0, args.Length);
+
+                    if (ret != null)//methodInfo.ReturnType != typeof(void))
+                    {
+                        Push(L, ret);
+                        return 1;
+                    }
+                    else
+                    {
+                        return 0;
+                    }
                 }
+
 
             }
             catch (Exception e)

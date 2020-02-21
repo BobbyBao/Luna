@@ -41,10 +41,10 @@ namespace SharpLuna
 
         public static bool ShouldExport(this Type t)
         {
-            if (t.IsGenericType)
-            {
-                return false;
-            }
+            //if (t.IsGenericType)
+            //{
+            //    return false;
+            //}
 
             if (t.IsByRef || t.IsPointer)
             {

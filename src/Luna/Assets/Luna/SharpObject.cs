@@ -232,6 +232,13 @@ namespace SharpLuna
 //                 return GetUnmanaged<T>(L, index);
 //             }
 
+            if(typeof(T).IsSubclassOf(typeof(Delegate)))
+            {
+                //to do: function to Delegate convert
+
+            }
+
+
             var handle = GetHandler(L, index);
 #if LUA_WEAKTABLE
             return (T)freeList[(int)handle];
@@ -243,6 +250,9 @@ namespace SharpLuna
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static unsafe long GetHandler(lua_State L, int index)
         {
+
+
+
             var ptr = lua_touserdata(L, index);
 #if DEBUG
             if (ptr == IntPtr.Zero)
