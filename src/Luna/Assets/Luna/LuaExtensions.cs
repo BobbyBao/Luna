@@ -538,7 +538,7 @@ namespace SharpLuna
             else if (t == typeof(LuaRef))
             {
                 if (lua_isnone(L, index))
-                    return Convert.To<T>(LuaRef.None);
+                    return (T)(object)null;// Convert.To<T>(LuaRef.None);
                 else
                     return Convert.To<T>(new LuaRef(L, index));
             }

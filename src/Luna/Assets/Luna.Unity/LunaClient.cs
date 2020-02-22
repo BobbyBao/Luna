@@ -38,6 +38,7 @@ namespace SharpLuna.Unity
             typeof(Component),
             typeof(MonoBehaviour),
             typeof(Transform),
+            typeof(RectTransform),
             typeof(Resources),
         };
 

@@ -271,10 +271,11 @@ namespace SharpLuna
                 }
                 else
                 {
+                    MethodInfo mi = methodInfo as MethodInfo;
                     object ret = methodInfo.Invoke(obj, args);
                     Array.Clear(args, 0, args.Length);
 
-                    if (ret != null)//methodInfo.ReturnType != typeof(void))
+                    if (mi.ReturnType != typeof(void))
                     {
                         Push(L, ret);
                         return 1;

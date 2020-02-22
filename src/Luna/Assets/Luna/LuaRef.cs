@@ -116,10 +116,10 @@ namespace SharpLuna
 
         public override int GetHashCode()
         {
-            var hashCode = 626460037;
-            hashCode = hashCode * -1521134295 + L.GetHashCode();
-            hashCode = hashCode * -1521134295 + _ref.GetHashCode();
-            return hashCode;
+            PushToStack();
+            var pointer = lua_topointer(L, -1);
+            lua_pop(L, 1);
+            return pointer.ToInt32();
         }
 
         public int CompareTo(LuaRef r)
@@ -134,6 +134,11 @@ namespace SharpLuna
 
         public bool Equals(LuaRef other)
         {
+            if(other == null)
+            {
+                return this == null;
+            }
+
             PushToStack();
             other.PushToStack();
             bool b = lua_compare(L, -2, -1, LuaCompare.Equal) != 0;
@@ -150,7 +155,7 @@ namespace SharpLuna
             return false;
         }
 
-        public static bool operator <(in LuaRef l, in LuaRef r)
+        public static bool operator < (LuaRef l, LuaRef r)
         {
             l.PushToStack();
             r.PushToStack();
@@ -159,7 +164,7 @@ namespace SharpLuna
             return b;
         }
 
-        public static bool operator <=(in LuaRef l, in LuaRef r)
+        public static bool operator <= (LuaRef l, LuaRef r)
         {
             l.PushToStack();
             r.PushToStack();
@@ -168,10 +173,8 @@ namespace SharpLuna
             return b;
         }
 
-        public static bool operator ==(in LuaRef l, in LuaRef r) => l.Equals(r);
-        public static bool operator !=(in LuaRef l, in LuaRef r) => !l.Equals(r);
-        public static bool operator >(in LuaRef l, in LuaRef r) => !(l <= r);
-        public static bool operator >=(in LuaRef l, in LuaRef r) => !(l < r);
+        public static bool operator >(LuaRef l, LuaRef r) => !(l <= r);
+        public static bool operator >=(LuaRef l, LuaRef r) => !(l < r);
 
         public static implicit operator bool(LuaRef luaRef)
         {

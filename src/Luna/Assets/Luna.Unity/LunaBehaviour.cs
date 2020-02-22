@@ -28,8 +28,6 @@ namespace SharpLuna.Unity
             {
                 var luna = LunaClient.Luna;
                 var L = luna.State;
-
-
                 int index = luaPath.LastIndexOf(".");
                 if (index != -1)
                 {
@@ -57,7 +55,6 @@ namespace SharpLuna.Unity
                     }
                 }
 
-
                 var metaTable = scriptClass.GetMetaTable();             
                 if(metaTable)
                 {                  
@@ -70,9 +67,9 @@ namespace SharpLuna.Unity
                     Debug.Log("GetMetaTable failed : " + className);
                 }
 
-                scriptInstance.Set("gameObject", gameObject);
-                scriptInstance.Set("transform", gameObject.transform);
-                scriptInstance.Set("behaviour", this);
+                scriptInstance["gameObject"] = gameObject;
+                scriptInstance["transform"] = gameObject.transform;
+                scriptInstance["behaviour"] = this;
 
                 onEnableFn = scriptClass.Get("onEnable");
                 onDisableFn = scriptClass.Get("onDisable");

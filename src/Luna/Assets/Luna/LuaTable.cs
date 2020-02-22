@@ -27,6 +27,45 @@ namespace SharpLuna
             return PopFromStack(L);
         }
 
+        public object this[int index]
+        {
+            get
+            {
+                return Get(index);
+            }
+
+            set
+            {
+                Set(index, value);
+            }
+        }
+
+        public object this[string index]
+        {
+            get
+            {
+                return Get(index);
+            }
+
+            set
+            {
+                Set(index, value);
+            }
+        }
+
+        public object this[object index]
+        {
+            get
+            {
+                return Get(index);
+            }
+
+            set
+            {
+                Set(index, value);
+            }
+        }
+
         public LuaRef GetMetaTable()
         {
             LuaRef meta = LuaRef.None;
@@ -226,34 +265,7 @@ namespace SharpLuna
             lua_pop(L, 1);
             return n;
         }
-
-        public LuaTableRef this[object key]
-        {
-            get
-            {
-                Lua.Push(L, key);
-                return new LuaTableRef(L, _ref, luaL_ref(L, LUA_REGISTRYINDEX));
-            }
-        }
-
-        public LuaTableRef this[int key]
-        {
-            get
-            {
-                Lua.Push(L, key);
-                return new LuaTableRef(L, _ref, luaL_ref(L, LUA_REGISTRYINDEX));
-            }
-        }
-
-        public LuaTableRef this[string key]
-        {
-            get
-            {
-                Lua.Push(L, key);
-                return new LuaTableRef(L, _ref, luaL_ref(L, LUA_REGISTRYINDEX));
-            }
-        }
-
+        
         public IEnumerator<TableKeyValuePair> GetEnumerator()
         {
             return new LuaTableEnumerator(L, _ref);
@@ -265,65 +277,7 @@ namespace SharpLuna
         }
 
     }
-
-
-    public class LuaTableRef : IDisposable
-    {
-        lua_State L;
-        int _table;
-        int _key;
-
-        public LuaTableRef(lua_State state, int table, int key)
-        {
-            L = state;
-            _table = table;
-            _key = key;
-            L.AddRef(this);
-        }
-
-        ~LuaTableRef()
-        {
-            if (L.IsActive())
-            {
-                luaL_unref(L, LUA_REGISTRYINDEX, _key);
-                L.RemoveRef(this);
-            }
-        }
-
-        public void Dispose()
-        {
-            luaL_unref(L, LUA_REGISTRYINDEX, _key);
-            L.RemoveRef(this);
-
-            GC.SuppressFinalize(this);
-        }
-
-        public K Key<K>()
-        {
-            lua_rawgeti(L, LUA_REGISTRYINDEX, _key);
-            return Lua.Pop<K>(L);
-        }
-
-        public void Set<V>(V value)
-        {
-            lua_rawgeti(L, LUA_REGISTRYINDEX, _table);
-            lua_rawgeti(L, LUA_REGISTRYINDEX, _key);
-            Lua.Push(L, value);
-            lua_settable(L, -3);
-            lua_pop(L, 1);
-        }
-
-        public T Value<T>()
-        {
-            lua_rawgeti(L, LUA_REGISTRYINDEX, _table);
-            lua_rawgeti(L, LUA_REGISTRYINDEX, _key);
-            lua_gettable(L, -2);
-            T v = Lua.Get<T>(L, -1);
-            lua_pop(L, 2);
-            return v;
-        }
-    }
-
+    
     public struct TableKeyValuePair
     {
         readonly int key;

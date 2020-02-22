@@ -10,7 +10,7 @@ public class SampleClient : LunaClient
     static ModuleInfo customTypes = new ModuleInfo
     {
         typeof(ResourceManager),
-        //typeof(LunaBehaviour),
+        typeof(LunaBehaviour),
         typeof(LunaHelper),
         typeof(UIManager),
         //typeof(UIPanel),

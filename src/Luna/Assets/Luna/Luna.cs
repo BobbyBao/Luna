@@ -420,9 +420,11 @@ namespace SharpLuna
 
                 return PopValues(L, oldTop);
             }
-            finally
+            catch(Exception e)
             {
+                Error(e.Message);
                 _executing = false;
+                return null;
             }
         }
 

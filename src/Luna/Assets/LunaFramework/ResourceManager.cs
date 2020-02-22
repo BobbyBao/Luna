@@ -17,7 +17,7 @@ public class ResourceManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        assetLoader.Dispose();
+        assetLoader?.Dispose();
         instance = null;
     }
 
