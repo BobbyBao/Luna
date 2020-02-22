@@ -617,7 +617,7 @@ namespace SharpLuna
 
         public SharpClass RegMethod(string name, MethodBase[] methodInfo)
         {
-            LuaRef luaFun = LuaRef.Empty;
+            LuaRef luaFun = null;
             /*
             if (methodInfo.Length == 1)
             {                  
@@ -659,7 +659,7 @@ namespace SharpLuna
                 return LuaRef.CreateFunction(State, luaFunc, del);
             }
 
-            return LuaRef.Empty;
+            return null;
         }
 
         public bool RegMethod(MethodInfo methodInfo, bool isProp, out LuaNativeFunction luaFunc, out Delegate del)

@@ -62,6 +62,8 @@ namespace SharpLuna
 
 #endif
 
+        static Dictionary<LuaRef, Delegate> delegateBridge = new Dictionary<LuaRef, Delegate>();
+
         public static void Init(lua_State L)
         {
 #if LUA_WEAKTABLE
@@ -213,6 +215,7 @@ namespace SharpLuna
 
         }
 
+        /*
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static object Get(lua_State L, int index)
         {
@@ -222,22 +225,22 @@ namespace SharpLuna
 #else
             return GCHandle.FromIntPtr((IntPtr)handle).Target;
 #endif
-        }
+        }*/
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T Get<T>(lua_State L, int index)
         {
-//             if (typeof(T).IsUnManaged())
-//             {
-//                 return GetUnmanaged<T>(L, index);
-//             }
-
-            if(typeof(T).IsSubclassOf(typeof(Delegate)))
+            //             if (typeof(T).IsUnManaged())
+            //             {
+            //                 return GetUnmanaged<T>(L, index);
+            //             }
+            /*
+            if (typeof(T).IsSubclassOf(typeof(Delegate)))
             {
                 //to do: function to Delegate convert
-
-            }
-
+                LuaRef func = Lua.Get<LuaRef>(L, index);
+                return (T)Converter.Convert(typeof(T), func);
+            }*/
 
             var handle = GetHandler(L, index);
 #if LUA_WEAKTABLE
@@ -248,12 +251,31 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static object Get(lua_State L, int index, Type t)
+        {
+            //todo: lua_topointer
+
+            if (t.IsSubclassOf(typeof(Delegate)))
+            {
+                //to do: function to Delegate convert
+                LuaRef func = Lua.Get<LuaRef>(L, index);
+                return Converter.Convert(t, func);
+            }
+
+
+            var handle = GetHandler(L, index);
+#if LUA_WEAKTABLE
+            return freeList[(int)handle];
+#else
+            return GCHandle.FromIntPtr((IntPtr)handle).Target;
+#endif
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static unsafe long GetHandler(lua_State L, int index)
         {
-
-
-
-            var ptr = lua_touserdata(L, index);
+            //var ptr = lua_touserdata(L, index);
+            var ptr = lua_topointer(L, index);
 #if DEBUG
             if (ptr == IntPtr.Zero)
             {

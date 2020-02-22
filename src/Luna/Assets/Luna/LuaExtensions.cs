@@ -271,9 +271,27 @@ namespace SharpLuna
                 case LuaType.Boolean:
                     return (bool)(lua_toboolean(L, index) != 0);
                 case LuaType.Table:
-                    return Get<LuaRef>(L, index);
+                    {
+                        var luaref = Get<LuaRef>(L, index);
+                        if (objtype != null)
+                        {
+                            var obj = Converter.Convert(objtype, luaref);
+                            if (obj != null)
+                                return obj;
+                        }
+                        return luaref;
+                    }
                 case LuaType.Function:
-                    return Get<LuaRef>(L, index);
+                    {
+                        var luaref = Get<LuaRef>(L, index);
+                        if (objtype != null)
+                        {
+                            var obj = Converter.Convert(objtype, luaref);
+                            if(obj != null)
+                                return obj;
+                        }            
+                        return luaref;
+                    }
                 case LuaType.LightUserData:
                     return ToLightObject<object>(L, index);
                 case LuaType.UserData:
@@ -480,12 +498,12 @@ namespace SharpLuna
             else
                 v = new LuaRef(L, index);
         }
-
+        /*
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Get(lua_State L, int index, out object v)
         {
             v = SharpObject.Get(L, index);
-        }
+        }*/
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Get<T>(lua_State L, int index, out T v)
@@ -540,10 +558,12 @@ namespace SharpLuna
                 if (lua_isnone(L, index))
                     return (T)(object)null;// Convert.To<T>(LuaRef.None);
                 else
-                    return Convert.To<T>(new LuaRef(L, index));
+                    return Converter.To<T>(new LuaRef(L, index));
             }
             else
-            {                  
+            {
+
+
                 return SharpObject.Get<T>(L, index);              
             }
             
@@ -555,39 +575,39 @@ namespace SharpLuna
             switch (def)
             {
                 case bool bval:
-                    return Convert.To<T>(luaL_optinteger(L, index, bval ? 1 : 0));
+                    return Converter.To<T>(luaL_optinteger(L, index, bval ? 1 : 0));
                 case sbyte ival:
-                    return Convert.To<T>((sbyte)luaL_optinteger(L, index, ival));
+                    return Converter.To<T>((sbyte)luaL_optinteger(L, index, ival));
                 case byte ival:
-                    return Convert.To<T>((byte)luaL_optinteger(L, index, ival));
+                    return Converter.To<T>((byte)luaL_optinteger(L, index, ival));
                 case short ival:
-                    return Convert.To<T>((short)luaL_optinteger(L, index, ival));
+                    return Converter.To<T>((short)luaL_optinteger(L, index, ival));
                 case ushort ival:
-                    return Convert.To<T>((ushort)luaL_optinteger(L, index, ival));
+                    return Converter.To<T>((ushort)luaL_optinteger(L, index, ival));
                 case char ival:
-                    return Convert.To<T>((char)luaL_optinteger(L, index, ival));
+                    return Converter.To<T>((char)luaL_optinteger(L, index, ival));
                 case int ival:
-                    return Convert.To<T>((int)luaL_optinteger(L, index, ival));
+                    return Converter.To<T>((int)luaL_optinteger(L, index, ival));
                 case uint ival:
-                    return Convert.To<T>((uint)luaL_optinteger(L, index, ival));
+                    return Converter.To<T>((uint)luaL_optinteger(L, index, ival));
                 case long ival:
-                    return Convert.To<T>(luaL_optinteger(L, index, ival));
+                    return Converter.To<T>(luaL_optinteger(L, index, ival));
                 case ulong ival:
-                    return Convert.To<T>((ulong)luaL_optinteger(L, index, (long)ival));
+                    return Converter.To<T>((ulong)luaL_optinteger(L, index, (long)ival));
                 case IntPtr ival:
-                    return Convert.To<T>((IntPtr)luaL_optinteger(L, index, (long)ival));
+                    return Converter.To<T>((IntPtr)luaL_optinteger(L, index, (long)ival));
                 case UIntPtr ival:
-                    return Convert.To<T>((UIntPtr)luaL_optinteger(L, index, (long)ival));
+                    return Converter.To<T>((UIntPtr)luaL_optinteger(L, index, (long)ival));
                 case float fval:
-                    return Convert.To<T>((float)luaL_optnumber(L, index, fval));
+                    return Converter.To<T>((float)luaL_optnumber(L, index, fval));
                 case double fval:
-                    return Convert.To<T>(luaL_optnumber(L, index, fval));
+                    return Converter.To<T>(luaL_optnumber(L, index, fval));
                 case string strval:
                     return (T)(object)luaL_optstring(L, index, strval);
                 case LuaNativeFunction fn:
                     return lua_isnoneornil(L, index) ? def : (T)(object)lua_tocfunction(L, index).ToLuaFunction();
                 case LuaRef luaRef:
-                    return lua_isnone(L, index) ? def : Convert.To<T>(new LuaRef(L, index));
+                    return lua_isnone(L, index) ? def : Converter.To<T>(new LuaRef(L, index));
 
                 default:
                     return lua_isnoneornil(L, index) ? def : SharpObject.Get<T>(L, index);

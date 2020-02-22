@@ -32,10 +32,10 @@ namespace SharpLuna
         
         public SharpModule(SharpClass parent, LuaRef parentMeta, string name) : base(parentMeta)
         {
-            LuaRef @ref = parentMeta.RawGet(name);
-            if (@ref)
+            LuaRef luaref = parentMeta.RawGet(name);
+            if (luaref)
             {
-                meta = @ref;
+                meta = luaref;
                 return;
             }
 

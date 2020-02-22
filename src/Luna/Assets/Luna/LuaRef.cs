@@ -17,7 +17,7 @@ namespace SharpLuna
         private readonly lua_State L;
         private readonly int _ref;
 
-        public static readonly LuaRef Empty = new LuaRef(0);
+        //public static readonly LuaRef Empty = new LuaRef(0);
         public static readonly LuaRef None = new LuaRef(LUA_NOREF);
         public static readonly LuaRef Nil = new LuaRef(LUA_REFNIL);
 
@@ -173,12 +173,51 @@ namespace SharpLuna
             return b;
         }
 
-        public static bool operator >(LuaRef l, LuaRef r) => !(l <= r);
-        public static bool operator >=(LuaRef l, LuaRef r) => !(l < r);
+        public static bool operator > (LuaRef l, LuaRef r) => !(l <= r);
+        public static bool operator >= (LuaRef l, LuaRef r) => !(l < r);
 
         public static implicit operator bool(LuaRef luaRef)
         {
             return luaRef != null && Lua.IsActive(luaRef.L) && luaRef._ref != LUA_NOREF && luaRef._ref != LUA_REFNIL;
+        }
+
+        public override string ToString()
+        {
+            if (_ref == 0)
+            {
+                return "Empty";
+            }
+
+            LuaType t = Type;
+            switch (t)
+            {
+                case LuaType.Boolean:
+                    return ToValue<bool>().ToString();
+                case LuaType.LightUserData:
+                    try
+                    {
+                        return Marshal.PtrToStringAnsi(ToPtr());
+                    }
+                    catch
+                    {
+                        return ToPtr().ToString();
+                    }
+                case LuaType.Number:
+                    return ToValue<double>().ToString();
+                case LuaType.String:
+                    return ToValue<string>();
+                case LuaType.Table:
+                    return "Table";
+                case LuaType.Function:
+                    return "Function";
+                case LuaType.UserData:
+                    return "UserData";
+                case LuaType.Thread:
+                    return "Thread";
+                default:
+                    return "nil";
+            }
+
         }
 
         public static LuaRef Registry(lua_State L)
@@ -366,44 +405,6 @@ namespace SharpLuna
             }
         }
         
-        public override string ToString()
-        {
-            if (_ref == 0)
-            {
-                return "Empty";
-            }
-
-            LuaType t = Type;
-            switch(t)
-            {
-                case LuaType.Boolean:
-                    return ToValue<bool>().ToString();                    
-                case LuaType.LightUserData:
-                    try
-                    {
-                        return Marshal.PtrToStringAnsi(ToPtr());
-                    }
-                    catch
-                    {
-                        return ToPtr().ToString();
-                    }
-                case LuaType.Number:
-                    return ToValue<double>().ToString();
-                case LuaType.String:
-                    return ToValue<string>();
-                case LuaType.Table:
-                    return "Table";
-                case LuaType.Function:
-                    return "Function";
-                case LuaType.UserData:
-                    return "UserData";
-                case LuaType.Thread:
-                    return "Thread";
-                default:
-                    return "nil";
-            }
-
-        }
     }
 
 
