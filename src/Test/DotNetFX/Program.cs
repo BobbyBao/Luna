@@ -14,7 +14,8 @@ namespace Tests
             TestFramework.dataPath = "../../../../Test/Scripts/";
             using (var test = new TestFramework())
             {
-                test.Luna.DoFile("test_super.luna");
+                //test.Luna.DoFile("test_perf.luna");
+                test.Luna.DoFile("test.luna");
             }
 
             //Application.Run(new Test.TableTree());

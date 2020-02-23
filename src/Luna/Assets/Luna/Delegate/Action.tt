@@ -32,6 +32,13 @@ namespace SharpLuna
                 return luaL_error(L, e.Message);
             }
         }
+
+        public static int CallDel(lua_State L, int start, Delegate del)
+        {
+            Action a = (Action)del;
+            a();
+            return 0;
+        }
     }
 
 <# for(int i= 0; i< typeList.Length ; i ++){ #>
@@ -47,16 +54,22 @@ namespace SharpLuna
             try
             {
                 var a = ToLightObject<Action<<# for(int j= 0; j <= i ; j ++){#><#=typeList[j]#><#if(j != i)#>, <#}#>>>(L, lua_upvalueindex(1), false);
-<# for(int j= 0; j <= i ; j ++){#>
-                GetT(L, <#=j#> + start, out <#=typeList[j]#> <#=typeList[j].ToLower()#>);
-<#}#>
-                a(<# for(int j= 0; j <= i ; j ++){#><#=typeList[j].ToLower()#><#if(j != i)#>, <#}#>);
-                return 0;
+                return CallDel(L, start, a);
             }
             catch (Exception e)
             {
                 return luaL_error(L, e.Message);
             }
+        }
+        
+        public static int CallDel(lua_State L, int start, Delegate del)
+        {
+            var a = (Action<<# for(int j= 0; j <= i ; j ++){#><#=typeList[j]#><#if(j != i)#>, <#}#>>)del;
+<# for(int j= 0; j <= i ; j ++){#>
+            GetT(L, <#=j#> + start, out <#=typeList[j]#> <#=typeList[j].ToLower()#>);
+<#}#>
+            a(<# for(int j= 0; j <= i ; j ++){#><#=typeList[j].ToLower()#><#if(j != i)#>, <#}#>);
+            return 0;
         }
     }
 

@@ -422,11 +422,15 @@ namespace SharpLuna
             }
             else if (objtype == typeof(LuaRef))
             {
-                Get(L, index, out LuaRef luaref);                
+                Get(L, index, out LuaRef luaref);
                 var obj = Converter.Convert(objtype, luaref);
                 if (obj != null)
-                    return obj;                
+                    return obj;
                 return luaref;
+            }
+            else if (objtype == typeof(object))
+            {
+                return GetObject(L, index);
             }
             else
             {
@@ -647,6 +651,12 @@ namespace SharpLuna
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void GetT<T>(lua_State L, int index, out T v)
         {
+            if(typeof(T) == typeof(object))
+            {
+                v = (T)GetObject(L, index);
+                return;
+            }
+
             v = Get<T>(L, index);
         }
 

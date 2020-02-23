@@ -36,6 +36,14 @@ namespace SharpLuna
                 return luaL_error(L, e.Message);
             }
         }
+
+        public static int CallDel(lua_State L, int start, Delegate del)
+        {
+            var a = (RefFunc<R>)del;
+            var r = a();
+            PushT(L, r);
+            return 1;
+        }
     }
 
     public struct RefFuncCaller<T1, R> where T1 : struct
@@ -50,14 +58,20 @@ namespace SharpLuna
             try
             {
                 var a = ToLightObject<RefFunc<T1, R>>(L, lua_upvalueindex(1), false);
-                var r = a(ref SharpObject.GetValue<T1>(L, 0 + start));
-                PushT(L, r);
-                return 1;
+                return CallDel(L, start, a);
             }
             catch (Exception e)
             {
                 return luaL_error(L, e.Message);
             }
+        }
+        
+        public static int CallDel(lua_State L, int start, Delegate del)
+        {
+            var a = (RefFunc<T1, R>)del;
+            var r = a(ref SharpObject.GetValue<T1>(L, 0 + start));
+            PushT(L, r);
+            return 1;
         }
     }
 
@@ -73,15 +87,21 @@ namespace SharpLuna
             try
             {
                 var a = ToLightObject<RefFunc<T1, T2, R>>(L, lua_upvalueindex(1), false);
-                GetT(L, 1 + start, out T2 t2);
-                var r = a(ref SharpObject.GetValue<T1>(L, 0 + start), t2);
-                PushT(L, r);
-                return 1;
+                return CallDel(L, start, a);
             }
             catch (Exception e)
             {
                 return luaL_error(L, e.Message);
             }
+        }
+        
+        public static int CallDel(lua_State L, int start, Delegate del)
+        {
+            var a = (RefFunc<T1, T2, R>)del;
+            GetT(L, 1 + start, out T2 t2);
+            var r = a(ref SharpObject.GetValue<T1>(L, 0 + start), t2);
+            PushT(L, r);
+            return 1;
         }
     }
 
@@ -97,16 +117,22 @@ namespace SharpLuna
             try
             {
                 var a = ToLightObject<RefFunc<T1, T2, T3, R>>(L, lua_upvalueindex(1), false);
-                GetT(L, 1 + start, out T2 t2);
-                GetT(L, 2 + start, out T3 t3);
-                var r = a(ref SharpObject.GetValue<T1>(L, 0 + start), t2, t3);
-                PushT(L, r);
-                return 1;
+                return CallDel(L, start, a);
             }
             catch (Exception e)
             {
                 return luaL_error(L, e.Message);
             }
+        }
+        
+        public static int CallDel(lua_State L, int start, Delegate del)
+        {
+            var a = (RefFunc<T1, T2, T3, R>)del;
+            GetT(L, 1 + start, out T2 t2);
+            GetT(L, 2 + start, out T3 t3);
+            var r = a(ref SharpObject.GetValue<T1>(L, 0 + start), t2, t3);
+            PushT(L, r);
+            return 1;
         }
     }
 
@@ -122,17 +148,23 @@ namespace SharpLuna
             try
             {
                 var a = ToLightObject<RefFunc<T1, T2, T3, T4, R>>(L, lua_upvalueindex(1), false);
-                GetT(L, 1 + start, out T2 t2);
-                GetT(L, 2 + start, out T3 t3);
-                GetT(L, 3 + start, out T4 t4);
-                var r = a(ref SharpObject.GetValue<T1>(L, 0 + start), t2, t3, t4);
-                PushT(L, r);
-                return 1;
+                return CallDel(L, start, a);
             }
             catch (Exception e)
             {
                 return luaL_error(L, e.Message);
             }
+        }
+        
+        public static int CallDel(lua_State L, int start, Delegate del)
+        {
+            var a = (RefFunc<T1, T2, T3, T4, R>)del;
+            GetT(L, 1 + start, out T2 t2);
+            GetT(L, 2 + start, out T3 t3);
+            GetT(L, 3 + start, out T4 t4);
+            var r = a(ref SharpObject.GetValue<T1>(L, 0 + start), t2, t3, t4);
+            PushT(L, r);
+            return 1;
         }
     }
 
@@ -148,18 +180,24 @@ namespace SharpLuna
             try
             {
                 var a = ToLightObject<RefFunc<T1, T2, T3, T4, T5, R>>(L, lua_upvalueindex(1), false);
-                GetT(L, 1 + start, out T2 t2);
-                GetT(L, 2 + start, out T3 t3);
-                GetT(L, 3 + start, out T4 t4);
-                GetT(L, 4 + start, out T5 t5);
-                var r = a(ref SharpObject.GetValue<T1>(L, 0 + start), t2, t3, t4, t5);
-                PushT(L, r);
-                return 1;
+                return CallDel(L, start, a);
             }
             catch (Exception e)
             {
                 return luaL_error(L, e.Message);
             }
+        }
+        
+        public static int CallDel(lua_State L, int start, Delegate del)
+        {
+            var a = (RefFunc<T1, T2, T3, T4, T5, R>)del;
+            GetT(L, 1 + start, out T2 t2);
+            GetT(L, 2 + start, out T3 t3);
+            GetT(L, 3 + start, out T4 t4);
+            GetT(L, 4 + start, out T5 t5);
+            var r = a(ref SharpObject.GetValue<T1>(L, 0 + start), t2, t3, t4, t5);
+            PushT(L, r);
+            return 1;
         }
     }
 
@@ -175,19 +213,25 @@ namespace SharpLuna
             try
             {
                 var a = ToLightObject<RefFunc<T1, T2, T3, T4, T5, T6, R>>(L, lua_upvalueindex(1), false);
-                GetT(L, 1 + start, out T2 t2);
-                GetT(L, 2 + start, out T3 t3);
-                GetT(L, 3 + start, out T4 t4);
-                GetT(L, 4 + start, out T5 t5);
-                GetT(L, 5 + start, out T6 t6);
-                var r = a(ref SharpObject.GetValue<T1>(L, 0 + start), t2, t3, t4, t5, t6);
-                PushT(L, r);
-                return 1;
+                return CallDel(L, start, a);
             }
             catch (Exception e)
             {
                 return luaL_error(L, e.Message);
             }
+        }
+        
+        public static int CallDel(lua_State L, int start, Delegate del)
+        {
+            var a = (RefFunc<T1, T2, T3, T4, T5, T6, R>)del;
+            GetT(L, 1 + start, out T2 t2);
+            GetT(L, 2 + start, out T3 t3);
+            GetT(L, 3 + start, out T4 t4);
+            GetT(L, 4 + start, out T5 t5);
+            GetT(L, 5 + start, out T6 t6);
+            var r = a(ref SharpObject.GetValue<T1>(L, 0 + start), t2, t3, t4, t5, t6);
+            PushT(L, r);
+            return 1;
         }
     }
 
@@ -203,20 +247,26 @@ namespace SharpLuna
             try
             {
                 var a = ToLightObject<RefFunc<T1, T2, T3, T4, T5, T6, T7, R>>(L, lua_upvalueindex(1), false);
-                GetT(L, 1 + start, out T2 t2);
-                GetT(L, 2 + start, out T3 t3);
-                GetT(L, 3 + start, out T4 t4);
-                GetT(L, 4 + start, out T5 t5);
-                GetT(L, 5 + start, out T6 t6);
-                GetT(L, 6 + start, out T7 t7);
-                var r = a(ref SharpObject.GetValue<T1>(L, 0 + start), t2, t3, t4, t5, t6, t7);
-                PushT(L, r);
-                return 1;
+                return CallDel(L, start, a);
             }
             catch (Exception e)
             {
                 return luaL_error(L, e.Message);
             }
+        }
+        
+        public static int CallDel(lua_State L, int start, Delegate del)
+        {
+            var a = (RefFunc<T1, T2, T3, T4, T5, T6, T7, R>)del;
+            GetT(L, 1 + start, out T2 t2);
+            GetT(L, 2 + start, out T3 t3);
+            GetT(L, 3 + start, out T4 t4);
+            GetT(L, 4 + start, out T5 t5);
+            GetT(L, 5 + start, out T6 t6);
+            GetT(L, 6 + start, out T7 t7);
+            var r = a(ref SharpObject.GetValue<T1>(L, 0 + start), t2, t3, t4, t5, t6, t7);
+            PushT(L, r);
+            return 1;
         }
     }
 
@@ -232,21 +282,27 @@ namespace SharpLuna
             try
             {
                 var a = ToLightObject<RefFunc<T1, T2, T3, T4, T5, T6, T7, T8, R>>(L, lua_upvalueindex(1), false);
-                GetT(L, 1 + start, out T2 t2);
-                GetT(L, 2 + start, out T3 t3);
-                GetT(L, 3 + start, out T4 t4);
-                GetT(L, 4 + start, out T5 t5);
-                GetT(L, 5 + start, out T6 t6);
-                GetT(L, 6 + start, out T7 t7);
-                GetT(L, 7 + start, out T8 t8);
-                var r = a(ref SharpObject.GetValue<T1>(L, 0 + start), t2, t3, t4, t5, t6, t7, t8);
-                PushT(L, r);
-                return 1;
+                return CallDel(L, start, a);
             }
             catch (Exception e)
             {
                 return luaL_error(L, e.Message);
             }
+        }
+        
+        public static int CallDel(lua_State L, int start, Delegate del)
+        {
+            var a = (RefFunc<T1, T2, T3, T4, T5, T6, T7, T8, R>)del;
+            GetT(L, 1 + start, out T2 t2);
+            GetT(L, 2 + start, out T3 t3);
+            GetT(L, 3 + start, out T4 t4);
+            GetT(L, 4 + start, out T5 t5);
+            GetT(L, 5 + start, out T6 t6);
+            GetT(L, 6 + start, out T7 t7);
+            GetT(L, 7 + start, out T8 t8);
+            var r = a(ref SharpObject.GetValue<T1>(L, 0 + start), t2, t3, t4, t5, t6, t7, t8);
+            PushT(L, r);
+            return 1;
         }
     }
 

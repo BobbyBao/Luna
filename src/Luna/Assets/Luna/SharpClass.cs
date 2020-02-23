@@ -622,20 +622,27 @@ namespace SharpLuna
             return this;
         }
 
+
         public SharpClass RegMethod(string name, MethodBase[] methodInfo)
         {             
             MethodWrap method = new MethodWrap(methodInfo);
-            
+
+#if !IL2CPP
+
             for(int i = 0; i < methodInfo.Length; i++)
             {
                 var mi = methodInfo[i] as MethodInfo;
-                if(RegMethod(mi, false, out var fn, out var del))
+                if(mi != null)
                 {
-                    method.luaFunc[i] = fn;
-                    method.del[i] = del;
+                    if(RegMethod(mi, "CallDel", out CallDel fn, out Delegate del))
+                    {
+                        method.luaFunc[i] = fn;
+                        method.del[i] = del;
+                    }
                 }
+             
             }
-
+#endif
             //Luna.Log("反射方式实现");
             LuaRef luaFun = LuaRef.CreateFunction(State, MethodWrap.Call, method);
             if (IsTagMethod(name, out var tag))
@@ -652,7 +659,12 @@ namespace SharpLuna
 
         public LuaRef RegMethod(MethodInfo methodInfo, bool isProp)
         {
-            if (RegMethod(methodInfo, isProp, out LuaNativeFunction luaFunc, out Delegate del))
+#if LUNA_SCRIPT
+            string callFnName = (methodInfo.IsStatic && !isProp) ? "StaticCall" : "Call";
+#else
+            string callFnName = "Call";
+#endif
+            if (RegMethod(methodInfo, callFnName, out LuaNativeFunction luaFunc, out Delegate del))
             {
                 return LuaRef.CreateFunction(State, luaFunc, del);
             }
@@ -660,7 +672,7 @@ namespace SharpLuna
             return null;
         }
 
-        public bool RegMethod(MethodInfo methodInfo, bool isProp, out LuaNativeFunction luaFunc, out Delegate del)
+        public bool RegMethod<T>(MethodInfo methodInfo, string callFnName, out T luaFunc, out Delegate del) where T : Delegate
         {
             if (methodInfo.CallingConvention == CallingConventions.VarArgs)
             {
@@ -680,6 +692,13 @@ namespace SharpLuna
 
             foreach (var info in paramInfo)
             {
+                if (!info.ParameterType.ShouldExport())
+                {
+                    luaFunc = null;
+                    del = null;
+                    return false;
+                }
+
                 if (info.ParameterType.IsGenericType)
                 {
                     Luna.Log("不支持泛型参数:" + methodInfo.ToString());
@@ -688,13 +707,14 @@ namespace SharpLuna
                     return false;
                 }
 
+                /*
                 if (info.ParameterType.IsByRef || info.ParameterType.IsPointer)
                 {
                     Luna.Log("不支持引用类型参数:" + methodInfo.ToString());
                     luaFunc = null;
                     del = null;
                     return false;
-                }
+                }*/
 
                 paramTypes.Add(info.ParameterType);
             }
@@ -702,10 +722,17 @@ namespace SharpLuna
             if (typeOfResult == typeof(void))
             {
                 var typeArray = paramTypes.ToArray();
-                return RegAction(methodInfo, typeArray, isProp, out luaFunc, out del);
+                return RegAction(methodInfo, typeArray, callFnName, out luaFunc, out del);
             }
             else
             {
+                if(!typeOfResult.ShouldExport())
+                {
+                    luaFunc = null;
+                    del = null;
+                    return false;
+                }
+            
                 if (typeOfResult.IsGenericType)
                 {
                     Luna.Log("不支持泛型参数:" + methodInfo.ToString());
@@ -713,36 +740,39 @@ namespace SharpLuna
                     del = null;
                     return false;
                 }
-
+                /*
                 if (typeOfResult.IsByRef || typeOfResult.IsPointer)
                 {
                     Luna.Log("不支持引用类型参数:" + methodInfo.ToString());
                     luaFunc = null;
                     del = null;
                     return false;
-                }
+                }*/
 
                 paramTypes.Add(typeOfResult);
                 var typeArray = paramTypes.ToArray();
-                return RegFunc(methodInfo, typeArray, isProp, out luaFunc, out del);
+                return RegFunc(methodInfo, typeArray, callFnName, out luaFunc, out del);
             }
 
         }
 
-        bool RegAction(MethodInfo methodInfo, Type[] typeArray, bool isProp, out LuaNativeFunction luaFunc, out Delegate del)
+        bool RegAction<T>(MethodInfo methodInfo, Type[] typeArray, string callFnName, out T luaFunc, out Delegate del) where T : Delegate
         {
-#if LUNA_SCRIPT
-            string callFnName = (methodInfo.IsStatic && !isProp) ? "StaticCall" : "Call";
-#else
-            string callFnName = "Call";
-#endif
             Type funcDelegateType = null;
             Type callerType = null;
+           
             if (typeArray.Length == 0)
             {
                 funcDelegateType = typeof(Action);
                 del = DelegateCache.Get(funcDelegateType, methodInfo);
-                luaFunc = ActionCaller.Call;
+                if(typeof(T) == typeof(CallDel) )
+                {
+                    luaFunc = (T)(object)(CallDel)ActionCaller.CallDel;
+                }
+                else
+                {
+                    luaFunc = (T)(object)(LuaNativeFunction)ActionCaller.Call;
+                }
                 return true;
             }
             else if (typeArray.Length > DelegateCache.actionType.Length)
@@ -772,17 +802,12 @@ namespace SharpLuna
             
             del = DelegateCache.Get(funcDelegateType, methodInfo);
             MethodInfo CallInnerDelegateMethod = callerType.GetMethod(callFnName, BindingFlags.Static | BindingFlags.Public);
-            luaFunc = (LuaNativeFunction)DelegateCache.Get(typeof(LuaNativeFunction), CallInnerDelegateMethod);
+            luaFunc = (T)DelegateCache.Get(typeof(T), CallInnerDelegateMethod);
             return true;
         }
 
-        bool RegFunc(MethodInfo methodInfo, Type[] typeArray, bool isProp, out LuaNativeFunction luaFunc, out Delegate del)
+        bool RegFunc<T>(MethodInfo methodInfo, Type[] typeArray, string callFnName, out T luaFunc, out Delegate del) where T : Delegate
         {
-#if LUNA_SCRIPT
-            string callFnName = (methodInfo.IsStatic && !isProp) ? "StaticCall" : "Call";
-#else
-            string callFnName = "Call";
-#endif
             Type funcDelegateType = null;
             Type callerType = null;
             if (typeArray.Length >= DelegateCache.funcType.Length)
@@ -812,7 +837,7 @@ namespace SharpLuna
             
             del = DelegateCache.Get(funcDelegateType, methodInfo);
             MethodInfo CallInnerDelegateMethod = callerType.GetMethod(callFnName, BindingFlags.Static | BindingFlags.Public);
-            luaFunc = (LuaNativeFunction)DelegateCache.Get(typeof(LuaNativeFunction), CallInnerDelegateMethod);
+            luaFunc = (T)DelegateCache.Get(typeof(T), CallInnerDelegateMethod);
             return true;
 
         }
