@@ -8,8 +8,11 @@ let test = UITest("UI/TestPanel")
 print(MainState.name)
 
 MainState.addChild(test)
-MainState.transit(test)
+//MainState.transit(test)
 
+//var go = ResourceManager.LoadObject("UI/Panel")
 
-let obj = UnityEngine.Resources.Load("UI/TestPanel")
-let go = UnityEngine.GameObject.Instantiate(obj)
+ResourceManager.LoadObject("UI/TestPanel", func (go) {
+    print(go.name)
+})
+

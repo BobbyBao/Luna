@@ -39,7 +39,7 @@ namespace SharpLuna
 #endif
         }
 
-        public static bool CreateClass(ref LuaRef meta, LuaRef parent, string name, int classId)
+        public static bool CreateClass(ref LuaRef meta, LuaRef parent, string name, int classId, LuaNativeFunction dctor)
         {
             LuaRef @ref = parent.RawGet<LuaRef, string>(name);
             if (@ref)
@@ -66,12 +66,13 @@ namespace SharpLuna
             registry.RawSet(typeClass, cls);
             parent.RawSet(name, cls);
             meta = cls;
+            meta.RawSet("__gc", dctor);
             return true;
         }
 
-        public static bool CreateClass(ref LuaRef meta, LuaRef parent, string name, int classId, int superClassID)
+        public static bool CreateClass(ref LuaRef meta, LuaRef parent, string name, int classId, int superClassID, LuaNativeFunction dctor)
         {
-            if (CreateClass(ref meta, parent, name, classId))
+            if (CreateClass(ref meta, parent, name, classId, dctor))
             {
                 if (superClassID != 0)
                 {

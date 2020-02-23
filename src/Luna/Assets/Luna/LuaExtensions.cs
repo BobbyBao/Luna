@@ -329,51 +329,18 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static object GetObject(lua_State L, int index, Type objtype = null)
+        internal static object GetObject(lua_State L, int index)
         {
             LuaType type = lua_type(L, index);
 
             switch (type)
             {
                 case LuaType.Number:
-                    {
-                        if(objtype != null)
-                        {
-                            if(objtype == typeof(int))
-                            {
-                                return (int)lua_tonumber(L, index);
-                            }
-                            else if (objtype == typeof(uint))
-                            {
-                                return (uint)lua_tonumber(L, index);
-                            }
-                            else if (objtype == typeof(short))
-                            {
-                                return (short)lua_tonumber(L, index);
-                            }
-                            else if (objtype == typeof(ushort))
-                            {
-                                return (ushort)lua_tonumber(L, index);
-                            }
-                            else if (objtype == typeof(sbyte))
-                            {
-                                return (sbyte)lua_tonumber(L, index);
-                            }
-                            else if (objtype == typeof(byte))
-                            {
-                                return (byte)lua_tonumber(L, index);
-                            }
-                            else if (objtype == typeof(float))
-                            {
-                                return (float)lua_tonumber(L, index);
-                            }
-                        }                        
-                     
+                    {                        
                         if (lua_isinteger(L, index))
                             return lua_tointeger(L, index);
 
-                        return lua_tonumber(L, index);                       
-                        
+                        return lua_tonumber(L, index);
                     }
                 case LuaType.String:
                     return lua_tostring(L, index);
@@ -381,24 +348,12 @@ namespace SharpLuna
                     return (bool)(lua_toboolean(L, index) != 0);
                 case LuaType.Table:
                     {
-                        Get(L, index, out LuaRef luaref);
-                        if (objtype != null)
-                        {
-                            var obj = Converter.Convert(objtype, luaref);
-                            if (obj != null)
-                                return obj;
-                        }
+                        Get(L, index, out LuaRef luaref);                        
                         return luaref;
                     }
                 case LuaType.Function:
                     {
-                        Get(L, index, out LuaRef luaref);
-                        if (objtype != null)
-                        {
-                            var obj = Converter.Convert(objtype, luaref);
-                            if(obj != null)
-                                return obj;
-                        }            
+                        Get(L, index, out LuaRef luaref);          
                         return luaref;
                     }
                 case LuaType.LightUserData:
@@ -407,6 +362,75 @@ namespace SharpLuna
                     return SharpObject.Get<object>(L, index);
                 default:
                     return null;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static object GetObject(lua_State L, int index, Type objtype)
+        {
+            if (objtype == typeof(float))
+            {
+                return (float)lua_tonumber(L, index);
+            }
+            if (objtype == typeof(double))
+            {
+                return lua_tonumber(L, index);
+            }
+            else if (objtype == typeof(int))
+            {
+                return (int)lua_tonumber(L, index);
+            }
+            else if (objtype == typeof(uint))
+            {
+                return (uint)lua_tonumber(L, index);
+            }
+            else if (objtype == typeof(short))
+            {
+                return (short)lua_tonumber(L, index);
+            }
+            else if (objtype == typeof(ushort))
+            {
+                return (ushort)lua_tonumber(L, index);
+            }
+            else if (objtype == typeof(sbyte))
+            {
+                return (sbyte)lua_tonumber(L, index);
+            }
+            else if (objtype == typeof(byte))
+            {
+                return (byte)lua_tonumber(L, index);
+            }
+            else if (objtype == typeof(string))
+            {
+                return lua_tostring(L, index);
+            }
+            else if (objtype == typeof(bool))
+            {
+                return (bool)(lua_toboolean(L, index) != 0);
+            }
+            else if (objtype == typeof(IntPtr))
+            {
+                return (IntPtr)lua_tonumber(L, index);
+            }
+            else if (objtype == typeof(UIntPtr))
+            {
+                return (uint)lua_tonumber(L, index);
+            }
+            else if (objtype == typeof(LuaNativeFunction))
+            {
+                return lua_tocfunction(L, index).ToLuaFunction();
+            }
+            else if (objtype == typeof(LuaRef))
+            {
+                Get(L, index, out LuaRef luaref);                
+                var obj = Converter.Convert(objtype, luaref);
+                if (obj != null)
+                    return obj;                
+                return luaref;
+            }
+            else
+            {
+                return SharpObject.Get<object>(L, index);
             }
         }
 
