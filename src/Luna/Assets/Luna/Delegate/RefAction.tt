@@ -53,7 +53,7 @@ namespace SharpLuna
             {
                 var a = ToLightObject<RefAction<<# for(int j= 0; j <= i ; j ++){#><#=typeList[j]#><#if(j != i)#>, <#}#>>>(L, lua_upvalueindex(1), false);
 <# for(int j= 1; j <= i ; j ++){#>
-                Get(L, <#=j#> + start, out <#=typeList[j]#> <#=typeList[j].ToLower()#>);
+                GetT(L, <#=j#> + start, out <#=typeList[j]#> <#=typeList[j].ToLower()#>);
 <#}#>
                 a(<# for(int j= 0; j <= i ; j ++){#><#if(j == 0){#>ref SharpObject.GetValue<<#=typeList[j]#>>(L, <#=j#> + start)<#if(j != i)#>, <#}else{#><#=typeList[j].ToLower()#><#if(j != i)#>, <#}}#>);
                 return 0;

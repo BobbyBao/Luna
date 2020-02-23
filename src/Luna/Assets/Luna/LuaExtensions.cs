@@ -12,12 +12,12 @@ namespace SharpLuna
 
     public unsafe static partial class Lua
     {
-        static ConcurrentDictionary<IntPtr, List<IDisposable>> luaStates = new ConcurrentDictionary<IntPtr, List<IDisposable>>();
+        static ConcurrentDictionary<IntPtr, FastList<IDisposable>> luaStates = new ConcurrentDictionary<IntPtr, FastList<IDisposable>>();
 
         public static lua_State NewState()
         {
             var L = luaL_newstate();
-            luaStates.TryAdd(L, new List<IDisposable>());
+            luaStates.TryAdd(L, new FastList<IDisposable>());
             return L;
         }
 
@@ -53,7 +53,7 @@ namespace SharpLuna
         {
             if (luaStates.TryGetValue(L, out var refs))
             {
-                refs.Remove(r);
+                refs.FastRemove(r);
             }
         }
 
@@ -154,7 +154,116 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Push(lua_State L, bool v)
+        {
+            lua_pushboolean(L, v ? 1 : 0);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Push(lua_State L, long v)
+        {
+            lua_pushinteger(L, v);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Push(lua_State L, ulong v)
+        {
+            lua_pushinteger(L, (long)v);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Push(lua_State L, IntPtr v)
+        {
+            lua_pushinteger(L, (long)v);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Push(lua_State L, UIntPtr v)
+        {
+            lua_pushinteger(L, (long)v);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Push(lua_State L, sbyte v)
+        {
+            lua_pushnumber(L, v);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Push(lua_State L, byte v)
+        {
+            lua_pushnumber(L, v);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Push(lua_State L, short v)
+        {
+            lua_pushnumber(L, v);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Push(lua_State L, ushort v)
+        {
+            lua_pushnumber(L, v);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Push(lua_State L, int v)
+        {
+            lua_pushnumber(L, v);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Push(lua_State L, uint v)
+        {
+            lua_pushnumber(L, v);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Push(lua_State L, float v)
+        {
+            lua_pushnumber(L, v);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Push(lua_State L, double v)
+        {
+            lua_pushnumber(L, v);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Push(lua_State L, string v)
+        {
+            lua_pushstring(L, v);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Push(lua_State L, LuaNativeFunction v)
+        {
+            lua_pushcfunction(L, v);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Push(lua_State L, LuaRef v)
+        {
+            if (v.IsValid)
+            {
+                v.PushToStack();
+            }
+            else
+            {
+                lua_pushnil(L);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Push<T>(lua_State L, T v)
+        {
+            SharpObject.PushToStack(L, v);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void PushT<T>(lua_State L, T v)
         {
             switch (v)
             {
@@ -512,6 +621,12 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void GetT<T>(lua_State L, int index, out T v)
+        {
+            v = Get<T>(L, index);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T Get<T>(lua_State L, int index)
         {
             Type t = typeof(T);
@@ -614,7 +729,7 @@ namespace SharpLuna
 
         public static T Pop<T>(lua_State L)
         {
-            Get<T>(L, -1, out T v);
+            T v = Get<T>(L, -1);
             lua_pop(L, 1);
             return v;
         }

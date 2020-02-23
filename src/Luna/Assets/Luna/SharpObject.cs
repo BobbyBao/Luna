@@ -246,15 +246,15 @@ namespace SharpLuna
             //             {
             //                 return GetUnmanaged<T>(L, index);
             //             }
-
+         
             LuaType type = lua_type(L, index);
-            if (type != LuaType.UserData)
+            if (type == LuaType.Function)
             {
                 //to do: function to Delegate convert
                 Lua.Get(L, index, out LuaRef func);
                 return (T)Converter.Convert(typeof(T), func);
             }
-
+            
             var handle = GetHandler(L, index);
 #if LUA_WEAKTABLE
             return (T)freeList[(int)handle];
@@ -266,8 +266,8 @@ namespace SharpLuna
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static unsafe long GetHandler(lua_State L, int index)
         {
-            //var ptr = lua_touserdata(L, index);
-            var ptr = lua_topointer(L, index);
+            var ptr = lua_touserdata(L, index);
+            //var ptr = lua_topointer(L, index);
 #if DEBUG
             if (ptr == IntPtr.Zero)
             {
@@ -277,6 +277,7 @@ namespace SharpLuna
             return *((long*)ptr);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Free(lua_State L, int index)
         {
             //             if (typeof(T).IsUnManaged())
@@ -299,6 +300,7 @@ namespace SharpLuna
         }
 
 #if LUA_WEAKTABLE
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static int TryGetUserData(lua_State L, long key, int cache_ref)
         {
 #if C_API
@@ -316,6 +318,7 @@ namespace SharpLuna
 #endif
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void CacheUserData(lua_State L, long key, int cache_ref)
         {
 #if C_API

@@ -8,32 +8,7 @@ namespace SharpLuna
 {
     using static Lua;
     using lua_State = IntPtr;
-
-    public struct Constructor<T> where T : new()
-    {
-        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        public static int Call(lua_State L)
-        {
-            try
-            {
-                int n = lua_gettop(L);
-                if (n == 1)
-                {
-                    var v = new T();
-                    Push(L, v);
-                    return 1;
-                }
-                lua_pushnil(L);
-                return 1;
-            }
-            catch (Exception e)
-            {
-                return luaL_error(L, e.Message);
-            }
-        }
-
-    }
-
+    
     public struct Destructor
     {
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]

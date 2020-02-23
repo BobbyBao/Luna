@@ -1,6 +1,7 @@
 ﻿#define C_API
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace SharpLuna
@@ -62,7 +63,7 @@ namespace SharpLuna
             cls.RawSet(___type, type_name);
 
             LuaRef registry = new LuaRef(L, LUA_REGISTRYINDEX);
-            registry.RawSet(typeClass/*classId*/, cls);
+            registry.RawSet(typeClass, cls);
             parent.RawSet(name, cls);
             meta = cls;
             return true;
@@ -102,6 +103,7 @@ namespace SharpLuna
 
         //todo: use upvalue
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int class_index(lua_State L)
         {
 #if C_API
@@ -204,6 +206,7 @@ namespace SharpLuna
         }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int class_newindex(lua_State L)
         {
 #if C_API

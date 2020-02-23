@@ -267,7 +267,7 @@ namespace SharpLuna
 
         public static LuaRef FromValue<T>(lua_State L, T value)
         {
-            Lua.Push<T>(L, value);
+            Lua.PushT<T>(L, value);
             return PopFromStack(L);
         }
 

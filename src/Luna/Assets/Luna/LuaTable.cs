@@ -89,7 +89,7 @@ namespace SharpLuna
         public V RawGet<V, K>(K key)
         {
             PushToStack();
-            Lua.Push<K>(L, key);
+            Lua.PushT<K>(L, key);
             lua_rawget(L, -2);
             V v = Lua.Get<V>(L, -1);
             lua_pop(L, 2);
@@ -99,7 +99,7 @@ namespace SharpLuna
         public LuaRef RawGet<K>(K key)
         {
             PushToStack();
-            Lua.Push<K>(L, key);
+            Lua.PushT<K>(L, key);
             lua_rawget(L, -2);
             LuaRef v = Lua.Get<LuaRef>(L, -1);
             lua_pop(L, 2);
@@ -109,7 +109,7 @@ namespace SharpLuna
         public V RawGet<V, K>(K key, V def)
         {
             PushToStack();
-            Lua.Push(L, key);
+            Lua.PushT(L, key);
             lua_rawget(L, -2);
             V v = Lua.Opt<V>(L, -1, def);
             lua_pop(L, 2);
@@ -119,8 +119,8 @@ namespace SharpLuna
         public void RawSet<K, V>(K key, V value)
         {
             PushToStack();
-            Lua.Push(L, key);
-            Lua.Push(L, value);
+            Lua.PushT(L, key);
+            Lua.PushT(L, value);
             lua_rawset(L, -3);
             lua_pop(L, 1);
         }
@@ -161,7 +161,7 @@ namespace SharpLuna
         public void RawSetP<V>(IntPtr p, V value)
         {
             PushToStack();
-            Lua.Push(L, value);
+            Lua.PushT(L, value);
             lua_rawsetp(L, -2, p);
             lua_pop(L, 1);
         }
@@ -192,7 +192,7 @@ namespace SharpLuna
         public void RawSet<V>(int i, V value)
         {
             PushToStack();
-            Lua.Push(L, value);
+            Lua.PushT(L, value);
             lua_rawseti(L, -2, i);
             lua_pop(L, 1);
         }
@@ -208,7 +208,7 @@ namespace SharpLuna
         public bool Has<K>(K key)
         {
             PushToStack();
-            Lua.Push(L, key);
+            Lua.PushT(L, key);
             lua_gettable(L, -2);
             bool ok = !lua_isnoneornil(L, -1);
             lua_pop(L, 2);
@@ -223,7 +223,7 @@ namespace SharpLuna
         public V Get<V, K>(K key)
         {
             PushToStack();
-            Lua.Push(L, key);
+            Lua.PushT(L, key);
             lua_gettable(L, -2);
             V t = Lua.Get<V>(L, -1);
             lua_pop(L, 2);
@@ -233,7 +233,7 @@ namespace SharpLuna
         public V Get<V, K>(K key, V def)
         {
             PushToStack();
-            Lua.Push(L, key);
+            Lua.PushT(L, key);
             lua_gettable(L, -2);
             V t = Lua.Opt<V>(L, -1, def);
             lua_pop(L, 2);
@@ -243,8 +243,8 @@ namespace SharpLuna
         public void Set<K, V>(K key, V value)
         {
             PushToStack();
-            Lua.Push(L, key);
-            Lua.Push(L, value);
+            Lua.PushT(L, key);
+            Lua.PushT(L, value);
             lua_settable(L, -3);
             lua_pop(L, 1);
         }
@@ -252,7 +252,7 @@ namespace SharpLuna
         public void Remove<K>(K key)
         {
             PushToStack();
-            Lua.Push(L, key);
+            Lua.PushT(L, key);
             lua_pushnil(L);
             lua_settable(L, -3);
             lua_pop(L, 1);
