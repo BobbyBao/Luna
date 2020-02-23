@@ -68,7 +68,7 @@ namespace SharpLuna
             try
             {
                 FieldInfo fieldInfo = ToLightObject<FieldInfo>(L, lua_upvalueindex(1), false);
-                object v = GetObject(L, 1);
+                object v = GetObject(L, 1, fieldInfo.FieldType);
                 fieldInfo.SetValue(null, v);
                 return 0;
             }
@@ -84,7 +84,7 @@ namespace SharpLuna
             try
             {
                 FieldInfo fieldInfo = ToLightObject<FieldInfo>(L, lua_upvalueindex(1), false);
-                object obj = GetObject(L, 1);
+                object obj = GetObject(L, 1, fieldInfo.FieldType);
                 object v = fieldInfo.GetValue(obj);
                 Push(L, v);
                 return 1;
@@ -101,8 +101,8 @@ namespace SharpLuna
             try
             {
                 FieldInfo fieldInfo = ToLightObject<FieldInfo>(L, lua_upvalueindex(1), false);
-                object obj = GetObject(L, 1);
-                object v = GetObject(L, 2);
+                object obj = GetObject(L, 1, fieldInfo.FieldType);
+                object v = GetObject(L, 2, fieldInfo.FieldType);
                 fieldInfo.SetValue(obj, v);
                 return 0;
             }
@@ -138,7 +138,7 @@ namespace SharpLuna
             try
             {
                 PropertyInfo propertyInfo = ToLightObject<PropertyInfo>(L, lua_upvalueindex(1), false);
-                object v = GetObject(L, 1);
+                object v = GetObject(L, 1, propertyInfo.PropertyType);
                 propertyInfo.SetValue(null, v);
                 return 0;
             }
@@ -154,7 +154,7 @@ namespace SharpLuna
             try
             {
                 PropertyInfo propertyInfo = ToLightObject<PropertyInfo>(L, lua_upvalueindex(1), false);
-                object obj = GetObject(L, 1);
+                object obj = GetObject(L, 1, propertyInfo.PropertyType);
                 object v = propertyInfo.GetValue(obj);
                 Push(L, v);
                 return 1;
@@ -171,8 +171,8 @@ namespace SharpLuna
             try
             {
                 PropertyInfo propertyInfo = ToLightObject<PropertyInfo>(L, lua_upvalueindex(1), false);
-                object obj = GetObject(L, 1);
-                object v = GetObject(L, 2);
+                object obj = GetObject(L, 1, propertyInfo.PropertyType);
+                object v = GetObject(L, 2, propertyInfo.PropertyType);
                 propertyInfo.SetValue(obj, v);
                 return 0;
             }
@@ -255,8 +255,7 @@ namespace SharpLuna
 #else
                 int StackStart = methodInfo.IsStatic ? 1 : 2;
 #endif
-                object obj = methodInfo.IsStatic ? null : GetObject(L, 1);
-                //object[] args = new object[parameterInfo.Length];
+                object obj = methodInfo.IsStatic ? null : GetObject(L, 1, methodInfo.ReflectedType);
                 for (int i = 0; i < args.Length; i++)
                 {
                     args[i] = GetObject(L, i + StackStart, parameterInfo[i].ParameterType);

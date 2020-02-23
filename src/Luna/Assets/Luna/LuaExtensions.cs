@@ -64,7 +64,7 @@ namespace SharpLuna
                 while (refs.Count != 0)
                 {
                     var r = refs[refs.Count - 1];
-                    r.Dispose();
+                    r?.Dispose();
                 }
             }
         }
@@ -272,7 +272,7 @@ namespace SharpLuna
                     return (bool)(lua_toboolean(L, index) != 0);
                 case LuaType.Table:
                     {
-                        var luaref = Get<LuaRef>(L, index);
+                        Get(L, index, out LuaRef luaref);
                         if (objtype != null)
                         {
                             var obj = Converter.Convert(objtype, luaref);
@@ -283,7 +283,7 @@ namespace SharpLuna
                     }
                 case LuaType.Function:
                     {
-                        var luaref = Get<LuaRef>(L, index);
+                        Get(L, index, out LuaRef luaref);
                         if (objtype != null)
                         {
                             var obj = Converter.Convert(objtype, luaref);
@@ -498,61 +498,61 @@ namespace SharpLuna
             else
                 v = new LuaRef(L, index);
         }
-        /*
+   
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Get(lua_State L, int index, out object v)
         {
-            v = SharpObject.Get(L, index);
-        }*/
+            v = SharpObject.Get<object>(L, index);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Get<T>(lua_State L, int index, out T v)
         {
-            v = Get<T>(L, index);
+            v = SharpObject.Get<T>(L, index);             
         }
-       
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T Get<T>(lua_State L, int index)
         {
             Type t = typeof(T);
-            
+    
             if (t.IsPrimitive)
             {
                 if (t == typeof(bool))
-                    return (T)(object)(bool)(lua_toboolean(L, index) != 0);
+                    return Converter.To<T>((bool)(lua_toboolean(L, index) != 0));
                 else if (t == typeof(char))
-                    return (T)(object)(char)luaL_checkinteger(L, index);
+                    return Converter.To<T>((char)luaL_checkinteger(L, index));
                 else if (t == typeof(sbyte))
-                    return (T)(object)(sbyte)luaL_checkinteger(L, index);
+                    return Converter.To<T>((sbyte)luaL_checkinteger(L, index));
                 else if (t == typeof(byte))
-                    return (T)(object)(byte)luaL_checkinteger(L, index);
+                    return Converter.To<T>((byte)luaL_checkinteger(L, index));
                 else if (t == typeof(short))
-                    return (T)(object)(short)luaL_checkinteger(L, index);
+                    return Converter.To<T>((short)luaL_checkinteger(L, index));
                 else if (t == typeof(ushort))
-                    return (T)(object)(ushort)luaL_checkinteger(L, index);
+                    return Converter.To<T>((ushort)luaL_checkinteger(L, index));
                 else if (t == typeof(int))
-                    return (T)(object)(int)luaL_checkinteger(L, index);
+                    return Converter.To<T>((int)luaL_checkinteger(L, index));
                 else if (t == typeof(uint))
-                    return (T)(object)(uint)luaL_checkinteger(L, index);
+                    return Converter.To<T>((uint)luaL_checkinteger(L, index));
                 else if (t == typeof(long))
-                    return (T)(object)(long)luaL_checkinteger(L, index);
+                    return Converter.To<T>((long)luaL_checkinteger(L, index));
                 else if (t == typeof(ulong))
-                    return (T)(object)(ulong)luaL_checkinteger(L, index);
+                    return Converter.To<T>((ulong)luaL_checkinteger(L, index));
                 else if (t == typeof(float))
-                    return (T)(object)(float)luaL_checknumber(L, index);
+                    return Converter.To<T>((float)luaL_checknumber(L, index));
                 else if (t == typeof(double))
-                    return (T)(object)luaL_checknumber(L, index);
+                    return Converter.To<T>(luaL_checknumber(L, index));
                 else
                     throw new Exception("Error type");
             }
             else if (t == typeof(IntPtr))
-                return (T)(object)(IntPtr)luaL_checkinteger(L, index);
+                return Converter.To<T>((IntPtr)luaL_checkinteger(L, index));
             else if (t == typeof(UIntPtr))
-                return (T)(object)(UIntPtr)luaL_checkinteger(L, index);
+                return Converter.To<T>((UIntPtr)luaL_checkinteger(L, index));
             else if (t == typeof(string))
                 return (T)(object)lua_checkstring(L, index);
             else if (t == typeof(LuaNativeFunction))
-                 return (T)(object)lua_tocfunction(L, index).ToLuaFunction();
+                return (T)(object)lua_tocfunction(L, index).ToLuaFunction();
             else if (t == typeof(LuaRef))
             {
                 if (lua_isnone(L, index))
@@ -562,13 +562,11 @@ namespace SharpLuna
             }
             else
             {
-
-
-                return SharpObject.Get<T>(L, index);              
+                return SharpObject.Get<T>(L, index);
             }
-            
+
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T Opt<T>(lua_State L, int index, T def)
         {
@@ -608,7 +606,6 @@ namespace SharpLuna
                     return lua_isnoneornil(L, index) ? def : (T)(object)lua_tocfunction(L, index).ToLuaFunction();
                 case LuaRef luaRef:
                     return lua_isnone(L, index) ? def : Converter.To<T>(new LuaRef(L, index));
-
                 default:
                     return lua_isnoneornil(L, index) ? def : SharpObject.Get<T>(L, index);
             }
@@ -617,7 +614,7 @@ namespace SharpLuna
 
         public static T Pop<T>(lua_State L)
         {
-            T v = Get<T>(L, -1);
+            Get<T>(L, -1, out T v);
             lua_pop(L, 1);
             return v;
         }

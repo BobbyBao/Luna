@@ -215,17 +215,29 @@ namespace SharpLuna
 
         }
 
-        /*
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static object Get(lua_State L, int index)
+        public static object Get(lua_State L, int index, Type t)
         {
+            LuaType type = lua_type(L, index);
+            if (type != LuaType.UserData)
+            {
+                if(t == null)
+                {
+                    //                    
+                    return null;
+                }
+
+                Lua.Get(L, index, out LuaRef func);
+                return Converter.Convert(t, func);
+            }
+
             var handle = GetHandler(L, index);
 #if LUA_WEAKTABLE
             return freeList[(int)handle];
 #else
             return GCHandle.FromIntPtr((IntPtr)handle).Target;
 #endif
-        }*/
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T Get<T>(lua_State L, int index)
@@ -234,40 +246,20 @@ namespace SharpLuna
             //             {
             //                 return GetUnmanaged<T>(L, index);
             //             }
-            /*
-            if (typeof(T).IsSubclassOf(typeof(Delegate)))
+
+            LuaType type = lua_type(L, index);
+            if (type != LuaType.UserData)
             {
                 //to do: function to Delegate convert
-                LuaRef func = Lua.Get<LuaRef>(L, index);
+                Lua.Get(L, index, out LuaRef func);
                 return (T)Converter.Convert(typeof(T), func);
-            }*/
+            }
 
             var handle = GetHandler(L, index);
 #if LUA_WEAKTABLE
             return (T)freeList[(int)handle];
 #else
             return (T)GCHandle.FromIntPtr((IntPtr)handle).Target;
-#endif
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static object Get(lua_State L, int index, Type t)
-        {
-            //todo: lua_topointer
-
-            if (t.IsSubclassOf(typeof(Delegate)))
-            {
-                //to do: function to Delegate convert
-                LuaRef func = Lua.Get<LuaRef>(L, index);
-                return Converter.Convert(t, func);
-            }
-
-
-            var handle = GetHandler(L, index);
-#if LUA_WEAKTABLE
-            return freeList[(int)handle];
-#else
-            return GCHandle.FromIntPtr((IntPtr)handle).Target;
 #endif
         }
 

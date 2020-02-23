@@ -23,6 +23,9 @@ public class SampleClient : LunaClient
 
         this.AddModule(customTypes);
 
+
+        Converter.Register<System.Action<GameObject>>(CreateActionGameObject);
+
     }
 
     protected override IEnumerator OnStart()
@@ -33,4 +36,11 @@ public class SampleClient : LunaClient
         yield return null;
     }
 
+    static System.Action<GameObject> CreateActionGameObject(LuaRef luaFunc)
+    {
+        return (data) =>
+        {
+            luaFunc.Call(data);
+        };
+    }
 }
