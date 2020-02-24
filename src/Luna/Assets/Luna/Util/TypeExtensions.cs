@@ -21,9 +21,7 @@ namespace SharpLuna
                 result = false;
             else
             {
-                var fieldInfos = t.GetFields(BindingFlags.Public |
-                    BindingFlags.NonPublic | BindingFlags.Instance);
-
+                var fieldInfos = t.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                 result = true;
                 foreach (var fieldInfo in fieldInfos)
                 {

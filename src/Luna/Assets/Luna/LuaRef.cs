@@ -323,7 +323,7 @@ namespace SharpLuna
 
         public static LuaRef CreateFunctionWith(lua_State L, LuaNativeFunction proc, params object[] upvalues)
         {
-            PushArg(L, upvalues);
+            PushArgs(L, upvalues);
             lua_pushcclosure(L, proc, upvalues.Length);
             return PopFromStack(L);
         }
@@ -373,7 +373,7 @@ namespace SharpLuna
         {
             lua_pushcfunction(L, LuaException.traceback);
             f.PushToStack();
-            PushArg(L, args);
+            PushArgs(L, args);
             if (lua_pcall(L, args.Length, 0, -args.Length + 2) != (int)LuaStatus.OK)
             {
                 lua_remove(L, -2);
@@ -386,7 +386,7 @@ namespace SharpLuna
         {
             lua_pushcfunction(L, LuaException.traceback);
             f.PushToStack();
-            PushArg(L, args);
+            PushArgs(L, args);
             if (lua_pcall(L, args.Length, 1, -args.Length + 2) != (int)LuaStatus.OK)
             {
                 lua_remove(L, -2);
@@ -397,13 +397,6 @@ namespace SharpLuna
             return v;
         }
      
-        static void PushArg(lua_State L, params object[] args)
-        {
-            foreach (var obj in args)
-            {
-                Lua.Push(L, obj);
-            }
-        }
         
     }
 

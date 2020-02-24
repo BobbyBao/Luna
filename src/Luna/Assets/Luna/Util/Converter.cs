@@ -12,7 +12,9 @@ namespace SharpLuna
 
     public static class Converter
     {
-        static Dictionary<Type, Func<LuaRef, object>> delegateFactory = new Dictionary<Type, Func<LuaRef, object>>();
+        static Dictionary<Type, Func<IntPtr, int, object>> delegateFactory = new Dictionary<Type, Func<IntPtr, int, object>>();
+
+        static Dictionary<Type, Func<IntPtr, int, object>> customConverter = new Dictionary<Type, Func<IntPtr, int, object>>();
 
         static Converter()
         {
@@ -21,7 +23,7 @@ namespace SharpLuna
         }
 
 
-        public static Func<LuaRef, object> GetFactory(Type type)
+        public static Func<IntPtr, int, object> GetFactory(Type type)
         {
             if (delegateFactory.TryGetValue(type, out var f))
             {
@@ -31,42 +33,61 @@ namespace SharpLuna
             return null;
         }
 
-        public static object Convert(Type type, LuaRef luaFunc)
+        public static object Convert(Type type, IntPtr L, int index)
         {
             if (!delegateFactory.TryGetValue(type, out var fac))
             {
                 return null;
             }
 
-            return fac(luaFunc);
+            return fac(L, index);
         }
 
-        public static void Register<T>(Func<LuaRef, object> factory) where T : Delegate
+        public static void Register<T>(Func<IntPtr, int, object> factory) where T : Delegate
         {
             delegateFactory[typeof(T)] = factory;
         }
 
-        public static void Register(Type type, Func<LuaRef, object> factory)
+        public static void Register(Type type, Func<IntPtr, int, object> factory)
         {
             delegateFactory[type] = factory;
         }
 
-        static Action<string> CreateActionString(LuaRef luaFunc)
+        static Action<string> CreateActionString(IntPtr L, int index)
         {
+            lua_pushvalue(L, index);
+            int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
             return (data) =>
             {
-                luaFunc.Call(data);
+                lua_pushcfunction(L, LuaException.traceback);
+                lua_rawgeti(L, LUA_REGISTRYINDEX, luaref);
+                Push(L, data);
+                if (lua_pcall(L, 1, 0, -1 + 2) != (int)LuaStatus.OK)
+                {
+                    lua_remove(L, -2);
+                    throw new LuaException(L);
+                }
+                lua_pop(L, 1);
             };
         }
 
-        static Action<int> CreateActionInt(LuaRef luaFunc)
+        static Action<int> CreateActionInt(IntPtr L, int index)
         {
+            lua_pushvalue(L, index);
+            int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
             return (data) =>
             {
-                luaFunc.Call(data);
+                lua_pushcfunction(L, LuaException.traceback);
+                lua_rawgeti(L, LUA_REGISTRYINDEX, luaref);
+                Push(L, data);
+                if (lua_pcall(L, 1, 0, -1 + 2) != (int)LuaStatus.OK)
+                {
+                    lua_remove(L, -2);
+                    throw new LuaException(L);
+                }
+                lua_pop(L, 1);
             };
         }
-
 #if IL2CPP
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T To<T>(this object v)

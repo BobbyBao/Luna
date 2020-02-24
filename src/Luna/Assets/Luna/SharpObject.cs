@@ -227,8 +227,8 @@ namespace SharpLuna
                     return null;
                 }
 
-                Lua.Get(L, index, out LuaRef func);
-                return Converter.Convert(t, func);
+                //Lua.Get(L, index, out LuaRef func);
+                return Converter.Convert(t, L, index);
             }
 
             var handle = GetHandler(L, index);
@@ -251,8 +251,8 @@ namespace SharpLuna
             if (type == LuaType.Function)
             {
                 //to do: function to Delegate convert
-                Lua.Get(L, index, out LuaRef func);
-                return (T)Converter.Convert(typeof(T), func);
+                //Lua.Get(L, index, out LuaRef func);
+                return (T)Converter.Convert(typeof(T), L, index);
             }
             
             var handle = GetHandler(L, index);

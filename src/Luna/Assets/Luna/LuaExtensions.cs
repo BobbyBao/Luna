@@ -153,6 +153,14 @@ namespace SharpLuna
 
         }
 
+        public static void PushArgs(lua_State L, params object[] args)
+        {
+            foreach (var obj in args)
+            {
+                Lua.Push(L, obj);
+            }
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Push(lua_State L, bool v)
         {
@@ -422,10 +430,10 @@ namespace SharpLuna
             }
             else if (objtype == typeof(LuaRef))
             {
-                Get(L, index, out LuaRef luaref);
-                var obj = Converter.Convert(objtype, luaref);
+                var obj = Converter.Convert(objtype, L, index);
                 if (obj != null)
                     return obj;
+                Get(L, index, out LuaRef luaref);
                 return luaref;
             }
             else if (objtype == typeof(object))

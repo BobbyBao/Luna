@@ -24,9 +24,14 @@ namespace SharpLuna
         public static void Clear()
         {
             generatedTypes.Clear();
+            classDelegates.Clear();
         }
 
         static HashSet<string> namespaces = new HashSet<string>();
+        static HashSet<Type> classDelegates = new HashSet<Type>();
+
+        static Dictionary<Type, string> allDelegates = new Dictionary<Type, string>();
+
         public static void GenerateClassWrap(string module, Type type, bool genSuper = false, List<string> excludeMembers = null)
         {
             string code = GenerateClass(module, type, genSuper, excludeMembers);
@@ -42,13 +47,6 @@ namespace SharpLuna
         static string GenerateClass(string module, Type type, bool genSuper, List<string> excludeMembers)
         {
             StringBuilder sbHead = new StringBuilder();
-            //sbHead.Append("using System;\n");
-            //sbHead.Append("using SharpLuna;\n");
-            //sbHead.Append("using System.Collections.Generic;\n");
-#if UNITY_EDITOR
-            //sb.Append("using UnityEngine;\n");
-#endif
-
             namespaces.Add("System");
             namespaces.Add("SharpLuna");
             namespaces.Add("System.Collections.Generic");
@@ -88,9 +86,8 @@ namespace SharpLuna
                 } while (currentType != null);
 
             }
-               
-            GenerateClassWrap(type, excludeMembers, sb, members);
 
+            GenerateClassWrap(type, excludeMembers, sb, members);
 
             sb.Append($"\tpublic static void Register(ClassWraper classWraper)\n\t{{\n");
 
@@ -142,7 +139,27 @@ namespace SharpLuna
                 {
                     sb.Append($"\t\tclassWraper.RegFunction(\"{name}\", {name});\n");
                 }
+                else if (memberType == MemberTypes.Custom)
+                {
+                    sb.Append($"\t\tclassWraper.RegFunction(\"{name}\", {name});\n");
+                }
             }
+
+            sb.AppendLine();
+            foreach (var delType in classDelegates)
+            {
+                if(allDelegates.TryGetValue(delType, out var delFn))
+                {
+                    if (!string.IsNullOrEmpty(delFn))
+                    {
+                        var fullName = delType.GetFriendlyName();
+                        sb.Append($"\t\tConverter.Register<{fullName}>({delFn});\n");
+                        allDelegates[delType] = "";
+                    }                 
+                }
+            }
+            
+            classDelegates.Clear();
 
             sb.Append("\t}\n");
 
@@ -150,7 +167,7 @@ namespace SharpLuna
 
             foreach (var @namespace in namespaces)
             {
-                sbHead.Append("using ").Append(@namespace).Append(";");
+                sbHead.Append("using ").Append(@namespace).Append(";").AppendLine();
             }
 
             sbHead.Append(sb);
@@ -181,6 +198,16 @@ namespace SharpLuna
                     {
                         gen = false;
                     }
+
+                    if(!classDelegates.Contains(p.ParameterType))
+                    {
+                        if(p.ParameterType.IsSubclassOf(typeof(Delegate)))
+                        {
+                            classDelegates.Add(p.ParameterType);
+                        }
+
+                    }                                                                                                                                                                                                                       
+
                 }
 
                 if (gen)
@@ -215,6 +242,15 @@ namespace SharpLuna
                         }
                     }
 
+                    if (!classDelegates.Contains(field.FieldType))
+                    {
+                        if (field.FieldType.IsSubclassOf(typeof(Delegate)))
+                        {
+                            classDelegates.Add(field.FieldType);
+                        }
+
+                    }
+
                     GenerateField(type, field, sb);
                     members.Add((MemberTypes.Field, field.Name, true, !field.IsLiteral && !field.IsInitOnly));
                 }
@@ -240,6 +276,15 @@ namespace SharpLuna
                 if (prop.Name == "Item")
                 {
                     continue;
+                }
+
+                if (!classDelegates.Contains(prop.PropertyType))
+                {
+                    if (prop.PropertyType.IsSubclassOf(typeof(Delegate)))
+                    {
+                        classDelegates.Add(prop.PropertyType);
+                    }
+
                 }
 
                 GenerateProperty(type, prop, sb);
@@ -300,6 +345,15 @@ namespace SharpLuna
                         {
                             gen = false;
                         }
+
+                        if (!classDelegates.Contains(p.ParameterType))
+                        {
+                            if (p.ParameterType.IsSubclassOf(typeof(Delegate)))
+                            {
+                                classDelegates.Add(p.ParameterType);
+                            }
+
+                        }
                     }
 
                     if (gen)
@@ -316,6 +370,17 @@ namespace SharpLuna
                     members.Add((MemberTypes.Method, method.Name, false, false));
                 }
             }
+
+            foreach(var delType in classDelegates)
+            {
+                if(allDelegates.ContainsKey(delType))
+                {
+                    continue;
+                }
+                var name = GenerateDelegate(delType, sb);
+                allDelegates[delType] = name;
+            }
+
 
             generatedTypes.Add(type);
         }
@@ -629,6 +694,54 @@ namespace SharpLuna
             sb.AppendLine();
         }
 
+        static string GenerateDelegate(Type delType, StringBuilder sb)
+        {
+            string delName = delType.GetFriendlyName();
+            string[] strs = delName.Split('.', '<', '>');
+            string name = string.Join("", strs);
+
+            string parameters = "";
+            int paramCount = 0;
+            if(delType.IsGenericType)
+            {
+                paramCount = delType.GetGenericArguments().Length;
+                for (int i = 1; i <= paramCount; i++)
+                {
+                    if(i != 1)
+                    {
+                        parameters += ", ";
+                    }
+
+                    parameters += "p" + i;
+                }
+            }
+
+            sb.Append($"\tstatic {delName} {name}(IntPtr L, int index)\n\t{{\n");
+
+            sb.Append("\t\tlua_pushvalue(L, index);\n");
+            sb.Append("\t\tint luaref = luaL_ref(L, LUA_REGISTRYINDEX);\n");
+
+            sb.Append($"\t\treturn ({parameters})=> \n\t\t{{\n");
+            sb.Append("\t\t\tlua_pushcfunction(L, LuaException.traceback);\n");
+            sb.Append("\t\t\tlua_rawgeti(L, LUA_REGISTRYINDEX, luaref);\n");
+
+            for(int i = 1; i <= paramCount; i++)
+            {
+                sb.Append($"\t\t\tPush(L, p{i});\n");
+            }
+
+            sb.Append($"\t\t\tif (lua_pcall(L, 1, 0, -{paramCount} + 2) != (int)LuaStatus.OK)\n");
+            sb.Append("\t\t\t{\n");
+            sb.Append("\t\t\t\tlua_remove(L, -2);\n");
+            sb.Append("\t\t\t\tthrow new LuaException(L);\n");
+            sb.Append("\t\t\t}\n");
+            sb.Append("\t\t\tlua_pop(L, 1);\n");
+
+            sb.Append("\t\t};\n");
+            sb.Append("\t}\n");
+            sb.AppendLine();
+            return name;
+        }
     }
 
 }
