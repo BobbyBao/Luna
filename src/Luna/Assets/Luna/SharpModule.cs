@@ -13,17 +13,6 @@ namespace SharpLuna
         static Dictionary<string, SharpModule> registeredModule;
         protected Luna luna;
 
-        public override Luna Luna
-        {
-            get
-            {               
-                if(luna != null)   
-                    return luna;
-
-                return base.Luna;
-            }
-        }
-
         //GlobalModule
         public SharpModule(Luna luna) : base(LuaRef.Globals(luna.State))
         {
@@ -41,8 +30,19 @@ namespace SharpLuna
             }
 
             this.parent = parent;
-            meta = create_meta(parentMeta, name, 0, null);
+            meta = create_module(parentMeta.State, parentMeta, name);
             Name = name;
+        }
+
+        public override Luna Luna
+        {
+            get
+            {
+                if (luna != null)
+                    return luna;
+
+                return base.Luna;
+            }
         }
 
         public SharpModule GetModule(string name)

@@ -18,8 +18,8 @@ namespace SharpLuna
         private readonly int _ref;
 
         //public static readonly LuaRef Empty = new LuaRef(0);
-        public static readonly LuaRef None = new LuaRef(LUA_NOREF);
-        public static readonly LuaRef Nil = new LuaRef(LUA_REFNIL);
+        public static readonly LuaRef None = new LuaRef(LUA_NOREF, IntPtr.Zero);
+        public static readonly LuaRef Nil = new LuaRef(LUA_REFNIL, IntPtr.Zero);
 
         public LuaRef(lua_State state, int index)
         {
@@ -44,9 +44,9 @@ namespace SharpLuna
             state.AddRef(this);
         }
 
-        private LuaRef(int luaRef)
+        public LuaRef(int luaRef, IntPtr state)
         {
-            L = IntPtr.Zero;
+            L = state;
             _ref = luaRef;
         }
 
@@ -77,6 +77,7 @@ namespace SharpLuna
         }
         
         public lua_State State => L;
+        public int Ref => _ref;
         public bool IsValid => _ref != LUA_NOREF;
         public bool IsTable => Type == LuaType.Table;
         public bool IsFunction => Type == LuaType.Function;

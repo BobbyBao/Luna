@@ -70,7 +70,7 @@ namespace SharpLuna
                 return classref;
             }
 
-            var meta = create_meta(module, name, classId, dctor);
+            var meta = create_class(module.State, module, name, classId, dctor);
 
             if (superClassID != 0)
             {
@@ -82,13 +82,61 @@ namespace SharpLuna
             return meta;
         }
 
-        public static LuaRef create_meta(LuaRef parentModule, string name, int classId, LuaNativeFunction dctor)
+        public static LuaRef create_class(lua_State L, LuaRef parentModule, string name, int classId, LuaNativeFunction dctor)
         {
-            var L = parentModule.State;
-
+            int moduleRef = parentModule.Ref;
+#if C_API
+            int metaRef = luna_create_class(L, moduleRef, name, classId, dctor.ToFunctionPointer());
+            return new LuaRef(metaRef, L);
+#else
             string fullName = GetFullName(parentModule, name);
+            
+            lua_createtable(L, 0, 0);
+            lua_pushvalue(L, -1);
+            lua_setmetatable(L, -2);
 
-            LuaRef meta = LuaRef.CreateTable(L);
+            lua_pushstring(L, "__index");
+            lua_pushcfunction(L, (LuaNativeFunction)class_index);
+            lua_rawset(L, -3);
+
+            lua_pushstring(L, "__newindex");
+            lua_pushcfunction(L, (LuaNativeFunction)class_newindex);
+            lua_rawset(L, -3);
+   
+            lua_createtable(L, 0, 0);
+            lua_rawsetp(L, -2, ___getters);
+
+            lua_createtable(L, 0, 0);
+            lua_rawsetp(L, -2, ___setters);
+
+            lua_pushstring(L, fullName);
+            lua_rawsetp(L, -2, ___type);
+  
+            if (dctor != null)
+            {
+                lua_pushstring(L, "__gc");
+                lua_pushcfunction(L, dctor);
+                lua_rawset(L, -3);
+            }
+
+            int metaRef = luaL_ref(L, LUA_REGISTRYINDEX);
+
+            if (classId != 0)
+            {
+                lua_pushvalue(L, LUA_REGISTRYINDEX);
+                lua_rawgeti(L, LUA_REGISTRYINDEX, metaRef);
+                lua_rawseti(L, -2, classId);
+                lua_pop(L, 1);
+            }
+
+            lua_rawgeti(L, LUA_REGISTRYINDEX, moduleRef);
+            lua_pushstring(L, name);
+            lua_rawgeti(L, LUA_REGISTRYINDEX, metaRef);
+            lua_rawset(L, -3);
+            lua_pop(L, 1);
+            return new LuaRef(metaRef, L);
+            /*
+            LuaRef meta = LuaRef.CreateTable(L);            
             meta.SetMetaTable(meta);
 
             meta.RawSet("__index", (LuaNativeFunction)class_index);
@@ -97,7 +145,7 @@ namespace SharpLuna
             meta.RawSet(___setters, LuaRef.CreateTable(L));
             meta.RawSet(___type, fullName);
 
-            if(dctor != null)
+            if (dctor != null)
                 meta.RawSet("__gc", dctor);
 
             if(classId != 0)
@@ -107,7 +155,32 @@ namespace SharpLuna
             }
 
             parentModule.RawSet(name, meta);
+            return meta;*/
+#endif
+
+        }
+
+        public static LuaRef create_module(lua_State L, LuaRef parentModule, string name)
+        {
+            int moduleRef = parentModule.Ref;
+#if C_API
+            int metaRef;
+            metaRef = luna_create_module(L, moduleRef, name);
+            return new LuaRef(metaRef, L);
+#else
+            string fullName = GetFullName(parentModule, name);
+
+            LuaRef meta = LuaRef.CreateTable(L);
+            meta.SetMetaTable(meta);
+
+            meta.RawSet("__index", (LuaNativeFunction)module_index);
+            meta.RawSet("__newindex", (LuaNativeFunction)module_newindex);
+            meta.RawSet(___getters, LuaRef.CreateTable(L));
+            meta.RawSet(___setters, LuaRef.CreateTable(L));
+            meta.RawSet(___type, fullName);
+            parentModule.RawSet(name, meta);
             return meta;
+#endif
         }
 
         //todo: use upvalue

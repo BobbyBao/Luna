@@ -482,6 +482,11 @@ namespace SharpLuna
         public static extern int luna_init(lua_State L, ref LunaData data);
 
 #if LUNA_SCRIPT
+        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int luna_create_class(lua_State L, int moduleRef, string name, int classId, lua_CFunction dctor);
+
+        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int luna_create_module(lua_State L, int moduleRef, string name);
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int luna_try_getuserdata(lua_State L, long key, int cache_ref);
