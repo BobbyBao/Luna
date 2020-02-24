@@ -2,13 +2,9 @@
 import "UIPanel"
 
 class UITest : UIPanel {
-    var btn1 = nil
-    var btn2 = nil
-    var btn3 = nil
-    var btn4 = nil
 
-    init(uiFile) {
-        super.init("Test", uiFile)
+    init() {
+        super.init("Test", "UI/TestPanel")
     }
 
     func onLoad(go) {

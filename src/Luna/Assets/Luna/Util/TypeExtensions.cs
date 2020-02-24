@@ -85,7 +85,7 @@ namespace SharpLuna
             else if (type.IsGenericType)
                 return type.Name.Split('`')[0] + "<" + string.Join(", ", type.GetGenericArguments().Select(x => GetFriendlyName(x)).ToArray()) + ">";
             else
-                return type.FullName;
+                return type.FullName.Replace("+", ".");
         }
 
         public static string GetFriendlyName(this Type type)

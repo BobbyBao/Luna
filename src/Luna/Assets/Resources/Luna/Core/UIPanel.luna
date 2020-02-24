@@ -3,6 +3,7 @@ import "Behaviour"
 class UIPanel : Behaviour {
     var gameObject = nil
     var uiFile = nil
+    var loaded = false
 
     init(n, uiFile) {
         super.init(n)
@@ -45,21 +46,38 @@ class UIPanel : Behaviour {
     func enter() {
     
         if self.gameObject == nil {
-            UIManager.Instance.OpenPanel(self.uiFile, self.Load, self)
+            self.state = BehaviourState.Transiting
+            UIManager.Instance.OpenPanel(self.uiFile, func(go)  { 
+                self.gameObject = go
+
+                if self.state == BehaviourState.Transiting {
+                    self.gameObject.SetActive(true)
+
+                    if !self.loaded {
+                        self.onLoad(go)
+                        self.loaded = true
+                    }
+                    
+                    self.onOpen()
+                    self.state = BehaviourState.Open
+                }
+                else if self.state == BehaviourState.Closed {
+                    self.gameObject.SetActive(false)
+                }
+
+            })
+        }
+        else {
+            
+            if !self.loaded {
+                self.onLoad(go)
+                self.loaded = true
+            }
+
+            self.onOpen()
+            self.state = BehaviourState.Open
         }
 
-    }
-
-    func Load(go) {
-     
-        self.gameObject = go
-        self.gameObject.SetActive(true)
-
-        self.onLoad(go)
-    }
-
-    func onLoad(go) {
-        
     }
 
     func exit() {  
@@ -68,6 +86,17 @@ class UIPanel : Behaviour {
             self.gameObject.SetActive(false)    
         }
 
+        self.onClose()
+        self.state = BehaviourState.Closed
+    }
+
+    func onLoad(go) {      
+    }
+
+    func onOpen() {
+    }
+
+    func onClose() {
     }
 
 	func shutdown() {

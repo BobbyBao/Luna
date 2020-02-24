@@ -26,6 +26,7 @@ namespace SharpLuna
             generatedTypes.Clear();
         }
 
+        static HashSet<string> namespaces = new HashSet<string>();
         public static void GenerateClassWrap(string module, Type type, bool genSuper = false, List<string> excludeMembers = null)
         {
             string code = GenerateClass(module, type, genSuper, excludeMembers);
@@ -40,13 +41,19 @@ namespace SharpLuna
 
         static string GenerateClass(string module, Type type, bool genSuper, List<string> excludeMembers)
         {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("using System;\n");
-            sb.Append("using SharpLuna;\n");
-            sb.Append("using System.Collections.Generic;\n");
+            StringBuilder sbHead = new StringBuilder();
+            //sbHead.Append("using System;\n");
+            //sbHead.Append("using SharpLuna;\n");
+            //sbHead.Append("using System.Collections.Generic;\n");
 #if UNITY_EDITOR
             //sb.Append("using UnityEngine;\n");
 #endif
+
+            namespaces.Add("System");
+            namespaces.Add("SharpLuna");
+            namespaces.Add("System.Collections.Generic");
+
+            StringBuilder sb = new StringBuilder();
             sb.Append("using static SharpLuna.Lua;\n");
 
             sb.AppendLine();
@@ -140,7 +147,14 @@ namespace SharpLuna
             sb.Append("\t}\n");
 
             sb.Append("}");
-            return sb.ToString();
+
+            foreach (var @namespace in namespaces)
+            {
+                sbHead.Append("using ").Append(@namespace).Append(";");
+            }
+
+            sbHead.Append(sb);
+            return sbHead.ToString();
 
         }
 
@@ -323,6 +337,7 @@ namespace SharpLuna
                 sb.Append($"\t\tif(n == 0)\n\t\t{{\n");               
                 sb.Append($"\t\t\tobj = new {type.FullName}();\n");
             }
+
             int idx = 0;
             foreach (var ctor in ctorList)
             {

@@ -3,16 +3,13 @@ import "GameState"
 import "UI/UITest"
 
 let MainState = GameState("main")
-let test = UITest("UI/TestPanel")
-
-print(MainState.name)
+let test = UITest()
 
 MainState.addChild(test)
-//MainState.transit(test)
+MainState.transit(test)
 
-//var go = ResourceManager.LoadObject("UI/Panel")
-
+/*
 ResourceManager.LoadObject("UI/TestPanel", func (go) {
     print(go.name)
 })
-
+*/
