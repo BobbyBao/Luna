@@ -719,6 +719,11 @@ namespace SharpLuna
             }
             else
             {
+                if (t == typeof(object))
+                {
+                    return (T)GetObject(L, index);
+                }
+
                 return SharpObject.Get<T>(L, index);
             }
 

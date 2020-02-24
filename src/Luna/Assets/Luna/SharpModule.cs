@@ -28,11 +28,12 @@ namespace SharpLuna
         public SharpModule(Luna luna) : base(LuaRef.Globals(luna.State))
         {
             this.luna = luna;
+            Name = "_G";
         }
         
         public SharpModule(SharpClass parent, LuaRef parentMeta, string name) : base(parentMeta)
         {
-            LuaRef luaref = parentMeta.RawGet(name);
+            LuaRef luaref = parentMeta.RawGet(name) as LuaRef;
             if (luaref)
             {
                 meta = luaref;
@@ -40,7 +41,8 @@ namespace SharpLuna
             }
 
             this.parent = parent;
-            meta = create_module(parentMeta.State, parentMeta, name);
+            meta = create_meta(parentMeta, name, 0, null);
+            Name = name;
         }
 
         public SharpModule GetModule(string name)
@@ -60,6 +62,22 @@ namespace SharpLuna
             return module;
         }
 
+        public SharpClass RegClass<T>()
+        {
+            return RegClass(typeof(T));
+        }
+
+        public SharpClass RegClass<T, SUPER>()
+        {
+            return RegClass(typeof(T), typeof(SUPER));
+        }
+
+        public SharpClass RegClass(Type classType, Type superType = null)
+        {
+            var cls = GetClass(classType, superType);
+            cls.OnRegClass();
+            return this;
+        }
     };
 
 

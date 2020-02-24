@@ -39,67 +39,75 @@ namespace SharpLuna
 #endif
         }
 
-        public static bool CreateClass(ref LuaRef meta, LuaRef parent, string name, int classId, LuaNativeFunction dctor)
+        public static string GetFullName(LuaRef parent, string name)
         {
-            LuaRef @ref = parent.RawGet<LuaRef, string>(name);
-            if (@ref)
+            string full_name = parent.RawGet(___type, "");
+            if (!string.IsNullOrEmpty(full_name))
             {
-                meta = @ref;
-                return false;
+                int pos = full_name.IndexOf('<');
+                if (pos != -1) full_name.Remove(0, pos + 1);
+                pos = full_name.LastIndexOf('>');
+                if (pos != -1) full_name.Remove(pos);
+                full_name += '.';
             }
-
-            var L = parent.State;
-            string type_name = "class<" + GetFullName(parent, name) + ">";
-
-            LuaRef typeClass = LuaRef.FromValue(L, classId);
-            LuaRef cls = LuaRef.CreateTable(L);
-            cls.SetMetaTable(cls);
-
-            cls.RawSet("__index", (LuaNativeFunction)class_index);
-            cls.RawSet("__newindex", (LuaNativeFunction)class_newindex);
-
-            cls.RawSet(___getters, LuaRef.CreateTable(L));
-            cls.RawSet(___setters, LuaRef.CreateTable(L));
-            cls.RawSet(___type, type_name);
-
-            LuaRef registry = new LuaRef(L, LUA_REGISTRYINDEX);
-            registry.RawSet(typeClass, cls);
-            parent.RawSet(name, cls);
-            meta = cls;
-            meta.RawSet("__gc", dctor);
-            return true;
+            full_name += name;
+            return full_name;
         }
 
-        public static bool CreateClass(ref LuaRef meta, LuaRef parent, string name, int classId, int superClassID, LuaNativeFunction dctor)
+        public static string GetMemberName(LuaRef parent, string name)
         {
-            if (CreateClass(ref meta, parent, name, classId, dctor))
-            {
-                if (superClassID != 0)
-                {
-                    LuaRef registry = new LuaRef(parent.State, LUA_REGISTRYINDEX);
-                    LuaRef super = registry.RawGet<LuaRef>(superClassID);
-                    meta.RawSet(___super, super);
-                }
-
-                return true;
-            }
-            return false;
+            string full_name = parent.RawGet(___type, "<unknown>");
+            full_name += '.';
+            full_name += name;
+            return full_name;
         }
 
-        public static LuaRef create_module(lua_State L, LuaRef parentMeta, string name)
+        public static LuaRef CreateClass(LuaRef module, string name, int classId, int superClassID, LuaNativeFunction dctor)
         {
-            string type_name = "module<" + GetFullName(parentMeta, name) + ">";
-            LuaRef module = LuaRef.CreateTable(L);
-            module.SetMetaTable(module);
+            LuaRef classref = module.RawGet<LuaRef, string>(name);
+            if (classref)
+            {
+                return classref;
+            }
 
-            module.RawSet("__index", (LuaNativeFunction)module_index);
-            module.RawSet("__newindex", (LuaNativeFunction)module_newindex);
-            module.RawSet(___getters, LuaRef.CreateTable(L));
-            module.RawSet(___setters, LuaRef.CreateTable(L));
-            module.RawSet(___type, type_name);
-            module.RawSet("___parent", parentMeta);
-            parentMeta.RawSet(name, module);
-            return module;
+            var meta = create_meta(module, name, classId, dctor);
+
+            if (superClassID != 0)
+            {
+                LuaRef registry = new LuaRef(module.State, LUA_REGISTRYINDEX);
+                LuaRef super = registry.RawGet<LuaRef>(superClassID);
+                meta.RawSet(___super, super);
+            }
+
+            return meta;
+        }
+
+        public static LuaRef create_meta(LuaRef parentModule, string name, int classId, LuaNativeFunction dctor)
+        {
+            var L = parentModule.State;
+
+            string fullName = GetFullName(parentModule, name);
+
+            LuaRef meta = LuaRef.CreateTable(L);
+            meta.SetMetaTable(meta);
+
+            meta.RawSet("__index", (LuaNativeFunction)class_index);
+            meta.RawSet("__newindex", (LuaNativeFunction)class_newindex);
+            meta.RawSet(___getters, LuaRef.CreateTable(L));
+            meta.RawSet(___setters, LuaRef.CreateTable(L));
+            meta.RawSet(___type, fullName);
+
+            if(dctor != null)
+                meta.RawSet("__gc", dctor);
+
+            if(classId != 0)
+            {
+                LuaRef registry = LuaRef.Registry(L);
+                registry.RawSet(classId, meta);
+            }
+
+            parentModule.RawSet(name, meta);
+            return meta;
         }
 
         //todo: use upvalue

@@ -40,6 +40,7 @@ namespace SharpLuna.Unity
             typeof(Transform),
             typeof(RectTransform),
             typeof(Resources),
+            typeof(AsyncOperation),
         };
 
         private Luna luna;
@@ -51,6 +52,8 @@ namespace SharpLuna.Unity
         {
             mathTypes, baseTypes
         };
+
+        System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
 
         private void Awake()
         {
@@ -79,7 +82,13 @@ namespace SharpLuna.Unity
             loader.AddSearchPath("core");
             loader.AddSearchPath("math");
 
+            sw.Start();
+
             luna.Run();
+
+            sw.Stop();
+
+            Luna.Log("Luna init time :", sw.ElapsedMilliseconds, "ms");
 
             LunaCreate?.Invoke(luna);
         }

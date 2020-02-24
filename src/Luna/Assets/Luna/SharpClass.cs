@@ -12,6 +12,8 @@ namespace SharpLuna
 
     public partial class SharpClass : IDisposable
     {
+        public string Name { get; protected set; }
+
         protected LuaRef meta;
         protected SharpClass parent;
         protected Type classType;
@@ -96,51 +98,6 @@ namespace SharpLuna
             return t.Name;
         }
 
-        public static string GetFullName(LuaRef parent, string name)
-        {
-            string full_name = parent.Get(___type, "");
-            if (!string.IsNullOrEmpty(full_name))
-            {
-                int pos = full_name.IndexOf('<');
-                if (pos != -1) full_name.Remove(0, pos + 1);
-                pos = full_name.LastIndexOf('>');
-                if (pos != -1) full_name.Remove(pos);
-                full_name += '.';
-            }
-            full_name += name;
-            return full_name;
-        }
-
-        public static string GetMemberName(LuaRef parent, string name)
-        {
-            string full_name = parent.RawGet(___type, "<unknown>");
-            full_name += '.';
-            full_name += name;
-            return full_name;
-        }
-
-        public static SharpClass Bind<T>(SharpClass parentMeta)
-        {
-            Type classType = typeof(T);
-            if (registeredClass.TryGetValue(classType, out var bindClass))
-            {
-                return bindClass;
-            }
-
-            var name = GetTableName(classType);
-            LuaRef meta = LuaRef.None;
-            if (!CreateClass(ref meta, parentMeta.Meta, name, SharpObject.Signature<T>(), Destructor))
-            {
-                return null;
-            }
-
-            bindClass = new SharpClass(meta);
-            bindClass.parent = parentMeta;
-            bindClass.SetClassType(classType);
-            registeredClass.Add(classType, bindClass);
-            return bindClass;
-        }
-
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         static int Destructor(lua_State L)
         {
@@ -148,29 +105,7 @@ namespace SharpLuna
             return 0;
         }
        
-        public static SharpClass Extend<T, SUPER>(SharpClass parent)
-        {
-            Type classType = typeof(T);
-            if (registeredClass.TryGetValue(classType, out var bindClass))
-            {
-                return bindClass;
-            }
-
-            string name = GetTableName(classType);
-            LuaRef meta = LuaRef.None;
-            if (!CreateClass(ref meta, parent.Meta, name, SharpObject.Signature<T>(), SharpObject.Signature<SUPER>(), Destructor))
-            {
-                return null;
-            }
-
-            bindClass = new SharpClass(meta);
-            bindClass.parent = parent;
-            bindClass.SetClassType(classType);
-            registeredClass.Add(classType, bindClass);
-            return bindClass;
-        }
-
-        public static SharpClass Extend(Type classType, Type superType, SharpClass parent)
+        public static SharpClass Extend(Type classType, Type superType, SharpClass module)
         {
             if (registeredClass.TryGetValue(classType, out var bindClass))
             {
@@ -178,14 +113,11 @@ namespace SharpLuna
             }
 
             string name = GetTableName(classType);
-            LuaRef meta = LuaRef.None;
-            if (CreateClass(ref meta, parent.Meta, name, SharpObject.Signature(classType), SharpObject.Signature(superType), Destructor))
-            {                
-                meta.RawSet("__gc", (LuaNativeFunction)Destructor);                
-            }
 
+            LuaRef meta = CreateClass(module.Meta, name, SharpObject.Signature(classType), SharpObject.Signature(superType), Destructor);           
             bindClass = new SharpClass(meta);
-            bindClass.parent = parent;
+            bindClass.parent = module;
+            bindClass.Name = name;
             bindClass.SetClassType(classType);
             registeredClass.Add(classType, bindClass);
             return bindClass;
@@ -256,30 +188,9 @@ namespace SharpLuna
             meta.RawSet(name, proc);
         }
 
-        public void SetMemberFunction(string name, LuaRef proc)
-        {
-            meta.RawSet(name, proc);
-        }
-
         #region 自动绑定
-        public SharpClass RegClass<T>()
-        {
-            return RegClass(typeof(T));
-        }
 
-        public SharpClass RegClass<T, SUPER>()
-        {
-            return RegClass(typeof(T), typeof(SUPER));
-        }
-
-        public SharpClass RegClass(Type classType, Type superType = null)
-        {
-            var cls = GetClass(classType, superType);
-            cls.OnRegClass();
-            return this;
-        }
-
-        protected void OnRegClass()
+        public void OnRegClass()
         {
             var fields = classType.GetFields();
             foreach (var field in fields)
@@ -423,40 +334,6 @@ namespace SharpLuna
             SetReadOnly(field.Name);
             return this;
         }
-
-       /*
-        public SharpClass RegConstructor(Type type, ConstructorInfo constructorInfo)
-        {
-            var paramInfos = constructorInfo.GetParameters();
-            foreach (var info in paramInfos)
-            {
-                if (info.ParameterType.IsByRef || info.ParameterType.IsPointer)
-                {
-                    return this;
-                }
-            }
-     
-            try
-            {
-                if (paramInfos.Length == 0)
-                {
-                    var callerType = typeof(Constructor<>).MakeGenericType(type);
-                    MethodInfo CallInnerDelegateMethod = callerType.GetMethod("Call", BindingFlags.Static | BindingFlags.Public);
-                    var luaFunc = (LuaNativeFunction)DelegateCache.Get(typeof(LuaNativeFunction), CallInnerDelegateMethod);
-                    meta.RawSet("__call", LuaRef.CreateFunction(State, luaFunc));
-                    return this;
-                }
-            }
-            catch(Exception e)
-            {
-                Luna.Log(e.Message);
-            }
-
-            Luna.LogWarning("注册反射版的Constructor : " + type.Name);
-
-            meta.RawSet("__call", LuaRef.CreateFunction(State, Constructor.Call, constructorInfo));
-            return this;
-        }*/
 
         public SharpClass RegField(FieldInfo fieldInfo)
         {
@@ -706,16 +583,7 @@ namespace SharpLuna
                     del = null;
                     return false;
                 }
-
-                /*
-                if (info.ParameterType.IsByRef || info.ParameterType.IsPointer)
-                {
-                    Luna.Log("不支持引用类型参数:" + methodInfo.ToString());
-                    luaFunc = null;
-                    del = null;
-                    return false;
-                }*/
-
+                
                 paramTypes.Add(info.ParameterType);
             }
 
@@ -740,14 +608,6 @@ namespace SharpLuna
                     del = null;
                     return false;
                 }
-                /*
-                if (typeOfResult.IsByRef || typeOfResult.IsPointer)
-                {
-                    Luna.Log("不支持引用类型参数:" + methodInfo.ToString());
-                    luaFunc = null;
-                    del = null;
-                    return false;
-                }*/
 
                 paramTypes.Add(typeOfResult);
                 var typeArray = paramTypes.ToArray();

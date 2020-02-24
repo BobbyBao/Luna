@@ -29,27 +29,9 @@ public class SampleClient : LunaClient
 
     protected override IEnumerator OnStart()
     {
-
         var luna = LunaClient.Luna;
 
         yield return null;
     }
 
-    static System.Action<GameObject> CreateActionGameObject(IntPtr L, int index)
-    {
-        lua_pushvalue(L, index);
-        int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
-        return (data) =>
-        {
-            lua_pushcfunction(L, LuaException.traceback);
-            lua_rawgeti(L, LUA_REGISTRYINDEX, luaref);
-            Push(L, data);
-            if (lua_pcall(L, 1, 0, -1 + 2) != (int)LuaStatus.OK)
-            {
-                lua_remove(L, -2);
-                throw new LuaException(L);
-            }
-            lua_pop(L, 1);
-        };
-    }
 }

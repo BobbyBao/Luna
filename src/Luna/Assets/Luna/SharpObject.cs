@@ -250,8 +250,6 @@ namespace SharpLuna
             LuaType type = lua_type(L, index);
             if (type == LuaType.Function)
             {
-                //to do: function to Delegate convert
-                //Lua.Get(L, index, out LuaRef func);
                 return (T)Converter.Convert(typeof(T), L, index);
             }
             

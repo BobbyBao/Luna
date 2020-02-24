@@ -44,11 +44,11 @@ namespace SharpLuna.Unity
                     className = className.Substring(index + 1);
                 }
                 
-                scriptClass = luna.GetGlobal(className);
+                scriptClass = luna.GetGlobal(className) as LuaRef;
                 if (!scriptClass)
                 {
                     luna.DoFile(luaPath);
-                    scriptClass = luna.GetGlobal(className);
+                    scriptClass = luna.GetGlobal(className) as LuaRef;
                     if (!scriptClass)
                     {
                         return;
@@ -58,7 +58,7 @@ namespace SharpLuna.Unity
                 var metaTable = scriptClass.GetMetaTable();             
                 if(metaTable)
                 {                  
-                    var ctor = metaTable.RawGet("__call");
+                    var ctor = metaTable.RawGet("__call") as LuaRef;
                     scriptInstance = ctor.Call<LuaRef>(metaTable);
                     metaTable.Dispose();
                 }
@@ -71,9 +71,9 @@ namespace SharpLuna.Unity
                 scriptInstance["transform"] = gameObject.transform;
                 scriptInstance["behaviour"] = this;
 
-                onEnableFn = scriptClass.Get("onEnable");
-                onDisableFn = scriptClass.Get("onDisable");
-                updateFn = scriptClass.Get("update");
+                onEnableFn = scriptClass.Get("onEnable") as LuaRef;
+                onDisableFn = scriptClass.Get("onDisable") as LuaRef;
+                updateFn = scriptClass.Get("update") as LuaRef;
 
                 CallFunc("awake");
             }
@@ -83,7 +83,7 @@ namespace SharpLuna.Unity
         {
             if(scriptInstance)
             {
-                var fn = scriptClass.Get(name);
+                var fn = scriptClass.Get(name) as LuaRef;
                 if (fn)
                 {
                     fn.Call(scriptInstance);
