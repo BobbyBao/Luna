@@ -1,0 +1,52 @@
+
+import "UIPanel"
+import "test/test_perf"
+
+class UITestPerformance : UIPanel {
+
+    init() {
+        super.init("TestPerformance", "UI/TestPerfPanel")
+    }
+
+    func onLoad(go) {
+        super.onLoad(go)
+
+        self.btn1 = self.addClickByName("Buttons/Button1", self.onButtonClick)
+        self.btn2 = self.addClickByName("Buttons/Button2", self.onButtonClick)
+        self.btn3 = self.addClickByName("Buttons/Button3", self.onButtonClick)
+        self.btn4 = self.addClickByName("Buttons/Button4", self.onButtonClick)
+        self.btn5 = self.addClickByName("Buttons/Button5", self.onButtonClick)
+        self.btn6 = self.addClickByName("Buttons/Button6", self.onButtonClick)
+        self.addClickByName("Buttons/Button9", self.onTest9)
+        self.addClickByName("Buttons/Button10", self.onTestTable)
+    }
+
+    func onButtonClick(go) {
+
+        if go == self.btn1 { 
+            test1(self.gameObject.transform)
+        } else if go == self.btn2 {    
+            test2()
+        } else if go == self.btn3 {    
+            test3()
+        } else if go == self.btn4 {    
+            test4()
+        } else if go == self.btn5 {    
+            
+        } else if go == self.btn6 {    
+            
+        } else if go == self.btn7 {    
+            
+        } else if go == self.btn8 {    
+           
+        }
+    }
+
+    func onTest9() {
+        test9()
+    }
+
+    func onTestTable() {
+        testTable()
+    }
+}

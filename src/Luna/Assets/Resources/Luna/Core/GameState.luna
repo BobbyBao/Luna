@@ -1,6 +1,6 @@
-import "Behaviour"
+import "Behavior"
 
-class GameState : Behaviour {
+class GameState : Behavior {
 
     init(n) {    
         super.init(n)        

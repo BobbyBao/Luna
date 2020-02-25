@@ -1,6 +1,6 @@
-import "Behaviour"
+import "Behavior"
 
-class GameStateManager : Behaviour {
+class GameStateManager : Behavior {
 
     init(n) {
         self.name = n

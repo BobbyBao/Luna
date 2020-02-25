@@ -12,7 +12,7 @@ namespace SharpLuna
     using lua_State = System.IntPtr;
     using static Lua;
 
-    public partial class LuaRef : IEquatable<LuaRef>, IComparable<LuaRef>, IEnumerable<TableKeyValuePair>, IDisposable
+    public partial class LuaRef : IEquatable<LuaRef>, IComparable<LuaRef>, IDisposable
     {
         private readonly lua_State L;
         private readonly int _ref;
@@ -208,13 +208,13 @@ namespace SharpLuna
                 case LuaType.String:
                     return ToValue<string>();
                 case LuaType.Table:
-                    return "Table";
+                    return "Table:" + GetHashCode();
                 case LuaType.Function:
-                    return "Function";
+                    return "Function:" + GetHashCode();
                 case LuaType.UserData:
-                    return "UserData";
+                    return "UserData:" + GetHashCode();
                 case LuaType.Thread:
-                    return "Thread";
+                    return "Thread:" + GetHashCode();
                 default:
                     return "nil";
             }

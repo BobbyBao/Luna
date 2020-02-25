@@ -114,7 +114,15 @@ namespace SharpLuna
 
             string name = GetTableName(classType);
 
-            LuaRef meta = CreateClass(module.Meta, name, SharpObject.TypeID(classType), SharpObject.TypeID(superType), Destructor);           
+            LuaNativeFunction dctor = null;
+            if(!classType.IsUnManaged() 
+                || IsRegistered(classType) //未注册Wrap，用反射版api， UnmanagedType同Object
+                )
+            {
+                dctor = Destructor;
+            }
+
+            LuaRef meta = CreateClass(module.Meta, name, SharpObject.TypeID(classType), SharpObject.TypeID(superType), dctor);           
             bindClass = new SharpClass(meta);
             bindClass.parent = module;
             bindClass.Name = name;
@@ -328,6 +336,7 @@ namespace SharpLuna
                 LuaRef r = LuaRef.FromValue(State, v);
                 SetGetter(field.Name, r);
             }
+
             SetReadOnly(field.Name);
             return this;
         }

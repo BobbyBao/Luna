@@ -1,12 +1,12 @@
 
-BehaviourState = {
+BehaviorState = {
     Init = 0,
     Transiting = 1,
     Open = 2,
     Closed = 3,
 }
 
-class Behaviour {
+class Behavior {
     var name = ""
     var parent = nil
     var state = 0

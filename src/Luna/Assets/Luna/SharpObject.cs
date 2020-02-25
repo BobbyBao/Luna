@@ -14,55 +14,15 @@ namespace SharpLuna
 
     public class SharpObject
     {
-        struct TypeIDHolder<T>
-        {
-            public readonly static int value = typeof(T).GetHashCode();
-        }
-
 #if LUA_WEAKTABLE
         static FreeList<object> freeList = new FreeList<object>(1024);
         static Dictionary<object, int> obj2id = new Dictionary<object, int>();
         static int weakTableRef;
-#else
-        class UserDataRef : IDisposable
-        {
-            public int Ref { get; }
-
-            private lua_State L;
-            public UserDataRef(lua_State l, int r)
-            {
-                L = l;
-                Ref = r;
-            }
-
-            ~UserDataRef()
-            {
-                if (L != IntPtr.Zero)
-                {
-                    if (isactive(L))
-                    {
-                        luaL_unref(L, LUA_REGISTRYINDEX, Ref);
-                        L = IntPtr.Zero;
-                    }
-                }
-            }
-
-            public void Dispose()
-            {
-                if (L != IntPtr.Zero)
-                {
-                    luaL_unref(L, LUA_REGISTRYINDEX, Ref);
-                    L = IntPtr.Zero;
-                }
-                GC.SuppressFinalize(this);
-            }
-        }
-
+#else       
         static ConditionalWeakTable<object, UserDataRef> objectUserData = new ConditionalWeakTable<object, UserDataRef>();
-
 #endif
 
-        static Dictionary<LuaRef, Delegate> delegateBridge = new Dictionary<LuaRef, Delegate>();
+        static Dictionary<Type, FreeList<int>> delegateBridge = new Dictionary<Type, FreeList<int>>();
 
         public static void Init(lua_State L)
         {
@@ -78,28 +38,19 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int TypeID<T>(T obj)
-        {
-            return obj.GetType().GetHashCode();
-        }
+        public static int TypeID<T>(T obj) => obj.GetType().GetHashCode();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int TypeID<T>()
-        {
-            return TypeIDHolder<T>.value;
-        }
+        public static int TypeID<T>() => typeof(T).GetHashCode();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int TypeID(Type type)
-        {
-            if (type == null) return 0;
-
-            return type.GetHashCode();
-        }
+        public static int TypeID(Type type) => type?.GetHashCode() ?? 0;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void AllocObject<T>(lua_State L, int classId, T obj)
+        public static unsafe void AllocObject<T>(lua_State L, T obj)
         {
+            int classId = TypeID(obj);
+
             IntPtr mem = lua_newuserdata(L, (UIntPtr)sizeof(long));
 
 #if LUA_WEAKTABLE
@@ -118,52 +69,52 @@ namespace SharpLuna
             objectUserData.Add(obj, userDataRef);
 #endif
             lua_rawgeti(L, LUA_REGISTRYINDEX, classId);
-#if DEBUG
-            luaL_checktype(L, -1, (int)LuaType.Table);
+
+#if DEBUG || UNITY_EDITOR
+
+            if(!lua_istable(L, -1))
+            {
+                Luna.LogWarning("class not registered : ", obj.GetType(), obj);
+                lua_pop(L, 1);
+                return;
+            }
+            //luaL_checktype(L, -1, (int)LuaType.Table);
 #endif
             lua_setmetatable(L, -2);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void AllocUnmanagedObject<T>(lua_State L, int classId, T obj)
+        public static unsafe void AllocUnmanagedObject<T>(lua_State L, T obj) where T : unmanaged
         {
+            int classId = TypeID(obj);
             IntPtr mem = lua_newuserdata(L, (UIntPtr)Unsafe.SizeOf<T>());
             Unsafe.Write((void*)mem, obj);
 
             lua_rawgeti(L, LUA_REGISTRYINDEX, classId);
-            luaL_checktype(L, -1, (int)LuaType.Table);
+
+#if DEBUG || UNITY_EDITOR
+
+            if (!lua_istable(L, -1))
+            {
+                Luna.LogWarning("class not registered : ", obj.GetType(), obj);
+                lua_pop(L, 1);
+                return;
+            }
+            //luaL_checktype(L, -1, (int)LuaType.Table);
+#endif
             lua_setmetatable(L, -2);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void PushToStack<T>(lua_State L) where T : new()
+        public static void PushUnmanagedObject<T>(lua_State L, in T obj) where T : unmanaged
         {
-            T obj = new T();
-            AllocObject(L, TypeID<T>(), obj);
+            AllocUnmanagedObject(L, obj);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void PushValueToStack<T>(lua_State L, ref T obj) where T : struct
         {
-
-            //todo:
-
-#if LUA_WEAKTABLE
-            if (obj2id.TryGetValue(obj, out var key))
-            {
-                if (TryGetUserData(L, key, weakTableRef) == 1)
-                {
-                    return;
-                }
-            }
-#else
-            if (objectUserData.TryGetValue(obj, out var userRef))
-            {
-                lua_rawgeti(L, LUA_REGISTRYINDEX, userRef.Ref);
-                return;
-            }
-#endif
-            AllocObject(L, TypeID(obj), obj);
+            AllocObject(L, obj);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -184,7 +135,7 @@ namespace SharpLuna
                 return;
             }
 #endif
-            AllocObject(L, TypeID(obj), obj);
+            AllocObject(L, obj);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -205,7 +156,7 @@ namespace SharpLuna
                 return;
             }
 #endif
-            AllocObject(L, TypeID(obj), obj);
+            AllocObject(L, obj);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -218,11 +169,11 @@ namespace SharpLuna
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe static ref T GetValue<T>(lua_State L, int index) where T : struct
         {
-//             if (typeof(T).IsUnManaged())
-//             {
-//                 return ref GetUnmanaged<T>(L, index);
-//             }
-//             else
+            if (typeof(T).IsUnManaged())
+            {
+                return ref GetUnmanaged<T>(L, index);
+            }
+            else
             {
                 var handle = GetHandler(L, index);
 #if LUA_WEAKTABLE
@@ -241,12 +192,10 @@ namespace SharpLuna
             if (type != LuaType.UserData)
             {
                 if(t == null)
-                {
-                    //                    
+                {             
                     return null;
                 }
 
-                //Lua.Get(L, index, out LuaRef func);
                 return Converter.Convert(t, L, index);
             }
 
@@ -260,14 +209,10 @@ namespace SharpLuna
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T Get<T>(lua_State L, int index)
-        {
-            //             if (typeof(T).IsUnManaged())
-            //             {
-            //                 return GetUnmanaged<T>(L, index);
-            //             }
-         
+        {         
             LuaType type = lua_type(L, index);
-            if (type == LuaType.Function)
+
+            if (type != LuaType.UserData)
             {
                 return (T)Converter.Convert(typeof(T), L, index);
             }
@@ -297,11 +242,6 @@ namespace SharpLuna
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Free(lua_State L, int index)
         {
-            //             if (typeof(T).IsUnManaged())
-            //             {
-            //                 return;
-            //             }
-
             var handle = GetHandler(L, index);
 #if LUA_WEAKTABLE
             var obj = freeList[(int)handle];
@@ -348,5 +288,47 @@ namespace SharpLuna
 #endif
         }
 #endif
+
+
+#if !LUA_WEAKTABLE
+        class UserDataRef : IDisposable
+        {
+            public int Ref { get; }
+
+            private lua_State L;
+            public UserDataRef(lua_State l, int r)
+            {
+                L = l;
+                Ref = r;
+            }
+
+            ~UserDataRef()
+            {
+                if (L != IntPtr.Zero)
+                {
+                    if (isactive(L))
+                    {
+                        luaL_unref(L, LUA_REGISTRYINDEX, Ref);
+                        L = IntPtr.Zero;
+                    }
+                }
+            }
+
+            public void Dispose()
+            {
+                if (L != IntPtr.Zero)
+                {
+                    luaL_unref(L, LUA_REGISTRYINDEX, Ref);
+                    L = IntPtr.Zero;
+                }
+                GC.SuppressFinalize(this);
+            }
         }
+
+        static ConditionalWeakTable<object, UserDataRef> objectUserData = new ConditionalWeakTable<object, UserDataRef>();
+
+#endif
+
     }
+
+}

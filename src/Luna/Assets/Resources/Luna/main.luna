@@ -1,12 +1,17 @@
-import "Behaviour"
 import "GameState"
+import "GameStateManager"
+
 import "UI/UITest"
 
-let MainState = GameState("main")
-let test = UITest()
 
-MainState.addChild(test)
-MainState.transit(test)
+game = GameStateManager()
+
+let mainState = GameState("main")
+game.addChild(mainState)
+
+let test = UITest()
+mainState.addChild(test)
+mainState.transit(test)
 
 /*
 ResourceManager.LoadObject("UI/TestPanel", func (go) {

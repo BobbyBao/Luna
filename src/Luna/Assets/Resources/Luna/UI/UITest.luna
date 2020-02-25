@@ -1,10 +1,12 @@
 
-import "UIPanel"
+import "UI/UITestPerformance"
 
 class UITest : UIPanel {
 
     init() {
         super.init("Test", "UI/TestPanel")
+        self.testPerfPanel = UITestPerformance()
+        self.addChild(self.testPerfPanel)
     }
 
     func onLoad(go) {
@@ -16,6 +18,7 @@ class UITest : UIPanel {
         self.btn4 = self.addClickByName("Buttons/Button4", self.onButtonClick)
         self.btn5 = self.addClickByName("Buttons/Button5", self.onButtonClick)
         self.btn6 = self.addClickByName("Buttons/Button6", self.onButtonClick)
+
     }
 
     func onButtonClick(go) {
@@ -28,7 +31,8 @@ class UITest : UIPanel {
             dofile("test/test_math")
         }
         else if go == self.btn3 {
-            dofile("test/test_perf")
+            //dofile("test/test_perf")
+            self.testPerfPanel.show()
         }
         else if go == self.btn4 {
         
@@ -36,4 +40,5 @@ class UITest : UIPanel {
             
         }
     }
+
 }

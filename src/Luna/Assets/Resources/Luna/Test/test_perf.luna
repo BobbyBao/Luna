@@ -1,9 +1,7 @@
-import "vector3"
 
 let GameObject = UnityEngine.GameObject
 
 func test1(transform) {
-	var one = Vector3.one
 	var t = os.clock()
 	
 	for i = 1,200000 {
@@ -84,6 +82,6 @@ func testTable() {
 }
 
 
-test4()
-test9() 
-testTable()
+//test4()
+//test9() 
+//testTable()

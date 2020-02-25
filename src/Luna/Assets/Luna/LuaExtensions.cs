@@ -271,10 +271,10 @@ namespace SharpLuna
         }
                 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Push<T>(lua_State L, ref T v)
+        public static void Push<T>(lua_State L, ref T v) where T : struct
         {
             //todo:
-            SharpObject.PushToStack(L, v);
+            SharpObject.PushValueToStack(L, ref v);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -449,6 +449,14 @@ namespace SharpLuna
             }
             else
             {
+                if(objtype.IsValueType)
+                {
+                    //if(objtype.IsUnManaged())
+                    //{
+                        //return SharpObject.GetUnmanaged(L, index);
+                    //}
+                }
+
                 return SharpObject.Get<object>(L, index);
             }
         }
@@ -666,12 +674,6 @@ namespace SharpLuna
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void GetT<T>(lua_State L, int index, out T v)
         {
-            if(typeof(T) == typeof(object))
-            {
-                v = (T)GetObject(L, index);
-                return;
-            }
-
             v = Get<T>(L, index);
         }
 
@@ -730,6 +732,13 @@ namespace SharpLuna
                 {
                     return (T)GetObject(L, index);
                 }
+                else if (t.IsValueType)
+                {
+                    if(t.IsUnManaged())
+                    {
+                        return SharpObject.GetUnmanaged<T>(L, index);
+                    }
+                }
 
                 return SharpObject.Get<T>(L, index);
             }
@@ -776,7 +785,16 @@ namespace SharpLuna
                 case LuaRef luaRef:
                     return lua_isnone(L, index) ? def : Converter.To<T>(new LuaRef(L, index));
                 default:
-                    return lua_isnoneornil(L, index) ? def : SharpObject.Get<T>(L, index);
+                    {
+                        if (lua_isnoneornil(L, index)) return def;
+
+                        if(typeof(T).IsUnManaged())
+                        {
+                            return SharpObject.GetUnmanaged<T>(L, index);
+                        }
+
+                        return SharpObject.Get<T>(L, index);
+                    }
             }
 
         }

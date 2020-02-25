@@ -1,8 +1,8 @@
 fileFormatVersion: 2
-guid: 998acf12883f9ee46b66026460e7c926
+guid: 1ffaf70de670b5a4491572ec8a1b13b4
 ScriptedImporter:
   fileIDToRecycleName:
-    11400000: vector3
+    11400000: UITestPerformance
   externalObjects: {}
   userData: 
   assetBundleName: 

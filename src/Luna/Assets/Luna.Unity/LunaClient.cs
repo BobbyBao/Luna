@@ -18,7 +18,7 @@ namespace SharpLuna.Unity
         public static readonly ModuleInfo mathTypes = new ModuleInfo
         {
             typeof(Vector2),
-            //typeof(Vector3),
+            typeof(Vector3),
             typeof(Vector4),
             typeof(Quaternion),
             typeof(Plane),

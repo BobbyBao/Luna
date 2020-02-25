@@ -50,7 +50,8 @@ namespace SharpLuna
                 "Chars",
                 "GetEnumerator"
             },
-            typeof(Delegate),            
+            typeof(Delegate),
+            typeof(Array),
         };
         
         public Luna(params ModuleInfo[] modules)
@@ -420,11 +421,12 @@ namespace SharpLuna
 
                 return PopValues(L, oldTop);
             }
+            /*
             catch(Exception e)
             {
                 Error(e.Message);
                 return null;
-            }
+            }*/
             finally
             {
                 _executing = false;

@@ -1,6 +1,6 @@
-import "Behaviour"
+import "Behavior"
 
-class UIPanel : Behaviour {
+class UIPanel : Behavior {
     var gameObject = nil
     var uiFile = nil
     var loaded = false
@@ -43,14 +43,20 @@ class UIPanel : Behaviour {
         LunaHelper.RemoveAction(self, evtFn)
     }
 
+    func show() {
+        if self.parent {
+            self.parent.transit(self)
+        }
+    }
+
     func enter() {
     
         if self.gameObject == nil {
-            self.state = BehaviourState.Transiting
+            self.state = BehaviorState.Transiting
             UIManager.Instance.OpenPanel(self.uiFile, func(go)  { 
                 self.gameObject = go
 
-                if self.state == BehaviourState.Transiting {
+                if self.state == BehaviorState.Transiting {
                     self.gameObject.SetActive(true)
 
                     if !self.loaded {
@@ -59,9 +65,9 @@ class UIPanel : Behaviour {
                     }
                     
                     self.onOpen()
-                    self.state = BehaviourState.Open
+                    self.state = BehaviorState.Open
                 }
-                else if self.state == BehaviourState.Closed {
+                else if self.state == BehaviorState.Closed {
                     self.gameObject.SetActive(false)
                 }
 
@@ -75,7 +81,7 @@ class UIPanel : Behaviour {
             }
 
             self.onOpen()
-            self.state = BehaviourState.Open
+            self.state = BehaviorState.Open
         }
 
     }
