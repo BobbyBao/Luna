@@ -6,6 +6,8 @@ class UITestPerformance : UIPanel {
 
     init() {
         super.init("TestPerformance", "UI/TestPerfPanel")
+        let GameObject = UnityEngine.GameObject
+        self.testObject = GameObject("test")
     }
 
     func onLoad(go) {
@@ -19,14 +21,15 @@ class UITestPerformance : UIPanel {
         self.btn6 = self.addClickByName("Buttons/Button6", self.onButtonClick)
         self.addClickByName("Buttons/Button9", self.onTest9)
         self.addClickByName("Buttons/Button10", self.onTestTable)
+
     }
 
     func onButtonClick(go) {
-
+        print(go.name)
         if go == self.btn1 { 
-            test1(self.gameObject.transform)
+            test1(self.testObject.transform)
         } else if go == self.btn2 {    
-            test2()
+            test2(self.testObject.transform)
         } else if go == self.btn3 {    
             test3()
         } else if go == self.btn4 {    

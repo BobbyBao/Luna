@@ -12,6 +12,9 @@ namespace SharpLuna
 
     public static partial class Lua
     {
+
+        public static void Push(lua_State L, in Space v) => Push(L, (int)v);
+
         public static void Push(lua_State L, in Vector2 v) => SharpObject.PushUnmanagedObject(L, v);
         public static void Push(lua_State L, in Vector3 v) => SharpObject.PushUnmanagedObject(L, v);
         public static void Push(lua_State L, in Vector4 v) => SharpObject.PushUnmanagedObject(L, v);
@@ -20,6 +23,8 @@ namespace SharpLuna
         public static void Push(lua_State L, in Plane v) => SharpObject.PushUnmanagedObject(L, v);
         public static void Push(lua_State L, in Ray v) => SharpObject.PushUnmanagedObject(L, v);
         public static void Push(lua_State L, in Bounds v) => SharpObject.PushUnmanagedObject(L, v);
+
+        public static void Get(lua_State L, int index, out Space v) { Get(L, index, out int v1); v = (Space)v1;}
 
         public static void Get(lua_State L, int index, out Vector2 v) => v = SharpObject.GetUnmanaged<Vector2>(L, index);
         public static void Get(lua_State L, int index, out Vector3 v) => v = SharpObject.GetUnmanaged<Vector3>(L, index);

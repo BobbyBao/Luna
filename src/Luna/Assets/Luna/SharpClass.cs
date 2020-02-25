@@ -406,7 +406,7 @@ namespace SharpLuna
 
                 return this;
             }
-
+            /*
             if (propertyInfo.CanRead)
             {
                 MethodInfo methodInfo = propertyInfo.GetGetMethod(false);
@@ -436,7 +436,7 @@ namespace SharpLuna
             {
                 SetReadOnly(propertyInfo.Name);
             }
-
+            */
             //todo: Reflection
 
             return this;
