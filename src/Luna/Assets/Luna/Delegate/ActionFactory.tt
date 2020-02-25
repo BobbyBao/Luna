@@ -14,8 +14,25 @@ namespace SharpLuna
     using static Lua;
     using lua_State = IntPtr;
 
-    public struct ActionCaller
+    public struct ActionFactory
     {
+        public static Action Create(IntPtr L, int index)
+        {
+            lua_pushvalue(L, index);
+            int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
+            return () =>
+            {
+                lua_pushcfunction(L, LuaException.traceback);
+                lua_rawgeti(L, LUA_REGISTRYINDEX, luaref);
+                if (lua_pcall(L, 0, 0, 2) != (int)LuaStatus.OK)
+                {
+                    lua_remove(L, -2);
+                    throw new LuaException(L);
+                }
+                lua_pop(L, 1);
+            };
+        }
+
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int StaticCall(lua_State L) => Call(L);
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
@@ -39,11 +56,30 @@ namespace SharpLuna
             a();
             return 0;
         }
+
     }
 
 <# for(int i= 0; i< typeList.Length ; i ++){ #>
-    public struct ActionCaller<<# for(int j= 0; j <= i ; j ++){#><#=typeList[j]#><#if(j != i)#>, <#}#>>
+    public struct ActionFactory<<# for(int j= 0; j <= i ; j ++){#><#=typeList[j]#><#if(j != i)#>, <#}#>>
     {
+        public static Action<<# for(int j= 0; j <= i ; j ++){#><#=typeList[j]#><#if(j != i)#>, <#}#>> Create(IntPtr L, int index)
+        {
+            lua_pushvalue(L, index);
+            int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
+            return (<# for(int j= 0; j <= i ; j ++){#><#=typeList[j].ToLower()#><#if(j != i)#>, <#}#>) =>
+            {
+                lua_pushcfunction(L, LuaException.traceback);
+                lua_rawgeti(L, LUA_REGISTRYINDEX, luaref);
+                <# for(int j= 0; j <= i ; j ++){#>Push(L, <#=typeList[j].ToLower()#>);
+                <#}#>if (lua_pcall(L, <#=i#>, 0, -<#=i#> + 2) != (int)LuaStatus.OK)
+                {
+                    lua_remove(L, -2);
+                    throw new LuaException(L);
+                }
+                lua_pop(L, 1);
+            };
+        }
+
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         public static int Call(lua_State L) => Call(L, 1);
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
@@ -71,6 +107,8 @@ namespace SharpLuna
             a(<# for(int j= 0; j <= i ; j ++){#><#=typeList[j].ToLower()#><#if(j != i)#>, <#}#>);
             return 0;
         }
+
+
     }
 
 <# }#>

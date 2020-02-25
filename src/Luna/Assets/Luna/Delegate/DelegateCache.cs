@@ -8,58 +8,6 @@ namespace SharpLuna
     using static Lua;
     public struct DelegateCache
     {
-        public readonly static (Type, Type)[] actionType = 
-        {
-            (typeof(Action), typeof(ActionCaller)),
-            (typeof(Action<>), typeof(ActionCaller<>)),
-            (typeof(Action<,>), typeof(ActionCaller<,>)),
-            (typeof(Action<,,>), typeof(ActionCaller<,,>)),
-            (typeof(Action<,,,>), typeof(ActionCaller<,,,>)),
-            (typeof(Action<,,,,>), typeof(ActionCaller<,,,,>)),
-            (typeof(Action<,,,,,>), typeof(ActionCaller<,,,,,>)),
-            (typeof(Action<,,,,,,>), typeof(ActionCaller<,,,,,,>)),
-            (typeof(Action<,,,,,,,>), typeof(ActionCaller<,,,,,,,>)),
-        };
-
-        public readonly static (Type, Type)[] refActionType =
-        {
-            (typeof(RefAction), typeof(RefActionCaller)),
-            (typeof(RefAction<>), typeof(RefActionCaller<>)),
-            (typeof(RefAction<,>), typeof(RefActionCaller<,>)),
-            (typeof(RefAction<,,>), typeof(RefActionCaller<,,>)),
-            (typeof(RefAction<,,,>), typeof(RefActionCaller<,,,>)),
-            (typeof(RefAction<,,,,>), typeof(RefActionCaller<,,,,>)),
-            (typeof(RefAction<,,,,,>), typeof(RefActionCaller<,,,,,>)),
-            (typeof(RefAction<,,,,,,>), typeof(RefActionCaller<,,,,,,>)),
-            (typeof(RefAction<,,,,,,,>), typeof(RefActionCaller<,,,,,,,>)),
-        };
-
-        public readonly static (Type, Type)[] funcType =
-        {
-            (typeof(Func<>), typeof(FuncCaller<>)),
-            (typeof(Func<,>), typeof(FuncCaller<,>)),
-            (typeof(Func<,,>), typeof(FuncCaller<,,>)),
-            (typeof(Func<,,,>), typeof(FuncCaller<,,,>)),
-            (typeof(Func<,,,,>), typeof(FuncCaller<,,,,>)),
-            (typeof(Func<,,,,,>), typeof(FuncCaller<,,,,,>)),
-            (typeof(Func<,,,,,,>), typeof(FuncCaller<,,,,,,>)),
-            (typeof(Func<,,,,,,,>), typeof(FuncCaller<,,,,,,,>)),
-            (typeof(Func<,,,,,,,,>), typeof(FuncCaller<,,,,,,,,>)),
-        };
-
-        public readonly static (Type, Type)[] refFuncType =
-        {
-            (typeof(RefFunc<>), typeof(RefFuncCaller<>)),
-            (typeof(RefFunc<,>), typeof(RefFuncCaller<,>)),
-            (typeof(RefFunc<,,>), typeof(RefFuncCaller<,,>)),
-            (typeof(RefFunc<,,,>), typeof(RefFuncCaller<,,,>)),
-            (typeof(RefFunc<,,,,>), typeof(RefFuncCaller<,,,,>)),
-            (typeof(RefFunc<,,,,,>), typeof(RefFuncCaller<,,,,,>)),
-            (typeof(RefFunc<,,,,,,>), typeof(RefFuncCaller<,,,,,,>)),
-            (typeof(RefFunc<,,,,,,,>), typeof(RefFuncCaller<,,,,,,,>)),
-            (typeof(RefFunc<,,,,,,,,>), typeof(RefFuncCaller<,,,,,,,,>)),
-        };
-
         static Dictionary<MethodInfo, Delegate> cache = new Dictionary<MethodInfo, Delegate>();
         static Dictionary<(MethodInfo, object), Delegate> cacheClose = new Dictionary<(MethodInfo, object), Delegate>();
 
@@ -112,7 +60,7 @@ namespace SharpLuna
             return del;
         }
 
-        public static Delegate GetInvokeer(MethodInfo methodInfo, object obj)
+        public static Delegate GetInvoker(MethodInfo methodInfo, object obj)
         {
             if (cacheClose.TryGetValue((methodInfo, obj), out var del))
             {
@@ -131,6 +79,211 @@ namespace SharpLuna
             }
             cacheClose.Add((methodInfo, obj), del);
             return del;
+        }
+
+        readonly static (Type, Type)[] actionType =
+        {
+            (typeof(Action), typeof(ActionFactory)),
+            (typeof(Action<>), typeof(ActionFactory<>)),
+            (typeof(Action<,>), typeof(ActionFactory<,>)),
+            (typeof(Action<,,>), typeof(ActionFactory<,,>)),
+            (typeof(Action<,,,>), typeof(ActionFactory<,,,>)),
+            (typeof(Action<,,,,>), typeof(ActionFactory<,,,,>)),
+            (typeof(Action<,,,,,>), typeof(ActionFactory<,,,,,>)),
+            (typeof(Action<,,,,,,>), typeof(ActionFactory<,,,,,,>)),
+            (typeof(Action<,,,,,,,>), typeof(ActionFactory<,,,,,,,>)),
+        };
+
+        readonly static (Type, Type)[] refActionType =
+        {
+            (typeof(RefAction), typeof(RefActionFactory)),
+            (typeof(RefAction<>), typeof(RefActionFactory<>)),
+            (typeof(RefAction<,>), typeof(RefActionFactory<,>)),
+            (typeof(RefAction<,,>), typeof(RefActionFactory<,,>)),
+            (typeof(RefAction<,,,>), typeof(RefActionFactory<,,,>)),
+            (typeof(RefAction<,,,,>), typeof(RefActionFactory<,,,,>)),
+            (typeof(RefAction<,,,,,>), typeof(RefActionFactory<,,,,,>)),
+            (typeof(RefAction<,,,,,,>), typeof(RefActionFactory<,,,,,,>)),
+            (typeof(RefAction<,,,,,,,>), typeof(RefActionFactory<,,,,,,,>)),
+        };
+
+        readonly static (Type, Type)[] funcType =
+        {
+            (typeof(Func<>), typeof(FuncFactory<>)),
+            (typeof(Func<,>), typeof(FuncFactory<,>)),
+            (typeof(Func<,,>), typeof(FuncFactory<,,>)),
+            (typeof(Func<,,,>), typeof(FuncFactory<,,,>)),
+            (typeof(Func<,,,,>), typeof(FuncFactory<,,,,>)),
+            (typeof(Func<,,,,,>), typeof(FuncFactory<,,,,,>)),
+            (typeof(Func<,,,,,,>), typeof(FuncFactory<,,,,,,>)),
+            (typeof(Func<,,,,,,,>), typeof(FuncFactory<,,,,,,,>)),
+            (typeof(Func<,,,,,,,,>), typeof(FuncFactory<,,,,,,,,>)),
+        };
+
+        readonly static (Type, Type)[] refFuncType =
+        {
+            (typeof(RefFunc<>), typeof(RefFuncFactory<>)),
+            (typeof(RefFunc<,>), typeof(RefFuncFactory<,>)),
+            (typeof(RefFunc<,,>), typeof(RefFuncFactory<,,>)),
+            (typeof(RefFunc<,,,>), typeof(RefFuncFactory<,,,>)),
+            (typeof(RefFunc<,,,,>), typeof(RefFuncFactory<,,,,>)),
+            (typeof(RefFunc<,,,,,>), typeof(RefFuncFactory<,,,,,>)),
+            (typeof(RefFunc<,,,,,,>), typeof(RefFuncFactory<,,,,,,>)),
+            (typeof(RefFunc<,,,,,,,>), typeof(RefFuncFactory<,,,,,,,>)),
+            (typeof(RefFunc<,,,,,,,,>), typeof(RefFuncFactory<,,,,,,,,>)),
+        };
+
+        public static bool GetMethodDelegate<T>(Type classType, MethodInfo methodInfo, string callFnName, out T luaFunc, out Delegate del) where T : Delegate
+        {
+            if (methodInfo.CallingConvention == CallingConventions.VarArgs)
+            {
+                Luna.Log("不支持可变参数类型:" + methodInfo.ToString());
+                luaFunc = null;
+                del = null;
+                return false;
+            }
+
+            Type typeOfResult = methodInfo.ReturnType;
+            var paramInfo = methodInfo.GetParameters();
+            List<Type> paramTypes = new List<Type>();
+            if (!methodInfo.IsStatic)
+            {
+                paramTypes.Add(classType);
+            }
+
+            foreach (var info in paramInfo)
+            {
+                if (!info.ParameterType.ShouldExport())
+                {
+                    luaFunc = null;
+                    del = null;
+                    return false;
+                }
+
+                if (info.ParameterType.IsGenericType)
+                {
+                    Luna.Log("不支持泛型参数:" + methodInfo.ToString());
+                    luaFunc = null;
+                    del = null;
+                    return false;
+                }
+
+                paramTypes.Add(info.ParameterType);
+            }
+
+            if (typeOfResult == typeof(void))
+            {
+                var typeArray = paramTypes.ToArray();
+                return RegAction(classType, methodInfo, typeArray, callFnName, out luaFunc, out del);
+            }
+            else
+            {
+                if (!typeOfResult.ShouldExport())
+                {
+                    luaFunc = null;
+                    del = null;
+                    return false;
+                }
+
+                if (typeOfResult.IsGenericType)
+                {
+                    Luna.Log("不支持泛型参数:" + methodInfo.ToString());
+                    luaFunc = null;
+                    del = null;
+                    return false;
+                }
+
+                paramTypes.Add(typeOfResult);
+                var typeArray = paramTypes.ToArray();
+                return RegFunc(classType, methodInfo, typeArray, callFnName, out luaFunc, out del);
+            }
+
+        }
+
+        static bool RegAction<T>(Type classType, MethodInfo methodInfo, Type[] typeArray, string callFnName, out T luaFunc, out Delegate del) where T : Delegate
+        {
+            Type funcDelegateType = null;
+            Type callerType = null;
+
+            if (typeArray.Length == 0)
+            {
+                funcDelegateType = typeof(Action);
+                del = DelegateCache.Get(funcDelegateType, methodInfo);
+                if (typeof(T) == typeof(CallDel))
+                {
+                    luaFunc = (T)(object)(CallDel)ActionFactory.CallDel;
+                }
+                else
+                {
+                    luaFunc = (T)(object)(LuaNativeFunction)ActionFactory.Call;
+                }
+                return true;
+            }
+            else if (typeArray.Length > DelegateCache.actionType.Length)
+            {
+                luaFunc = null;
+                del = null;
+                return false;
+            }
+            else
+            {
+                try
+                {
+                    (var funcGenType, var callerGenType) = (classType.IsValueType && !methodInfo.IsStatic) ?
+                    refActionType[typeArray.Length] : actionType[typeArray.Length];
+
+                    funcDelegateType = funcGenType.MakeGenericType(typeArray);
+                    callerType = callerGenType.MakeGenericType(typeArray);
+                }
+                catch (Exception e)
+                {
+                    Luna.Log(e);
+                    luaFunc = null;
+                    del = null;
+                    return false;
+                }
+            }
+
+            del = DelegateCache.Get(funcDelegateType, methodInfo);
+            MethodInfo CallInnerDelegateMethod = callerType.GetMethod(callFnName, BindingFlags.Static | BindingFlags.Public);
+            luaFunc = (T)DelegateCache.Get(typeof(T), CallInnerDelegateMethod);
+            return true;
+        }
+
+        static bool RegFunc<T>(Type classType, MethodInfo methodInfo, Type[] typeArray, string callFnName, out T luaFunc, out Delegate del) where T : Delegate
+        {
+            Type funcDelegateType = null;
+            Type callerType = null;
+            if (typeArray.Length >= DelegateCache.funcType.Length)
+            {
+                luaFunc = null;
+                del = null;
+                return false;
+            }
+            else
+            {
+                try
+                {
+                    (var funcGenType, var callerGenType) = (classType.IsValueType && !methodInfo.IsStatic) ?
+                    refFuncType[typeArray.Length - 1] : funcType[typeArray.Length - 1];
+
+                    funcDelegateType = funcGenType.MakeGenericType(typeArray);
+                    callerType = callerGenType.MakeGenericType(typeArray);
+                }
+                catch (Exception e)
+                {
+                    Luna.Log(e);
+                    luaFunc = null;
+                    del = null;
+                    return false;
+                }
+            }
+
+            del = DelegateCache.Get(funcDelegateType, methodInfo);
+            MethodInfo CallInnerDelegateMethod = callerType.GetMethod(callFnName, BindingFlags.Static | BindingFlags.Public);
+            luaFunc = (T)DelegateCache.Get(typeof(T), CallInnerDelegateMethod);
+            return true;
+
         }
 
     }

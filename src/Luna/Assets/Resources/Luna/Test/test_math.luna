@@ -1,17 +1,13 @@
 
-import "vec3"
+import "Vector3"
 
-let v1 = vec3(1,2,3)
-let v2 = vec3(2,4,6)
+let v1 = Vector3(1,2,3)
+let v2 = Vector3(2,4,6)
 
 print(v1 == v2)
 print(v1 != v2)
 
-print(v1 < v2)
-print(v1 <= v2)
-print(v1 > v2)
-print(v1 >= v2)
-
+print(v1)
 
 print(-v2)
 
@@ -19,11 +15,11 @@ print(tostring(v1 + v2))
 
 v2 += v1
 
-
-
 print(tostring(v2))
 
 print(tostring(v2 - v1))
 
 print(tostring(v1 * 10))
 print(tostring(v1 / 10))
+
+print(Vector3.distance(v1,v2))

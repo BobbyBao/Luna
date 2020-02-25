@@ -1,7 +1,44 @@
+import "vector3"
 
 let GameObject = UnityEngine.GameObject
 
-func test4(){	
+func test1(transform) {
+	var one = Vector3.one
+	var t = os.clock()
+	
+	for i = 1,200000 {
+		transform.position = transform.position
+	}
+	
+	t = os.clock() - t
+	print("Transform.position lua cost time: ", t)	
+}
+
+func test2(transform) {		
+	var up = Vector3.up
+	var t = os.clock()
+
+	for i = 1,200000 {
+		transform.Rotate(up, 1)	
+	}
+	
+	t = os.clock() - t
+	print("Transform.Rotate lua cost time: ", t)	
+}
+
+func test3() {
+	var t = os.clock()
+	var New = Vector3.__call
+	
+	for i = 1, 200000 {
+		var v = New(i, i, i)		
+	}
+		
+	t = os.clock() - t
+	print("Vector3.New lua cost time: ", t)	
+}
+
+func test4() {	
 
 	var t = os.clock()
     var go = GameObject()	

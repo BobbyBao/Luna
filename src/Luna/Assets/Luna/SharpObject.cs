@@ -14,7 +14,7 @@ namespace SharpLuna
 
     public class SharpObject
     {
-        struct SignatureHolder<T>
+        struct TypeIDHolder<T>
         {
             public readonly static int value = typeof(T).GetHashCode();
         }
@@ -78,19 +78,19 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int Signature<T>(T obj)
+        public static int TypeID<T>(T obj)
         {
             return obj.GetType().GetHashCode();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int Signature<T>()
+        public static int TypeID<T>()
         {
-            return SignatureHolder<T>.value;
+            return TypeIDHolder<T>.value;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int Signature(Type type)
+        public static int TypeID(Type type)
         {
             if (type == null) return 0;
 
@@ -98,75 +98,10 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void PushToStack<T>(lua_State L) where T : new()
-        {
-            T obj = new T();
-            AllocObject(L, Signature<T>(), obj);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void PushToStack<T>(lua_State L, T obj)
-        {
-#if LUA_WEAKTABLE
-            if (obj2id.TryGetValue(obj, out var key))
-            {
-                if (TryGetUserData(L, key, weakTableRef) == 1)
-                {
-                    return;
-                }
-            }
-#else
-            if (objectUserData.TryGetValue(obj, out var userRef))
-            {
-                lua_rawgeti(L, LUA_REGISTRYINDEX, userRef.Ref);
-                return;
-            }
-#endif
-            AllocObject(L, Signature(obj), obj);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void PushToStack<T>(lua_State L, object obj)
-        {
-#if LUA_WEAKTABLE
-            if (obj2id.TryGetValue(obj, out var key))
-            {
-                if (TryGetUserData(L, key, weakTableRef) == 1)
-                {
-                    return;
-                }
-            }
-#else
-            if (objectUserData.TryGetValue(obj, out var userRef))
-            {
-                lua_rawgeti(L, LUA_REGISTRYINDEX, userRef.Ref);
-                return;
-            }
-#endif
-            AllocObject(L, Signature(obj), obj);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void AllocValueObject<T>(lua_State L, int classId, T obj)
-        {
-            IntPtr mem = lua_newuserdata(L, (UIntPtr)Unsafe.SizeOf<T>());
-            Unsafe.Write((void*)mem, obj);
-
-            lua_rawgeti(L, LUA_REGISTRYINDEX, classId);
-            luaL_checktype(L, -1, (int)LuaType.Table);
-            lua_setmetatable(L, -2);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe void AllocObject<T>(lua_State L, int classId, T obj)
         {
-            //             if (typeof(T).IsUnManaged())
-            //             {
-            //                 return AllocValueObject(L, classId, obj);
-            //             }
-
             IntPtr mem = lua_newuserdata(L, (UIntPtr)sizeof(long));
-       
+
 #if LUA_WEAKTABLE
             long id = freeList.Alloc(obj);
             *((long*)mem) = id;
@@ -187,6 +122,90 @@ namespace SharpLuna
             luaL_checktype(L, -1, (int)LuaType.Table);
 #endif
             lua_setmetatable(L, -2);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe void AllocUnmanagedObject<T>(lua_State L, int classId, T obj)
+        {
+            IntPtr mem = lua_newuserdata(L, (UIntPtr)Unsafe.SizeOf<T>());
+            Unsafe.Write((void*)mem, obj);
+
+            lua_rawgeti(L, LUA_REGISTRYINDEX, classId);
+            luaL_checktype(L, -1, (int)LuaType.Table);
+            lua_setmetatable(L, -2);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void PushToStack<T>(lua_State L) where T : new()
+        {
+            T obj = new T();
+            AllocObject(L, TypeID<T>(), obj);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void PushValueToStack<T>(lua_State L, ref T obj) where T : struct
+        {
+
+            //todo:
+
+#if LUA_WEAKTABLE
+            if (obj2id.TryGetValue(obj, out var key))
+            {
+                if (TryGetUserData(L, key, weakTableRef) == 1)
+                {
+                    return;
+                }
+            }
+#else
+            if (objectUserData.TryGetValue(obj, out var userRef))
+            {
+                lua_rawgeti(L, LUA_REGISTRYINDEX, userRef.Ref);
+                return;
+            }
+#endif
+            AllocObject(L, TypeID(obj), obj);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void PushToStack<T>(lua_State L, T obj)
+        {
+#if LUA_WEAKTABLE
+            if (obj2id.TryGetValue(obj, out var key))
+            {
+                if (TryGetUserData(L, key, weakTableRef) == 1)
+                {
+                    return;
+                }
+            }
+#else
+            if (objectUserData.TryGetValue(obj, out var userRef))
+            {
+                lua_rawgeti(L, LUA_REGISTRYINDEX, userRef.Ref);
+                return;
+            }
+#endif
+            AllocObject(L, TypeID(obj), obj);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void PushToStack<T>(lua_State L, object obj)
+        {
+#if LUA_WEAKTABLE
+            if (obj2id.TryGetValue(obj, out var key))
+            {
+                if (TryGetUserData(L, key, weakTableRef) == 1)
+                {
+                    return;
+                }
+            }
+#else
+            if (objectUserData.TryGetValue(obj, out var userRef))
+            {
+                lua_rawgeti(L, LUA_REGISTRYINDEX, userRef.Ref);
+                return;
+            }
+#endif
+            AllocObject(L, TypeID(obj), obj);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

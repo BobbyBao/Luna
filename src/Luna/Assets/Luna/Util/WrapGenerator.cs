@@ -730,7 +730,7 @@ namespace SharpLuna
                 sb.Append($"\t\t\tPush(L, p{i});\n");
             }
 
-            sb.Append($"\t\t\tif (lua_pcall(L, 1, 0, -{paramCount} + 2) != (int)LuaStatus.OK)\n");
+            sb.Append($"\t\t\tif (lua_pcall(L, {paramCount}, 0, -{paramCount} + 2) != (int)LuaStatus.OK)\n");
             sb.Append("\t\t\t{\n");
             sb.Append("\t\t\t\tlua_remove(L, -2);\n");
             sb.Append("\t\t\t\tthrow new LuaException(L);\n");

@@ -1,2 +1,32 @@
 
 import "vec3"
+
+
+import "vec3"
+
+let v1 = vec3(1,2,3)
+let v2 = vec3(2,4,6)
+
+print(v1 == v2)
+print(v1 != v2)
+
+print(v1 < v2)
+print(v1 <= v2)
+print(v1 > v2)
+print(v1 >= v2)
+
+
+print(-v2)
+
+print(tostring(v1 + v2))
+
+v2 += v1
+
+
+
+print(tostring(v2))
+
+print(tostring(v2 - v1))
+
+print(tostring(v1 * 10))
+print(tostring(v1 / 10))

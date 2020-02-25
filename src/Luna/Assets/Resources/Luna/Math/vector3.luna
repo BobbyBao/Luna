@@ -1,0 +1,456 @@
+
+let math  = math
+let acos	= math.acos
+let sqrt 	= math.sqrt
+let max 	= math.max
+let min 	= math.min
+let cos	= math.cos
+let sin	= math.sin
+let abs	= math.abs
+let setmetatable = setmetatable
+let rawset = rawset
+let rawget = rawget
+let type = type
+
+let rad2Deg = 57.295779513082
+let deg2Rad = 0.017453292519943
+
+class Vector3 {
+	var x = 0 
+	var y = 0 
+	var z = 0
+
+    init(x, y, z) {
+        self.x = x
+        self.y = y
+        self.z = z
+    }
+
+    func set(x, y, z) {
+        self.x = x
+        self.y = y
+        self.z = z
+    }
+
+	func get()	{	
+		return self.x, self.y, self.z	
+	}
+	
+	func clone() {
+		return Vector3(self.x, self.y, self.z)
+	}
+
+	func __index(t,k) {
+		var v = rawget(Vector3, k)
+		
+		if v == nil {						
+			v = rawget(get, k)		
+			
+			if v != nil {
+				return v(t)				
+			}		
+		}
+		
+		return v
+	}
+
+	
+	func magnitude() {
+		return sqrt(self.x * self.x + self.y * self.y + self.z * self.z)
+	}
+
+	func setNormalize() {
+		var num = sqrt(self.x * self.x + self.y * self.y + self.z * self.z)
+		
+		if num > 1e-5 {    
+			self.x = self.x / num
+			self.y = self.y / num
+			self.z = self.z /num
+		}
+		else {
+			self.x = 0
+			self.y = 0
+			self.z = 0
+		} 
+	
+		return self
+	}
+		
+	func sqrMagnitude() {
+		return self.x * self.x + self.y * self.y + self.z * self.z
+	}
+	
+	func clampMagnitude(maxLength) {
+		if self.sqrMagnitude() > (maxLength * maxLength) {    
+			self.setNormalize()
+			self.mul(maxLength)        
+		}
+		
+		return self
+	}
+
+	func mul(q) {
+		if type(q) == "number" {
+			self.x = self.x * q
+			self.y = self.y * q
+			self.z = self.z * q
+		} else {
+			self.mulQuat(q)
+		}
+		
+		return self
+	}
+
+	func div(d) {
+		self.x = self.x / d
+		self.y = self.y / d
+		self.z = self.z / d
+		
+		return self
+	}
+
+	func add(vb) {
+		self.x = self.x + vb.x
+		self.y = self.y + vb.y
+		self.z = self.z + vb.z
+		
+		return self
+	}
+
+	func sub(vb) {
+		self.x = self.x - vb.x
+		self.y = self.y - vb.y
+		self.z = self.z - vb.z
+		
+		return self
+	}
+
+	func mulQuat(quat) {
+		let num 	= quat.x * 2
+		let num2 	= quat.y * 2
+		let num3 	= quat.z * 2
+		let num4 	= quat.x * num
+		let num5 	= quat.y * num2
+		let num6 	= quat.z * num3
+		let num7 	= quat.x * num2
+		let num8 	= quat.x * num3
+		let num9 	= quat.y * num3
+		let num10 = quat.w * num
+		let num11 = quat.w * num2
+		let num12 = quat.w * num3
+		
+		let x = (((1 - (num5 + num6)) * self.x) + ((num7 - num12) * self.y)) + ((num8 + num11) * self.z)
+		let y = (((num7 + num12) * self.x) + ((1 - (num4 + num6)) * self.y)) + ((num9 - num10) * self.z)
+		let z = (((num8 - num11) * self.x) + ((num9 + num10) * self.y)) + ((1 - (num4 + num5)) * self.z)
+		
+		self.set(x, y, z)	
+		return self
+	}
+
+
+	func __tostring() {
+		return "["..self.x..","..self.y..","..self.z.."]"
+	}
+
+	func / (va, d) {
+		return Vector3(va.x / d, va.y / d, va.z / d)
+	}
+
+	func * (va, d) {
+		if type(d) == "number" {
+			return Vector3(va.x * d, va.y * d, va.z * d)
+		} else {
+			let vec = va.clone()
+			vec.mulQuat(d)
+			return vec
+		}	
+	}
+
+	func + (va, vb) {
+		return Vector3(va.x + vb.x, va.y + vb.y, va.z + vb.z)
+	}
+
+	func - (va, vb) {
+		return Vector3(va.x - vb.x, va.y - vb.y, va.z - vb.z)
+	}
+
+	func __unm (va) {
+		return Vector3(-va.x, -va.y, -va.z)
+	}
+
+	func == (a,b) {
+		let v = a - b
+		let delta = v.sqrMagnitude()
+		return delta < 1e-10
+	}
+}
+
+Vector3.up 		= Vector3(0,1,0)
+Vector3.down 	= Vector3(0,-1,0)
+Vector3.right	= Vector3(1,0,0)
+Vector3.left	= Vector3(-1,0,0)
+Vector3.forward = Vector3(0,0,1)
+Vector3.back	= Vector3(0,0,-1)
+Vector3.zero	= Vector3(0,0,0)
+Vector3.one		= Vector3(1,1,1)
+
+func Vector3.distance(va, vb) {
+	return sqrt((va.x - vb.x)^2 + (va.y - vb.y)^2 + (va.z - vb.z)^2)
+}
+
+func Vector3.dot(lhs, rhs) {
+	return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z
+}
+
+func Vector3.lerp(from, to, t) {
+	t = clamp(t, 0, 1)
+	return Vector3(from.x + (to.x - from.x) * t, from.y + (to.y - from.y) * t, from.z + (to.z - from.z) * t)
+}
+
+func Vector3.max(lhs, rhs) {
+	return Vector3(max(lhs.x, rhs.x), max(lhs.y, rhs.y), max(lhs.z, rhs.z))
+}
+
+func Vector3.min(lhs, rhs) {
+	return Vector3(min(lhs.x, rhs.x), min(lhs.y, rhs.y), min(lhs.z, rhs.z))
+}
+
+func Vector3.normalize(v) {
+	let x,y,z = v.x, v.y, v.z		
+	let num = sqrt(x * x + y * y + z * z)	
+	
+	if num > 1e-5 {		
+		return setmetatable({x = x / num, y = y / num, z = z / num}, Vector3)
+    }
+	  
+	return setmetatable({x = 0, y = 0, z = 0}, Vector3)
+}
+
+let dot = Vector3.Dot
+
+func Vector3.angle(from, to) {
+	return acos(clamp(dot(from:Normalize(), to:Normalize()), -1, 1)) * rad2Deg
+}
+/*
+func Vector3.OrthoNormalize(va, vb, vc)	{
+	va.setNormalize()
+	vb.sub(vb.project(va))
+	vb.setNormalize()
+	
+	if vc == nil then
+		return va, vb
+	end
+	
+	vc:Sub(vc:Project(va))
+	vc:Sub(vc:Project(vb))
+	vc:SetNormalize()		
+	return va, vb, vc
+}
+
+func Vector3.MoveTowards(current, target, maxDistanceDelta)	
+	local delta = target - current	
+    local sqrDelta = delta:SqrMagnitude()
+	local sqrDistance = maxDistanceDelta * maxDistanceDelta
+	
+    if sqrDelta > sqrDistance then    
+		local magnitude = sqrt(sqrDelta)
+		
+		if magnitude > 1e-6 then
+			delta:Mul(maxDistanceDelta / magnitude)
+			delta:Add(current)
+			return delta
+		else
+			return current:Clone()
+		end
+    end
+	
+    return target:Clone()
+end
+
+func ClampedMove(lhs, rhs, clampedDelta)
+	local delta = rhs - lhs
+	
+	if delta > 0 then
+		return lhs + min(delta, clampedDelta)
+	else
+		return lhs - min(-delta, clampedDelta)
+	end
+end
+
+let overSqrt2 = 0.7071067811865475244008443621048490
+
+local func OrthoNormalVector(vec)
+	local res = _new()
+	
+	if abs(vec.z) > overSqrt2 then			
+		local a = vec.y * vec.y + vec.z * vec.z
+		local k = 1 / sqrt (a)
+		res.x = 0
+		res.y = -vec.z * k
+		res.z = vec.y * k
+	else			
+		local a = vec.x * vec.x + vec.y * vec.y
+		local k = 1 / sqrt (a)
+		res.x = -vec.y * k
+		res.y = vec.x * k
+		res.z = 0
+	end
+	
+	return res
+end
+
+func Vector3.RotateTowards(current, target, maxRadiansDelta, maxMagnitudeDelta)
+	local len1 = current:Magnitude()
+	local len2 = target:Magnitude()
+	
+	if len1 > 1e-6 and len2 > 1e-6 then	
+		local from = current / len1
+		local to = target / len2		
+		local cosom = dot(from, to)
+				
+		if cosom > 1 - 1e-6 then		
+			return Vector3.MoveTowards (current, target, maxMagnitudeDelta)		
+		elseif cosom < -1 + 1e-6 then		
+			local axis = OrthoNormalVector(from)						
+			local q = Quaternion.AngleAxis(maxRadiansDelta * rad2Deg, axis)	
+			local rotated = q:MulVec3(from)
+			local delta = ClampedMove(len1, len2, maxMagnitudeDelta)
+			rotated:Mul(delta)
+			return rotated
+		else		
+			local angle = acos(cosom)
+			local axis = Vector3.Cross(from, to)
+			axis:SetNormalize ()
+			local q = Quaternion.AngleAxis(min(maxRadiansDelta, angle) * rad2Deg, axis)			
+			local rotated = q:MulVec3(from)
+			local delta = ClampedMove(len1, len2, maxMagnitudeDelta)
+			rotated:Mul(delta)
+			return rotated
+		end
+	end
+		
+	return Vector3.MoveTowards(current, target, maxMagnitudeDelta)
+end
+	
+func Vector3.SmoothDamp(current, target, currentVelocity, smoothTime)
+	local maxSpeed = Mathf.Infinity
+	local deltaTime = Time.deltaTime
+    smoothTime = max(0.0001, smoothTime)
+    local num = 2 / smoothTime
+    local num2 = num * deltaTime
+    local num3 = 1 / (1 + num2 + 0.48 * num2 * num2 + 0.235 * num2 * num2 * num2)    
+    local vector2 = target:Clone()
+    local maxLength = maxSpeed * smoothTime
+	local vector = current - target
+    vector:ClampMagnitude(maxLength)
+    target = current - vector
+    local vec3 = (currentVelocity + (vector * num)) * deltaTime
+    currentVelocity = (currentVelocity - (vec3 * num)) * num3
+    local vector4 = target + (vector + vec3) * num3	
+	
+    if Vector3.Dot(vector2 - current, vector4 - vector2) > 0 then    
+        vector4 = vector2
+        currentVelocity:Set(0,0,0)
+    end
+	
+    return vector4, currentVelocity
+end	
+	
+func Vector3.Scale(a, b)
+	local x = a.x * b.x
+	local y = a.y * b.y
+	local z = a.z * b.z	
+	return _new(x, y, z)
+end
+	
+func Vector3.Cross(lhs, rhs)
+	local x = lhs.y * rhs.z - lhs.z * rhs.y
+	local y = lhs.z * rhs.x - lhs.x * rhs.z
+	local z = lhs.x * rhs.y - lhs.y * rhs.x
+	return _new(x,y,z)	
+end
+	
+func Vector3:Equals(other)
+	return self.x == other.x and self.y == other.y and self.z == other.z
+end
+		
+func Vector3.Reflect(inDirection, inNormal)
+	local num = -2 * dot(inNormal, inDirection)
+	inNormal = inNormal * num
+	inNormal:Add(inDirection)
+	return inNormal
+end
+
+	
+func Vector3.Project(vector, onNormal)
+	local num = onNormal:SqrMagnitude()
+	
+	if num < 1.175494e-38 then	
+		return _new(0,0,0)
+	end
+	
+	local num2 = dot(vector, onNormal)
+	local v3 = onNormal:Clone()
+	v3:Mul(num2/num)	
+	return v3
+end
+	
+func Vector3.ProjectOnPlane(vector, planeNormal)
+	local v3 = Vector3.Project(vector, planeNormal)
+	v3:Mul(-1)
+	v3:Add(vector)
+	return v3
+end		
+
+func Vector3.Slerp(from, to, t)
+	local omega, sinom, scale0, scale1
+
+	if t <= 0 then		
+		return from:Clone()
+	elseif t >= 1 then		
+		return to:Clone()
+	end
+	
+	local v2 	= to:Clone()
+	local v1 	= from:Clone()
+	local len2 	= to:Magnitude()
+	local len1 	= from:Magnitude()	
+	v2:Div(len2)
+	v1:Div(len1)
+
+	local len 	= (len2 - len1) * t + len1
+	local cosom = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z
+	
+	if cosom > 1 - 1e-6 then
+		scale0 = 1 - t
+		scale1 = t
+	elseif cosom < -1 + 1e-6 then		
+		local axis = OrthoNormalVector(from)		
+		local q = Quaternion.AngleAxis(180.0 * t, axis)		
+		local v = q:MulVec3(from)
+		v:Mul(len)				
+		return v
+	else
+		omega 	= acos(cosom)
+		sinom 	= sin(omega)
+		scale0 	= sin((1 - t) * omega) / sinom
+		scale1 	= sin(t * omega) / sinom	
+	end
+
+	v1:Mul(scale0)
+	v2:Mul(scale1)
+	v2:Add(v1)
+	v2:Mul(len)
+	return v2
+end
+
+
+
+func Vector3.AngleAroundAxis (from, to, axis)	 	 
+	from = from - Vector3.Project(from, axis)
+	to = to - Vector3.Project(to, axis) 	    
+	local angle = Vector3.Angle (from, to)	   	    
+	return angle * (Vector3.Dot (axis, Vector3.Cross (from, to)) < 0 and -1 or 1)
+end
+*/
+

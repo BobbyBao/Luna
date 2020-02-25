@@ -1,0 +1,31 @@
+import "Behaviour"
+
+class GameStateManager : Behaviour {
+
+    init(n) {
+        self.name = n
+        self.children = List()
+        self.currentState = nil
+    }
+
+    func transit(state) {    
+
+        if self.currentState {
+            self.currentState.exit()
+        } 
+
+        self.currentState = state
+
+        if self.currentState {
+            self.currentState.enter()
+        }
+    }
+
+    func deactive(state) {
+        if state == self.currentState {
+            self.currentState = nil
+            state.exit()
+        }
+    }
+
+}

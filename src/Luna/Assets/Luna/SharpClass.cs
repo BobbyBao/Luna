@@ -114,7 +114,7 @@ namespace SharpLuna
 
             string name = GetTableName(classType);
 
-            LuaRef meta = CreateClass(module.Meta, name, SharpObject.Signature(classType), SharpObject.Signature(superType), Destructor);           
+            LuaRef meta = CreateClass(module.Meta, name, SharpObject.TypeID(classType), SharpObject.TypeID(superType), Destructor);           
             bindClass = new SharpClass(meta);
             bindClass.parent = module;
             bindClass.Name = name;
@@ -188,8 +188,6 @@ namespace SharpLuna
             meta.RawSet(name, proc);
         }
 
-        #region 自动绑定
-
         public void OnRegClass()
         {
             var fields = classType.GetFields();
@@ -251,7 +249,6 @@ namespace SharpLuna
                     }
 
                     memberInfo.Add(constructorInfo);
-                    //RegConstructor(classType, ctor);
                 }
 
                 if(memberInfo.Count > 0)
@@ -511,7 +508,7 @@ namespace SharpLuna
                 var mi = methodInfo[i] as MethodInfo;
                 if(mi != null)
                 {
-                    if(RegMethod(mi, "CallDel", out CallDel fn, out Delegate del))
+                    if(DelegateCache.GetMethodDelegate(classType, mi, "CallDel", out CallDel fn, out Delegate del))
                     {
                         method.luaFunc[i] = fn;
                         method.del[i] = del;
@@ -541,168 +538,13 @@ namespace SharpLuna
 #else
             string callFnName = "Call";
 #endif
-            if (RegMethod(methodInfo, callFnName, out LuaNativeFunction luaFunc, out Delegate del))
+            if (DelegateCache.GetMethodDelegate(classType, methodInfo, callFnName, out LuaNativeFunction luaFunc, out Delegate del))
             {
                 return LuaRef.CreateFunction(State, luaFunc, del);
             }
 
             return null;
         }
-
-        public bool RegMethod<T>(MethodInfo methodInfo, string callFnName, out T luaFunc, out Delegate del) where T : Delegate
-        {
-            if (methodInfo.CallingConvention == CallingConventions.VarArgs)
-            {
-                Luna.Log("不支持可变参数类型:" + methodInfo.ToString());
-                luaFunc = null;
-                del = null;
-                return false;
-            }
-
-            Type typeOfResult = methodInfo.ReturnType;
-            var paramInfo = methodInfo.GetParameters();
-            List<Type> paramTypes = new List<Type>();
-            if (!methodInfo.IsStatic)
-            {
-                paramTypes.Add(classType);
-            }
-
-            foreach (var info in paramInfo)
-            {
-                if (!info.ParameterType.ShouldExport())
-                {
-                    luaFunc = null;
-                    del = null;
-                    return false;
-                }
-
-                if (info.ParameterType.IsGenericType)
-                {
-                    Luna.Log("不支持泛型参数:" + methodInfo.ToString());
-                    luaFunc = null;
-                    del = null;
-                    return false;
-                }
-                
-                paramTypes.Add(info.ParameterType);
-            }
-
-            if (typeOfResult == typeof(void))
-            {
-                var typeArray = paramTypes.ToArray();
-                return RegAction(methodInfo, typeArray, callFnName, out luaFunc, out del);
-            }
-            else
-            {
-                if(!typeOfResult.ShouldExport())
-                {
-                    luaFunc = null;
-                    del = null;
-                    return false;
-                }
-            
-                if (typeOfResult.IsGenericType)
-                {
-                    Luna.Log("不支持泛型参数:" + methodInfo.ToString());
-                    luaFunc = null;
-                    del = null;
-                    return false;
-                }
-
-                paramTypes.Add(typeOfResult);
-                var typeArray = paramTypes.ToArray();
-                return RegFunc(methodInfo, typeArray, callFnName, out luaFunc, out del);
-            }
-
-        }
-
-        bool RegAction<T>(MethodInfo methodInfo, Type[] typeArray, string callFnName, out T luaFunc, out Delegate del) where T : Delegate
-        {
-            Type funcDelegateType = null;
-            Type callerType = null;
-           
-            if (typeArray.Length == 0)
-            {
-                funcDelegateType = typeof(Action);
-                del = DelegateCache.Get(funcDelegateType, methodInfo);
-                if(typeof(T) == typeof(CallDel) )
-                {
-                    luaFunc = (T)(object)(CallDel)ActionCaller.CallDel;
-                }
-                else
-                {
-                    luaFunc = (T)(object)(LuaNativeFunction)ActionCaller.Call;
-                }
-                return true;
-            }
-            else if (typeArray.Length > DelegateCache.actionType.Length)
-            {
-                luaFunc = null;
-                del = null;
-                return false;
-            }
-            else
-            {
-                try
-                {
-                    (var funcGenType, var callerGenType) = (classType.IsValueType && !methodInfo.IsStatic) ?
-                    DelegateCache.refActionType[typeArray.Length] : DelegateCache.actionType[typeArray.Length];
-
-                    funcDelegateType = funcGenType.MakeGenericType(typeArray);
-                    callerType = callerGenType.MakeGenericType(typeArray);
-                }
-                catch (Exception e)
-                {
-                    Luna.Log(e);
-                    luaFunc = null;
-                    del = null;
-                    return false;
-                }
-            }
-            
-            del = DelegateCache.Get(funcDelegateType, methodInfo);
-            MethodInfo CallInnerDelegateMethod = callerType.GetMethod(callFnName, BindingFlags.Static | BindingFlags.Public);
-            luaFunc = (T)DelegateCache.Get(typeof(T), CallInnerDelegateMethod);
-            return true;
-        }
-
-        bool RegFunc<T>(MethodInfo methodInfo, Type[] typeArray, string callFnName, out T luaFunc, out Delegate del) where T : Delegate
-        {
-            Type funcDelegateType = null;
-            Type callerType = null;
-            if (typeArray.Length >= DelegateCache.funcType.Length)
-            {
-                luaFunc = null;
-                del = null;
-                return false;
-            }
-            else
-            {
-                try
-                {
-                    (var funcGenType, var callerGenType) = (classType.IsValueType && !methodInfo.IsStatic) ?
-                    DelegateCache.refFuncType[typeArray.Length - 1] : DelegateCache.funcType[typeArray.Length - 1];
-
-                    funcDelegateType = funcGenType.MakeGenericType(typeArray);
-                    callerType = callerGenType.MakeGenericType(typeArray);
-                }
-                catch (Exception e)
-                {
-                    Luna.Log(e);
-                    luaFunc = null;
-                    del = null;
-                    return false;
-                }
-            }
-            
-            del = DelegateCache.Get(funcDelegateType, methodInfo);
-            MethodInfo CallInnerDelegateMethod = callerType.GetMethod(callFnName, BindingFlags.Static | BindingFlags.Public);
-            luaFunc = (T)DelegateCache.Get(typeof(T), CallInnerDelegateMethod);
-            return true;
-
-        }
-
-#endregion
 
 
     }

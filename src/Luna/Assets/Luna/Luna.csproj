@@ -30,39 +30,39 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Delegate\Action.tt">
+    <None Update="Delegate\ActionFactory.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Action.cs</LastGenOutput>
+      <LastGenOutput>ActionFactory.cs</LastGenOutput>
     </None>
-    <None Update="Delegate\Func.tt">
+    <None Update="Delegate\FuncFactory.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Func.cs</LastGenOutput>
+      <LastGenOutput>FuncFactory.cs</LastGenOutput>
     </None>
-    <None Update="Delegate\RefAction.tt">
-      <LastGenOutput>RefAction.cs</LastGenOutput>
+    <None Update="Delegate\RefActionFactory.tt">
+      <LastGenOutput>RefActionFactory.cs</LastGenOutput>
       <Generator>TextTemplatingFileGenerator</Generator>
     </None>
-    <Compile Update="Delegate\Action.cs">
+    <Compile Update="Delegate\ActionFactory.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>Action.tt</DependentUpon>
+      <DependentUpon>ActionFactory.tt</DependentUpon>
     </Compile>
-    <Compile Update="Delegate\Func.cs">
+    <Compile Update="Delegate\FuncFactory.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>Func.tt</DependentUpon>
+      <DependentUpon>FuncFactory.tt</DependentUpon>
     </Compile>
-    <Compile Update="Delegate\RefAction.cs">
-      <DependentUpon>RefAction.tt</DependentUpon>
+    <Compile Update="Delegate\RefActionFactory.cs">
+      <DependentUpon>RefActionFactory.tt</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>    
-    <None Update="Delegate\RefFunc.tt">
-      <LastGenOutput>RefFunc.cs</LastGenOutput>
+    <None Update="Delegate\RefFuncFactory.tt">
+      <LastGenOutput>RefFuncFactory.cs</LastGenOutput>
       <Generator>TextTemplatingFileGenerator</Generator>
     </None>
-    <Compile Update="Delegate\RefFunc.cs">
-      <DependentUpon>RefFunc.tt</DependentUpon>
+    <Compile Update="Delegate\RefFuncFactory.cs">
+      <DependentUpon>RefFuncFactory.tt</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>

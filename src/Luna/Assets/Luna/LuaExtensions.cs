@@ -269,6 +269,13 @@ namespace SharpLuna
         {
             SharpObject.PushToStack(L, v);
         }
+                
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Push<T>(lua_State L, ref T v)
+        {
+            //todo:
+            SharpObject.PushToStack(L, v);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void PushT<T>(lua_State L, T v)

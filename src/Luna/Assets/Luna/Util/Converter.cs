@@ -13,16 +13,17 @@ namespace SharpLuna
     public static class Converter
     {
         static Dictionary<Type, Func<IntPtr, int, object>> delegateFactory = new Dictionary<Type, Func<IntPtr, int, object>>();
-
-        static Dictionary<Type, Func<IntPtr, int, object>> customConverter = new Dictionary<Type, Func<IntPtr, int, object>>();
-
         static Converter()
         {
-            Register<Action<string>>(CreateActionString);
-            Register<Action<int>>(CreateActionInt);
+            RegisterAction<int>();
+            RegisterAction<string>();
+            RegisterAction<object>();
+
+            RegisterFunc<int>();
+            RegisterFunc<string>();
+            RegisterFunc<object>();
         }
-
-
+        
         public static Func<IntPtr, int, object> GetFactory(Type type)
         {
             if (delegateFactory.TryGetValue(type, out var f))
@@ -43,7 +44,7 @@ namespace SharpLuna
             return fac(L, index);
         }
 
-        public static void Register<T>(Func<IntPtr, int, object> factory) where T : Delegate
+        public static void Register<T>(Func<IntPtr, int, object> factory)
         {
             delegateFactory[typeof(T)] = factory;
         }
@@ -53,41 +54,57 @@ namespace SharpLuna
             delegateFactory[type] = factory;
         }
 
-        static Action<string> CreateActionString(IntPtr L, int index)
+        public static void RegisterAction()
         {
-            lua_pushvalue(L, index);
-            int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
-            return (data) =>
-            {
-                lua_pushcfunction(L, LuaException.traceback);
-                lua_rawgeti(L, LUA_REGISTRYINDEX, luaref);
-                Push(L, data);
-                if (lua_pcall(L, 1, 0, -1 + 2) != (int)LuaStatus.OK)
-                {
-                    lua_remove(L, -2);
-                    throw new LuaException(L);
-                }
-                lua_pop(L, 1);
-            };
+            delegateFactory[typeof(Action)] = ActionFactory.Create;
         }
 
-        static Action<int> CreateActionInt(IntPtr L, int index)
+        public static void RegisterAction<T1>()
         {
-            lua_pushvalue(L, index);
-            int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
-            return (data) =>
-            {
-                lua_pushcfunction(L, LuaException.traceback);
-                lua_rawgeti(L, LUA_REGISTRYINDEX, luaref);
-                Push(L, data);
-                if (lua_pcall(L, 1, 0, -1 + 2) != (int)LuaStatus.OK)
-                {
-                    lua_remove(L, -2);
-                    throw new LuaException(L);
-                }
-                lua_pop(L, 1);
-            };
+            delegateFactory[typeof(Action<T1>)] = ActionFactory<T1>.Create;
         }
+
+        public static void RegisterAction<T1, T2>()
+        {
+            delegateFactory[typeof(Action<T1, T2>)] = ActionFactory<T1, T2>.Create;
+        }
+
+        public static void RegisterAction<T1, T2, T3>()
+        {
+            delegateFactory[typeof(Action<T1, T2, T3>)] = ActionFactory<T1, T2, T3>.Create;
+        }
+
+        public static void RegisterAction<T1, T2, T3, T4>()
+        {
+            delegateFactory[typeof(Action<T1, T2, T3, T4>)] = ActionFactory<T1, T2, T3, T4>.Create;
+        }
+
+        public static void RegisterFunc<R>()
+        {
+            delegateFactory[typeof(Func<R>)] = FuncFactory<R>.Create;
+        }
+
+        public static void RegisterFunc<T1,R>()
+        {
+            delegateFactory[typeof(Func<T1, R>)] = FuncFactory<T1, R>.Create;
+        }
+
+        public static void RegisterFunc<T1, T2, R>()
+        {
+            delegateFactory[typeof(Func<T1, T2, R>)] = FuncFactory<T1, T2, R>.Create;
+        }
+
+        public static void RegisterFunc<T1, T2, T3, R>()
+        {
+            delegateFactory[typeof(Func<T1, T2, T3, R>)] = FuncFactory<T1, T2, T3, R>.Create;
+        }
+
+        public static void RegisterFunc<T1, T2, T3, T4, R>()
+        {
+            delegateFactory[typeof(Func<T1, T2, T3, T4, R>)] = FuncFactory<T1, T2, T3, T4, R>.Create;
+        }
+
+
 #if IL2CPP
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T To<T>(this object v)

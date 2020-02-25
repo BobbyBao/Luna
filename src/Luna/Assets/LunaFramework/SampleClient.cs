@@ -19,7 +19,7 @@ public class SampleClient : LunaClient
         //typeof(UIPanel),
     };
 
-    protected override void OnInit()
+    protected override void OnPreInit()
     {          
         gameObject.AddComponent<ResourceManager>();
         gameObject.AddComponent<UIManager>();

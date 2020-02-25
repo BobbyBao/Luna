@@ -18,7 +18,7 @@ namespace SharpLuna.Unity
         public static readonly ModuleInfo mathTypes = new ModuleInfo
         {
             typeof(Vector2),
-            typeof(Vector3),
+            //typeof(Vector3),
             typeof(Vector4),
             typeof(Quaternion),
             typeof(Plane),
@@ -60,15 +60,12 @@ namespace SharpLuna.Unity
             Instance = this;
             DontDestroyOnLoad(gameObject);
 
-            OnInit();
+            sw.Start();
 
             Luna.Print = Debug.Log;
             Luna.Warning = Debug.LogWarning;
             Luna.Error = Debug.LogError;
             Luna.ReadBytes = ReadBytes;
-
-            luna = new Luna(modules.ToArray());
-            luna.PostInit += OnPostInit;
 
             loader = new ResScriptLoader
             {
@@ -81,8 +78,13 @@ namespace SharpLuna.Unity
 
             loader.AddSearchPath("core");
             loader.AddSearchPath("math");
+            
+            OnPreInit();
 
-            sw.Start();
+            luna = new Luna(modules.ToArray());
+            luna.PostInit += OnPostInit;
+
+            OnInit();
 
             luna.Run();
 
@@ -109,8 +111,17 @@ namespace SharpLuna.Unity
             yield return OnStart();
         }
 
+        protected virtual void OnPreInit()
+        {
+        }
+
         protected virtual void OnInit()
         {
+            Converter.RegisterAction<UnityEngine.Object>();
+            Converter.RegisterAction<GameObject>();
+
+            Converter.RegisterFunc<UnityEngine.Object>();
+            Converter.RegisterFunc<GameObject>();
         }
 
         protected virtual void OnPostInit()

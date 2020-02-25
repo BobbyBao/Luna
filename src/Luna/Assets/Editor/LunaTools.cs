@@ -81,5 +81,28 @@ namespace SharpLuna
 
         }
 
+        [MenuItem("Luna/清除WrapFile")]
+        public static void ClearWraps()
+        {
+            var path = Application.dataPath + "/LunaFramework/SystemType/";
+            if (Directory.Exists(path))
+            {
+                Directory.Delete(path, true);
+            }
+            
+            path = Application.dataPath + "/LunaFramework/BaseType/";
+            if (Directory.Exists(path))
+            {
+                Directory.Delete(path, true);
+            }
+            
+            path = Application.dataPath + "/LunaFramework/CustomType/";
+            if (Directory.Exists(path))
+            {
+                Directory.Delete(path, true);
+            }
+
+            AssetDatabase.Refresh();
+        }
     }
 }

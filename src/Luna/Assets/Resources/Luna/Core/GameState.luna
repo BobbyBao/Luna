@@ -2,8 +2,7 @@ import "Behaviour"
 
 class GameState : Behaviour {
 
-    init(n) {
-    
+    init(n) {    
         super.init(n)        
     }
 

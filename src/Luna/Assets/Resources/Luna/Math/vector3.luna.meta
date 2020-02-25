@@ -1,8 +1,8 @@
 fileFormatVersion: 2
-guid: bfba4a848e4e8df478c5594d02066ff1
+guid: 998acf12883f9ee46b66026460e7c926
 ScriptedImporter:
   fileIDToRecycleName:
-    11400000: vec3
+    11400000: vector3
   externalObjects: {}
   userData: 
   assetBundleName: 
