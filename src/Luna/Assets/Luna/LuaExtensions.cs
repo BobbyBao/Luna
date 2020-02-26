@@ -808,6 +808,11 @@ namespace SharpLuna
                     return lua_isnone(L, index) ? def : Converter.To<T>(new LuaRef(L, index));
                 default:
                     {
+                        if (typeof(T).IsEnum)
+                        {
+                            return Converter.To<T>((int)luaL_optinteger(L, index, (long)(object)def));
+                        }
+
                         if (lua_isnoneornil(L, index)) return def;
 
                         if(typeof(T).IsUnManaged())

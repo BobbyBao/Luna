@@ -1,5 +1,8 @@
 
-var test = Tests.TestClass()
+
+let TestClass = Tests.TestClass
+
+var test = TestClass()
 print(test)
 
 var s = String.Concat("123", "456")

@@ -24,6 +24,7 @@ class UITestPerformance : UIPanel {
         self.addClickByName("Buttons/Button9", self.onTest9)
         self.addClickByName("Buttons/Button10", self.onTestTable)
 
+		LunaHelper.AddEventTrigger(self.gameObject, EventTriggerType.PointerClick, self.onClickBack, self)
     }
 
     func onButtonClick(go) {
@@ -54,4 +55,9 @@ class UITestPerformance : UIPanel {
     func onTestTable() {
         testTable()
     }
+
+	func onClickBack(go, data) {
+		self.gameObject.SetActive(false)
+	}
+	
 }

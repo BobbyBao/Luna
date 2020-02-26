@@ -35,6 +35,11 @@ public class ResourceManager : MonoBehaviour
         });
     }
 
+    public static void Free(GameObject obj)
+    {
+
+    }
+
     public static T Load<T>(string filePath) where T : UnityEngine.Object
     {
         return assetLoader.Load<T>(filePath);
@@ -45,7 +50,12 @@ public class ResourceManager : MonoBehaviour
         instance.StartCoroutine(assetLoader.Load<T>(filePath, finishLoad));
     }
 
-    public static void LoadScene(string sceneName, Action<AsyncOperation> loadCallback, bool addtive = false)
+    public static void LoadScene(string sceneName, Action<AsyncOperation> loadCallback)
+    {
+        LoadScene(sceneName, loadCallback, false);
+    }
+
+    public static void LoadScene(string sceneName, Action<AsyncOperation> loadCallback, bool addtive)
     {
         instance.StartCoroutine(assetLoader.LoadScene(sceneName, loadCallback, addtive ? UnityEngine.SceneManagement.LoadSceneMode.Additive : UnityEngine.SceneManagement.LoadSceneMode.Single));
     }

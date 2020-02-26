@@ -3,14 +3,21 @@ class TestBehaviour {
 
 	func awake() {
 		print "awake"
+
+        var child = LunaHelper.FindChild(self.gameObject, "Button")
+		LunaHelper.AddClick(child, self.close, self)
 	}
 	
 	func start() {
 		print "start"
 	}
+
+	func close(go) {
+		self.gameObject.SetActive(false)
+	}
 	
 	func update() {
-		print "update"
+		//print "update"
 	}
 	
 	func onDestroy() {

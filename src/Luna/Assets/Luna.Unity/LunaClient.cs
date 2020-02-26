@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace SharpLuna.Unity
@@ -53,6 +54,8 @@ namespace SharpLuna.Unity
             typeof(Image),
             typeof(Button),
             typeof(RawImage),
+            typeof(EventTriggerType),
+            typeof(BaseEventData),
         };
 
         private Luna luna;

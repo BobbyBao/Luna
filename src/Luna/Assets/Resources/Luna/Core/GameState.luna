@@ -1,9 +1,37 @@
 import "Behavior"
 
 class GameState : Behavior {
+    var loaded = false
+    var sceneName = ""
+    var loadOp = nil
 
     init(n) {    
         super.init(n)        
+    }
+
+    func enter() {
+    
+        if self.loadOp == nil {
+            self.state = BehaviorState.Transiting
+            ResourceManager.LoadScene(self.sceneName, func(op)  { 
+                self.loadOp = op
+
+                if self.state == BehaviorState.Transiting {
+                    self.onLoad()
+                    self.state = BehaviorState.Open
+                }
+            })
+        } 
+        
+    }
+
+    func onLoad() {
+    
+    }
+
+    func exit() {  
+
+        self.state = BehaviourState.Closed
     }
 
 }

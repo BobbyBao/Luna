@@ -49,6 +49,12 @@ class UIPanel : Behavior {
         }
     }
 
+    func hide() {
+        if self.parent {
+            self.parent.deactive(self)
+        }
+    }
+
     func enter() {
     
         if self.gameObject == nil {
@@ -77,7 +83,8 @@ class UIPanel : Behavior {
                 self.onLoad(go)
                 self.loaded = true
             }
-
+            
+            self.gameObject.SetActive(true)
             self.onOpen()
             self.state = BehaviorState.Open
         }

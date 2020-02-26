@@ -29,7 +29,7 @@ namespace SharpLuna
 
 #if LUA_WEAKTABLE
         static FreeList<object> freeList = new FreeList<object>(1024);
-        static Dictionary<object, int> obj2id = new Dictionary<object, int>();// new ReferenceEqualsComparer());
+        static Dictionary<object, int> obj2id = new Dictionary<object, int>(new ReferenceEqualsComparer());
         static int weakTableRef;
 #else       
         static ConditionalWeakTable<object, UserDataRef> objectUserData = new ConditionalWeakTable<object, UserDataRef>();
@@ -69,7 +69,7 @@ namespace SharpLuna
 #if LUA_WEAKTABLE
             long id = freeList.Alloc(obj);
             *((long*)mem) = id;
-            obj2id.Add(obj, (int)id);
+            obj2id[obj] = (int)id;
 
             CacheUserData(L, id, weakTableRef);
 #else

@@ -24,10 +24,14 @@ namespace SharpLuna
         public static void Clear()
         {
             generatedTypes.Clear();
+            enums.Clear();
+            genericTypes.Clear();
             classDelegates.Clear();
         }
 
         static HashSet<string> namespaces = new HashSet<string>();
+        static HashSet<Type> enums = new HashSet<Type>();
+        static HashSet<Type> genericTypes = new HashSet<Type>();
         static HashSet<Type> classDelegates = new HashSet<Type>();
 
         static Dictionary<Type, string> allDelegates = new Dictionary<Type, string>();
