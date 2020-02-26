@@ -41,7 +41,12 @@ namespace SharpLuna
         private readonly Dictionary<Type, ClassWraper> _classWrapers = new Dictionary<Type, ClassWraper>();
 
         public static ModuleInfo systemModule = new ModuleInfo
-        {   
+        {
+            new ClassInfo(typeof(Type))
+            {
+                "IsSZArray"
+            },
+
             typeof(object),
             typeof(Enum),
             new ClassInfo(typeof(string))
@@ -49,6 +54,7 @@ namespace SharpLuna
                 "Chars",
                 "GetEnumerator"
             },
+
             typeof(Delegate),
             typeof(Array),
         };
@@ -83,6 +89,7 @@ namespace SharpLuna
             Register("print", DoPrint);
             Register("dofile", DoFile);
             Register("loadfile", LoadFile);
+            Register("typeof", GetClassType);
 
 #if LUNA_SCRIPT
             DoString(classSource);
@@ -262,6 +269,27 @@ namespace SharpLuna
             return 2;
         }
 
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+        static int GetClassType(IntPtr L)
+        {
+            lua_pushvalue(L, -1);
+            lua_pushliteral(L, "type");
+            lua_rawget(L, -2);
+            /*
+            if (lua_iscfunction(L, -1))
+            {
+                lua_pushvalue(L, -2);
+                lua_call(L, 1, 1);                
+            }
+            else
+            {
+                Debug.LogError("type not register to lua");
+                lua_pushnil(L);
+            
+            }*/
+
+            return 1;
+        }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         static int PanicCallback(lua_State L)
@@ -391,11 +419,11 @@ namespace SharpLuna
 
                 return PopValues(L, oldTop);
             }
-            catch(Exception e)
-            {
-                Debug.LogError(e.Message);
-                return null;
-            }
+            //catch(Exception e)
+            //{
+            //    Debug.LogError(e.Message);
+            //    return null;
+            //}
             finally
             {
                 _executing = false;

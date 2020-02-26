@@ -33,8 +33,9 @@ namespace SharpLuna
                 Directory.Delete(path, true);
             }
 
-            GenerateModule(LunaClient.mathTypes, path);
             GenerateModule(LunaClient.baseTypes, path);
+            GenerateModule(LunaClient.mathTypes, path);
+            GenerateModule(LunaClient.uiTypes, path);
 
             path = Application.dataPath + "/LunaFramework/CustomType/";
             if (Directory.Exists(path))

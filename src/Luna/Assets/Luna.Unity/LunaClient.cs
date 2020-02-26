@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace SharpLuna.Unity
 {
@@ -14,6 +15,22 @@ namespace SharpLuna.Unity
         public static event Action<Luna> LunaDestroy;
 
         public static Luna Luna => Instance?.luna;
+
+        public static readonly ModuleInfo baseTypes = new ModuleInfo("UnityEngine")
+        {
+            typeof(UnityEngine.Object),
+            typeof(GameObject),
+            typeof(Component),
+            typeof(MonoBehaviour),
+            typeof(Transform),
+            typeof(RectTransform),
+            typeof(Renderer),
+            typeof(MeshRenderer),
+            typeof(SkinnedMeshRenderer),
+            typeof(Resources),
+            typeof(AsyncOperation),
+            typeof(Input),
+        };
 
         public static readonly ModuleInfo mathTypes = new ModuleInfo
         {
@@ -31,16 +48,11 @@ namespace SharpLuna.Unity
             typeof(TouchPhase),
         };
 
-        public static readonly ModuleInfo baseTypes = new ModuleInfo("UnityEngine")
+        public static readonly ModuleInfo uiTypes = new ModuleInfo
         {
-            typeof(UnityEngine.Object),
-            typeof(GameObject),
-            typeof(Component),
-            typeof(MonoBehaviour),
-            typeof(Transform),
-            typeof(RectTransform),
-            typeof(Resources),
-            typeof(AsyncOperation),
+            typeof(Image),
+            typeof(Button),
+            typeof(RawImage),
         };
 
         private Luna luna;
@@ -50,7 +62,7 @@ namespace SharpLuna.Unity
 
         private List<ModuleInfo> modules = new List<ModuleInfo>
         {
-            mathTypes, baseTypes
+            mathTypes, baseTypes, uiTypes
         };
 
         System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();

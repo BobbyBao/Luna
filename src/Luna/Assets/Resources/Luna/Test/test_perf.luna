@@ -51,6 +51,61 @@ func test4() {
 	print("TestIndex luna cost time: ", t)	
 }
 
+func test5() {	
+	let t = os.clock()
+	let GameObject = UnityEngine.GameObject
+	let SkinnedMeshRenderer = UnityEngine.SkinnedMeshRenderer
+	let tp = typeof(SkinnedMeshRenderer)
+
+	for i = 1,20000 {				
+		let go = GameObject()
+		go.AddComponent(tp)
+    	local c = go.GetComponent(tp)
+    	c.shadowCastingMode = 0
+    	c.receiveShadows = false
+	}
+		
+	print("Test5 lua cost time: ", os.clock() - t)	
+}
+
+func test6() {	
+	let t = os.clock()
+	let Input = UnityEngine.Input
+
+	for i = 1,200000 {		
+		let t = Input.GetTouch(0)		
+		let p = Input.mousePosition
+		//Physics.RayCast
+	}
+		
+	print("lua cost time: ", os.clock() - t)	
+}
+
+func test7() {	
+	let Vector3 = Vector3	
+	let t = os.clock()
+		
+	for i = 1, 200000 {
+		let v = Vector3(i,i,i)
+		Vector3.Normalize(v)
+	}
+		
+	print("lua Vector3 New Normalize cost time: ", os.clock() - t)	
+}
+
+func test8() {		
+	let Quaternion = Quaternion
+	let t = os.clock()
+	
+	for i = 1,200000 {
+		let q1 = Quaternion.Euler(i, i, i)		
+		let q2 = Quaternion.Euler(i * 2, i * 2, i * 2)
+		Quaternion.Slerp(Quaternion.identity, q1, 0.5)		
+	}
+		
+	print("Quaternion Euler Slerp const: ", os.clock() - t)		
+}
+
 func test9() {
 	var total = 0
 	var t = os.clock()

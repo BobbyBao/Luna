@@ -55,7 +55,6 @@ class UIPanel : Behavior {
             self.state = BehaviorState.Transiting
             UIManager.Instance.OpenPanel(self.uiFile, func(go)  { 
                 self.gameObject = go
-
                 if self.state == BehaviorState.Transiting {
                     self.gameObject.SetActive(true)
 
@@ -72,8 +71,7 @@ class UIPanel : Behavior {
                 }
 
             })
-        }
-        else {
+        } else {
             
             if !self.loaded {
                 self.onLoad(go)

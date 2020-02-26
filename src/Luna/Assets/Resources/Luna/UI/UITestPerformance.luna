@@ -19,6 +19,8 @@ class UITestPerformance : UIPanel {
         self.btn4 = self.addClickByName("Buttons/Button4", self.onButtonClick)
         self.btn5 = self.addClickByName("Buttons/Button5", self.onButtonClick)
         self.btn6 = self.addClickByName("Buttons/Button6", self.onButtonClick)
+        self.btn7 = self.addClickByName("Buttons/Button7", self.onButtonClick)
+        self.btn8 = self.addClickByName("Buttons/Button8", self.onButtonClick)
         self.addClickByName("Buttons/Button9", self.onTest9)
         self.addClickByName("Buttons/Button10", self.onTestTable)
 
@@ -35,13 +37,13 @@ class UITestPerformance : UIPanel {
         } else if go == self.btn4 {    
             test4()
         } else if go == self.btn5 {    
-            
+            test5()
         } else if go == self.btn6 {    
-            
+            test6()
         } else if go == self.btn7 {    
-            
+            test7()
         } else if go == self.btn8 {    
-           
+            test8()
         }
     }
 

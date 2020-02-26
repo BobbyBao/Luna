@@ -62,7 +62,7 @@ namespace SharpLuna
             return full_name;
         }
 
-        public static LuaRef CreateClass(LuaRef module, string name, int classId, int superClassID, LuaNativeFunction dctor)
+        public static LuaRef CreateClass(LuaRef module, string name, Type classId, Type superClass, LuaNativeFunction dctor)
         {
             LuaRef classref = module.RawGet<LuaRef, string>(name);
             if (classref)
@@ -72,9 +72,10 @@ namespace SharpLuna
 
             var meta = create_class(module.State, module, name, classId, dctor);
 
-            if (superClassID != 0)
+            if (superClass != null)
             {
                 LuaRef registry = new LuaRef(module.State, LUA_REGISTRYINDEX);
+                int superClassID = SharpObject.TypeID(superClass);
                 LuaRef super = registry.RawGet<LuaRef>(superClassID);
                 meta.RawSet(___super, super);
             }
@@ -82,12 +83,15 @@ namespace SharpLuna
             return meta;
         }
 
-        public static LuaRef create_class(lua_State L, LuaRef parentModule, string name, int classId, LuaNativeFunction dctor)
+        public static LuaRef create_class(lua_State L, LuaRef parentModule, string name, Type classType, LuaNativeFunction dctor)
         {
             int moduleRef = parentModule.Ref;
+            int classId = SharpObject.TypeID(classType);
 #if C_API
             int metaRef = luna_create_class(L, moduleRef, name, classId, dctor.ToFunctionPointer());
-            return new LuaRef(metaRef, L);
+            var meta = new LuaRef(metaRef, L);
+            meta.RawSet("type", classType);
+            return meta;
 #else
             string fullName = GetFullName(parentModule, name);
             

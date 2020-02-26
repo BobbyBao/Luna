@@ -153,7 +153,7 @@ namespace SharpLuna
                 dctor = Destructor;
             }
 
-            LuaRef meta = CreateClass(module.Meta, name, SharpObject.TypeID(classType), SharpObject.TypeID(superType), dctor);
+            LuaRef meta = CreateClass(module.Meta, name, classType, superType, dctor);
             var bindClass = new SharpClass(module, meta);
             bindClass.Name = name;
             bindClass.SetClassType(classType);

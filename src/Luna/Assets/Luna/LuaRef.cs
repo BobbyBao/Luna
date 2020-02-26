@@ -48,6 +48,11 @@ namespace SharpLuna
         {
             L = state;
             _ref = luaRef;
+
+            if(state != IntPtr.Zero)
+            {
+                state.AddRef(this);
+            }
         }
 
         ~LuaRef()
