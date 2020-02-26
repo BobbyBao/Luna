@@ -15,9 +15,21 @@ namespace SharpLuna
 
     public class SharpObject
     {
+        class ReferenceEqualsComparer : IEqualityComparer<object>
+        {
+            public new bool Equals(object o1, object o2)
+            {
+                return object.ReferenceEquals(o1, o2);
+            }
+            public int GetHashCode(object obj)
+            {
+                return System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(obj);
+            }
+        }
+
 #if LUA_WEAKTABLE
         static FreeList<object> freeList = new FreeList<object>(1024);
-        static Dictionary<object, int> obj2id = new Dictionary<object, int>();
+        static Dictionary<object, int> obj2id = new Dictionary<object, int>();// new ReferenceEqualsComparer());
         static int weakTableRef;
 #else       
         static ConditionalWeakTable<object, UserDataRef> objectUserData = new ConditionalWeakTable<object, UserDataRef>();
@@ -85,7 +97,7 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void AllocUnmanagedObject<T>(lua_State L, T obj) where T : unmanaged
+        public static unsafe void AllocUnmanagedObject<T>(lua_State L, T obj)// where T : unmanaged
         {
             int classId = TypeID(obj);
             IntPtr mem = lua_newuserdata(L, (UIntPtr)Unsafe.SizeOf<T>());
@@ -107,15 +119,44 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void PushUnmanagedObject<T>(lua_State L, in T obj) where T : unmanaged
+        public static unsafe void AllocUnmanagedObject(lua_State L, object obj)
+        {
+            int classId = TypeID(obj);
+            IntPtr mem = lua_newuserdata(L, (UIntPtr)Marshal.SizeOf(obj));
+            Marshal.StructureToPtr(obj, mem, false);
+
+            lua_rawgeti(L, LUA_REGISTRYINDEX, classId);
+
+#if DEBUG || UNITY_EDITOR
+
+            if (!lua_istable(L, -1))
+            {
+                Debug.LogWarning($"class not registered : {obj.GetType() }, obj: {obj}");
+                lua_pop(L, 1);
+                return;
+            }
+            //luaL_checktype(L, -1, (int)LuaType.Table);
+#endif
+            lua_setmetatable(L, -2);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void PushUnmanagedObject<T>(lua_State L, in T obj) //where T : unmanaged
         {
             AllocUnmanagedObject(L, obj);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void PushValueToStack<T>(lua_State L, ref T obj) where T : struct
+        public static void PushValueToStack<T>(lua_State L, ref T obj) //where T : struct
         {
-            AllocObject(L, obj);
+            if (typeof(T).IsUnManaged())
+            {
+                AllocUnmanagedObject(L, obj);
+            }
+            else
+            {
+                AllocObject(L, obj);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -165,6 +206,13 @@ namespace SharpLuna
         {
             var ptr = lua_touserdata(L, index);
             return ref Unsafe.AsRef<T>((void*)ptr);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe static object GetUnmanaged(lua_State L, int index, Type type)
+        {
+            var ptr = lua_touserdata(L, index);
+            return Marshal.PtrToStructure(ptr, type);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

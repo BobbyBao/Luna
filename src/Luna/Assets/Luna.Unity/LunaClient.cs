@@ -62,9 +62,6 @@ namespace SharpLuna.Unity
 
             sw.Start();
 
-            Luna.Print = Debug.Log;
-            Luna.Warning = Debug.LogWarning;
-            Luna.Error = Debug.LogError;
             Luna.ReadBytes = ReadBytes;
 
             loader = new ResScriptLoader

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Collections;
+using UnityEngine;
 
 namespace SharpLuna
 {
@@ -28,8 +29,6 @@ namespace SharpLuna
         public bool UseTraceback { get; set; } = false;
 
         public static Action<string> Print { get; set; }
-        public static Action<string> Warning { get; set; }
-        public static Action<string> Error { get; set; }
         public static Func<string, byte[]> ReadBytes { get; set; }
 
         public event Action PostInit;
@@ -71,21 +70,6 @@ namespace SharpLuna
 
         public void Start()
         {
-            if (Print == null)
-            {
-                Print = Console.WriteLine;
-            }
-
-            if (Warning == null)
-            {
-                Warning = Console.WriteLine;
-            }
-
-            if (Error == null)
-            {
-                Error = Console.WriteLine;
-            }
-
             if (ReadBytes == null)
             {
                 ReadBytes = System.IO.File.ReadAllBytes;
@@ -156,11 +140,7 @@ namespace SharpLuna
             Lua.CloseState(L);
             L = IntPtr.Zero;
         }
-        /*
-        public static void Log(params object[] args) => Print?.Invoke(string.Join("\t", args));
-        public static void LogWarning(params object[] args) => Warning?.Invoke(string.Join("\t", args));
-        public static void LogError(params object[] args) => Error?.Invoke(string.Join("\t", args));
-        */
+        
         public void Register(string name, LuaNativeFunction function)
         {
             savedFn.TryAdd(function);
@@ -200,13 +180,10 @@ namespace SharpLuna
             }
 
             if(Print != null)
-            {                
                 Print(sb.ToString());
-            }
             else
-            {
-                Console.WriteLine(sb.ToString());
-            }
+                Debug.Log(sb.ToString());
+ 
             return 0;
         }
 
@@ -414,12 +391,11 @@ namespace SharpLuna
 
                 return PopValues(L, oldTop);
             }
-            /*
             catch(Exception e)
             {
-                Error(e.Message);
+                Debug.LogError(e.Message);
                 return null;
-            }*/
+            }
             finally
             {
                 _executing = false;

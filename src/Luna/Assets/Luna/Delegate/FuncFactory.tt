@@ -73,8 +73,8 @@ namespace SharpLuna
             {
                 lua_pushcfunction(L, LuaException.traceback);
                 lua_rawgeti(L, LUA_REGISTRYINDEX, luaref);
-                <# for(int j= 0; j <= i ; j ++){#>Push(L, <#=typeList[j].ToLower()#>);
-                <#}#>if (lua_pcall(L, <#=i#>, 0, -<#=i#> + 2) != (int)LuaStatus.OK)
+                <# for(int j= 0; j <= i ; j ++){#>PushT(L, <#=typeList[j].ToLower()#>);
+                <#}#>if (lua_pcall(L, <#=i+1#>, 0, -<#=i+1#> + 2) != (int)LuaStatus.OK)
                 {
                     lua_remove(L, -2);
                     throw new LuaException(L);

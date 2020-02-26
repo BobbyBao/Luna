@@ -30,9 +30,9 @@ namespace SharpLuna
             }
             catch (System.Exception ex)
             {
-                Debug.LogError(ex.Message);
-                Debug.LogError(type.ToString());
-                Debug.LogError(methodInfo.ReflectedType.ToString() + ", " + methodInfo.ToString());
+                //Debug.LogError(ex.Message);
+                //Debug.LogError(type.ToString());
+                //Debug.LogError(methodInfo.ReflectedType.ToString() + ", " + methodInfo.ToString());
                 return null;
             }
             cache.Add(methodInfo, del);
@@ -52,9 +52,9 @@ namespace SharpLuna
             }
             catch (System.Exception ex)
             {
-                Debug.LogError(ex.Message);
-                Debug.LogError(type.ToString());
-                Debug.LogError(methodInfo.ReflectedType.ToString() + ", " + methodInfo.ToString());
+                //Debug.LogError(ex.Message);
+                //Debug.LogError(type.ToString());
+                //Debug.LogError(methodInfo.ReflectedType.ToString() + ", " + methodInfo.ToString());
                 return null;
             }
             cache.Add(methodInfo, del);
@@ -74,8 +74,8 @@ namespace SharpLuna
             }
             catch (System.Exception ex)
             {
-                Debug.LogError(ex.Message);
-                Debug.LogError(methodInfo.ReflectedType.ToString() + ", " + methodInfo.ToString());
+                //Debug.LogError(ex.Message);
+                //Debug.LogError(methodInfo.ReflectedType.ToString() + ", " + methodInfo.ToString());
                 return null;
             }
             cacheClose.Add((methodInfo, obj), del);
@@ -160,14 +160,14 @@ namespace SharpLuna
                     del = null;
                     return false;
                 }
-
+                /*
                 if (info.ParameterType.IsGenericType)
                 {
                     Debug.Log("不支持泛型参数:" + methodInfo.ToString());
                     luaFunc = null;
                     del = null;
                     return false;
-                }
+                }*/
 
                 paramTypes.Add(info.ParameterType);
             }
@@ -185,14 +185,14 @@ namespace SharpLuna
                     del = null;
                     return false;
                 }
-
+                /*
                 if (typeOfResult.IsGenericType)
                 {
                     Debug.Log("不支持泛型参数:" + methodInfo.ToString());
                     luaFunc = null;
                     del = null;
                     return false;
-                }
+                }*/
 
                 paramTypes.Add(typeOfResult);
                 var typeArray = paramTypes.ToArray();

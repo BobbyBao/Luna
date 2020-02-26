@@ -23,7 +23,6 @@ namespace Test
             InitializeComponent();
 
             Luna.Print = this.Print;
-            Luna.Error = this.Print;
             framework = new TestFramework();
 
             var it = Directory.EnumerateFiles(TestFramework.dataPath, "*.luna");

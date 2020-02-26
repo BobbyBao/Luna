@@ -142,9 +142,9 @@ namespace SharpLuna
             LuaNativeFunction dctor = null;
             if (classType.IsValueType)
             {
-                if (!classType.IsUnManaged() || !Luna.IsWrapered(classType)) //未注册Wrap，用反射版api， UnmanagedType同Object
+                if (!classType.IsUnManaged()) //未注册Wrap，用反射版api， UnmanagedType同Object
                 {
-                    dctor = DestructorStruct;
+                    dctor = Destructor;
                 }
 
             }

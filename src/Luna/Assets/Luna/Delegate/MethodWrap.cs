@@ -103,7 +103,6 @@ namespace SharpLuna
                 int StackStart = methodInfo.IsStatic ? 1 : 2;
 #endif
 
-                object obj = methodInfo.IsStatic ? null : GetObject(L, 1, methodInfo.ReflectedType);
                 for (int i = 0; i < args.Length; i++)
                 {
                     args[i] = GetObject(L, i + StackStart, parameterInfo[i].ParameterType);
@@ -118,6 +117,7 @@ namespace SharpLuna
                 }
                 else
                 {
+                    object obj = methodInfo.IsStatic ? null : GetObject(L, 1, methodInfo.ReflectedType);
                     MethodInfo mi = methodInfo as MethodInfo;
                     object ret = methodInfo.Invoke(obj, args);
                     Array.Clear(args, 0, args.Length);

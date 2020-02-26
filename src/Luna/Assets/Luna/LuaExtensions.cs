@@ -273,7 +273,6 @@ namespace SharpLuna
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Push<T>(lua_State L, ref T v) where T : struct
         {
-            //todo:
             SharpObject.PushValueToStack(L, ref v);
         }
 
@@ -337,7 +336,22 @@ namespace SharpLuna
                         lua_pushnil(L);
                     }
                     break;
-                default:                      
+                default:
+                    Type t = v.GetType();
+                    if(t.IsEnum)
+                    {
+                        lua_pushinteger(L, (int)(object)v);
+                    }
+                    else if(t.IsValueType)
+                    {
+                        if(t.IsUnManaged())
+                        {
+                            SharpObject.PushUnmanagedObject(L, v);
+                            return;
+                        }
+                        
+                    }
+                      
                     SharpObject.PushToStack(L, v);
                     break;
             }
@@ -448,13 +462,17 @@ namespace SharpLuna
                 return GetObject(L, index);
             }
             else
-            {
+            { 
+                if(objtype.IsEnum)
+                {
+                    return (int)lua_tonumber(L, index);
+                }
                 if(objtype.IsValueType)
                 {
-                    //if(objtype.IsUnManaged())
-                    //{
-                        //return SharpObject.GetUnmanaged(L, index);
-                    //}
+                    if(objtype.IsUnManaged())
+                    {
+                        return SharpObject.GetUnmanaged(L, index, objtype);
+                    }
                 }
 
                 return SharpObject.Get<object>(L, index);
@@ -731,6 +749,10 @@ namespace SharpLuna
                 if (t == typeof(object))
                 {
                     return (T)GetObject(L, index);
+                }
+                else if(t.IsEnum)
+                {
+                    return Converter.To<T>((int)luaL_checkinteger(L, index));
                 }
                 else if (t.IsValueType)
                 {
