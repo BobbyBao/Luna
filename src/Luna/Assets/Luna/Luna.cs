@@ -69,7 +69,7 @@ namespace SharpLuna
             Dispose();
         }
 
-        public void Run()
+        public void Start()
         {
             if (Print == null)
             {
@@ -115,14 +115,17 @@ namespace SharpLuna
 
             RegisterWraps(this.GetType());
 
-            Init(); 
+            foreach (var moduleInfo in this._config)
+            {
+                this.RegisterModel(moduleInfo);
+            }
 
             PostInit?.Invoke();
 
             var it = _classWrapers.GetEnumerator();
             while(it.MoveNext())
             {
-                if (!SharpClass.IsRegistered(it.Current.Key))
+                if (!SharpModule.IsRegistered(it.Current.Key))
                 {
                     RegisterClass(it.Current.Key);
                 }
@@ -131,16 +134,6 @@ namespace SharpLuna
             _classWrapers.Clear();
 
             
-        }
-
-        private void Init()
-        {
-
-            foreach(var moduleInfo in this._config)
-            {                
-                this.RegisterModel(moduleInfo);                
-            }
-
         }
 
         public void Dispose()
@@ -163,11 +156,11 @@ namespace SharpLuna
             Lua.CloseState(L);
             L = IntPtr.Zero;
         }
-
+        /*
         public static void Log(params object[] args) => Print?.Invoke(string.Join("\t", args));
         public static void LogWarning(params object[] args) => Warning?.Invoke(string.Join("\t", args));
         public static void LogError(params object[] args) => Error?.Invoke(string.Join("\t", args));
-
+        */
         public void Register(string name, LuaNativeFunction function)
         {
             savedFn.TryAdd(function);
@@ -464,7 +457,7 @@ namespace SharpLuna
             return classWraper;
         }
 
-        public bool IsRegistered(Type type)
+        public bool IsWrapered(Type type)
         {
             return _classWrapers.ContainsKey(type);
         }
@@ -488,7 +481,7 @@ namespace SharpLuna
         
         void AddWrapClass(Type type, Type wrapType)
         {
-            if(IsRegistered(type))
+            if(IsWrapered(type))
             {
                 return;
             }

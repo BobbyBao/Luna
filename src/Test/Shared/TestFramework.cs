@@ -25,7 +25,7 @@ namespace Tests
             
             GenerateWraps();
 
-            luna.Run();
+            luna.Start();
             luna.AddSearcher(Loader);           
         }
 
@@ -118,10 +118,11 @@ namespace Tests
 
         void AutoBind()
         {
-            luna.RegisterClass(typeof(TestEnum));
-            luna.RegisterClass(typeof(TestStruct));
-            luna.RegisterClass(typeof(TestClass));
-
+            Type[] types =
+                {typeof(TestEnum),
+            typeof(TestStruct),
+            typeof(TestClass) };
+            luna.RegisterModel("Tests", types);
         }
 
         void TestTable()
@@ -130,26 +131,26 @@ namespace Tests
             var c = luna.GetGlobal("TestClass");
             var it = c.GetEnumerator();
 
-            Luna.Log("TestClass : ======================== ");
+            Debug.Log("TestClass : ======================== ");
 
             while (it.MoveNext())
             {
-                Luna.Log(it.Current.Key<string>());
+                Debug.Log(it.Current.Key<string>());
             }
 
             it.Reset();
-            Luna.Log("TestClass : ======================== ");
+            Debug.Log("TestClass : ======================== ");
 
             while (it.MoveNext())
             {
-                Luna.Log(it.Current.Key<string>());
+                Debug.Log(it.Current.Key<string>());
             }
 
-            Luna.Log("TestClass : ======================== ");
+            Debug.Log("TestClass : ======================== ");
 
             foreach (var e in c)
             {
-                Luna.Log(e.Key<string>());
+                Debug.Log(e.Key<string>());
             }
 
             it.Dispose();

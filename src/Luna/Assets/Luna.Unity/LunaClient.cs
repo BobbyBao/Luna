@@ -81,16 +81,28 @@ namespace SharpLuna.Unity
             
             OnPreInit();
 
+            sw.Stop();
+
+            Debug.Log($"Luna preinit time : {sw.ElapsedMilliseconds} ms");
+
+            sw.Start();
+
             luna = new Luna(modules.ToArray());
             luna.PostInit += OnPostInit;
 
             OnInit();
 
-            luna.Run();
+            sw.Stop();
+
+            Debug.Log($"Luna init time : { sw.ElapsedMilliseconds} ms");
+
+            sw.Start();
+
+            luna.Start();
 
             sw.Stop();
 
-            Luna.Log("Luna init time :", sw.ElapsedMilliseconds, "ms");
+            Debug.Log($"Luna start time : {sw.ElapsedMilliseconds} ms");
 
             LunaCreate?.Invoke(luna);
         }

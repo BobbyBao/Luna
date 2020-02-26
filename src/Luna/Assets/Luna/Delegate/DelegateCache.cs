@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
+using UnityEngine;
 
 namespace SharpLuna
 {
@@ -29,9 +30,9 @@ namespace SharpLuna
             }
             catch (System.Exception ex)
             {
-                Luna.LogError(ex.Message);
-                Luna.LogError(type.ToString());
-                Luna.LogError(methodInfo.ReflectedType.ToString() + ", " + methodInfo.ToString());
+                Debug.LogError(ex.Message);
+                Debug.LogError(type.ToString());
+                Debug.LogError(methodInfo.ReflectedType.ToString() + ", " + methodInfo.ToString());
                 return null;
             }
             cache.Add(methodInfo, del);
@@ -51,9 +52,9 @@ namespace SharpLuna
             }
             catch (System.Exception ex)
             {
-                Luna.LogError(ex.Message);
-                Luna.LogError(type.ToString());
-                Luna.LogError(methodInfo.ReflectedType.ToString() + ", " + methodInfo.ToString());
+                Debug.LogError(ex.Message);
+                Debug.LogError(type.ToString());
+                Debug.LogError(methodInfo.ReflectedType.ToString() + ", " + methodInfo.ToString());
                 return null;
             }
             cache.Add(methodInfo, del);
@@ -73,8 +74,8 @@ namespace SharpLuna
             }
             catch (System.Exception ex)
             {
-                Luna.LogError(ex.Message);
-                Luna.LogError(methodInfo.ReflectedType.ToString() + ", " + methodInfo.ToString());
+                Debug.LogError(ex.Message);
+                Debug.LogError(methodInfo.ReflectedType.ToString() + ", " + methodInfo.ToString());
                 return null;
             }
             cacheClose.Add((methodInfo, obj), del);
@@ -137,7 +138,7 @@ namespace SharpLuna
         {
             if (methodInfo.CallingConvention == CallingConventions.VarArgs)
             {
-                Luna.Log("不支持可变参数类型:" + methodInfo.ToString());
+                Debug.Log("不支持可变参数类型:" + methodInfo.ToString());
                 luaFunc = null;
                 del = null;
                 return false;
@@ -162,7 +163,7 @@ namespace SharpLuna
 
                 if (info.ParameterType.IsGenericType)
                 {
-                    Luna.Log("不支持泛型参数:" + methodInfo.ToString());
+                    Debug.Log("不支持泛型参数:" + methodInfo.ToString());
                     luaFunc = null;
                     del = null;
                     return false;
@@ -187,7 +188,7 @@ namespace SharpLuna
 
                 if (typeOfResult.IsGenericType)
                 {
-                    Luna.Log("不支持泛型参数:" + methodInfo.ToString());
+                    Debug.Log("不支持泛型参数:" + methodInfo.ToString());
                     luaFunc = null;
                     del = null;
                     return false;
@@ -237,7 +238,7 @@ namespace SharpLuna
                 }
                 catch (Exception e)
                 {
-                    Luna.Log(e);
+                    Debug.Log(e);
                     luaFunc = null;
                     del = null;
                     return false;
@@ -272,7 +273,7 @@ namespace SharpLuna
                 }
                 catch (Exception e)
                 {
-                    Luna.Log(e);
+                    Debug.Log(e);
                     luaFunc = null;
                     del = null;
                     return false;

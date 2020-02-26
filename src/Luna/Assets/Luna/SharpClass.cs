@@ -12,16 +12,13 @@ namespace SharpLuna
 
     public partial class SharpClass : IDisposable
     {
-        public string Name { get; protected set; }
+        public string Name { get; set; }
 
         protected LuaRef meta;
         protected SharpClass parent;
         protected Type classType;
 
         protected Dictionary<string, MethodWraper> classInfo;
-
-        static Dictionary<Type, SharpClass> registeredClass = new Dictionary<Type, SharpClass>();
-        static Dictionary<Type, string> classAlias = new Dictionary<Type, string>();
 
         static Dictionary<string, string> tagMethods = new Dictionary<string, string>
         {
@@ -43,11 +40,16 @@ namespace SharpLuna
         };
 
         static bool IsTagMethod(string name, out string tag) => tagMethods.TryGetValue(name, out tag);
-
-        protected SharpClass(LuaRef meta)
+        public SharpClass(SharpClass parent)
+        {
+            this.parent = parent;
+        }
+        
+        public SharpClass(SharpClass parent, LuaRef meta)
         {
             this.meta = meta;
             this.meta.CheckTable();
+            this.parent = parent;
         }
 
         ~SharpClass()
@@ -71,104 +73,10 @@ namespace SharpLuna
 
         public LuaRef Meta => meta;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsRegistered<T>()
-        {
-            return IsRegistered(typeof(T));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsRegistered(Type t)
-        {
-            return registeredClass.ContainsKey(t);
-        }
-
-        public static void SetAlias(Type t, string alias)
-        {
-            classAlias.Add(t, alias);
-        }
-
-        public static string GetTableName(Type t)
-        {
-            if (classAlias.TryGetValue(t, out string alias))
-            {
-                return alias;
-            }
-
-            return t.Name;
-        }
-
-        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        static int Destructor(lua_State L)
-        {
-            SharpObject.Free(L, 1);
-            return 0;
-        }
-       
-        public static SharpClass Extend(Type classType, Type superType, SharpClass module)
-        {
-            if (registeredClass.TryGetValue(classType, out var bindClass))
-            {
-                return bindClass;
-            }
-
-            string name = GetTableName(classType);
-
-            LuaNativeFunction dctor = null;
-            if(!classType.IsUnManaged() 
-                || IsRegistered(classType) //未注册Wrap，用反射版api， UnmanagedType同Object
-                )
-            {
-                dctor = Destructor;
-            }
-
-            LuaRef meta = CreateClass(module.Meta, name, SharpObject.TypeID(classType), SharpObject.TypeID(superType), dctor);           
-            bindClass = new SharpClass(meta);
-            bindClass.parent = module;
-            bindClass.Name = name;
-            bindClass.SetClassType(classType);
-            registeredClass.Add(classType, bindClass);
-            return bindClass;
-        }
-
-        protected void SetClassType(Type type)
+        public void SetClassType(Type type)
         {
             classType = type;
             classInfo = Luna.GetClassWrapper(classType);
-        }
-        
-        public SharpClass GetClass(Type classType, Type superClass = null)
-        {
-            if (classType == superClass)
-            {
-                return SharpClass.Extend(classType, null, this);
-            }
-
-            var parentType = classType.BaseType;
- 
-
-            while (superClass == null)
-            {           
-                if(parentType == null)
-                {
-                    break;
-                }
-
-                if (SharpClass.IsRegistered(parentType))
-                {
-                    superClass = parentType;
-                    break;
-                }
-
-                if (parentType == typeof(object))
-                {
-                    break;
-                }
-
-                parentType = parentType.BaseType;
-            }
-
-            return SharpClass.Extend(classType, superClass, this);
         }
         
         public void SetGetter(string name, LuaRef getter)
@@ -263,7 +171,7 @@ namespace SharpLuna
                     RegMethod("__call", memberInfo.ToArray());
             }
 
-            var props = classType.GetProperties();
+            var props = classType.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
             foreach (var p in props)
             {
                 if (!p.ShouldExport())
@@ -406,7 +314,7 @@ namespace SharpLuna
 
                 return this;
             }
-            /*
+            
             if (propertyInfo.CanRead)
             {
                 MethodInfo methodInfo = propertyInfo.GetGetMethod(false);
@@ -436,7 +344,7 @@ namespace SharpLuna
             {
                 SetReadOnly(propertyInfo.Name);
             }
-            */
+            
             //todo: Reflection
 
             return this;

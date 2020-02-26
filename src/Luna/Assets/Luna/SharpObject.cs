@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using UnityEngine;
 
 namespace SharpLuna
 {
@@ -74,7 +75,7 @@ namespace SharpLuna
 
             if(!lua_istable(L, -1))
             {
-                Luna.LogWarning("class not registered : ", obj.GetType(), obj);
+                Debug.LogWarning($"class not registered : {obj.GetType() }, obj: {obj}");
                 lua_pop(L, 1);
                 return;
             }
@@ -96,7 +97,7 @@ namespace SharpLuna
 
             if (!lua_istable(L, -1))
             {
-                Luna.LogWarning("class not registered : ", obj.GetType(), obj);
+                Debug.LogWarning($"class not registered : {obj.GetType() }, obj: {obj}");
                 lua_pop(L, 1);
                 return;
             }
@@ -237,6 +238,24 @@ namespace SharpLuna
             }
 #endif
             return *((long*)ptr);
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void FreeStruct(lua_State L, int index)
+        {
+            var handle = GetHandler(L, index);
+#if LUA_WEAKTABLE
+            var obj = freeList[(int)handle];
+            obj2id.Remove(obj);
+            freeList.Free((int)handle);
+#else
+            GCHandle gCHandle = GCHandle.FromIntPtr((IntPtr)handle);
+            if (gCHandle.IsAllocated)
+            {
+                gCHandle.Free();
+            }
+#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -1,10 +1,13 @@
 
+var test = Tests.TestClass()
+print(test)
+
 var s = String.Concat("123", "456")
 print(s)
 
 print "static : "
 
-print(tostring(TestEnum.A))
+print(tostring(Tests.TestEnum.A))
 
 print(TestClass.constVar)
 print(TestClass.staticVar)
@@ -22,8 +25,6 @@ TestClass.StaticFunc2("str param", 12345)
 
 print "instance : "
 
-var test = TestClass()
-print(test)
 
 print(test.variable)
 

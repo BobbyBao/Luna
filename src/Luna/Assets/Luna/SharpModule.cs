@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace SharpLuna
@@ -10,17 +11,20 @@ namespace SharpLuna
 
     public class SharpModule : SharpClass
     {
-        static Dictionary<string, SharpModule> registeredModule;
         protected Luna luna;
 
+        static Dictionary<string, SharpModule> registeredModule;
+        static Dictionary<Type, SharpClass> registeredClass = new Dictionary<Type, SharpClass>();
+        static Dictionary<Type, string> classAlias = new Dictionary<Type, string>();
+
         //GlobalModule
-        public SharpModule(Luna luna) : base(LuaRef.Globals(luna.State))
+        public SharpModule(Luna luna) : base(null, LuaRef.Globals(luna.State))
         {
             this.luna = luna;
             Name = "_G";
         }
         
-        public SharpModule(SharpClass parent, LuaRef parentMeta, string name) : base(parentMeta)
+        public SharpModule(SharpModule parent, LuaRef parentMeta, string name) : base(parent)
         {
             LuaRef luaref = parentMeta.RawGet(name) as LuaRef;
             if (luaref)
@@ -78,6 +82,112 @@ namespace SharpLuna
             cls.OnRegClass();
             return this;
         }
+
+
+        public SharpClass GetClass(Type classType, Type superClass = null)
+        {
+            if (registeredClass.TryGetValue(classType, out var bindClass))
+            {
+                return bindClass;
+            }
+
+            if (classType == superClass)
+            {
+                return CreateClass(classType, null, this);
+            }
+
+            var parentType = classType.BaseType;
+            while (superClass == null)
+            {
+                if (parentType == null)
+                {
+                    break;
+                }
+
+                if (SharpModule.IsRegistered(parentType))
+                {
+                    superClass = parentType;
+                    break;
+                }
+
+                if (parentType == typeof(object))
+                {
+                    break;
+                }
+
+                parentType = parentType.BaseType;
+            }
+
+            return CreateClass(classType, superClass, this);
+        }
+
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+        static int Destructor(lua_State L)
+        {
+            SharpObject.Free(L, 1);
+            return 0;
+        }
+
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+        static int DestructorStruct(lua_State L)
+        {
+            SharpObject.FreeStruct(L, 1);
+            return 0;
+        }
+
+        private SharpClass CreateClass(Type classType, Type superType, SharpClass module)
+        {
+            string name = GetTableName(classType);
+
+            LuaNativeFunction dctor = null;
+            if (classType.IsValueType)
+            {
+                if (!classType.IsUnManaged() || !Luna.IsWrapered(classType)) //未注册Wrap，用反射版api， UnmanagedType同Object
+                {
+                    dctor = DestructorStruct;
+                }
+
+            }
+            else
+            {
+                dctor = Destructor;
+            }
+
+            LuaRef meta = CreateClass(module.Meta, name, SharpObject.TypeID(classType), SharpObject.TypeID(superType), dctor);
+            var bindClass = new SharpClass(module, meta);
+            bindClass.Name = name;
+            bindClass.SetClassType(classType);
+            registeredClass.Add(classType, bindClass);
+            return bindClass;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsRegistered<T>()
+        {
+            return IsRegistered(typeof(T));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsRegistered(Type t)
+        {
+            return registeredClass.ContainsKey(t);
+        }
+
+        public static void SetAlias(Type t, string alias)
+        {
+            classAlias.Add(t, alias);
+        }
+
+        public static string GetTableName(Type t)
+        {
+            if (classAlias.TryGetValue(t, out string alias))
+            {
+                return alias;
+            }
+
+            return t.Name;
+        }
+
     };
 
 
