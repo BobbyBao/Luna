@@ -52,44 +52,23 @@ namespace SharpLuna
                 {
                     var m = method.methodInfo[i];
                     var paramInfo = method.parameters[i];
+                    int paramCount = n - 1;
+#if !LUNA_SCRIPT              
                     if (m.IsStatic)
                     {
-#if LUNA_SCRIPT
-                        if (paramInfo.Length == n - 1)
-                        {
-                            methodInfo = m;
-                            parameterInfo = paramInfo;
-                            args = method.args[i];
-                            callDel = method.luaFunc[i];
-                            del = method.del[i];
-                            break;
-                        }
-#else                        
-                        if (paramInfo.Length == n)
-                        {
-                            methodInfo = m;
-                            parameterInfo = paramInfo;
-                            args = method.args[i];
-                            callDel = method.luaFunc[i];
-                            del = method.del[i];
-                            break;
-                        }
+                        paramCount = n;
+                    }
 #endif
-                    }
-                    else
+                    if (paramInfo.Length == paramCount)
                     {
-                        if (paramInfo.Length == n - 1)
-                        {
-                            methodInfo = m;
-                            parameterInfo = paramInfo;
-                            args = method.args[i];
-                            callDel = method.luaFunc[i];
-                            del = method.del[i];
-                            break;
-                        }
-
+                        //todo:CheckType
+                        methodInfo = m;
+                        parameterInfo = paramInfo;
+                        args = method.args[i];
+                        callDel = method.luaFunc[i];
+                        del = method.del[i];
+                        break;
                     }
-
                 }
 
                 if (callDel != null)
@@ -253,7 +232,7 @@ namespace SharpLuna
             try
             {
                 PropertyInfo propertyInfo = ToLightObject<PropertyInfo>(L, lua_upvalueindex(1), false);
-                object obj = GetObject(L, 1, propertyInfo.PropertyType);
+                object obj = GetObject(L, 1, propertyInfo.ReflectedType);
                 object v = propertyInfo.GetValue(obj);
                 Push(L, v);
                 return 1;
@@ -270,7 +249,7 @@ namespace SharpLuna
             try
             {
                 PropertyInfo propertyInfo = ToLightObject<PropertyInfo>(L, lua_upvalueindex(1), false);
-                object obj = GetObject(L, 1, propertyInfo.PropertyType);
+                object obj = GetObject(L, 1, propertyInfo.ReflectedType);
                 object v = GetObject(L, 2, propertyInfo.PropertyType);
                 propertyInfo.SetValue(obj, v);
                 return 0;

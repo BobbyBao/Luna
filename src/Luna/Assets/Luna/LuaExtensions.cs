@@ -148,6 +148,21 @@ namespace SharpLuna
             }
             else
             {
+                if (t.IsEnum)
+                {
+                    lua_pushinteger(L, (int)(object)obj);
+                    return;
+                }
+                else if (t.IsValueType)
+                {
+                    if(t.IsUnManaged())
+                    {
+                        SharpObject.PushUnmanagedObject(L, obj);
+                        return;
+                    }
+
+                }
+                
                 SharpObject.PushToStack(L, obj);
             }
 
@@ -256,7 +271,7 @@ namespace SharpLuna
         {
             SharpObject.PushToStack(L, v);
         }
-                
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Push<T>(lua_State L, ref T v) where T : struct
         {
@@ -331,20 +346,20 @@ namespace SharpLuna
                     break;
                 default:
                     Type t = v.GetType();
-                    if(t.IsEnum)
+                    if (t.IsEnum)
                     {
                         lua_pushinteger(L, (int)(object)v);
                     }
-                    else if(t.IsValueType)
+                    else if (t.IsValueType)
                     {
-                        if(t.IsUnManaged())
+                        if (t.IsUnManaged())
                         {
                             SharpObject.PushUnmanagedObject(L, v);
                             return;
                         }
-                        
+
                     }
-                      
+
                     SharpObject.PushToStack(L, v);
                     break;
             }
@@ -358,7 +373,7 @@ namespace SharpLuna
             switch (type)
             {
                 case LuaType.Number:
-                    {                        
+                    {
                         if (lua_isinteger(L, index))
                             return lua_tointeger(L, index);
 
@@ -370,12 +385,12 @@ namespace SharpLuna
                     return (bool)(lua_toboolean(L, index) != 0);
                 case LuaType.Table:
                     {
-                        Get(L, index, out LuaRef luaref);                        
+                        Get(L, index, out LuaRef luaref);
                         return luaref;
                     }
                 case LuaType.Function:
                     {
-                        Get(L, index, out LuaRef luaref);          
+                        Get(L, index, out LuaRef luaref);
                         return luaref;
                     }
                 case LuaType.LightUserData:
@@ -465,14 +480,14 @@ namespace SharpLuna
                 return GetObject(L, index);
             }
             else
-            { 
-                if(objtype.IsEnum)
+            {
+                if (objtype.IsEnum)
                 {
                     return (int)lua_tonumber(L, index);
                 }
-                if(objtype.IsValueType)
+                if (objtype.IsValueType)
                 {
-                    if(objtype.IsUnManaged())
+                    if (objtype.IsUnManaged())
                     {
                         return SharpObject.GetUnmanaged(L, index, objtype);
                     }
@@ -486,15 +501,15 @@ namespace SharpLuna
         public static bool CheckType(lua_State L, int index, Type t)
         {
             LuaType luaType = lua_type(L, index);
-            
+
             if (t == typeof(bool))
                 return luaType == LuaType.Boolean;
             else if (t == typeof(string))
                 return luaType == LuaType.String;
             else if (t.IsPrimitive)
-                return luaType == LuaType.Number;              
+                return luaType == LuaType.Number;
             else if (t == typeof(LuaNativeFunction))
-                return luaType == LuaType.Function;           
+                return luaType == LuaType.Function;
             else if (t == typeof(IntPtr))
                 return luaType == LuaType.Number;
             else if (t == typeof(UIntPtr))
@@ -550,7 +565,7 @@ namespace SharpLuna
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool CheckType<T1, T2, T3, T4, T5>(lua_State L, int index)
         {
-            return CheckType(L, index, typeof(T1)) && CheckType(L, index + 1, typeof(T2)) && CheckType(L, index + 2, typeof(T3)) && CheckType(L, index + 3, typeof(T4)) 
+            return CheckType(L, index, typeof(T1)) && CheckType(L, index + 1, typeof(T2)) && CheckType(L, index + 2, typeof(T3)) && CheckType(L, index + 3, typeof(T4))
                 && CheckType(L, index + 4, typeof(T5));
         }
 
@@ -608,7 +623,7 @@ namespace SharpLuna
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Get(lua_State L, int index, out int v)
         {
-            v = (int)luaL_checkinteger(L, index);
+            v = (int)luaL_checknumber(L, index);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -679,7 +694,7 @@ namespace SharpLuna
             else
                 v = new LuaRef(L, index);
         }
-   
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Get(lua_State L, int index, out object v)
         {
@@ -689,7 +704,7 @@ namespace SharpLuna
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Get<T>(lua_State L, int index, out T v)
         {
-            v = SharpObject.Get<T>(L, index);             
+            v = SharpObject.Get<T>(L, index);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -765,7 +780,8 @@ namespace SharpLuna
                 }
                 else if (t.IsEnum)
                 {
-                    return Converter.To<T>((int)luaL_checkinteger(L, index));
+                    if(lua_type(L, index) == LuaType.Number)
+                        return Converter.To<T>((int)luaL_checkinteger(L, index));
                 }
                 else if (t.IsValueType)
                 {
@@ -817,6 +833,20 @@ namespace SharpLuna
                     return (T)(object)luaL_optstring(L, index, strval);
                 case LuaNativeFunction fn:
                     return lua_isnoneornil(L, index) ? def : (T)(object)lua_tocfunction(L, index).ToLuaFunction();
+                case LuaByteBuffer v:
+                    {
+                        if (lua_isnoneornil(L, index))
+                            return def;
+                        Get(L, index, out LuaByteBuffer buffer);
+                        return (T)(object)buffer;
+                    }
+                case byte[] v:
+                    {
+                        if (lua_isnoneornil(L, index))
+                            return def;
+                        Get(L, index, out byte[] buffer);
+                        return (T)(object)buffer;
+                    }
                 case LuaRef luaRef:
                     return lua_isnone(L, index) ? def : Converter.To<T>(new LuaRef(L, index));
                 default:
@@ -828,7 +858,7 @@ namespace SharpLuna
 
                         if (lua_isnoneornil(L, index)) return def;
 
-                        if(typeof(T).IsUnManaged())
+                        if (typeof(T).IsUnManaged())
                         {
                             return SharpObject.GetUnmanaged<T>(L, index);
                         }
@@ -945,7 +975,7 @@ namespace SharpLuna
             }
         }
 
-#region LUA_DEBUG
+        #region LUA_DEBUG
         public static bool GetInfo(lua_State L, string what, IntPtr ar)
         {
             return lua_getinfo(L, what, ar) != 0;
@@ -1035,6 +1065,6 @@ namespace SharpLuna
             return ret;
         }
 
-#endregion
+        #endregion
     }
 }

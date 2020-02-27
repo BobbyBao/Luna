@@ -110,58 +110,35 @@ namespace SharpLuna
             foreach (var field in fields)
             {
                 if (!field.IsPublic)
-                {
                     continue;
-                }
-
+   
                 if (field.IsLiteral)
-                {
                     RegConstant(field);                   
-                }
                 else
-                {
                     RegField(field);
-                }
-
             }
 
-            bool wrapCtor = false;
-
+            if (classInfo.TryGetValue("ctor", out var methodConfig))
             {
-                if (classInfo.TryGetValue("ctor", out var methodConfig))
-                {
-                    if (methodConfig.func != null)
-                    {
-                        meta.RawSet("__call", LuaRef.CreateFunction(State, methodConfig.func));
-                        wrapCtor = true;
-                    }
-
-                }
-            }     
-
-            if (!wrapCtor)
+                meta.RawSet("__call", LuaRef.CreateFunction(State, methodConfig.func));                
+            }
+            else
             {
                 var ctors = classType.GetConstructors();
                 List<MethodBase> memberInfo = new List<MethodBase>();
                 foreach (var constructorInfo in ctors)
                 {
                     if (!constructorInfo.IsPublic)
-                    {
                         continue;
-                    }
 
                     if (!constructorInfo.ShouldExport())
-                    {
                         continue;
-                    }
 
                     var paramInfos = constructorInfo.GetParameters();
                     foreach (var info in paramInfos)
                     {
                         if (!info.ParameterType.ShouldExport())
-                        {
                             continue;
-                        }
                     }
 
                     memberInfo.Add(constructorInfo);
@@ -175,18 +152,12 @@ namespace SharpLuna
             foreach (var p in props)
             {
                 if (!p.ShouldExport())
-                {
                     continue;
-                }
 
                 if (p.Name == "Item")
-                {
                     RegIndexer(p);
-                }
                 else
-                {
                     RegProperty(p);
-                }
             }
 
             var methods = classType.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly);
@@ -198,7 +169,7 @@ namespace SharpLuna
                     continue;
                 }
 
-                if (classInfo.TryGetValue(m.Name, out var methodConfig))
+                if (classInfo.TryGetValue(m.Name, out methodConfig))
                 {
                     if (methodConfig.func != null)
                     {
@@ -287,7 +258,6 @@ namespace SharpLuna
             }
           
             //Luna.LogWarning("注册反射版的field : " + fieldInfo.Name);
-
             if (fieldInfo.IsStatic)
             {
                 var getter = LuaRef.CreateFunction(State, Field.StaticGetter, fieldInfo);
@@ -334,11 +304,24 @@ namespace SharpLuna
                 MethodInfo methodInfo = propertyInfo.GetGetMethod(false);
                 if (methodInfo != null)
                 {
-                    var luaFun = RegMethod(methodInfo, true); 
+#if true//IL2CPP
+                    if (methodInfo.IsStatic)
+                    {
+                        var getter = LuaRef.CreateFunction(State, Property.StaticGetter, propertyInfo);
+                        SetGetter(propertyInfo.Name, getter);
+                    }
+                    else
+                    {
+                        var getter = LuaRef.CreateFunction(State, Property.Getter, propertyInfo);
+                        SetGetter(propertyInfo.Name, getter);
+                    }
+#else
+                    var luaFun = RegMethod(methodInfo, true);
                     if (luaFun)
                     {
                         SetGetter(propertyInfo.Name, luaFun);
                     }
+#endif
                 }
             }
 
@@ -347,19 +330,30 @@ namespace SharpLuna
                 MethodInfo methodInfo = propertyInfo.GetSetMethod(false);
                 if (methodInfo != null)
                 {
+#if true//IL2CPP
+                    if (methodInfo.IsStatic)
+                    {
+                        var setter = LuaRef.CreateFunction(State, Property.StaticSetter, propertyInfo);
+                        SetSetter(propertyInfo.Name, setter);
+                    }
+                    else
+                    {
+                        var setter = LuaRef.CreateFunction(State, Property.Setter, propertyInfo);
+                        SetSetter(propertyInfo.Name, setter);
+                    }
+#else
                     var luaFun = RegMethod(methodInfo, true);
                     if (luaFun)
                     {
                         SetSetter(propertyInfo.Name, luaFun);
                     }
+#endif
                 }
             }
             else
             {
                 SetReadOnly(propertyInfo.Name);
             }
-            
-            //todo: Reflection
 
             return this;
         }
@@ -427,13 +421,10 @@ namespace SharpLuna
             return this;
         }
 
-
         public SharpClass RegMethod(string name, MethodBase[] methodInfo)
         {             
             MethodWrap method = new MethodWrap(methodInfo);
-
 #if !IL2CPP
-
             for(int i = 0; i < methodInfo.Length; i++)
             {
                 var mi = methodInfo[i] as MethodInfo;

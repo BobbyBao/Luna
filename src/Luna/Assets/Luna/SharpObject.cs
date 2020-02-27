@@ -150,6 +150,12 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void PushUnmanagedObject(lua_State L, in object obj) //where T : unmanaged
+        {
+            AllocUnmanagedObject(L, obj);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void PushUnmanagedObject<T>(lua_State L, in T obj) //where T : unmanaged
         {
             AllocUnmanagedObject(L, obj);
