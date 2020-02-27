@@ -12,12 +12,12 @@ namespace SharpLuna
 
     public unsafe static partial class Lua
     {
-        static ConcurrentDictionary<IntPtr, FastList<IDisposable>> luaStates = new ConcurrentDictionary<IntPtr, FastList<IDisposable>>();
+        static ConcurrentDictionary<IntPtr, List<IDisposable>> luaStates = new ConcurrentDictionary<IntPtr, List<IDisposable>>();
 
         public static lua_State NewState()
         {
             var L = luaL_newstate();
-            luaStates.TryAdd(L, new FastList<IDisposable>());
+            luaStates.TryAdd(L, new List<IDisposable>());
             return L;
         }
 
@@ -252,19 +252,6 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Push(lua_State L, LuaRef v)
-        {
-            if (v.IsValid)
-            {
-                v.PushToStack();
-            }
-            else
-            {
-                lua_pushnil(L);
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Push<T>(lua_State L, T v)
         {
             SharpObject.PushToStack(L, v);
@@ -335,6 +322,12 @@ namespace SharpLuna
                     {
                         lua_pushnil(L);
                     }
+                    break;
+                case byte[] bytes:
+                    Push(L, bytes);
+                    break;
+                case LuaByteBuffer bytes:
+                    Push(L, bytes);
                     break;
                 default:
                     Type t = v.GetType();
@@ -449,6 +442,16 @@ namespace SharpLuna
             {
                 return lua_tocfunction(L, index).ToLuaFunction();
             }
+            else if (objtype == typeof(byte[]))
+            {
+                Get(L, index, out byte[] v);
+                return v;
+            }
+            else if (objtype == typeof(LuaByteBuffer))
+            {
+                Get(L, index, out LuaByteBuffer v);
+                return v;
+            }
             else if (objtype == typeof(LuaRef))
             {
                 var obj = Converter.Convert(objtype, L, index);
@@ -497,9 +500,9 @@ namespace SharpLuna
             else if (t == typeof(UIntPtr))
                 return luaType == LuaType.Number;
             else if (t == typeof(LuaRef))
-            {
                 return luaType == LuaType.Table || luaType == LuaType.Function;
-            }
+            else if (t == typeof(LuaByteBuffer))
+                return luaType == LuaType.String;
             else
             {
                 return luaType == LuaType.UserData;
@@ -699,7 +702,7 @@ namespace SharpLuna
         public static T Get<T>(lua_State L, int index)
         {
             Type t = typeof(T);
-    
+
             if (t.IsPrimitive)
             {
                 if (t == typeof(bool))
@@ -737,6 +740,16 @@ namespace SharpLuna
                 return (T)(object)lua_checkstring(L, index);
             else if (t == typeof(LuaNativeFunction))
                 return (T)(object)lua_tocfunction(L, index).ToLuaFunction();
+            else if (t == typeof(LuaByteBuffer))
+            {
+                Get(L, index, out LuaByteBuffer buffer);
+                return (T)(object)buffer;
+            }
+            else if (t == typeof(byte[]))
+            {
+                Get(L, index, out byte[] buffer);
+                return (T)(object)buffer;
+            }
             else if (t == typeof(LuaRef))
             {
                 if (lua_isnone(L, index))
@@ -750,13 +763,13 @@ namespace SharpLuna
                 {
                     return (T)GetObject(L, index);
                 }
-                else if(t.IsEnum)
+                else if (t.IsEnum)
                 {
                     return Converter.To<T>((int)luaL_checkinteger(L, index));
                 }
                 else if (t.IsValueType)
                 {
-                    if(t.IsUnManaged())
+                    if (t.IsUnManaged())
                     {
                         return SharpObject.GetUnmanaged<T>(L, index);
                     }

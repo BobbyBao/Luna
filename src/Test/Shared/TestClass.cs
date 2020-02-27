@@ -69,10 +69,11 @@ namespace Tests
         public string name { get; set; } = "Default Name";
 
         public TestClass Child { get; set; }
-
         public event Action testEvent;
 
         Dictionary<int, string> testString = new Dictionary<int, string>();
+
+        int[] intArray = new int[100];
 
         public TestClass()
         {
@@ -95,7 +96,10 @@ namespace Tests
                 testString[index] = value;
             }
         }
-        
+
+        public int[] IntArray => intArray;
+
+
         public void Method()
         {
             Console.WriteLine("Method");

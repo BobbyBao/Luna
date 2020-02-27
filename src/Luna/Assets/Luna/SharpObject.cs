@@ -15,6 +15,13 @@ namespace SharpLuna
 
     public class SharpObject
     {
+        public enum UserDataType : int
+        {
+            Object = 0,
+            Unmanaged = 1,
+            StructStart = 2
+        }
+
         class ReferenceEqualsComparer : IEqualityComparer<object>
         {
             public new bool Equals(object o1, object o2)
@@ -67,8 +74,10 @@ namespace SharpLuna
             IntPtr mem = lua_newuserdata(L, (UIntPtr)sizeof(long));
 
 #if LUA_WEAKTABLE
-            long id = freeList.Alloc(obj);
-            *((long*)mem) = id;
+            int id = freeList.Alloc(obj);
+            *((int*)mem) = 0;
+            *(((int*)mem) + 1) = id;
+
             obj2id[obj] = (int)id;
 
             CacheUserData(L, id, weakTableRef);
@@ -87,7 +96,7 @@ namespace SharpLuna
 
             if(!lua_istable(L, -1))
             {
-                Debug.LogWarning($"class not registered : {obj.GetType() }, obj: {obj}");
+                Debug.LogWarning($"class not registered : {obj.GetType() }, id: {classId} obj: {obj}");
                 lua_pop(L, 1);
                 return;
             }
@@ -100,8 +109,8 @@ namespace SharpLuna
         public static unsafe void AllocUnmanagedObject<T>(lua_State L, T obj)// where T : unmanaged
         {
             int classId = TypeID(obj);
-            IntPtr mem = lua_newuserdata(L, (UIntPtr)Unsafe.SizeOf<T>());
-            Unsafe.Write((void*)mem, obj);
+            IntPtr mem = lua_newuserdata(L, (UIntPtr)Unsafe.SizeOf<T>() + 4);
+            Unsafe.Write((void*)(mem + 4), obj);
 
             lua_rawgeti(L, LUA_REGISTRYINDEX, classId);
 
@@ -122,8 +131,8 @@ namespace SharpLuna
         public static unsafe void AllocUnmanagedObject(lua_State L, object obj)
         {
             int classId = TypeID(obj);
-            IntPtr mem = lua_newuserdata(L, (UIntPtr)Marshal.SizeOf(obj));
-            Marshal.StructureToPtr(obj, mem, false);
+            IntPtr mem = lua_newuserdata(L, (UIntPtr)Marshal.SizeOf(obj) + 4);
+            Marshal.StructureToPtr(obj, mem + 4, false);
 
             lua_rawgeti(L, LUA_REGISTRYINDEX, classId);
 
@@ -205,14 +214,14 @@ namespace SharpLuna
         public unsafe static ref T GetUnmanaged<T>(lua_State L, int index)
         {
             var ptr = lua_touserdata(L, index);
-            return ref Unsafe.AsRef<T>((void*)ptr);
+            return ref Unsafe.AsRef<T>((void*)(ptr + 4));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe static object GetUnmanaged(lua_State L, int index, Type type)
         {
             var ptr = lua_touserdata(L, index);
-            return Marshal.PtrToStructure(ptr, type);
+            return Marshal.PtrToStructure(ptr + 4, type);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -232,6 +241,17 @@ namespace SharpLuna
 #endif
             }
 
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static object Get(lua_State L, int index)
+        {
+            var handle = GetHandler(L, index);
+#if LUA_WEAKTABLE
+            return freeList[(int)handle];
+#else
+            return GCHandle.FromIntPtr((IntPtr)handle).Target;
+#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -265,7 +285,7 @@ namespace SharpLuna
             {
                 return (T)Converter.Convert(typeof(T), L, index);
             }
-            
+
             var handle = GetHandler(L, index);
 #if LUA_WEAKTABLE
             return (T)freeList[(int)handle];
@@ -275,7 +295,7 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static unsafe long GetHandler(lua_State L, int index)
+        static unsafe int GetHandler(lua_State L, int index)
         {
             var ptr = lua_touserdata(L, index);
             //var ptr = lua_topointer(L, index);
@@ -285,7 +305,8 @@ namespace SharpLuna
                 return 0;
             }
 #endif
-            return *((long*)ptr);
+            return *(((int*)ptr) + 1);
+            //return *((int*)ptr);
         }
 
 
@@ -310,6 +331,8 @@ namespace SharpLuna
         public static void Free(lua_State L, int index)
         {
             var handle = GetHandler(L, index);
+            //Debug.Log("gc : " + handle);
+
 #if LUA_WEAKTABLE
             var obj = freeList[(int)handle];
             obj2id.Remove(obj);
@@ -325,7 +348,7 @@ namespace SharpLuna
 
 #if LUA_WEAKTABLE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int TryGetUserData(lua_State L, long key, int cache_ref)
+        static int TryGetUserData(lua_State L, int key, int cache_ref)
         {
 #if C_API
             return luna_try_getuserdata(L, key, cache_ref);
@@ -343,7 +366,7 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void CacheUserData(lua_State L, long key, int cache_ref)
+        static void CacheUserData(lua_State L, int key, int cache_ref)
         {
 #if C_API
             luna_cacheuserdata(L, key, cache_ref);

@@ -185,6 +185,11 @@ namespace SharpLuna
                 return alias;
             }
 
+            if (t.IsArray)
+            {
+                return t.Name.Replace("[]", "Array");
+            }
+
             return t.Name;
         }
 

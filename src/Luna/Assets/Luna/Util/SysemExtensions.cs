@@ -6,7 +6,24 @@ using System.Text;
 namespace SharpLuna
 {
     public static class SystemExtensions
-    {        
+    {
+        public static void FastRemove<T>(this List<T> list, T item)
+        {
+            int index = list.IndexOf(item);
+            FastRemove(list, index);
+        }
+
+        public static void FastRemove<T>(this List<T> list, int index)
+        {
+            int size = list.Count;
+
+            if (index < 0 || index >= size) 
+                throw new ArgumentOutOfRangeException(nameof(index));
+
+            list[index] = list[size - 1];
+            list.RemoveAt(size - 1);
+        }
+
         public static StringBuilder Indent(this StringBuilder sb, int count)
         {
             for (int i = 0; i < count; i++)

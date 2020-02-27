@@ -36,6 +36,12 @@ namespace SharpLuna
 
         public static object Convert(Type type, IntPtr L, int index)
         {
+            if(type.IsEnum)
+            {
+                Get(L, index, out int v);
+                return (object)v;
+            }
+
             if (!delegateFactory.TryGetValue(type, out var fac))
             {
                 return null;

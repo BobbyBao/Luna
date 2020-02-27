@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SharpLuna
 {
-    public class FreeList<T> : FastList<T>
+    public class FreeList<T> : List<T>
     {
         Stack<int> freeList = new Stack<int>();
 
@@ -14,13 +14,12 @@ namespace SharpLuna
             Add(default);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int Alloc(T obj)
         {
             if (freeList.Count > 0)
             {
                 int id = freeList.Pop();
-                items[id] = obj;
+                this[id] = obj;
                 return id;
             }
 
@@ -29,10 +28,9 @@ namespace SharpLuna
             return count;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Free(int id)
         {
-            items[id] = default;
+            this[id] = default;
             freeList.Push(id);
         }
     }

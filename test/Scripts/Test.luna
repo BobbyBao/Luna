@@ -5,6 +5,21 @@ let TestClass = Tests.TestClass
 var test = TestClass()
 print(test)
 
+var array = test.IntArray
+
+array[0] = 123
+print("array : "..array[0])
+
+var aaa = Int32Array(10)
+print("aaa : ", aaa.Length)
+for i = 0,9 {
+	aaa[i] = i
+}
+for i = 0,9 {
+	print(aaa[i])
+}
+
+
 var s = String.Concat("123", "456")
 print(s)
 

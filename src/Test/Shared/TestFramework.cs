@@ -118,11 +118,14 @@ namespace Tests
 
         void AutoBind()
         {
-            Type[] types =
-                {typeof(TestEnum),
-            typeof(TestStruct),
-            typeof(TestClass) };
-            luna.RegisterModel("Tests", types);
+            Type[] testTypes =
+            {
+                typeof(TestEnum),
+                typeof(TestStruct),
+                typeof(TestClass) 
+            };
+
+            luna.RegisterModel("Tests", testTypes);
         }
 
         void TestTable()

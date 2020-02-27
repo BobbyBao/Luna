@@ -42,10 +42,11 @@ namespace SharpLuna
 
         public static ModuleInfo systemModule = new ModuleInfo
         {
+            /*
             new ClassInfo(typeof(Type))
             {
                 "IsSZArray"
-            },
+            },*/
 
             typeof(object),
             typeof(Enum),
@@ -57,6 +58,11 @@ namespace SharpLuna
 
             typeof(Delegate),
             typeof(Array),
+
+            typeof(byte[]),
+            typeof(int[]),
+            typeof(float[]),
+            typeof(object[]),
         };
         
         public Luna(params ModuleInfo[] modules)
@@ -275,19 +281,6 @@ namespace SharpLuna
             lua_pushvalue(L, -1);
             lua_pushliteral(L, "type");
             lua_rawget(L, -2);
-            /*
-            if (lua_iscfunction(L, -1))
-            {
-                lua_pushvalue(L, -2);
-                lua_call(L, 1, 1);                
-            }
-            else
-            {
-                Debug.LogError("type not register to lua");
-                lua_pushnil(L);
-            
-            }*/
-
             return 1;
         }
 
@@ -507,7 +500,7 @@ namespace SharpLuna
 
         public SharpClass RegisterModel(string name, IEnumerable<Type> types)
         {
-            var model = _binder.GetModule(name);
+            var model = string.IsNullOrEmpty(name) ? _binder : _binder.GetModule(name);
             foreach (Type t in types)
             {
                 model.RegClass(t);

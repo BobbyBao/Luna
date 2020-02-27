@@ -211,6 +211,20 @@ namespace SharpLuna
                         {
                             meta.RawSet(m.Name, fn);
                         }
+
+                        if(classType.IsArray)
+                        {
+                            if(m.Name == "Get")
+                            {
+                                SetMemberFunction(___get_indexed, fn);
+                            }
+
+                            if (m.Name == "Set")
+                            {
+                                SetMemberFunction(___set_indexed, fn);
+                            }
+                        }
+
                     }
 
                     registered.Add(m.Name);
@@ -443,6 +457,19 @@ namespace SharpLuna
             else
             {
                 meta.RawSet(name, luaFun);
+            }
+
+            if (classType.IsArray)
+            {
+                if (name == "Get")
+                {
+                    SetMemberFunction(___get_indexed, luaFun);
+                }
+
+                if (name == "Set")
+                {
+                    SetMemberFunction(___set_indexed, luaFun);
+                }
             }
 
             return this;

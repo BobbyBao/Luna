@@ -36,10 +36,30 @@ namespace SharpLuna
 
         static Dictionary<Type, string> allDelegates = new Dictionary<Type, string>();
 
+        struct MemberGenInfo
+        {
+            public MemberTypes memberType;
+            public string name;
+            public string alias;
+            public bool hasGetter;
+            public bool hasSetter;
+
+            public MemberGenInfo(MemberTypes t, string n, bool hasGetter = false, bool hasSetter = false, string alias = "")
+            {
+                this.memberType = t;
+                this.name = n;
+                this.alias = alias;
+                this.hasGetter = hasGetter;
+                this.hasSetter = hasSetter;
+            }
+
+            public string Name => string.IsNullOrEmpty(alias) ? name : alias;
+        }
+
         public static void GenerateClassWrap(string module, Type type, bool genSuper = false, List<string> excludeMembers = null)
         {
             string code = GenerateClass(module, type, genSuper, excludeMembers);
-            string fileName = type.Name + "Wrap.cs";
+            string fileName = type.Name.Replace("[]", "Array") + "Wrap.cs";
             if(!string.IsNullOrEmpty(module))
             {
                 fileName = module + "_" + fileName;
@@ -68,7 +88,7 @@ namespace SharpLuna
                 sb.Append(module).Append("_");
             }
 
-            sb.Append(type.Name).Append("Wrap\n{\n");
+            sb.Append(type.Name.Replace("[]", "Array")).Append("Wrap\n{\n");
 
             sb.Indent(1).Append($"#if LUNA_SCRIPT\n");
             sb.Indent(1).Append($"const int startStack = 2;\n");
@@ -76,8 +96,8 @@ namespace SharpLuna
             sb.Indent(1).Append($"const int startStack = 1;\n");
             sb.Indent(1).Append($"#endif\n");
 
-            List<(MemberTypes memberType, string name, bool hasGetter, bool hasSetter)> members =
-                new List<(MemberTypes memberType, string name, bool hasGetter, bool hasSetter)>();
+            List<MemberGenInfo> members =
+                new List<MemberGenInfo>();
 
             if (genSuper)
             {
@@ -101,58 +121,55 @@ namespace SharpLuna
 
             sb.Append($"\tpublic static void Register(ClassWraper classWraper)\n\t{{\n");
 
-            foreach (var (memberType, name, hasGetter, hasSetter) in members)
+            foreach (var memberGenInfo in members)
             {
-                if (memberType == MemberTypes.Constructor)
+                if (memberGenInfo.memberType == MemberTypes.Constructor)
                 {
                     sb.Append($"\t\tclassWraper.RegConstructor(Constructor);\n");
                 }
-                else if (memberType == MemberTypes.Field)
+                else if (memberGenInfo.memberType == MemberTypes.Field)
                 {
-                    if (hasGetter || hasSetter)
+                    if (memberGenInfo.hasGetter || memberGenInfo.hasSetter)
                     {
-                        sb.Append($"\t\tclassWraper.RegField(\"{name}\"");
+                        sb.Append($"\t\tclassWraper.RegField(\"{memberGenInfo.name}\"");
 
-                        if (hasGetter)
+                        if (memberGenInfo.hasGetter)
                         {
-                            sb.Append($", Get_{name}");
+                            sb.Append($", Get_{memberGenInfo.name}");
                         }
 
-                        if (hasSetter)
+                        if (memberGenInfo.hasSetter)
                         {
-                            sb.Append($", Set_{name}");
+                            sb.Append($", Set_{memberGenInfo.name}");
                         }
 
                         sb.Append($");\n");
                     }
                 }
-                else if (memberType == MemberTypes.Property)
+                else if (memberGenInfo.memberType == MemberTypes.Property)
                 {
-                    if (hasGetter || hasSetter)
+                    if (memberGenInfo.hasGetter || memberGenInfo.hasSetter)
                     {
-                        sb.Append($"\t\tclassWraper.RegProperty(\"{name}\"");
+                        sb.Append($"\t\tclassWraper.RegProperty(\"{memberGenInfo.name}\"");
 
-                        if (hasGetter)
+                        if (memberGenInfo.hasGetter)
                         {
-                            sb.Append($", Get_{name}");
+                            sb.Append($", Get_{memberGenInfo.name}");
                         }
 
-                        if (hasSetter)
+                        if (memberGenInfo.hasSetter)
                         {
-                            sb.Append($", Set_{name}");
+                            sb.Append($", Set_{memberGenInfo.name}");
                         }
 
                         sb.Append($");\n");
                     }
                 }
-                else if (memberType == MemberTypes.Method)
+                else if (memberGenInfo.memberType == MemberTypes.Method)
                 {
-                    sb.Append($"\t\tclassWraper.RegFunction(\"{name}\", {name});\n");
+                    sb.Append($"\t\tclassWraper.RegFunction(\"{memberGenInfo.name}\", {memberGenInfo.Name});\n");
                 }
-                else if (memberType == MemberTypes.Custom)
-                {
-                    sb.Append($"\t\tclassWraper.RegFunction(\"{name}\", {name});\n");
-                }
+
             }
 
             sb.AppendLine();
@@ -185,7 +202,7 @@ namespace SharpLuna
 
         }
 
-        private static void GenerateClassWrap(Type type, List<string> excludeMembers, StringBuilder sb, List<(MemberTypes memberType, string name, bool hasGetter, bool hasSetter)> members)
+        private static void GenerateClassWrap(Type type, List<string> excludeMembers, StringBuilder sb, List<MemberGenInfo> members)
         {
             var ctors = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
             List<ConstructorInfo> ctorList = new List<ConstructorInfo>();
@@ -231,7 +248,7 @@ namespace SharpLuna
             {
                 ctorList.Sort((a, b) => a.GetParameters().Length - b.GetParameters().Length);
                 GenerateConstructor(type, ctorList, sb);
-                members.Add((MemberTypes.Constructor, "ctor", false, false));
+                members.Add(new MemberGenInfo(MemberTypes.Constructor, "ctor", false, false));
             }
 
             if (!type.IsEnum)
@@ -262,7 +279,7 @@ namespace SharpLuna
                     }
 
                     GenerateField(type, field, sb);
-                    members.Add((MemberTypes.Field, field.Name, true, !field.IsLiteral && !field.IsInitOnly));
+                    members.Add(new MemberGenInfo(MemberTypes.Field, field.Name, true, !field.IsLiteral && !field.IsInitOnly));
                 }
             }
 
@@ -298,7 +315,7 @@ namespace SharpLuna
                 }
 
                 GenerateProperty(type, prop, sb);
-                members.Add((MemberTypes.Property, prop.Name, prop.CanRead, prop.CanWrite));
+                members.Add(new MemberGenInfo(MemberTypes.Property, prop.Name, prop.CanRead, prop.CanWrite));
             }
 
             var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
@@ -314,7 +331,7 @@ namespace SharpLuna
                     continue;
                 }
 
-                if (members.FindIndex((t) => t.Item2 == method.Name) != -1)
+                if (members.FindIndex((t) => t.name == method.Name) != -1)
                 {
                     continue;
                 }
@@ -376,8 +393,8 @@ namespace SharpLuna
                 if (methodInfos.Count > 0)
                 {
                     methodInfos.Sort((a, b) => a.GetParameters().Length - b.GetParameters().Length);
-                    GenerateMethod(type, methodInfos.ToArray(), paraments, sb);
-                    members.Add((MemberTypes.Method, method.Name, false, false));
+                    string methodName = GenerateMethod(type, methodInfos.ToArray(), paraments, sb);
+                    members.Add(new MemberGenInfo(MemberTypes.Method, method.Name, false, false, methodName));
                 }
             }
             /*
@@ -396,6 +413,7 @@ namespace SharpLuna
 
         static void GenerateConstructor(Type type, List<ConstructorInfo> ctorList, StringBuilder sb)
         {
+            bool isArray = type.IsArray;
             sb.Append("\t[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]\n");
             sb.Append($"\tstatic int Constructor(IntPtr L)\n\t{{\n");
 
@@ -449,7 +467,14 @@ namespace SharpLuna
                         sb.AppendLine();
                     }
 
-                    sb.Append($"\t\t\tobj = new {type.FullName}(");
+                    if(isArray)
+                    {
+                        sb.Append($"\t\t\tobj = new {type.GetElementType().FullName}[");
+                    }
+                    else
+                    {
+                        sb.Append($"\t\t\tobj = new {type.FullName}(");
+                    }
 
                     for (int i = 1; i <= parameters.Length; i++)
                     {
@@ -461,7 +486,14 @@ namespace SharpLuna
                         }
                     }
 
-                    sb.Append(");\n");
+                    if (isArray)
+                    {
+                        sb.Append("];\n");
+                    }
+                    else
+                    {
+                        sb.Append(");\n");
+                    }
                 }
 
                 if(idx == ctorList.Count)
@@ -547,10 +579,26 @@ namespace SharpLuna
             
         }
 
-        static void GenerateMethod(Type type, MethodInfo[] methodInfo, int[] paraments, StringBuilder sb)
+        static string GenerateMethod(Type type, MethodInfo[] methodInfo, int[] paraments, StringBuilder sb)
         {
+            bool isArrayGet = false;
+            bool isArraySet = false;
+            string methodName = methodInfo[0].Name;
+            
+            if (methodName == "Get")
+            {
+                methodName += "_Item";
+                isArrayGet = type.IsArray;
+            }
+
+            if (methodName == "Set")
+            {
+                methodName += "_Item";
+                isArraySet = type.IsArray;
+            }
+            
             sb.Append("\t[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]\n");
-            sb.Append($"\tstatic int {methodInfo[0].Name}(IntPtr L)\n\t{{\n");
+            sb.Append($"\tstatic int {methodName}(IntPtr L)\n\t{{\n");
 
             int indent = 2;
             if (methodInfo.Length > 1)
@@ -655,27 +703,68 @@ namespace SharpLuna
                     if (method.IsStatic)
                         sb.Append($"{type.FullName}.{method.Name}(");
                     else
-                        sb.Append($"obj.{method.Name}(");
+                    {
+                        if (isArrayGet || isArraySet)
+                        {
+                            sb.Append($"obj[");
+                        }
+                        else
+                            sb.Append($"obj.{method.Name}(");
+                    }
                 }
                 else
                 {
                     if (method.IsStatic)
                         sb.Indent(indent).Append($"{type.FullName}.{method.Name}(");
                     else
-                        sb.Indent(indent).Append($"obj.{method.Name}(");                    
+                    {
+                        if(isArrayGet || isArraySet)
+                        {
+                            sb.Indent(indent).Append($"obj[");
+                        }
+                        else
+                            sb.Indent(indent).Append($"obj.{method.Name}(");
+                    }
                 }
                    
-                for (int i = 0; i < parameters.Length; i++)
+                for (int i = 0; i < parameters.Length - 1; i++)
                 {
                     var paramInfo = parameters[i];
                     sb.Append($"t{i}");
-                    if (i != parameters.Length - 1)
+
+                    if (i == parameters.Length - 2 && isArraySet)
+                    {
+                    }
+                    else
                     {
                         sb.Append(", ");
                     }
                 }
-               
-                sb.Append(");\n");
+
+                if(parameters.Length - 1 >= 0)
+                {
+                    if (isArraySet)
+                    {
+
+                        sb.Append($"] = t{parameters.Length - 1};\n");
+                    }
+                    else
+                    {
+                        sb.Append($"t{parameters.Length - 1}");
+                    }
+                }
+                
+                if (isArrayGet)
+                {
+                    sb.Append("];\n");
+                }
+                else if (isArraySet)
+                {
+                }
+                else
+                {
+                    sb.Append(");\n");
+                }
 
                 if (method.ReturnType != typeof(void))
                 {
@@ -704,6 +793,8 @@ namespace SharpLuna
               
             sb.Append("\t}\n");
             sb.AppendLine();
+
+            return methodName;
         }
 
         static string GenerateDelegate(Type delType, StringBuilder sb)

@@ -49,7 +49,7 @@ namespace SharpLuna
             L = state;
             _ref = luaRef;
 
-            if(state != IntPtr.Zero)
+            if (state != IntPtr.Zero)
             {
                 state.AddRef(this);
             }
@@ -80,7 +80,7 @@ namespace SharpLuna
 
             GC.SuppressFinalize(this);
         }
-        
+
         public lua_State State => L;
         public int Ref => _ref;
         public bool IsValid => _ref != LUA_NOREF;
@@ -140,7 +140,7 @@ namespace SharpLuna
 
         public bool Equals(LuaRef other)
         {
-            if(other == null)
+            if (other == null)
             {
                 return this == null;
             }
@@ -161,7 +161,7 @@ namespace SharpLuna
             return false;
         }
 
-        public static bool operator < (LuaRef l, LuaRef r)
+        public static bool operator <(LuaRef l, LuaRef r)
         {
             l.PushToStack();
             r.PushToStack();
@@ -170,7 +170,7 @@ namespace SharpLuna
             return b;
         }
 
-        public static bool operator <= (LuaRef l, LuaRef r)
+        public static bool operator <=(LuaRef l, LuaRef r)
         {
             l.PushToStack();
             r.PushToStack();
@@ -179,8 +179,8 @@ namespace SharpLuna
             return b;
         }
 
-        public static bool operator > (LuaRef l, LuaRef r) => !(l <= r);
-        public static bool operator >= (LuaRef l, LuaRef r) => !(l < r);
+        public static bool operator >(LuaRef l, LuaRef r) => !(l <= r);
+        public static bool operator >=(LuaRef l, LuaRef r) => !(l < r);
 
         public static implicit operator bool(LuaRef luaRef)
         {
@@ -366,7 +366,7 @@ namespace SharpLuna
         }
 
         public R Call<R>(params object[] args)
-        {           
+        {
             return Invoke<R>(L, this, args);
         }
 
@@ -374,7 +374,7 @@ namespace SharpLuna
         {
             return Invoke<R>(L, Get<LuaRef, string>(func), args);
         }
-        
+
         static void Invoke(lua_State L, LuaRef f, params object[] args)
         {
             lua_pushcfunction(L, LuaException.traceback);
@@ -402,9 +402,25 @@ namespace SharpLuna
             lua_pop(L, 2);
             return v;
         }
-     
-        
+
+
     }
 
+    public static partial class Lua
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Push(lua_State L, LuaRef v)
+        {
+            if (v.IsValid)
+            {
+                v.PushToStack();
+            }
+            else
+            {
+                lua_pushnil(L);
+            }
+        }
+
+    }
 
 }
