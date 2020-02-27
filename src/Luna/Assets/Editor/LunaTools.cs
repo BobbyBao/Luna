@@ -26,6 +26,7 @@ namespace SharpLuna
             }
 
             GenerateModule(Luna.systemModule, path);
+            WrapGenerator.GenerateEnums();
 
             path = Application.dataPath + "/LunaFramework/BaseType/";
             if (Directory.Exists(path))
@@ -36,6 +37,7 @@ namespace SharpLuna
             GenerateModule(LunaClient.baseTypes, path);
             GenerateModule(LunaClient.mathTypes, path);
             GenerateModule(LunaClient.uiTypes, path);
+            WrapGenerator.GenerateEnums();
 
             path = Application.dataPath + "/LunaFramework/CustomType/";
             if (Directory.Exists(path))
@@ -67,6 +69,8 @@ namespace SharpLuna
                     }
                 }
             }
+            
+            WrapGenerator.GenerateEnums();
 
             AssetDatabase.Refresh();
         }

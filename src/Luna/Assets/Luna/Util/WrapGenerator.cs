@@ -31,6 +31,8 @@ namespace SharpLuna
 
         static HashSet<string> namespaces = new HashSet<string>();
         static HashSet<Type> enums = new HashSet<Type>();
+        static HashSet<Type> unmanagedTypes = new HashSet<Type>();
+
         static HashSet<Type> genericTypes = new HashSet<Type>();
         static HashSet<Type> classDelegates = new HashSet<Type>();
 
@@ -58,6 +60,12 @@ namespace SharpLuna
 
         public static void GenerateClassWrap(string module, Type type, bool genSuper = false, List<string> excludeMembers = null)
         {
+            if(type.IsEnum)
+            {
+                enums.Add(type);
+                return;
+            }
+
             string code = GenerateClass(module, type, genSuper, excludeMembers);
             string fileName = type.Name.Replace("[]", "Array") + "Wrap.cs";
             if(!string.IsNullOrEmpty(module))
@@ -66,6 +74,39 @@ namespace SharpLuna
             }
 
             File.WriteAllText(Path.Combine(exportPath, fileName), code);
+        }
+
+        public static void GenerateEnums()
+        {
+            if(enums.Count == 0)
+            {
+                return;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append("using System;\n");
+            sb.AppendLine();
+            sb.Append("namespace SharpLuna\n{\n");
+            sb.Append("\tpublic static partial class Lua\n\t{\n");
+
+            foreach(var type in enums)
+            {
+                sb.Append($"\t\tpublic static void Push(IntPtr L, in {type.FullName} v) => Push(L, (int)v);\n");             
+            }
+
+            sb.AppendLine();
+
+            foreach (var type in enums)
+            {
+                sb.Append($"\t\tpublic static void Get(IntPtr L, int index, out {type.FullName} v) \n\t\t{{\n\t\t\tGet(L, index, out int v1);\n\t\t\tv = ({type.FullName})v1; \n\t\t}}\n\n");
+            }
+
+            sb.Append("\t}\n");
+            sb.Append("}\n");
+
+            enums.Clear();
+
+            File.WriteAllText(Path.Combine(exportPath, "EnumStackOps.cs"), sb.ToString());
         }
 
         static string GenerateClass(string module, Type type, bool genSuper, List<string> excludeMembers)
@@ -90,15 +131,7 @@ namespace SharpLuna
 
             sb.Append(type.Name.Replace("[]", "Array")).Append("Wrap\n{\n");
 
-            sb.Indent(1).Append($"#if LUNA_SCRIPT\n");
-            sb.Indent(1).Append($"const int startStack = 2;\n");
-            sb.Indent(1).Append($"#else\n");
-            sb.Indent(1).Append($"const int startStack = 1;\n");
-            sb.Indent(1).Append($"#endif\n");
-
-            List<MemberGenInfo> members =
-                new List<MemberGenInfo>();
-
+            List<MemberGenInfo> members = new List<MemberGenInfo>();
             if (genSuper)
             {
                 Type currentType = type;
@@ -190,7 +223,24 @@ namespace SharpLuna
 
             sb.Append("\t}\n");
 
-            sb.Append("}");
+
+            sb.Append("}\n");
+
+            if (!type.IsEnum)
+            {
+                sb.AppendLine();
+
+                if (type.IsUnManaged())
+                {
+                    sb.Append("namespace SharpLuna\n{\n");
+                    sb.Append("\tpublic static partial class Lua\n\t{\n");
+                    sb.Append($"\t\tpublic static void Push(IntPtr L, in {type.FullName} v) => SharpObject.PushUnmanagedObject(L, v);\n\n");
+                    sb.Append($"\t\tpublic static void Get(IntPtr L, int index, out {type.FullName} v) => v = SharpObject.GetUnmanaged<{type.FullName}>(L, index);\n");
+                    sb.Append("\t}\n");
+                    sb.Append("}\n");
+                }
+
+            }
 
             foreach (var @namespace in namespaces)
             {
@@ -198,6 +248,7 @@ namespace SharpLuna
             }
 
             sbHead.Append(sb);
+
             return sbHead.ToString();
 
         }
@@ -660,19 +711,11 @@ namespace SharpLuna
                 }
 
                 if(method.IsStatic)
-                {/*
-                    if (parameters.Length > 0)
-                    {
-                        sb.Indent(indent).Append($"#if LUNA_SCRIPT\n");
-                        sb.Indent(indent).Append($"const int startStack = 2;\n");
-                        sb.Indent(indent).Append($"#else\n");
-                        sb.Indent(indent).Append($"const int startStack = 1;\n");
-                        sb.Indent(indent).Append($"#endif\n");
-                    }*/
+                {
                     for (int i = 0; i < parameters.Length; i++)
                     {
                         var paramInfo = parameters[i];
-                        sb.Indent(indent).Append($"Get(L, {i} + startStack, out {paramInfo.ParameterType.GetFriendlyName()} t{i});");
+                        sb.Indent(indent).Append($"Get(L, {i} + STATIC_STARTSTACK, out {paramInfo.ParameterType.GetFriendlyName()} t{i});");
                         sb.AppendLine();
                     }
 

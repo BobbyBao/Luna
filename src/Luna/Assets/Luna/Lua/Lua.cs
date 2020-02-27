@@ -27,7 +27,12 @@ namespace SharpLuna
 
         public const int LUA_NOREF = (-2);
         public const int LUA_REFNIL = (-1);
-
+        
+#if LUNA_SCRIPT
+        public const int STATIC_STARTSTACK = 2;
+#else
+	    public const int STATIC_STARTSTACK = 1;
+#endif
         internal static Encoding Encoding { get; set; } = Encoding.UTF8;
         internal static HashSet<object> savedFn = new HashSet<object>();
        

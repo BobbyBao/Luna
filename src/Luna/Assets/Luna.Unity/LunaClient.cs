@@ -31,6 +31,8 @@ namespace SharpLuna.Unity
             typeof(Resources),
             typeof(AsyncOperation),
             typeof(Input),
+            typeof(Space),
+            typeof(UnityEngine.Rendering.ShadowCastingMode),
         };
 
         public static readonly ModuleInfo mathTypes = new ModuleInfo
