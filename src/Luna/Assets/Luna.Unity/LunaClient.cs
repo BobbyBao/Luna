@@ -31,6 +31,9 @@ namespace SharpLuna.Unity
             typeof(Resources),
             typeof(AsyncOperation),
             typeof(Input),
+
+            typeof(Time),
+
             typeof(Space),
             typeof(UnityEngine.Rendering.ShadowCastingMode),
         };
@@ -71,6 +74,10 @@ namespace SharpLuna.Unity
         };
 
         System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+
+        LuaRef update;
+        LuaRef fixedUpdate;
+        LuaRef lateUpdate;
 
         private void Awake()
         {
@@ -148,6 +155,7 @@ namespace SharpLuna.Unity
 
             Converter.RegisterFunc<UnityEngine.Object>();
             Converter.RegisterFunc<GameObject>();
+
         }
 
         protected virtual void OnPostInit()
@@ -162,10 +170,47 @@ namespace SharpLuna.Unity
         public void Run(string file)
         {
             luna.DoFile(file);
+
+            update = luna.GetGlobal("Update");
+            fixedUpdate = luna.GetGlobal("FixedUpdate");
+            lateUpdate = luna.GetGlobal("LateUpdate");
+
+        }
+
+        protected virtual void Update()
+        {
+            if(update)
+            {
+                update.Call(Time.deltaTime, Time.unscaledDeltaTime);
+            }
+            
+        }
+
+        protected virtual void FixedUpdate()
+        {
+
+            if (fixedUpdate)
+            {
+                fixedUpdate.Call(Time.fixedDeltaTime);
+            }
+
+        }
+
+        protected virtual void LateUpdate()
+        {
+            if (lateUpdate)
+            {
+                lateUpdate.Call(Time.fixedDeltaTime);
+            }
+
         }
 
         private void OnDestroy()
         {
+            update?.Dispose();
+            fixedUpdate?.Dispose();
+            lateUpdate?.Dispose();
+
             LunaDestroy?.Invoke(luna);
             luna?.Dispose();
             luna = null;

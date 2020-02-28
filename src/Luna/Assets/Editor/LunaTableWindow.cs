@@ -180,7 +180,7 @@ namespace Assets.Editor
                     id2fullPath[hash] = fullPath;
 
                     string strDisplay = k;
-                    if(v.Type == LuaType.String)
+                    if(v.Type <= LuaType.String)
                     {
                         strDisplay += (" : " + v.ToString());
                     }

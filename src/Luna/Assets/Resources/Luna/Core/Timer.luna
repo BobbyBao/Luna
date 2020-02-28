@@ -1,0 +1,157 @@
+let setmetatable = setmetatable
+let UpdateBeat = UpdateBeat
+let CoUpdateBeat = CoUpdateBeat
+let Time = Time
+
+class BaseTimer {
+	var eventType = ""
+
+	init (fn, duration, loop, evtType) {
+		loop = loop or 1
+		self.fn = fn
+		self.duration = duration
+		self.loop = loop
+		self.running = false
+		self.eventType = evtType				
+	}
+
+	func reset(fn, duration, loop) {
+		self.fn			= fn	
+		self.duration 	= duration
+		self.loop		= loop or 1
+	}
+
+	func start() {		
+		if not self.handle {	
+			self.handle = Event.createListener(self.eventType, self.update, self)
+		}
+		
+		self.running = true
+		Event.addListener(self.eventType, self.handle)	
+	}
+
+	func stop() {
+		self.running = false
+
+		if self.handle {
+			Event.removeListener(self.eventType, self.handle)	
+		}
+	}
+
+}
+
+class Timer : BaseTimer {
+
+	//scale false 采用deltaTime计时，true 采用 unscaledDeltaTime计时
+	init (fn, duration, loop, scale) {
+		super.init(fn, duration, loop, "Update")
+		scale = scale or false and true	
+		self.scale = scale
+		self.time = duration	
+
+		print("scale ", self.scale)
+	}
+
+	func reset(fn, duration, loop, scale) {
+		super.reset(fn, duration, loop)		
+		self.scale = scale
+		self.time = duration	
+	}
+
+	func update() {
+	
+		if not self.running {
+			return
+		}
+
+		let delta = self.scale and Time.deltaTime or Time.unscaledDeltaTime	
+
+		self.time = self.time - delta
+
+		if self.time <= 0 {
+			self.fn()
+			
+			if self.loop > 0 {
+				self.loop = self.loop - 1
+				self.time = self.time + self.duration
+			}
+			
+			if self.loop == 0 {
+				self.stop()
+			} else if self.loop < 0 {
+				self.time = self.time + self.duration
+			}
+		}
+	}
+}
+
+//给协同使用的帧计数timer
+class FrameTimer : BaseTimer {
+
+	init (fn, count, loop) {
+		super.init(fn, count, loop, "CoUpdate")
+		self.count = Time.frameCount + count
+	}
+
+	func reset(fn, count, loop) {
+		super.reset(fn, count, loop)
+		self.count = Time.frameCount + count	
+	}
+
+	func update() {
+		if not self.running {
+			return
+		}
+
+		if Time.frameCount >= self.count {
+			self.fn()	
+			
+			if self.loop > 0 {
+				self.loop = self.loop - 1
+			}
+			
+			if self.loop == 0 {
+				self.stop()
+			} else {
+				self.count = Time.frameCount + self.duration
+			}
+		}
+	}
+
+}
+
+class CoTimer : BaseTimer { 
+
+	init(fn, duration, loop) {
+		super.init(fn, duration, loop, "CoUpdate")
+		self.time = duration	
+	}
+
+	func reset(fn, duration, loop) {
+		super.reset(fn, duration, loop)
+		self.time = duration		
+	}
+
+	func update() {
+		if not self.running {
+			return
+		}
+
+		if self.time <= 0 {
+			self.fn()		
+			
+			if self.loop > 0 {
+				self.loop = self.loop - 1
+				self.time = self.time + self.duration
+			}
+			
+			if self.loop == 0 {
+				self.stop()
+			} else if self.loop < 0 {
+				self.time = self.time + self.duration
+			}
+		}
+		
+		self.time = self.time - Time.deltaTime
+	}
+}

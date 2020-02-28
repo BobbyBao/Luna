@@ -22,6 +22,7 @@ class UITest : UIPanel {
     }
 
     func onButtonClick(go) {
+
         print(go.name)
 
         if go == self.btn1 {
@@ -31,13 +32,18 @@ class UITest : UIPanel {
             dofile("test/test_math")
         }
         else if go == self.btn3 {
-            //dofile("test/test_perf")
             self.testPerfPanel.show()
         }
         else if go == self.btn4 {
         
-            UIManager.Instance.OpenPanel("ui/panel", func(go)  { });
+            UIManager.Instance.OpenPanel("ui/TestBehaviourPanel", func(go)  { });
             
+        }
+        else if go == self.btn5 {
+            dofile("test/test_timer")          
+        }
+        else if go == self.btn6 {
+        
         }
     }
 

@@ -1,0 +1,139 @@
+let create = coroutine.create
+let running = coroutine.running
+let resume = coroutine.resume
+let yield = coroutine.yield
+let error = error
+let unpack = unpack
+let debug = debug
+let FrameTimer = FrameTimer
+let CoTimer = CoTimer
+
+let comap = {}
+let pool = {}
+setmetatable(comap, {__mode = "kv"})
+
+func coroutine.start(f, ...) {
+	let co = create(f)
+	
+	if running() == nil {
+		let flag, msg = resume(co, ...)
+	
+		if not flag {					
+			error(debug.traceback(co, msg))
+		}					
+	} else {
+		let args = {...}
+		var timer = nil
+		
+		let action = func()	{											
+			let flag, msg = resume(co, unpack(args))			
+			timer.func = nil
+			table.insert(pool, timer)
+	
+			if not flag {														
+				error(debug.traceback(co, msg))						
+			}		
+		}
+			
+		if #pool > 0 {
+			timer = table.remove(pool)
+			timer.reset(action, 0, 1)
+		} else {
+			timer = FrameTimer(action, 0, 1)
+		}
+		
+		comap[co] = timer
+		timer.start()		
+	}
+
+	return co
+}
+
+func coroutine.wait(t, co, ...) {
+	let args = {...}
+	co = co or running()		
+	let timer = nil
+		
+	let action = func()	{		
+		let flag, msg = resume(co, unpack(args))
+		
+		if not flag {	
+			timer.stop()						
+			error(debug.traceback(co, msg))			
+			return
+		}
+	}
+	
+	timer = CoTimer(action, t, 1)
+	comap[co] = timer	
+	timer.start()
+	return yield()
+}
+
+func coroutine.step(t, co, ...) {
+	let args = {...}
+	co = co or running()		
+	let timer = nil
+	
+	let action = func()	{				
+		let flag, msg = resume(co, unpack(args))
+		timer.func = nil
+		table.insert(pool, timer)
+	
+		if not flag {																		
+			error(debug.traceback(co, msg))
+			return	
+		}
+	}
+				
+	if #pool > 0 {
+		timer = table.remove(pool)
+		timer.reset(action, t or 1, 1)
+	} else {
+		timer = FrameTimer(action, t or 1, 1)
+	}
+
+	comap[co] = timer
+	timer.start()
+	return yield()
+}
+
+func coroutine.www(www, co)	{		
+	co = co or running()			
+	let timer = nil			
+			
+	let action = func()	{		
+		if not www.isDone {		
+			return		
+		}		
+				
+		timer.stop()	
+		let flag, msg = resume(co)			
+		timer.func = nil
+		table.insert(pool, timer)	
+			
+		if not flag {												
+			error(debug.traceback(co, msg))			
+			return			
+		}				
+	}		
+				
+	if #pool > 0 {
+		timer = table.remove(pool)
+		timer.reset(action, 1, -1)
+	} else {	
+		timer = FrameTimer(action, 1, -1)	
+	}
+	comap[co] = timer	
+ 	timer.start()
+ 	return yield()
+}
+
+func coroutine.stop(co) {
+ 	let timer = comap[co]
+
+ 	if timer ~= nil {
+ 		comap[co] = nil
+ 		timer.stop() 		
+ 	}
+}

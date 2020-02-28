@@ -1,0 +1,12 @@
+
+import "timer"
+
+var lastTime = Time.time
+func testTimer() {
+    print("delta", Time.time - lastTime, "Time.deltaTime : ", Time.deltaTime)
+    lastTime = Time.time
+}
+
+let t = Timer(testTimer, 1, 10)
+
+t.start()

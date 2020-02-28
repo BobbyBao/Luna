@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Reflection;
 using System.Collections;
+using UnityEngine;
 
 namespace SharpLuna
 {
@@ -357,22 +358,52 @@ namespace SharpLuna
 
         public void Call(params object[] args)
         {
-            Invoke(L, this, args);
+            try
+            {
+                Invoke(L, this, args);
+            }
+            catch(Exception ex)
+            {
+                Debug.LogError(ex.Message);
+            }
         }
 
         public void Dispatch(string func, params object[] args)
         {
-            Invoke(L, Get<LuaRef, string>(func), args);
+            try
+            {
+                Invoke(L, Get<LuaRef, string>(func), args);
+            }
+            catch(Exception ex)
+            {
+                Debug.LogError(ex.Message);
+            }
         }
 
         public R Call<R>(params object[] args)
         {
-            return Invoke<R>(L, this, args);
+            try
+            {
+                return Invoke<R>(L, this, args);
+            }
+            catch(Exception ex)
+            {
+                Debug.LogError(ex.Message); 
+                return default;
+            }
         }
 
         public R Dispatch<R>(string func, params object[] args)
         {
-            return Invoke<R>(L, Get<LuaRef, string>(func), args);
+            try
+            {
+                return Invoke<R>(L, Get<LuaRef, string>(func), args);
+            }
+            catch(Exception ex)
+            {
+                Debug.LogError(ex.Message);
+                return default;
+            }
         }
 
         static void Invoke(lua_State L, LuaRef f, params object[] args)

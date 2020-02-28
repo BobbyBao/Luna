@@ -1,0 +1,155 @@
+import "LinkedList"
+import "Time"
+
+let setmetatable = setmetatable
+let xpcall = xpcall
+let pcall = pcall
+let assert = assert
+let rawget = rawget
+let error = error
+let print = print
+let ilist = ilist
+
+let _pcall = {}
+
+_pcall.__call = func(self, ...) {
+	if nil == self.obj {
+		return pcall(self.fn, ...)					
+	} else {	
+		return pcall(self.fn, self.obj, ...)					
+	}	
+}
+
+_pcall.__eq = func(lhs, rhs) {
+	return lhs.fn == rhs.fn and lhs.obj == rhs.obj
+}
+
+local func functor(fn, obj) {
+	return setmetatable({fn = fn, obj = obj}, _pcall)			
+}
+
+class Event {
+
+	init (n) {
+		self.name = n
+		self.opList = {}
+		self.list = LinkedList()
+	}
+
+	func invoke(...) {
+		//print("invoke", self)	
+		let _list = self.list	
+		self.lock = true
+		let ilist = ilist	
+
+		for i, f in ilist(_list) {		
+			self.current = i			
+			//print(self, f)				
+			let flag, msg = f(...)
+			if not flag {			
+				_list.remove(i)			
+				self.lock = false		
+				error(msg)				
+			}
+		}	
+
+		let opList = self.opList	
+		self.lock = false		
+
+		for i, op in ipairs(opList) {									
+			op()
+			opList[i] = nil
+		}
+	}
+
+	func create(fn, obj) {
+		fn = functor(fn, obj)
+		return {value = fn, _prev = 0, _next = 0, removed = true}		
+	}
+
+	func add(handle) {
+		//assert(handle)
+		if self.lock {		
+			table.insert(self.opList, func() { self.list.pushnode(handle) } )		
+		} else {
+			self.list.pushnode(handle)
+		}	
+		
+	}
+
+	func remove(handle)	{
+		//assert(handle)	
+		if self.lock {		
+			table.insert(self.opList, func() { self.list.remove(handle) })				
+		} else {
+			self.list.remove(handle)
+		}
+	}
+
+	func count() {
+		return self.list.length
+	}	
+
+	func clear() {
+		self.list.clear()
+		self.opList = {}	
+		self.lock = false
+		self.keepSafe = false
+		self.current = nil
+	}
+
+}
+
+
+Event.events = {}
+
+Event.get = func(self, name) {
+	var e = Event.events[name]
+	if not e {
+		e = Event(name)
+		Event.events[name] = e
+	}
+	return e
+}
+
+func Event.createListener(self, name, fn, obj) {
+	let evt = Event.get(name)
+	return evt.create(fn, obj)
+}
+
+func Event.addListener(self, name, handle) {	
+	let evt = Event.get(name)
+	evt.add(handle)
+}
+
+func Event.removeListener(self, name, handle) {
+	let evt = Event.get(name)
+	evt.remove(handle)
+}
+
+UpdateBeat 		= Event.get("Update")
+LateUpdateBeat	= Event.get("LateUpdate")
+FixedUpdateBeat	= Event.get("FixedUpdate")
+CoUpdateBeat	= Event.get("CoUpdate")				//只在协程使用
+
+let Time = Time
+let UpdateBeat = UpdateBeat
+let LateUpdateBeat = LateUpdateBeat
+let FixedUpdateBeat = FixedUpdateBeat
+let CoUpdateBeat = CoUpdateBeat
+
+func Update(deltaTime, unscaledDeltaTime) {
+	Time.SetDeltaTime(deltaTime, unscaledDeltaTime)		
+	UpdateBeat.invoke()	
+}
+
+func LateUpdate() {	
+	LateUpdateBeat.invoke()		
+	CoUpdateBeat.invoke()	
+	Time.SetFrameCount()			
+}
+
+func FixedUpdate(fixedDeltaTime) {
+	Time.SetFixedDelta(fixedDeltaTime)
+	FixedUpdateBeat.invoke()
+}

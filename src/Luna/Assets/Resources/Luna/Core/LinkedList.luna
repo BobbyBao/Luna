@@ -1,0 +1,174 @@
+
+class LinkedList {
+
+	init() {
+		self._next = self
+		self._prev = self
+		self.length = 0
+	}
+
+	func clear() {
+		self._next = self
+		self._prev = self
+		self.length = 0
+	}
+
+	func push(value) {
+		//assert(value)
+		let node = {value = value, _prev = 0, _next = 0, removed = false}
+
+		self._prev._next = node
+		node._next = self
+		node._prev = self._prev
+		self._prev = node
+
+		self.length = self.length + 1
+		return node
+	}
+
+	func pushnode(node) {
+
+		if not node.removed { return }
+
+		self._prev._next = node
+		node._next = self
+		node._prev = self._prev
+		self._prev = node
+		node.removed = false
+		self.length = self.length + 1
+
+	}
+
+	func pop() {
+		let _prev = self._prev
+		self.remove(_prev)
+		return _prev.value
+	}
+
+	func unshift(v) {
+		let node = { value = v, _prev = 0, _next = 0, removed = false }
+
+		self._next._prev = node
+		node._prev = self
+		node._next = self._next
+		self._next = node
+
+		self.length = self.length + 1
+		return node
+	}
+
+	func shift() {
+		let _next = self._next
+		self.remove(_next)
+		return _next.value
+	}
+
+	func remove(iter) {
+		if iter.removed { return }
+
+		let _prev = iter._prev
+		let _next = iter._next
+		_next._prev = _prev
+		_prev._next = _next
+		
+		self.length = math.max(0, self.length - 1)
+		iter.removed = true
+	}
+
+	func find(v, iter) {
+		iter = iter or self
+
+		repeat
+		{
+			if v == iter.value {
+				return iter
+			} else {
+				iter = iter._next
+			}
+
+		} until iter == self
+
+		return nil
+	}
+
+	func findlast(v, iter) {
+		iter = iter or self
+
+		repeat {
+			if v == iter.value {
+				return iter
+			}
+
+			iter = iter._prev
+		} until iter == self
+
+		return nil
+	}
+
+	func next(iter) {
+		let _next = iter._next
+		if _next != self {
+			return _next, _next.value
+		}
+
+		return nil
+	}
+
+	func prev(iter) {
+		let _prev = iter._prev
+		if _prev != self {
+			return _prev, _prev.value
+		}
+
+		return nil
+	}
+
+	func erase(v) {
+		let iter = self.find(v)
+
+		if iter {
+			self.remove(iter)		
+		}
+	}
+
+	func insert(v, iter) {
+		if not iter {
+			return self.push(v)
+		}
+
+		let node = {value = v, _next = 0, _prev = 0, removed = false}
+
+		if iter._next {
+			iter._next._prev = node
+			node._next = iter._next
+		} else {
+			self.last = node
+		}
+
+		node._prev = iter
+		iter._next = node
+		self.length = self.length + 1
+		return node
+	}
+
+	func head() {
+		return self._next.value
+	}
+
+	func tail() {
+		return self._prev.value
+	}
+
+	func clone() {
+		let t = LinkedList()
+
+		for i, v in self.next, self, self {
+			t.push(v)
+		}
+
+		return t
+	}
+}
+
+ilist = func(_list) { return LinkedList.next, _list, _list }
+rilist = func(_list) { return LinkedList.prev, _list, _list }
