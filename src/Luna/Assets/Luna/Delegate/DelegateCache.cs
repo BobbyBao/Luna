@@ -28,7 +28,7 @@ namespace SharpLuna
             {
                 del = Delegate.CreateDelegate(type, methodInfo);
             }
-            catch (System.Exception ex)
+            catch// (System.Exception ex)
             {
                 //Debug.LogError(ex.Message);
                 //Debug.LogError(type.ToString());
@@ -50,7 +50,7 @@ namespace SharpLuna
             {
                 del = Delegate.CreateDelegate(type, methodInfo);
             }
-            catch (System.Exception ex)
+            catch// (System.Exception ex)
             {
                 //Debug.LogError(ex.Message);
                 //Debug.LogError(type.ToString());
@@ -72,7 +72,7 @@ namespace SharpLuna
             {
                 del = (Delegate)methodInfo.Invoke(null, new[] { obj });
             }
-            catch (System.Exception ex)
+            catch //(System.Exception ex)
             {
                 //Debug.LogError(ex.Message);
                 //Debug.LogError(methodInfo.ReflectedType.ToString() + ", " + methodInfo.ToString());

@@ -27,7 +27,7 @@ namespace SharpLuna
             L = state;
             lua_pushvalue(L, index);
             _ref = luaL_ref(L, LUA_REGISTRYINDEX);
-            state.AddRef(this);
+            state.addref(this);
         }
 
         public LuaRef(lua_State state, string name)
@@ -35,14 +35,14 @@ namespace SharpLuna
             L = state;
             PushGlobal(L, name);
             _ref = luaL_ref(L, LUA_REGISTRYINDEX);
-            state.AddRef(this);
+            state.addref(this);
         }
 
         public LuaRef(lua_State state)
         {
             L = state;
             _ref = luaL_ref(state, LUA_REGISTRYINDEX);
-            state.AddRef(this);
+            state.addref(this);
         }
 
         public LuaRef(int luaRef, IntPtr state)
@@ -52,30 +52,30 @@ namespace SharpLuna
 
             if (state != IntPtr.Zero)
             {
-                state.AddRef(this);
+                state.addref(this);
             }
         }
 
         ~LuaRef()
         {
-            if (L.IsActive())
+            if (L.isactive())
             {
                 if (_ref != LUA_NOREF)
                 {
                     luaL_unref(L, LUA_REGISTRYINDEX, _ref);
-                    L.RemoveRef(this);
+                    L.unref(this);
                 }
             }
         }
 
         public void Dispose()
         {
-            if (L.IsActive())
+            if (L.isactive())
             {
                 if (_ref != LUA_NOREF)
                 {
                     luaL_unref(L, LUA_REGISTRYINDEX, _ref);
-                    L.RemoveRef(this);
+                    L.unref(this);
                 }
             }
 
@@ -185,7 +185,7 @@ namespace SharpLuna
 
         public static implicit operator bool(LuaRef luaRef)
         {
-            return luaRef != null && Lua.IsActive(luaRef.L) && luaRef._ref != LUA_NOREF && luaRef._ref != LUA_REFNIL;
+            return luaRef != null && Lua.isactive(luaRef.L) && luaRef._ref != LUA_NOREF && luaRef._ref != LUA_REFNIL;
         }
 
         public override string ToString()

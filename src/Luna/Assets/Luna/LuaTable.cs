@@ -333,16 +333,16 @@ namespace SharpLuna
             _table = table;
             _key = LUA_NOREF;
             _value = LUA_NOREF;
-            L.AddRef(this);
+            L.addref(this);
         }
 
         ~LuaTableEnumerator()
         {
-            if (L.IsActive())
+            if (L.isactive())
             {
                 luaL_unref(L, LUA_REGISTRYINDEX, _key);
                 luaL_unref(L, LUA_REGISTRYINDEX, _value);
-                L.RemoveRef(this);
+                L.unref(this);
             }
         }
 
@@ -383,7 +383,7 @@ namespace SharpLuna
             {
                 luaL_unref(L, LUA_REGISTRYINDEX, _key);
                 luaL_unref(L, LUA_REGISTRYINDEX, _value);
-                L.RemoveRef(this);
+                L.unref(this);
             }
 
             GC.SuppressFinalize(this);

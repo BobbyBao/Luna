@@ -35,7 +35,65 @@ namespace SharpLuna
 #endif
         internal static Encoding Encoding { get; set; } = Encoding.UTF8;
         internal static HashSet<object> savedFn = new HashSet<object>();
-       
+
+        static ConcurrentDictionary<IntPtr, List<IDisposable>> luaStates = new ConcurrentDictionary<IntPtr, List<IDisposable>>();
+
+        public static lua_State newstate()
+        {
+            var L = luaL_newstate();
+            luaStates.TryAdd(L, new List<IDisposable>());
+            return L;
+        }
+
+        public static void closestate(this lua_State L)
+        {
+            if (!luaStates.TryRemove(L, out var state))
+            {
+                assert(false);
+            }
+
+            lua_close(L);
+        }
+
+        public static bool isactive(this lua_State L)
+        {
+            if (L == IntPtr.Zero)
+            {
+                return false;
+            }
+
+            return luaStates.ContainsKey(L);
+        }
+
+
+        public static void addref(this lua_State L, IDisposable r)
+        {
+            if (luaStates.TryGetValue(L, out var refs))
+            {
+                refs.Add(r);
+            }
+        }
+
+        public static void unref(this lua_State L, IDisposable r)
+        {
+            if (luaStates.TryGetValue(L, out var refs))
+            {
+                refs.FastRemove(r);
+            }
+        }
+
+        public static void unrefall(this lua_State L)
+        {
+            if (luaStates.TryGetValue(L, out var refs))
+            {
+                while (refs.Count != 0)
+                {
+                    var r = refs[refs.Count - 1];
+                    r?.Dispose();
+                }
+            }
+        }
+
         public static LuaNativeFunction lua_atpanic(lua_State L, LuaNativeFunction panicFunction)
         {
 #if SAVE_FUNC

@@ -12,60 +12,87 @@ namespace SharpLuna
 
     public unsafe static partial class Lua
     {
-        static ConcurrentDictionary<IntPtr, List<IDisposable>> luaStates = new ConcurrentDictionary<IntPtr, List<IDisposable>>();
-
-        public static lua_State NewState()
+        public unsafe static void PushGlobal(lua_State L, string name)
         {
-            var L = luaL_newstate();
-            luaStates.TryAdd(L, new List<IDisposable>());
-            return L;
+            var p = Marshal.StringToHGlobalAnsi(name);
+            PushGlobal(L, (byte*)p);
+            Marshal.FreeHGlobal(p);
         }
 
-        public static bool IsActive(this lua_State L)
+        public static void PopToGlobal(lua_State L, string name)
         {
-            if (L == IntPtr.Zero)
+            var p = Marshal.StringToHGlobalAnsi(name);
+            PopToGlobal(L, (byte*)p);
+            Marshal.FreeHGlobal(p);
+        }
+
+        static byte* strchr(byte* p, char ch)
+        {
+            if (p == null)
             {
-                return false;
+                return null;
             }
-
-            return luaStates.ContainsKey(L);
-        }
-
-        public static void CloseState(this lua_State L)
-        {
-            if (!luaStates.TryRemove(L, out var state))
+            while (*p != 0)
             {
-                assert(false);
-            }
-
-            lua_close(L);
-        }
-
-        public static void AddRef(this lua_State L, IDisposable r)
-        {
-            if (luaStates.TryGetValue(L, out var refs))
-            {
-                refs.Add(r);
-            }
-        }
-
-        public static void RemoveRef(this lua_State L, IDisposable r)
-        {
-            if (luaStates.TryGetValue(L, out var refs))
-            {
-                refs.FastRemove(r);
-            }
-        }
-
-        public static void RemoveAll(this lua_State L)
-        {
-            if (luaStates.TryGetValue(L, out var refs))
-            {
-                while (refs.Count != 0)
+                if (*p == ch)
                 {
-                    var r = refs[refs.Count - 1];
-                    r?.Dispose();
+                    return p;
                 }
+                p = p + 1;
+            }
+            //strchr for '\0' should succeed - the while loop terminates
+            //*p == 0, but ch also == 0, so NULL terminator address is returned
+            return (*p == ch) ? p : null;
+        }
+
+        private unsafe static void PushGlobal(lua_State L, byte* name)
+        {
+            byte* p = strchr(name, '.');
+            if (p != null)
+            {
+                lua_pushglobaltable(L);                 // <table>
+                while (p != null)
+                {
+                    lua_pushlstring(L, name, p - name); // <table> <key>
+
+                    lua_gettable(L, -2);                // <table> <table_value>
+                    lua_remove(L, -2);                  // <table_value>
+                    if (lua_isnoneornil(L, -1)) return;
+                    name = p + 1;
+                    p = strchr(name, '.');
+                }
+                lua_pushstring(L, name);                // <last_table> <key>
+                lua_gettable(L, -2);                    // <last_table> <table_value>
+                lua_remove(L, -2);                      // <table_value>
+            }
+            else
+            {
+                lua_getglobal(L, name);
+            }
+        }
+
+        private static unsafe void PopToGlobal(lua_State L, byte* name)
+        {
+            byte* p = strchr(name, '.');
+            if (p != null)
+            {
+                lua_pushglobaltable(L);                 // <value> <table>
+                while (p != null)
+                {
+                    lua_pushlstring(L, name, p - name); // <value> <table> <key>
+                    lua_gettable(L, -2);                // <value> <table> <table_value>
+                    lua_remove(L, -2);                  // <value> <table_value>
+                    name = p + 1;
+                    p = strchr(name, '.');
+                }
+                lua_pushstring(L, name);                // <value> <last_table> <name>
+                lua_pushvalue(L, -3);                   // <value> <last_table> <name> <value>
+                lua_settable(L, -3);                    // <value> <last_table>
+                lua_pop(L, 2);
+            }
+            else
+            {
+                lua_setglobal(L, name);
             }
         }
 
@@ -91,6 +118,36 @@ namespace SharpLuna
                 handle.Free();
 
             return reference;
+        }
+
+        public static void PushArgs(lua_State L, params object[] args)
+        {
+            foreach (var obj in args)
+            {
+                Lua.Push(L, obj);
+            }
+        }
+
+        public static T Pop<T>(lua_State L)
+        {
+            T v = Get<T>(L, -1);
+            lua_pop(L, 1);
+            return v;
+        }
+
+        public static object[] PopValues(lua_State L, int oldTop)
+        {
+            int newTop = lua_gettop(L);
+
+            if (oldTop == newTop)
+                return null;
+
+            var returnValues = new List<object>();
+            for (int i = oldTop + 1; i <= newTop; i++)
+                returnValues.Add(GetObject(L, i));
+
+            lua_settop(L, oldTop);
+            return returnValues.ToArray();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -168,115 +225,56 @@ namespace SharpLuna
 
         }
 
-        public static void PushArgs(lua_State L, params object[] args)
-        {
-            foreach (var obj in args)
-            {
-                Lua.Push(L, obj);
-            }
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Push(lua_State L, bool v) => lua_pushboolean(L, v ? 1 : 0);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Push(lua_State L, bool v)
-        {
-            lua_pushboolean(L, v ? 1 : 0);
-        }
+        public static void Push(lua_State L, long v) => lua_pushinteger(L, v);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Push(lua_State L, long v)
-        {
-            lua_pushinteger(L, v);
-        }
+        public static void Push(lua_State L, ulong v) => lua_pushinteger(L, (long)v);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Push(lua_State L, ulong v)
-        {
-            lua_pushinteger(L, (long)v);
-        }
+        public static void Push(lua_State L, IntPtr v) => lua_pushinteger(L, (long)v);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Push(lua_State L, IntPtr v)
-        {
-            lua_pushinteger(L, (long)v);
-        }
+        public static void Push(lua_State L, UIntPtr v) => lua_pushinteger(L, (long)v);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Push(lua_State L, UIntPtr v)
-        {
-            lua_pushinteger(L, (long)v);
-        }
+        public static void Push(lua_State L, sbyte v) => lua_pushnumber(L, v);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Push(lua_State L, sbyte v)
-        {
-            lua_pushnumber(L, v);
-        }
+        public static void Push(lua_State L, byte v) => lua_pushnumber(L, v);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Push(lua_State L, byte v)
-        {
-            lua_pushnumber(L, v);
-        }
+        public static void Push(lua_State L, short v) => lua_pushnumber(L, v);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Push(lua_State L, short v)
-        {
-            lua_pushnumber(L, v);
-        }
+        public static void Push(lua_State L, ushort v) => lua_pushnumber(L, v);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Push(lua_State L, ushort v)
-        {
-            lua_pushnumber(L, v);
-        }
+        public static void Push(lua_State L, int v) => lua_pushnumber(L, v);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Push(lua_State L, int v)
-        {
-            lua_pushnumber(L, v);
-        }
+        public static void Push(lua_State L, uint v) => lua_pushnumber(L, v);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Push(lua_State L, uint v)
-        {
-            lua_pushnumber(L, v);
-        }
+        public static void Push(lua_State L, float v) => lua_pushnumber(L, v);
+  
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Push(lua_State L, double v) => lua_pushnumber(L, v);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Push(lua_State L, float v)
-        {
-            lua_pushnumber(L, v);
-        }
+        public static void Push(lua_State L, string v) => lua_pushstring(L, v);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Push(lua_State L, double v)
-        {
-            lua_pushnumber(L, v);
-        }
+        public static void Push(lua_State L, LuaNativeFunction v) => lua_pushcfunction(L, v);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Push(lua_State L, string v)
-        {
-            lua_pushstring(L, v);
-        }
+        public static void Push<T>(lua_State L, T v) => SharpObject.PushToStack(L, v);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Push(lua_State L, LuaNativeFunction v)
-        {
-            lua_pushcfunction(L, v);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Push<T>(lua_State L, T v)
-        {
-            SharpObject.PushToStack(L, v);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Push<T>(lua_State L, ref T v) where T : struct
-        {
-            SharpObject.PushValueToStack(L, ref v);
-        }
+        public static void Push<T>(lua_State L, ref T v) where T : struct => SharpObject.PushValueToStack(L, ref v);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void PushT<T>(lua_State L, T v)
@@ -498,193 +496,52 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool CheckType(lua_State L, int index, Type t)
-        {
-            LuaType luaType = lua_type(L, index);
-
-            if (t == typeof(bool))
-                return luaType == LuaType.Boolean;
-            else if (t == typeof(string))
-                return luaType == LuaType.String;
-            else if (t.IsPrimitive)
-                return luaType == LuaType.Number;
-            else if (t == typeof(LuaNativeFunction))
-                return luaType == LuaType.Function;
-            else if (t == typeof(IntPtr))
-                return luaType == LuaType.Number;
-            else if (t == typeof(UIntPtr))
-                return luaType == LuaType.Number;
-            else if (t == typeof(LuaRef))
-                return luaType == LuaType.Table || luaType == LuaType.Function;
-            else if (t == typeof(LuaByteBuffer))
-                return luaType == LuaType.String;
-            else
-            {
-                return luaType == LuaType.UserData;
-            }
-
-        }
-
-        public static bool CheckType(lua_State L, int index, Type[] types)
-        {
-            for (int i = 0; i < types.Length; i++)
-            {
-                if (!CheckType(L, index, types[i]))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
+        public static void Get(lua_State L, int index, out bool v) => v = lua_toboolean(L, index) != 0;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool CheckType<T>(lua_State L, int index)
-        {
-            return CheckType(L, index, typeof(T));
-        }
+        public static void Get(lua_State L, int index, out long v) => v = (long)luaL_checkinteger(L, index);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool CheckType<T1, T2>(lua_State L, int index)
-        {
-            return CheckType(L, index, typeof(T1)) && CheckType(L, index + 1, typeof(T2));
-        }
+        public static void Get(lua_State L, int index, out ulong v) => v = (ulong)luaL_checkinteger(L, index);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool CheckType<T1, T2, T3>(lua_State L, int index)
-        {
-            return CheckType(L, index, typeof(T1)) && CheckType(L, index + 1, typeof(T2)) && CheckType(L, index + 2, typeof(T3));
-        }
+        public static void Get(lua_State L, int index, out IntPtr v) => v = (IntPtr)luaL_checkinteger(L, index);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool CheckType<T1, T2, T3, T4>(lua_State L, int index)
-        {
-            return CheckType(L, index, typeof(T1)) && CheckType(L, index + 1, typeof(T2)) && CheckType(L, index + 2, typeof(T3)) && CheckType(L, index + 3, typeof(T4));
-        }
+        public static void Get(lua_State L, int index, out UIntPtr v) => v = (UIntPtr)luaL_checkinteger(L, index);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool CheckType<T1, T2, T3, T4, T5>(lua_State L, int index)
-        {
-            return CheckType(L, index, typeof(T1)) && CheckType(L, index + 1, typeof(T2)) && CheckType(L, index + 2, typeof(T3)) && CheckType(L, index + 3, typeof(T4))
-                && CheckType(L, index + 4, typeof(T5));
-        }
+        public static void Get(lua_State L, int index, out int v) => v = (int)luaL_checknumber(L, index);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool CheckType<T1, T2, T3, T4, T5, T6>(lua_State L, int index)
-        {
-            return CheckType(L, index, typeof(T1)) && CheckType(L, index + 1, typeof(T2)) && CheckType(L, index + 2, typeof(T3)) && CheckType(L, index + 3, typeof(T4))
-                && CheckType(L, index + 4, typeof(T5)) && CheckType(L, index + 5, typeof(T6));
-        }
+        public static void Get(lua_State L, int index, out uint v) => v = (uint)luaL_checkinteger(L, index);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool CheckType<T1, T2, T3, T4, T5, T6, T7>(lua_State L, int index)
-        {
-            return CheckType(L, index, typeof(T1)) && CheckType(L, index + 1, typeof(T2)) && CheckType(L, index + 2, typeof(T3)) && CheckType(L, index + 3, typeof(T4))
-                && CheckType(L, index + 4, typeof(T5)) && CheckType(L, index + 5, typeof(T6)) && CheckType(L, index + 6, typeof(T7));
-        }
+        public static void Get(lua_State L, int index, out short v) => v = (short)luaL_checkinteger(L, index);
+ 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Get(lua_State L, int index, out ushort v) => v = (ushort)luaL_checkinteger(L, index);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool CheckType<T1, T2, T3, T4, T5, T6, T7, T8>(lua_State L, int index)
-        {
-            return CheckType(L, index, typeof(T1)) && CheckType(L, index + 1, typeof(T2)) && CheckType(L, index + 2, typeof(T3)) && CheckType(L, index + 3, typeof(T4))
-                && CheckType(L, index + 4, typeof(T5)) && CheckType(L, index + 5, typeof(T6)) && CheckType(L, index + 6, typeof(T7)) && CheckType(L, index + 7, typeof(T8));
-        }
+        public static void Get(lua_State L, int index, out char v) => v = (char)luaL_checkinteger(L, index);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Get(lua_State L, int index, out bool v)
-        {
-            v = lua_toboolean(L, index) != 0;
-        }
+        public static void Get(lua_State L, int index, out sbyte v) => v = (sbyte)luaL_checkinteger(L, index);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Get(lua_State L, int index, out long v)
-        {
-            v = (long)luaL_checkinteger(L, index);
-        }
+        public static void Get(lua_State L, int index, out byte v) => v = (byte)luaL_checkinteger(L, index);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Get(lua_State L, int index, out ulong v)
-        {
-            v = (ulong)luaL_checkinteger(L, index);
-        }
+        public static void Get(lua_State L, int index, out float v) => v = (float)luaL_checknumber(L, index);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Get(lua_State L, int index, out IntPtr v)
-        {
-            v = (IntPtr)luaL_checkinteger(L, index);
-        }
+        public static void Get(lua_State L, int index, out double v) => v = (double)luaL_checknumber(L, index);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Get(lua_State L, int index, out UIntPtr v)
-        {
-            v = (UIntPtr)luaL_checkinteger(L, index);
-        }
+        public static void Get(lua_State L, int index, out string v) => v = lua_checkstring(L, index);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Get(lua_State L, int index, out int v)
-        {
-            v = (int)luaL_checknumber(L, index);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Get(lua_State L, int index, out uint v)
-        {
-            v = (uint)luaL_checkinteger(L, index);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Get(lua_State L, int index, out short v)
-        {
-            v = (short)luaL_checkinteger(L, index);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Get(lua_State L, int index, out ushort v)
-        {
-            v = (ushort)luaL_checkinteger(L, index);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Get(lua_State L, int index, out char v)
-        {
-            v = (char)luaL_checkinteger(L, index);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Get(lua_State L, int index, out sbyte v)
-        {
-            v = (sbyte)luaL_checkinteger(L, index);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Get(lua_State L, int index, out byte v)
-        {
-            v = (byte)luaL_checkinteger(L, index);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Get(lua_State L, int index, out float v)
-        {
-            v = (float)luaL_checknumber(L, index);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Get(lua_State L, int index, out double v)
-        {
-            v = (double)luaL_checknumber(L, index);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Get(lua_State L, int index, out string v)
-        {
-            v = lua_checkstring(L, index);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Get(lua_State L, int index, out LuaNativeFunction v)
-        {
-            v = lua_tocfunction(L, index).ToLuaFunction();
-        }
+        public static void Get(lua_State L, int index, out LuaNativeFunction v) => v = lua_tocfunction(L, index).ToLuaFunction();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Get(lua_State L, int index, out LuaRef v)
@@ -696,22 +553,13 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Get(lua_State L, int index, out object v)
-        {
-            v = SharpObject.Get<object>(L, index);
-        }
+        public static void Get(lua_State L, int index, out object v) => v = SharpObject.Get<object>(L, index);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Get<T>(lua_State L, int index, out T v)
-        {
-            v = SharpObject.Get<T>(L, index);
-        }
+        public static void Get<T>(lua_State L, int index, out T v) => v = SharpObject.Get<T>(L, index);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void GetT<T>(lua_State L, int index, out T v)
-        {
-            v = Get<T>(L, index);
-        }
+        public static void GetT<T>(lua_State L, int index, out T v) => v = Get<T>(L, index);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T Get<T>(lua_State L, int index)
@@ -869,111 +717,99 @@ namespace SharpLuna
 
         }
 
-        public static T Pop<T>(lua_State L)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool CheckType(lua_State L, int index, Type t)
         {
-            T v = Get<T>(L, -1);
-            lua_pop(L, 1);
-            return v;
-        }
+            LuaType luaType = lua_type(L, index);
 
-        public static object[] PopValues(lua_State L, int oldTop)
-        {
-            int newTop = lua_gettop(L);
-
-            if (oldTop == newTop)
-                return null;
-
-            var returnValues = new List<object>();
-            for (int i = oldTop + 1; i <= newTop; i++)
-                returnValues.Add(GetObject(L, i));
-
-            lua_settop(L, oldTop);
-            return returnValues.ToArray();
-        }
-
-        public unsafe static void PushGlobal(lua_State L, string name)
-        {
-            var p = Marshal.StringToHGlobalAnsi(name);
-            PushGlobal(L, (byte*)p);
-            Marshal.FreeHGlobal(p);
-        }
-
-        public static void PopToGlobal(lua_State L, string name)
-        {
-            var p = Marshal.StringToHGlobalAnsi(name);
-            PopToGlobal(L, (byte*)p);
-            Marshal.FreeHGlobal(p);
-        }
-
-        static byte* strchr(byte* p, char ch)
-        {
-            if (p == null)
-            {
-                return null;
-            }
-            while (*p != 0)
-            {
-                if (*p == ch)
-                {
-                    return p;
-                }
-                p = p + 1;
-            }
-            //strchr for '\0' should succeed - the while loop terminates
-            //*p == 0, but ch also == 0, so NULL terminator address is returned
-            return (*p == ch) ? p : null;
-        }
-
-        private unsafe static void PushGlobal(lua_State L, byte* name)
-        {
-            byte* p = strchr(name, '.');
-            if (p != null)
-            {
-                lua_pushglobaltable(L);                 // <table>
-                while (p != null)
-                {
-                    lua_pushlstring(L, name, p - name); // <table> <key>
-
-                    lua_gettable(L, -2);                // <table> <table_value>
-                    lua_remove(L, -2);                  // <table_value>
-                    if (lua_isnoneornil(L, -1)) return;
-                    name = p + 1;
-                    p = strchr(name, '.');
-                }
-                lua_pushstring(L, name);                // <last_table> <key>
-                lua_gettable(L, -2);                    // <last_table> <table_value>
-                lua_remove(L, -2);                      // <table_value>
-            }
+            if (t == typeof(bool))
+                return luaType == LuaType.Boolean;
+            else if (t == typeof(string))
+                return luaType == LuaType.String;
+            else if (t.IsPrimitive)
+                return luaType == LuaType.Number;
+            else if (t == typeof(LuaNativeFunction))
+                return luaType == LuaType.Function;
+            else if (t == typeof(IntPtr))
+                return luaType == LuaType.Number;
+            else if (t == typeof(UIntPtr))
+                return luaType == LuaType.Number;
+            else if (t == typeof(LuaRef))
+                return luaType == LuaType.Table || luaType == LuaType.Function;
+            else if (t == typeof(LuaByteBuffer))
+                return luaType == LuaType.String;
             else
             {
-                lua_getglobal(L, name);
+                return luaType == LuaType.UserData;
             }
+
         }
 
-        private static unsafe void PopToGlobal(lua_State L, byte* name)
+        public static bool CheckType(lua_State L, int index, Type[] types)
         {
-            byte* p = strchr(name, '.');
-            if (p != null)
+            for (int i = 0; i < types.Length; i++)
             {
-                lua_pushglobaltable(L);                 // <value> <table>
-                while (p != null)
+                if (!CheckType(L, index, types[i]))
                 {
-                    lua_pushlstring(L, name, p - name); // <value> <table> <key>
-                    lua_gettable(L, -2);                // <value> <table> <table_value>
-                    lua_remove(L, -2);                  // <value> <table_value>
-                    name = p + 1;
-                    p = strchr(name, '.');
+                    return false;
                 }
-                lua_pushstring(L, name);                // <value> <last_table> <name>
-                lua_pushvalue(L, -3);                   // <value> <last_table> <name> <value>
-                lua_settable(L, -3);                    // <value> <last_table>
-                lua_pop(L, 2);
             }
-            else
-            {
-                lua_setglobal(L, name);
-            }
+
+            return true;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool CheckType<T>(lua_State L, int index)
+        {
+            return CheckType(L, index, typeof(T));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool CheckType<T1, T2>(lua_State L, int index)
+        {
+            return CheckType(L, index, typeof(T1)) && CheckType(L, index + 1, typeof(T2));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool CheckType<T1, T2, T3>(lua_State L, int index)
+        {
+            return CheckType(L, index, typeof(T1)) && CheckType(L, index + 1, typeof(T2)) && CheckType(L, index + 2, typeof(T3));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool CheckType<T1, T2, T3, T4>(lua_State L, int index)
+        {
+            return CheckType(L, index, typeof(T1)) && CheckType(L, index + 1, typeof(T2)) && CheckType(L, index + 2, typeof(T3)) && CheckType(L, index + 3, typeof(T4));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool CheckType<T1, T2, T3, T4, T5>(lua_State L, int index)
+        {
+            return CheckType(L, index, typeof(T1)) && CheckType(L, index + 1, typeof(T2)) && CheckType(L, index + 2, typeof(T3)) && CheckType(L, index + 3, typeof(T4))
+                && CheckType(L, index + 4, typeof(T5));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool CheckType<T1, T2, T3, T4, T5, T6>(lua_State L, int index)
+        {
+            return CheckType(L, index, typeof(T1)) && CheckType(L, index + 1, typeof(T2)) && CheckType(L, index + 2, typeof(T3)) && CheckType(L, index + 3, typeof(T4))
+                && CheckType(L, index + 4, typeof(T5)) && CheckType(L, index + 5, typeof(T6));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool CheckType<T1, T2, T3, T4, T5, T6, T7>(lua_State L, int index)
+        {
+            return CheckType(L, index, typeof(T1)) && CheckType(L, index + 1, typeof(T2)) && CheckType(L, index + 2, typeof(T3)) && CheckType(L, index + 3, typeof(T4))
+                && CheckType(L, index + 4, typeof(T5)) && CheckType(L, index + 5, typeof(T6)) && CheckType(L, index + 6, typeof(T7));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool CheckType<T1, T2, T3, T4, T5, T6, T7, T8>(lua_State L, int index)
+        {
+            return CheckType(L, index, typeof(T1)) && CheckType(L, index + 1, typeof(T2)) && CheckType(L, index + 2, typeof(T3)) && CheckType(L, index + 3, typeof(T4))
+                && CheckType(L, index + 4, typeof(T5)) && CheckType(L, index + 5, typeof(T6)) && CheckType(L, index + 6, typeof(T7)) && CheckType(L, index + 7, typeof(T8));
+        }
+
 
         #region LUA_DEBUG
         public static bool GetInfo(lua_State L, string what, IntPtr ar)
