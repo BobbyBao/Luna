@@ -21,7 +21,7 @@ public static class LuaCoroutine
         func _resume(co) {
             if comap[co] {
                 comap[co] = nil
-                let flag, msg = coroutine.resume(co)
+                var flag, msg = coroutine.resume(co)
                     
                 if not flag {
                     msg = debug.traceback(co, msg)
@@ -70,9 +70,9 @@ public static class LuaCoroutine
             return coroutine.yield()
         }
 
-        func StartCoroutine(func) {
-            let co = coroutine.create(func)                       
-            let flag, msg = coroutine.resume(co)
+        func StartCoroutine(fn) {
+            let co = coroutine.create(fn)                       
+            var flag, msg = coroutine.resume(co)
 
             if not flag {
                 msg = debug.traceback(co, msg)

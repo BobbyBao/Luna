@@ -191,6 +191,10 @@ namespace SharpLuna
                 lua_pushstring(L, (string)obj);
             else if (t == typeof(LuaNativeFunction))
                 lua_pushcfunction(L, (LuaNativeFunction)obj);
+            else if (t == typeof(byte[]))
+                Push(L, (byte[])obj);
+            else if (t == typeof(LuaByteBuffer))
+                Push(L, (LuaByteBuffer)obj);           
             else if (t == typeof(LuaRef))
             {
                 var luaRef = (LuaRef)obj;

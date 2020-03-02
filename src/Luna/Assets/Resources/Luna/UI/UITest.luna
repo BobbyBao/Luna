@@ -34,16 +34,14 @@ class UITest : UIPanel {
         else if go == self.btn3 {
             self.testPerfPanel.show()
         }
-        else if go == self.btn4 {
-        
+        else if go == self.btn4 {        
             UIManager.Instance.OpenPanel("ui/TestBehaviourPanel", func(go)  { });
-            
         }
         else if go == self.btn5 {
             dofile("test/test_timer")          
         }
-        else if go == self.btn6 {
-        
+        else if go == self.btn6 {        
+            dofile("test/test_coroutine") 
         }
     }
 

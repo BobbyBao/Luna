@@ -26,7 +26,6 @@ namespace SharpLuna
         public bool IsExecuting => _executing;
         private bool _executing;
 
-        public bool UseTraceback { get; set; } = false;
 
         public static Action<string> Print { get; set; }
         public static Func<string, byte[]> ReadBytes { get; set; }
@@ -310,26 +309,6 @@ namespace SharpLuna
             throw new LuaScriptException(err.ToString(), string.Empty);
         }
 
-        private static int PushDebugTraceback(lua_State L, int argCount)
-        {
-            lua_getglobal(L, "debug");
-            lua_getfield(L, -1, "traceback");
-            lua_remove(L, -2);
-            int errIndex = -argCount - 2;
-            lua_insert(L, errIndex);
-            return errIndex;
-        }
-
-        public string GetDebugTraceback()
-        {
-            int oldTop = lua_gettop(L);
-            lua_getglobal(L, "debug"); // stack: debug
-            lua_getfield(L, -1, "traceback"); // stack: debug,traceback
-            lua_remove(L, -2); // stack: traceback
-            lua_pcall(L, 0, -1, 0);
-            return PopValues(L, oldTop)[0] as string;            
-        }
-
         public object[] DoString(byte[] chunk, string chunkName = "chunk")
         {
             int oldTop = lua_gettop(L);
@@ -411,12 +390,12 @@ namespace SharpLuna
                     ThrowExceptionFromError(oldTop);
 
                 return PopValues(L, oldTop);
-            }
-            //catch(Exception e)
-            //{
-            //    Debug.LogError(e.Message);
-            //    return null;
-            //}
+            }/*
+            catch(Exception e)
+            {
+                Debug.LogError(e.Message);
+                return null;
+            }*/
             finally
             {
                 _executing = false;
@@ -666,7 +645,7 @@ func __class(c, className, base) {
         return c
     }
 
-    mt.__call = func(class_tbl, ...)
+    mt.__call = func(cls_table, ...)
     {
         var obj = { }
         if c.init {

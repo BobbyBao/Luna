@@ -1,0 +1,52 @@
+import "Coroutine"
+
+local func testCo2() {
+    print "11"
+    coroutine.step()
+    print "12"
+}
+
+local func testCo1() {
+    print "1"
+    coroutine.step()
+
+    testCo2()
+
+    print "2"
+    coroutine.step() 
+    print "3"
+}
+
+var co = coroutine.start(testCo1)
+
+func fib(n) {
+    var a, b = 0, 1
+    while n > 0 {
+        a, b = b, a + b
+        n = n - 1
+    }
+
+    return a
+}
+
+func coFunc() {
+    print('Coroutine started')    
+    for i = 0, 10, 1 {
+        print(fib(i))                    
+        coroutine.wait(0.1)						
+    }
+
+	print("current frameCount: "..Time.frameCount)
+	coroutine.step()
+	print("yield frameCount: "..Time.frameCount)
+
+    let WWW = UnityEngine.WWW
+	var www = WWW("http://www.baidu.com")
+	coroutine.www(www)
+    print(www.bytes)
+	//var s = tolua.tolstring(www.bytes)
+	//print(s:sub(1, 128))
+    print('Coroutine ended')
+}
+
+coroutine.start(coFunc)

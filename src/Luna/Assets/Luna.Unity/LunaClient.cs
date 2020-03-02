@@ -33,7 +33,7 @@ namespace SharpLuna.Unity
             typeof(Input),
 
             typeof(Time),
-
+            typeof(WWW),
             typeof(Space),
             typeof(UnityEngine.Rendering.ShadowCastingMode),
         };
@@ -160,6 +160,7 @@ namespace SharpLuna.Unity
 
         protected virtual void OnPostInit()
         {
+            LuaCoroutine.Register(Luna, this);
         }
 
         protected virtual IEnumerator OnStart()
@@ -200,7 +201,7 @@ namespace SharpLuna.Unity
         {
             if (lateUpdate)
             {
-                lateUpdate.Call(Time.fixedDeltaTime);
+                lateUpdate.Call();
             }
 
         }

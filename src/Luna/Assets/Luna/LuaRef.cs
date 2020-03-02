@@ -364,7 +364,8 @@ namespace SharpLuna
             }
             catch(Exception ex)
             {
-                Debug.LogError(ex.Message);
+                ThrowError(L, ex.Message);
+                //Debug.LogError(ex.Message);
             }
         }
 

@@ -35,7 +35,7 @@ namespace SharpLuna
 #endif
         internal static Encoding Encoding { get; set; } = Encoding.UTF8;
         internal static HashSet<object> savedFn = new HashSet<object>();
-
+        public static bool UseTraceback { get; set; } = false;
         static ConcurrentDictionary<IntPtr, List<IDisposable>> luaStates = new ConcurrentDictionary<IntPtr, List<IDisposable>>();
 
         public static lua_State newstate()
@@ -255,6 +255,67 @@ namespace SharpLuna
             Marshal.FreeHGlobal(p);
         }
 
+
+        public static int PushDebugTraceback(lua_State L, int argCount)
+        {
+            lua_getglobal(L, "debug");
+            lua_getfield(L, -1, "traceback");
+            lua_remove(L, -2);
+            int errIndex = -argCount - 2;
+            lua_insert(L, errIndex);
+            return errIndex;
+        }
+
+        public static string GetDebugTraceback(lua_State L)
+        {
+            int oldTop = lua_gettop(L);
+            lua_getglobal(L, "debug"); // stack: debug
+            lua_getfield(L, -1, "traceback"); // stack: debug,traceback
+            lua_remove(L, -2); // stack: traceback
+            lua_pcall(L, 0, -1, 0);
+            return PopValues(L, oldTop)[0] as string;
+        }
+
+        public static void ThrowError(lua_State L, object e)
+        {
+            // We use this to remove anything pushed by luaL_where
+            int oldTop = lua_gettop(L);
+
+            // Stack frame #1 is our C# wrapper, so not very interesting to the user
+            // Stack frame #2 must be the lua code that called us, so that's what we want to use
+            luaL_where(L, 1);
+            var curlev = PopValues(L, oldTop);
+
+            // Determine the position in the script where the exception was triggered
+            string errLocation = string.Empty;
+
+            if (curlev.Length > 0)
+                errLocation = curlev[0].ToString();
+
+            string message = e as string;
+
+            if (message != null)
+            {
+                // Wrap Lua error (just a string) and store the error location
+                if (UseTraceback)
+                    message += Environment.NewLine + GetDebugTraceback(L);
+                e = new LuaScriptException(message, errLocation);
+            }
+            else
+            {
+                var ex = e as Exception;
+
+                if (ex != null)
+                {
+                    // Wrap generic .NET exception as an InnerException and store the error location
+                    if (UseTraceback) ex.Data["Traceback"] = GetDebugTraceback(L);
+                    e = new LuaScriptException(ex, errLocation);
+                }
+            }
+
+            Push(L, e);
+            lua_error(L);
+        }
 
     }
 }

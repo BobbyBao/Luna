@@ -1,9 +1,11 @@
+import "Timer"
+
 let create = coroutine.create
 let running = coroutine.running
 let resume = coroutine.resume
 let yield = coroutine.yield
 let error = error
-let unpack = unpack
+let unpack = table.unpack
 let debug = debug
 let FrameTimer = FrameTimer
 let CoTimer = CoTimer
@@ -12,7 +14,8 @@ let comap = {}
 let pool = {}
 setmetatable(comap, {__mode = "kv"})
 
-func coroutine.start(f, ...) {
+func coroutine.start(f, ...){
+	
 	let co = create(f)
 	
 	if running() == nil {
@@ -26,8 +29,8 @@ func coroutine.start(f, ...) {
 		var timer = nil
 		
 		let action = func()	{											
-			let flag, msg = resume(co, unpack(args))			
-			timer.func = nil
+			let flag, msg = resume(co, table.unpack(args))			
+			timer.fn = nil
 			table.insert(pool, timer)
 	
 			if not flag {														
@@ -52,10 +55,10 @@ func coroutine.start(f, ...) {
 func coroutine.wait(t, co, ...) {
 	let args = {...}
 	co = co or running()		
-	let timer = nil
+	var timer = nil
 		
 	let action = func()	{		
-		let flag, msg = resume(co, unpack(args))
+		let flag, msg = resume(co, table.unpack(args))
 		
 		if not flag {	
 			timer.stop()						
@@ -73,11 +76,11 @@ func coroutine.wait(t, co, ...) {
 func coroutine.step(t, co, ...) {
 	let args = {...}
 	co = co or running()		
-	let timer = nil
+	var timer = nil
 	
 	let action = func()	{				
-		let flag, msg = resume(co, unpack(args))
-		timer.func = nil
+		let flag, msg = resume(co, table.unpack(args))
+		timer.fn = nil
 		table.insert(pool, timer)
 	
 		if not flag {																		
@@ -100,7 +103,7 @@ func coroutine.step(t, co, ...) {
 
 func coroutine.www(www, co)	{		
 	co = co or running()			
-	let timer = nil			
+	var timer = nil			
 			
 	let action = func()	{		
 		if not www.isDone {		
@@ -109,7 +112,7 @@ func coroutine.www(www, co)	{
 				
 		timer.stop()	
 		let flag, msg = resume(co)			
-		timer.func = nil
+		timer.fn = nil
 		table.insert(pool, timer)	
 			
 		if not flag {												
@@ -132,7 +135,7 @@ func coroutine.www(www, co)	{
 func coroutine.stop(co) {
  	let timer = comap[co]
 
- 	if timer ~= nil {
+ 	if timer != nil {
  		comap[co] = nil
  		timer.stop() 		
  	}

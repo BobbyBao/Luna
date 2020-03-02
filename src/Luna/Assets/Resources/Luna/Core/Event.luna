@@ -103,7 +103,7 @@ class Event {
 
 Event.events = {}
 
-Event.get = func(self, name) {
+func Event.get(self, name) {
 	var e = Event.events[name]
 	if not e {
 		e = Event(name)

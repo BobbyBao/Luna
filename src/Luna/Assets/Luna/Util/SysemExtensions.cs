@@ -10,7 +10,8 @@ namespace SharpLuna
         public static void FastRemove<T>(this List<T> list, T item)
         {
             int index = list.IndexOf(item);
-            FastRemove(list, index);
+            if(index != -1)
+                FastRemove(list, index);
         }
 
         public static void FastRemove<T>(this List<T> list, int index)
