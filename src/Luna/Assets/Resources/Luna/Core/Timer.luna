@@ -1,6 +1,5 @@
 let setmetatable = setmetatable
-let UpdateBeat = UpdateBeat
-let CoUpdateBeat = CoUpdateBeat
+
 let Time = Time
 
 class BaseTimer {
@@ -23,18 +22,18 @@ class BaseTimer {
 
 	func start() {		
 		if not self.handle {	
-			self.handle = Event.createListener(self.eventType, self.update, self)
+			self.handle = Events.createListener(self.eventType, self.update, self)
 		}
 		
 		self.running = true
-		Event.addListener(self.eventType, self.handle)	
+		Events.addListener(self.eventType, self.handle)	
 	}
 
 	func stop() {
 		self.running = false
 
 		if self.handle {
-			Event.removeListener(self.eventType, self.handle)	
+			Events.removeListener(self.eventType, self.handle)	
 		}
 	}
 
@@ -42,7 +41,6 @@ class BaseTimer {
 
 class Timer : BaseTimer {
 
-	//scale false 采用deltaTime计时，true 采用 unscaledDeltaTime计时
 	init (fn, duration, loop, scale) {
 		super.init(fn, duration, loop, "Update")
 		scale = scale or false and true	
@@ -89,7 +87,7 @@ class Timer : BaseTimer {
 class FrameTimer : BaseTimer {
 
 	init (fn, count, loop) {
-		super.init(fn, count, loop, "CoUpdate")
+		super.init(fn, count, loop, "CoroutineUpdate")
 		self.count = Time.frameCount + count
 	}
 
@@ -123,7 +121,7 @@ class FrameTimer : BaseTimer {
 class CoTimer : BaseTimer { 
 
 	init(fn, duration, loop) {
-		super.init(fn, duration, loop, "CoUpdate")
+		super.init(fn, duration, loop, "CoroutineUpdate")
 		self.time = duration	
 	}
 

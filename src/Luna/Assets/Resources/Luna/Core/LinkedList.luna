@@ -114,6 +114,8 @@ class LinkedList {
 		return nil
 	}
 
+	func iter() { return self.next, self, self }
+
 	func prev(iter) {
 		let _prev = iter._prev
 		if _prev != self {
@@ -122,6 +124,8 @@ class LinkedList {
 
 		return nil
 	}
+
+	func riter() { return self.prev, self, self }
 
 	func erase(v) {
 		let iter = self.find(v)
@@ -170,5 +174,3 @@ class LinkedList {
 	}
 }
 
-ilist = func(_list) { return LinkedList.next, _list, _list }
-rilist = func(_list) { return LinkedList.prev, _list, _list }

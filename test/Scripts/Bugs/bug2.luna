@@ -1,0 +1,9 @@
+
+//classÇ¶Ì×
+
+
+class ClassA {
+
+	class classB {
+	}
+}

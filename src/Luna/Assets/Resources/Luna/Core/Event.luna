@@ -8,7 +8,6 @@ let assert = assert
 let rawget = rawget
 let error = error
 let print = print
-let ilist = ilist
 
 let _pcall = {}
 
@@ -42,7 +41,7 @@ class Event {
 		self.lock = true
 		let ilist = ilist	
 
-		for i, f in ilist(_list) {		
+		for i, f in _list.iter() {		
 			self.current = i			
 			//print(self, f)				
 			let flag, msg = f(...)
@@ -100,56 +99,53 @@ class Event {
 
 }
 
-
-Event.events = {}
-
-func Event.get(self, name) {
-	var e = Event.events[name]
-	if not e {
-		e = Event(name)
-		Event.events[name] = e
+class Events {
+var t = {}
+	func get(name) {
+		var e = Events[name]
+		if not e {
+			e = Event(name)
+			Events[name] = e
+		}
+		return e
 	}
-	return e
+
+	func createListener(name, fn, obj) {
+		let evt = Events.get(name)
+		return evt.create(fn, obj)
+	}
+
+	func addListener(name, handle) {	
+		let evt = Events.get(name)
+		evt.add(handle)
+	}
+
+	func removeListener(name, handle) {
+		let evt = Events.get(name)
+		evt.remove(handle)
+	}
+
 }
 
-func Event.createListener(self, name, fn, obj) {
-	let evt = Event.get(name)
-	return evt.create(fn, obj)
-}
-
-func Event.addListener(self, name, handle) {	
-	let evt = Event.get(name)
-	evt.add(handle)
-}
-
-func Event.removeListener(self, name, handle) {
-	let evt = Event.get(name)
-	evt.remove(handle)
-}
-
-UpdateBeat 		= Event.get("Update")
-LateUpdateBeat	= Event.get("LateUpdate")
-FixedUpdateBeat	= Event.get("FixedUpdate")
-CoUpdateBeat	= Event.get("CoUpdate")				//只在协程使用
 
 let Time = Time
-let UpdateBeat = UpdateBeat
-let LateUpdateBeat = LateUpdateBeat
-let FixedUpdateBeat = FixedUpdateBeat
-let CoUpdateBeat = CoUpdateBeat
+let updateEvent 	= Events.get("Update")
+let lateUpdateEvent	= Events.get("LateUpdate")
+let fixedUpdateEvent = Events.get("FixedUpdate")
+let coroutineEvent	= Events.get("CoroutineUpdate")
 
 func Update(deltaTime, unscaledDeltaTime) {
-	Time.SetDeltaTime(deltaTime, unscaledDeltaTime)		
-	UpdateBeat.invoke()	
-}
-
-func LateUpdate() {	
-	LateUpdateBeat.invoke()		
-	CoUpdateBeat.invoke()	
-	Time.SetFrameCount()			
+	Time.setDeltaTime(deltaTime, unscaledDeltaTime)		
+	updateEvent.invoke()	
 }
 
 func FixedUpdate(fixedDeltaTime) {
-	Time.SetFixedDelta(fixedDeltaTime)
-	FixedUpdateBeat.invoke()
+	Time.setFixedDelta(fixedDeltaTime)
+	fixedUpdateEvent.invoke()
+}
+
+func LateUpdate() {	
+	lateUpdateEvent.invoke()		
+	coroutineEvent.invoke()	
+	Time.setFrameCount()			
 }

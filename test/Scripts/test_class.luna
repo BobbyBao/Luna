@@ -6,9 +6,18 @@ class BaseObj {
 	func print() {
 		print(self.name, self.id)
 	}
+
+	staticVar = 100
+
+	func staticFunc() {
+		print "static func"
+	}
 }
 
-BaseObj.staticVar = 100
+//BaseObj.staticVar = 100
+
+print("static member : ", BaseObj.staticVar)
+BaseObj.staticFunc()
 
 //测试DSL风格构造
 
@@ -25,7 +34,6 @@ t.print()
 
 //测试变量
 
-print(BaseObj.staticVar)
 print(t.staticVar)
 
 t.staticVar = 200

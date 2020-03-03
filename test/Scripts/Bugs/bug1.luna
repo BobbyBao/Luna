@@ -1,0 +1,17 @@
+
+//table类型的成员不能做构造初始化{}
+
+
+class ClassA {
+
+	var t = {} //
+	func test() {
+		print "test"
+	}
+}
+
+var a = ClassA() 
+a.test()
+
+ClassA.test() {
+}

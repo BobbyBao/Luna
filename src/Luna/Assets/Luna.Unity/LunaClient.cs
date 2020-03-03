@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Networking;
 using UnityEngine.UI;
 
 namespace SharpLuna.Unity
@@ -34,6 +35,7 @@ namespace SharpLuna.Unity
 
             typeof(Time),
             typeof(WWW),
+            typeof(UnityWebRequest),
             typeof(Space),
             typeof(UnityEngine.Rendering.ShadowCastingMode),
         };
