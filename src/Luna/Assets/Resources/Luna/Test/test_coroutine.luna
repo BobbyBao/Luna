@@ -1,5 +1,5 @@
 import "Coroutine"
-
+/*
 local func testCo2() {
     print "11"
     coroutine.step()
@@ -50,3 +50,24 @@ func coFunc() {
 }
 
 coroutine.start(coFunc)
+*/
+func CoExample() {          
+    //WaitForSeconds(1)
+    print('WaitForSeconds end time: '.. UnityEngine.Time.time)        
+    WaitForFixedUpdate() 
+    print('WaitForFixedUpdate end frameCount: '..UnityEngine.Time.frameCount)
+    WaitForEndOfFrame()
+    print('WaitForEndOfFrame end frameCount: '..UnityEngine.Time.frameCount)
+/*
+    Yield(nil)
+    print('yield null end frameCount: '..UnityEngine.Time.frameCount)
+    Yield(0)
+    print('yield(0) end frameCime: '..UnityEngine.Time.frameCount)
+    var www = UnityEngine.WWW('http://www.baidu.com')
+    Yield(www)
+    print('yield(www) end time: '.. UnityEngine.Time.time)
+    print(www.bytes)
+    print('coroutine over')*/
+}
+           
+StartCoroutine(CoExample)                                   

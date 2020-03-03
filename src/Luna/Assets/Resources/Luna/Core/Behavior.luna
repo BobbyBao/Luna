@@ -38,12 +38,12 @@ class Behavior {
         self.children.remove(child)    
     }
 
-    func transit(behaviour) {    
+    func activate(behaviour) {    
         self.activeList.push(behaviour)
         behaviour.enter()
     }
 
-    func deactive(behaviour) {    
+    func deactivate(behaviour) {    
         self.activeList.remove(behaviour)
         behaviour.exit()
     }

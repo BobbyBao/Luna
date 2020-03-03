@@ -148,7 +148,8 @@ public static class LuaCoroutine
     static IEnumerator CoWaitForFixedUpdate(LuaRef func)
     {
         yield return new WaitForFixedUpdate();
-        func.Call();
+        if(func)
+            func.Call();
     }
 
     [AOT.MonoPInvokeCallbackAttribute(typeof(LuaNativeFunction))]

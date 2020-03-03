@@ -47,15 +47,15 @@ class Time {
 	
 	func setDeltaTime(deltaTime, unscaledDeltaTime) {
 	
-		let _Time = Time
-		_Time.deltaTime = deltaTime	
-		_Time.unscaledDeltaTime = unscaledDeltaTime
+		let _time = Time
+		_time.deltaTime = deltaTime	
+		_time.unscaledDeltaTime = unscaledDeltaTime
 		counter = counter - 1
 
-		_Time.time = _Time.time + deltaTime
-		_Time.realtimeSinceStartup = _Time.realtimeSinceStartup + unscaledDeltaTime
-		_Time.timeSinceLevelLoad = _Time.timeSinceLevelLoad + deltaTime	
-		_Time.unscaledTime = _Time.unscaledTime + unscaledDeltaTime 
+		_time.time = _time.time + deltaTime
+		_time.realtimeSinceStartup = _time.realtimeSinceStartup + unscaledDeltaTime
+		_time.timeSinceLevelLoad = _time.timeSinceLevelLoad + deltaTime	
+		_time.unscaledTime = _time.unscaledTime + unscaledDeltaTime 
 		
 	}
 

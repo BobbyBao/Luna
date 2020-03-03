@@ -45,13 +45,13 @@ class UIPanel : Behavior {
 
     func show() {
         if self.parent {
-            self.parent.transit(self)
+            self.parent.activate(self)
         }
     }
 
     func hide() {
         if self.parent {
-            self.parent.deactive(self)
+            self.parent.deactivate(self)
         }
     }
 

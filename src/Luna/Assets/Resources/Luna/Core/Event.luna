@@ -100,7 +100,6 @@ class Event {
 }
 
 class Events {
-var t = {}
 	func get(name) {
 		var e = Events[name]
 		if not e {

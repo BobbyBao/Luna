@@ -37,7 +37,7 @@ public class ResourceManager : MonoBehaviour
 
     public static void Free(GameObject obj)
     {
-
+        GameObject.Destroy(obj);
     }
 
     public static T Load<T>(string filePath) where T : UnityEngine.Object

@@ -8,7 +8,7 @@ class GameStateManager : Behavior {
         self.currentState = nil
     }
 
-    func transit(state) {    
+    func activate(state) {    
 
         if self.currentState {
             self.currentState.exit()
@@ -21,7 +21,7 @@ class GameStateManager : Behavior {
         }
     }
 
-    func deactive(state) {
+    func deactivate(state) {
         if state == self.currentState {
             self.currentState = nil
             state.exit()

@@ -14,7 +14,7 @@ game.addChild(mainState)
 
 let test = UITest()
 mainState.addChild(test)
-mainState.transit(test)
+mainState.activate(test)
 
 /*
 ResourceManager.LoadObject("UI/TestPanel", func (go) {

@@ -9,6 +9,9 @@
     <Import_RootNamespace>Test</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Scripts\Bugs\bug1.luna" />
+    <None Include="$(MSBuildThisFileDirectory)Scripts\Bugs\bug2.luna" />
+    <None Include="$(MSBuildThisFileDirectory)Scripts\Bugs\bug3.luna" />
     <None Include="$(MSBuildThisFileDirectory)Scripts\fib.luna">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
