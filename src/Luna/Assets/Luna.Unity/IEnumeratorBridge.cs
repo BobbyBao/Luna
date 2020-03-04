@@ -43,7 +43,7 @@ namespace SharpLuna
                 ThrowExceptionFromError(L, err_func - 1);
 
             int __gen_ret = lua_toboolean(L, err_func + 1);
-            lua_settop(L, err_func - 1/* - 1*/);
+            lua_settop(L, err_func - 1);
             return __gen_ret != 0;
         }
 

@@ -1,36 +1,5 @@
 let rawget = rawget
-let uTime = UnityEngine.Time
-
-var counter = 1
-
-
-var _set = {
-
-	fixedDeltaTime = func (v) {
-		Time.fixedDeltaTime = v
-		uTime.fixedDeltaTime = v
-	},
-
-	maximumDeltaTime = func (v) {
-		Time.maximumDeltaTime = v
-		uTime.maximumDeltaTime = v
-	},
-
-	timeScale = func (v) {
-		Time.timeScale = v
-		uTime.timeScale = v
-	},
-
-	captureFramerate = func (v) {
-		Time.captureFramerate = v
-		uTime.captureFramerate = v
-	},
-
-	timeSinceLevelLoad = func (v) {
-		Time.timeSinceLevelLoad = v
-	},
-
-}
+let UnityTime = UnityEngine.Time
 
 class Time {
 	deltaTime			= 0
@@ -46,33 +15,28 @@ class Time {
 	unscaledTime		= 0
 	
 	func setDeltaTime(deltaTime, unscaledDeltaTime) {
-	
-		let _time = Time
-		_time.deltaTime = deltaTime	
-		_time.unscaledDeltaTime = unscaledDeltaTime
-		counter = counter - 1
-
-		_time.time = _time.time + deltaTime
-		_time.realtimeSinceStartup = _time.realtimeSinceStartup + unscaledDeltaTime
-		_time.timeSinceLevelLoad = _time.timeSinceLevelLoad + deltaTime	
-		_time.unscaledTime = _time.unscaledTime + unscaledDeltaTime 
-		
+		self.deltaTime = deltaTime	
+		self.unscaledDeltaTime = unscaledDeltaTime
+		self.time = self.time + deltaTime
+		self.realtimeSinceStartup = self.realtimeSinceStartup + unscaledDeltaTime
+		self.timeSinceLevelLoad = self.timeSinceLevelLoad + deltaTime	
+		self.unscaledTime = self.unscaledTime + unscaledDeltaTime 
 	}
 
 	func setFixedDelta(fixedDeltaTime)	{
-		Time.deltaTime = fixedDeltaTime
-		Time.fixedDeltaTime = fixedDeltaTime
-		Time.fixedTime = Time.fixedTime + fixedDeltaTime
+		self.deltaTime = fixedDeltaTime
+		self.fixedDeltaTime = fixedDeltaTime
+		self.fixedTime = self.fixedTime + fixedDeltaTime
 	}
 
 	func setFrameCount() {
-		Time.frameCount = Time.frameCount + 1
+		self.frameCount = self.frameCount + 1
 	}
 
 	func setTimeScale(scale) {
-		let last = Time.timeScale
-		Time.timeScale = scale
-		uTime.timeScale = scale
+		let last = self.timeScale
+		self.timeScale = scale
+		UnityTime.timeScale = scale
 		return last
 	}
 
@@ -83,11 +47,39 @@ class Time {
 			return v
 		}
 
-		return uTime.__index(uTime, k)	
+		return UnityTime.__index(UnityTime, k)	
+	}
+
+	var _set = {
+
+		fixedDeltaTime = func (v) {
+			Time.fixedDeltaTime = v
+			UnityTime.fixedDeltaTime = v
+		},
+
+		maximumDeltaTime = func (v) {
+			Time.maximumDeltaTime = v
+			UnityTime.maximumDeltaTime = v
+		},
+
+		timeScale = func (v) {
+			Time.timeScale = v
+			UnityTime.timeScale = v
+		},
+
+		captureFramerate = func (v) {
+			Time.captureFramerate = v
+			UnityTime.captureFramerate = v
+		},
+
+		timeSinceLevelLoad = func (v) {
+			Time.timeSinceLevelLoad = v
+		},
+
 	}
 
 	func __newindex(t, k, v) {
-		let fn = rawget(_set, k)
+		let fn = rawget(t._set, k)
 
 		if fn {
 			return fn(v)
@@ -96,15 +88,15 @@ class Time {
 
 }
 
-Time.time = uTime.time
-Time.timeSinceLevelLoad = uTime.timeSinceLevelLoad
-Time.unscaledTime = uTime.unscaledTime
-Time.realtimeSinceStartup = uTime.realtimeSinceStartup
-Time.frameCount = uTime.frameCount
+
+if UnityTime != nil {
+	Time.time = UnityTime.time
+	Time.timeSinceLevelLoad = UnityTime.timeSinceLevelLoad
+	Time.unscaledTime = UnityTime.unscaledTime
+	Time.realtimeSinceStartup = UnityTime.realtimeSinceStartup
+	Time.frameCount = UnityTime.frameCount
+	Time.maximumDeltaTime = UnityTime.maximumDeltaTime	
+	Time.timeScale = UnityTime.timeScale	
+}
 
 UnityEngine.Time = Time
-
-if uTime != nil {
-	Time.maximumDeltaTime = uTime.maximumDeltaTime	
-	Time.timeScale = uTime.timeScale	
-}

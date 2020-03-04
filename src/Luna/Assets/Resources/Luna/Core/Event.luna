@@ -132,7 +132,6 @@ let Time = Time
 let updateEvent 	= Events.create("Update")
 let lateUpdateEvent	= Events.create("LateUpdate")
 let fixedUpdateEvent = Events.create("FixedUpdate")
-let coroutineEvent	= Events.create("CoroutineUpdate")
 
 func Update(deltaTime, unscaledDeltaTime) {
 	Time.setDeltaTime(deltaTime, unscaledDeltaTime)		
@@ -145,7 +144,6 @@ func FixedUpdate(fixedDeltaTime) {
 }
 
 func LateUpdate() {	
-	lateUpdateEvent.invoke()		
-	coroutineEvent.invoke()	
+	lateUpdateEvent.invoke()	
 	Time.setFrameCount()			
 }

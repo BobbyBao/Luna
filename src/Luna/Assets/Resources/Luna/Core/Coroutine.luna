@@ -1,142 +1,73 @@
-import "Timer"
 
-let create = coroutine.create
-let running = coroutine.running
-let resume = coroutine.resume
-let yield = coroutine.yield
-let error = error
-let unpack = table.unpack
-let debug = debug
-let FrameTimer = FrameTimer
-let CoTimer = CoTimer
+let unpack = unpack or table.unpack
 
-let comap = {}
-let pool = {}
-setmetatable(comap, {__mode = "kv"})
-
-func coroutine.start(f, ...){
-	
-	let co = create(f)
-	
-	if running() == nil {
-		let flag, msg = resume(co, ...)
-	
-		if not flag {					
-			error(debug.traceback(co, msg))
-		}					
-	} else {
-		let args = {...}
-		var timer = nil
-		
-		let action = func()	{											
-			let flag, msg = resume(co, table.unpack(args))			
-			timer.fn = nil
-			table.insert(pool, timer)
-	
-			if not flag {														
-				error(debug.traceback(co, msg))						
-			}		
-		}
-			
-		if #pool > 0 {
-			timer = table.remove(pool)
-			timer.reset(action, 0, 1)
-		} else {
-			timer = FrameTimer(action, 0, 1)
-		}
-		
-		comap[co] = timer
-		timer.start()		
-	}
-
-	return co
+func async_to_sync(async_func, callback_pos) {
+    return func(...) {
+        let _co = coroutine.running() or error ('this function must be run in coroutine')
+        var rets
+        var waiting = false
+        local func cb_func(...) {
+            if waiting {
+                assert(coroutine.resume(_co, ...))
+            } else {
+                rets = {...}
+            }
+        }
+        let params = {...}
+        table.insert(params, callback_pos or (#params + 1), cb_func)
+        async_func(unpack(params))
+        if rets == nil {
+            waiting = true
+            rets = {coroutine.yield()}
+        }
+        
+        return unpack(rets)
+    }
 }
 
-func coroutine.wait(t, co, ...) {
-	let args = {...}
-	co = co or running()		
-	var timer = nil
-		
-	let action = func()	{		
-		let flag, msg = resume(co, table.unpack(args))
-		
-		if not flag {	
-			timer.stop()						
-			error(debug.traceback(co, msg))			
-			return
-		}
-	}
-	
-	timer = CoTimer(action, t, 1)
-	comap[co] = timer	
-	timer.start()
-	return yield()
+func coroutine_call(fn) {
+    return func(...) {
+        local co = coroutine.create(fn)
+        assert(coroutine.resume(co, ...))
+    }
 }
 
-func coroutine.step(t, co, ...) {
-	let args = {...}
-	co = co or running()		
-	var timer = nil
-	
-	let action = func()	{				
-		let flag, msg = resume(co, table.unpack(args))
-		timer.fn = nil
-		table.insert(pool, timer)
-	
-		if not flag {																		
-			error(debug.traceback(co, msg))
-			return	
-		}
-	}
-				
-	if #pool > 0 {
-		timer = table.remove(pool)
-		timer.reset(action, t or 1, 1)
-	} else {
-		timer = FrameTimer(action, t or 1, 1)
-	}
+let move_end = {}
 
-	comap[co] = timer
-	timer.start()
-	return yield()
+let generator_mt = {
+    __index = {
+        MoveNext = func(self) {
+            self.Current = self.co()
+            if self.Current == move_end {
+                self.Current = nil
+                return false
+            } else {
+                return true
+            }
+        },
+
+        Reset = func(self) {
+            self.co = coroutine.wrap(self.w_func)
+        }
+    }
 }
 
-func coroutine.www(www, co)	{		
-	co = co or running()			
-	var timer = nil			
-			
-	let action = func()	{		
-		if not www.isDone {		
-			return		
-		}		
-				
-		timer.stop()	
-		let flag, msg = resume(co)			
-		timer.fn = nil
-		table.insert(pool, timer)	
-			
-		if not flag {												
-			error(debug.traceback(co, msg))			
-			return			
-		}				
-	}		
-				
-	if #pool > 0 {
-		timer = table.remove(pool)
-		timer.reset(action, 1, -1)
-	} else {	
-		timer = FrameTimer(action, 1, -1)	
-	}
-	comap[co] = timer	
- 	timer.start()
- 	return yield()
+func cs_generator(fn, ...) {
+    let params = {...}
+    let generator = setmetatable({
+        w_func = func() {
+            fn(unpack(params))
+            return move_end
+        }
+    }, generator_mt)
+    generator.Reset()
+    return generator
 }
 
-func coroutine.stop(co) {
- 	let timer = comap[co]
+func coroutine.start(...) {
+    return startCoroutine(cs_generator(...))
+}
 
- 	if timer != nil {
- 		comap[co] = nil
- 		timer.stop() 		
- 	}
+func coroutine.stop(c) {
+    stopCoroutine(c)
 }
