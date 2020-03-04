@@ -15,8 +15,8 @@ namespace SharpLuna
 
     public partial class LuaRef : IEquatable<LuaRef>, IComparable<LuaRef>, IDisposable
     {
-        private readonly lua_State L;
-        private readonly int _ref;
+        protected readonly lua_State L;
+        protected readonly int _ref;
 
         //public static readonly LuaRef Empty = new LuaRef(0);
         public static readonly LuaRef None = new LuaRef(LUA_NOREF, IntPtr.Zero);
@@ -364,8 +364,8 @@ namespace SharpLuna
             }
             catch(Exception ex)
             {
-                ThrowError(L, ex.Message);
-                //Debug.LogError(ex.Message);
+                //ThrowError(L, ex.Message);
+                Debug.LogError(ex.Message);
             }
         }
 

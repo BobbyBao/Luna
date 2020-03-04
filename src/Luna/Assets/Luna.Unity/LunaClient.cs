@@ -9,6 +9,8 @@ using UnityEngine.UI;
 
 namespace SharpLuna.Unity
 {
+    using static Lua;
+    using lua_State = IntPtr;
 
     public class LunaClient : MonoBehaviour
     {
@@ -34,8 +36,10 @@ namespace SharpLuna.Unity
             typeof(Input),
 
             typeof(Time),
+            typeof(WaitForSeconds),
             typeof(WWW),
             typeof(UnityWebRequest),
+            typeof(Coroutine),
             typeof(Space),
             typeof(UnityEngine.Rendering.ShadowCastingMode),
         };
@@ -158,10 +162,13 @@ namespace SharpLuna.Unity
             Converter.RegisterFunc<UnityEngine.Object>();
             Converter.RegisterFunc<GameObject>();
 
+            Converter.Register(typeof(System.Collections.IEnumerator), IEnumeratorBridge.Create);
         }
 
         protected virtual void OnPostInit()
         {
+            luna.Register("startCoroutine", startCoroutine);
+            luna.Register("stopCoroutine", stopCoroutine);
         }
 
         protected virtual IEnumerator OnStart()
@@ -177,6 +184,23 @@ namespace SharpLuna.Unity
             fixedUpdate = luna.GetGlobal("FixedUpdate");
             lateUpdate = luna.GetGlobal("LateUpdate");
 
+        }
+
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+        static int startCoroutine(lua_State L)
+        {
+            Get(L, 1, out IEnumerator cor);
+            var coro = Instance.StartCoroutine(cor);
+            Push(L, coro);
+            return 1;
+        }
+
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+        static int stopCoroutine(lua_State L)
+        {
+            Get(L, 1, out Coroutine cor);
+            Instance.StopCoroutine(cor);
+            return 0;
         }
 
         protected virtual void Update()

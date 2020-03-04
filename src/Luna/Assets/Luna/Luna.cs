@@ -96,6 +96,7 @@ namespace SharpLuna
             Register("loadfile", LoadFile);
             Register("typeof", GetClassType);
 
+            errorFuncRef = get_error_func_ref(L);
 #if LUNA_SCRIPT
             DoString(classSource);
             DoString(listSource);
@@ -290,32 +291,13 @@ namespace SharpLuna
             throw new LuaException(reason);
         }
 
-        private void ThrowExceptionFromError(int oldTop)
-        {
-            object err = GetObject(L, -1);
-
-            lua_settop(L, oldTop);
-
-            // A pre-wrapped exception - just rethrow it (stack trace of InnerException will be preserved)
-            var luaEx = err as LuaScriptException;
-
-            if (luaEx != null)
-                throw luaEx;
-
-            // A non-wrapped Lua error (best interpreted as a string) - wrap it and throw it
-            if (err == null)
-                err = "Unknown Lua Error";
-
-            throw new LuaScriptException(err.ToString(), string.Empty);
-        }
-
         public object[] DoString(byte[] chunk, string chunkName = "chunk")
         {
             int oldTop = lua_gettop(L);
             _executing = true;
 
             if (luaL_loadbuffer(L, chunk, chunkName) != LuaStatus.OK)
-                ThrowExceptionFromError(oldTop);
+                ThrowExceptionFromError(L, oldTop);
 
             int errorFunctionIndex = 0;
 
@@ -328,7 +310,7 @@ namespace SharpLuna
             try
             {
                 if (lua_pcall(L, 0, -1, errorFunctionIndex) != LuaStatus.OK)
-                    ThrowExceptionFromError(oldTop);
+                    ThrowExceptionFromError(L, oldTop);
                 
                 return PopValues(L, oldTop);
             }
@@ -344,7 +326,7 @@ namespace SharpLuna
             _executing = true;
 
             if (lua_loadstring(L, chunk, chunkName) != LuaStatus.OK)
-                ThrowExceptionFromError(oldTop);
+                ThrowExceptionFromError(L, oldTop);
 
             int errorFunctionIndex = 0;
 
@@ -357,7 +339,7 @@ namespace SharpLuna
             try
             {
                 if (lua_pcall(L, 0, -1, errorFunctionIndex) != LuaStatus.OK)
-                    ThrowExceptionFromError(oldTop);
+                    ThrowExceptionFromError(L, oldTop);
 
                 return PopValues(L, oldTop);
             }
@@ -373,7 +355,7 @@ namespace SharpLuna
 
             byte[] buffer = ReadBytes(fileName);
             if (luaL_loadbuffer(L, buffer, "@" + fileName) != LuaStatus.OK)
-                ThrowExceptionFromError(oldTop);
+                ThrowExceptionFromError(L, oldTop);
 
             _executing = true;
 
@@ -387,7 +369,7 @@ namespace SharpLuna
             try
             {
                 if (lua_pcall(L, 0, -1, errorFunctionIndex) != LuaStatus.OK)
-                    ThrowExceptionFromError(oldTop);
+                    ThrowExceptionFromError(L, oldTop);
 
                 return PopValues(L, oldTop);
             }/*

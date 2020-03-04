@@ -1,3 +1,4 @@
+/*
 import "Coroutine"
 
 local func testCo2() {
@@ -40,7 +41,8 @@ func coFunc() {
 	coroutine.step()
 	print("yield frameCount: "..Time.frameCount)
 
-	var www = new UnityEngine.WWW("http://www.baidu.com")
+    let WWW = UnityEngine.WWW
+	var www = WWW("http://www.baidu.com")
 	coroutine.www(www)
     print(www.bytes)
 	//var s = tolua.tolstring(www.bytes)
@@ -50,3 +52,37 @@ func coFunc() {
 
 coroutine.start(coFunc)
 
+*/
+
+
+local func start_coro(...) {
+    return startCoroutine(cs_generator(...))
+}
+
+local func stop_coro(c) {
+    stopCoroutine(c)
+}
+
+var a = start_coro(func() {
+    print('coroutine a started')
+	coroutine.yield(start_coro(func() {
+            print('coroutine b stated inside cotoutine a')
+            coroutine.yield(new UnityEngine.WaitForSeconds(1))
+            print('i am coroutine b')
+        }
+	))
+
+	print('coroutine b finish')
+    
+	while true {
+		coroutine.yield(new UnityEngine.WaitForSeconds(1))
+		print('i am coroutine a')
+	}
+})
+
+start_coro(func() {
+    print('stop coroutine a after 5 seconds')
+	coroutine.yield(new UnityEngine.WaitForSeconds(5))
+	stop_coro(a)
+    print('coroutine a stoped')
+})

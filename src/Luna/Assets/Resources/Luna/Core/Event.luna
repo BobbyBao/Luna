@@ -100,28 +100,28 @@ class Event {
 }
 
 class Events {
-
+	var events = {}
 	func create(name) {
-		var e = Events[name]
+		var e = self.events[name]
 		if not e {
-			e = Event(name)
-			Events[name] = e
+			e = new Event(name)
+			self.events[name] = e
 		}
 		return e
 	}
 
 	func createListener(name, fn, obj) {
-		let evt = Events(name)
+		let evt = self.events[name]
 		return evt.create(fn, obj)
 	}
 
 	func addListener(name, handle) {	
-		let evt = Events(name)
+		let evt = self.events[name]
 		evt.add(handle)
 	}
 
 	func removeListener(name, handle) {
-		let evt = Events(name)
+		let evt = self.events[name]
 		evt.remove(handle)
 	}
 

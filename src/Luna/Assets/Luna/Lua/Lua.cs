@@ -36,6 +36,7 @@ namespace SharpLuna
         internal static Encoding Encoding { get; set; } = Encoding.Default;
         internal static HashSet<object> savedFn = new HashSet<object>();
         public static bool UseTraceback { get; set; } = false;
+        public static int errorFuncRef = -1;
         static ConcurrentDictionary<IntPtr, List<IDisposable>> luaStates = new ConcurrentDictionary<IntPtr, List<IDisposable>>();
 
         public static lua_State newstate()
@@ -62,7 +63,12 @@ namespace SharpLuna
                 return false;
             }
 
-            return luaStates.ContainsKey(L);
+            if(!luaStates.ContainsKey(L))
+            {
+                return false;
+            }
+
+            return true;
         }
 
 
@@ -226,6 +232,11 @@ namespace SharpLuna
 
         public static string luaL_optstring(lua_State L, int n, string d) => Marshal.PtrToStringAnsi(luaL_optlstring(L, (n), (d), null));
 
+        public static void lua_getref(lua_State L, int reference)
+        {
+            lua_rawgeti(L, LUA_REGISTRYINDEX, reference);
+        }
+
         [Conditional("DEBUG")]
         public static void assert(bool condition) => Debug.Assert(condition);
 
@@ -266,6 +277,30 @@ namespace SharpLuna
             return errIndex;
         }
 
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+        public static int errorfunc(lua_State L)
+        {
+            lua_getglobal(L, "debug");
+            lua_getfield(L, -1, "traceback");
+            lua_remove(L, -2);
+            lua_pushvalue(L, 1);
+            lua_pushnumber(L, 2);
+            lua_call(L, 2, 1);
+            return 1;
+        }
+
+        public static int get_error_func_ref(lua_State L)
+        {
+            lua_pushcclosure(L, errorfunc, 0);
+            return luaL_ref(L, LUA_REGISTRYINDEX);
+        }
+
+        public static int load_error_func(lua_State L, int @ref)
+        {
+            lua_rawgeti(L, LUA_REGISTRYINDEX, @ref);
+            return lua_gettop(L);
+        }
+
         public static string GetDebugTraceback(lua_State L)
         {
             int oldTop = lua_gettop(L);
@@ -274,6 +309,25 @@ namespace SharpLuna
             lua_remove(L, -2); // stack: traceback
             lua_pcall(L, 0, -1, 0);
             return PopValues(L, oldTop)[0] as string;
+        }
+
+        public static void ThrowExceptionFromError(lua_State L, int oldTop)
+        {
+            object err = GetObject(L, -1);
+
+            lua_settop(L, oldTop);
+
+            // A pre-wrapped exception - just rethrow it (stack trace of InnerException will be preserved)
+            var luaEx = err as Exception;
+
+            if (luaEx != null)
+                throw luaEx;
+
+            // A non-wrapped Lua error (best interpreted as a string) - wrap it and throw it
+            if (err == null)
+                err = "Unknown Lua Error";
+
+            throw new LuaScriptException(err.ToString(), string.Empty);
         }
 
         public static void ThrowError(lua_State L, object e)

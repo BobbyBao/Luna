@@ -12,7 +12,7 @@ namespace SharpLuna
 
     public static class Converter
     {
-        static Dictionary<Type, Func<IntPtr, int, object>> delegateFactory = new Dictionary<Type, Func<IntPtr, int, object>>();
+        static Dictionary<Type, Func<IntPtr, int, object>> converterFactory = new Dictionary<Type, Func<IntPtr, int, object>>();
         static Converter()
         {
             RegisterAction<int>();
@@ -26,7 +26,7 @@ namespace SharpLuna
         
         public static Func<IntPtr, int, object> GetFactory(Type type)
         {
-            if (delegateFactory.TryGetValue(type, out var f))
+            if (converterFactory.TryGetValue(type, out var f))
             {
                 return f;
             }
@@ -42,7 +42,7 @@ namespace SharpLuna
                 return (object)v;
             }
 
-            if (!delegateFactory.TryGetValue(type, out var fac))
+            if (!converterFactory.TryGetValue(type, out var fac))
             {
                 return null;
             }
@@ -52,62 +52,62 @@ namespace SharpLuna
 
         public static void Register<T>(Func<IntPtr, int, object> factory)
         {
-            delegateFactory[typeof(T)] = factory;
+            converterFactory[typeof(T)] = factory;
         }
 
         public static void Register(Type type, Func<IntPtr, int, object> factory)
         {
-            delegateFactory[type] = factory;
+            converterFactory[type] = factory;
         }
 
         public static void RegisterAction()
         {
-            delegateFactory[typeof(Action)] = ActionFactory.Create;
+            converterFactory[typeof(Action)] = ActionFactory.Create;
         }
 
         public static void RegisterAction<T1>()
         {
-            delegateFactory[typeof(Action<T1>)] = ActionFactory<T1>.Create;
+            converterFactory[typeof(Action<T1>)] = ActionFactory<T1>.Create;
         }
 
         public static void RegisterAction<T1, T2>()
         {
-            delegateFactory[typeof(Action<T1, T2>)] = ActionFactory<T1, T2>.Create;
+            converterFactory[typeof(Action<T1, T2>)] = ActionFactory<T1, T2>.Create;
         }
 
         public static void RegisterAction<T1, T2, T3>()
         {
-            delegateFactory[typeof(Action<T1, T2, T3>)] = ActionFactory<T1, T2, T3>.Create;
+            converterFactory[typeof(Action<T1, T2, T3>)] = ActionFactory<T1, T2, T3>.Create;
         }
 
         public static void RegisterAction<T1, T2, T3, T4>()
         {
-            delegateFactory[typeof(Action<T1, T2, T3, T4>)] = ActionFactory<T1, T2, T3, T4>.Create;
+            converterFactory[typeof(Action<T1, T2, T3, T4>)] = ActionFactory<T1, T2, T3, T4>.Create;
         }
 
         public static void RegisterFunc<R>()
         {
-            delegateFactory[typeof(Func<R>)] = FuncFactory<R>.Create;
+            converterFactory[typeof(Func<R>)] = FuncFactory<R>.Create;
         }
 
         public static void RegisterFunc<T1,R>()
         {
-            delegateFactory[typeof(Func<T1, R>)] = FuncFactory<T1, R>.Create;
+            converterFactory[typeof(Func<T1, R>)] = FuncFactory<T1, R>.Create;
         }
 
         public static void RegisterFunc<T1, T2, R>()
         {
-            delegateFactory[typeof(Func<T1, T2, R>)] = FuncFactory<T1, T2, R>.Create;
+            converterFactory[typeof(Func<T1, T2, R>)] = FuncFactory<T1, T2, R>.Create;
         }
 
         public static void RegisterFunc<T1, T2, T3, R>()
         {
-            delegateFactory[typeof(Func<T1, T2, T3, R>)] = FuncFactory<T1, T2, T3, R>.Create;
+            converterFactory[typeof(Func<T1, T2, T3, R>)] = FuncFactory<T1, T2, T3, R>.Create;
         }
 
         public static void RegisterFunc<T1, T2, T3, T4, R>()
         {
-            delegateFactory[typeof(Func<T1, T2, T3, T4, R>)] = FuncFactory<T1, T2, T3, T4, R>.Create;
+            converterFactory[typeof(Func<T1, T2, T3, T4, R>)] = FuncFactory<T1, T2, T3, T4, R>.Create;
         }
 
 

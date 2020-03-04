@@ -73,7 +73,7 @@ func test6() {
 	let Input = UnityEngine.Input
 
 	for i = 1,200000 {		
-		let t = Input.GetTouch(0)		
+		//let t = Input.GetTouch(0)		
 		let p = Input.mousePosition
 		//Physics.RayCast
 	}
