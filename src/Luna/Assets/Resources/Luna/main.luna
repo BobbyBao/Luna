@@ -12,7 +12,7 @@ game = GameStateManager()
 let mainState = GameState("main")
 game.addChild(mainState)
 
-let test = UITest()
+let test = new UITest()
 mainState.addChild(test)
 mainState.activate(test)
 

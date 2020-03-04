@@ -1,6 +1,6 @@
 
 //table类型的成员不能做构造初始化{}
-
+//fixed
 
 class ClassA {
 
@@ -13,5 +13,4 @@ class ClassA {
 var a = ClassA() 
 a.test()
 
-ClassA.test() {
-}
+ClassA.test()

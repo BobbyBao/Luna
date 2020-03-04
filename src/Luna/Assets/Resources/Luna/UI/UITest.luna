@@ -5,7 +5,7 @@ class UITest : UIPanel {
 
     init() {
         super.init("Test", "UI/TestPanel")
-        self.testPerfPanel = UITestPerformance()
+        self.testPerfPanel = new UITestPerformance()
         self.addChild(self.testPerfPanel)
     }
 

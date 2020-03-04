@@ -36,7 +36,6 @@ namespace SharpLuna.Unity
             typeof(Time),
             typeof(WWW),
             typeof(UnityWebRequest),
-            typeof(Coroutine),
             typeof(Space),
             typeof(UnityEngine.Rendering.ShadowCastingMode),
         };
@@ -163,7 +162,6 @@ namespace SharpLuna.Unity
 
         protected virtual void OnPostInit()
         {
-            LuaCoroutine.Register(Luna, this);
         }
 
         protected virtual IEnumerator OnStart()

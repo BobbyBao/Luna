@@ -5,9 +5,8 @@ import "test/test_perf"
 class UITestPerformance : UIPanel {
 
     init() {
-        super.init("TestPerformance", "UI/TestPerfPanel")
-        let GameObject = UnityEngine.GameObject
-        self.testObject = GameObject("test")
+        super.init("TestPerformance", "UI/TestPerfPanel")        
+        self.testObject = new  UnityEngine.GameObject("test")
     }
 
     func onLoad(go) {

@@ -1,3 +1,5 @@
+//Module class construct
+//fixed
 
-var test = Tests.TestClass()
+var test = new Tests.TestClass()
 print(test)

@@ -100,7 +100,8 @@ class Event {
 }
 
 class Events {
-	func get(name) {
+
+	func create(name) {
 		var e = Events[name]
 		if not e {
 			e = Event(name)
@@ -110,17 +111,17 @@ class Events {
 	}
 
 	func createListener(name, fn, obj) {
-		let evt = Events.get(name)
+		let evt = Events(name)
 		return evt.create(fn, obj)
 	}
 
 	func addListener(name, handle) {	
-		let evt = Events.get(name)
+		let evt = Events(name)
 		evt.add(handle)
 	}
 
 	func removeListener(name, handle) {
-		let evt = Events.get(name)
+		let evt = Events(name)
 		evt.remove(handle)
 	}
 
@@ -128,10 +129,10 @@ class Events {
 
 
 let Time = Time
-let updateEvent 	= Events.get("Update")
-let lateUpdateEvent	= Events.get("LateUpdate")
-let fixedUpdateEvent = Events.get("FixedUpdate")
-let coroutineEvent	= Events.get("CoroutineUpdate")
+let updateEvent 	= Events.create("Update")
+let lateUpdateEvent	= Events.create("LateUpdate")
+let fixedUpdateEvent = Events.create("FixedUpdate")
+let coroutineEvent	= Events.create("CoroutineUpdate")
 
 func Update(deltaTime, unscaledDeltaTime) {
 	Time.setDeltaTime(deltaTime, unscaledDeltaTime)		
