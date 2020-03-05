@@ -279,7 +279,6 @@ namespace SharpLuna
             }
 
             return lua_gettop(L) - n;
-
         }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
@@ -498,7 +497,7 @@ namespace SharpLuna
 
         public SharpClass RegisterModel(ModuleInfo moduleInfo)
         {
-            var model = string.IsNullOrEmpty(moduleInfo.Name) ? _binder : _binder.GetModule(moduleInfo.Name);
+            var model = string.IsNullOrEmpty(moduleInfo.Name) ? _binder : SharpModule.Get(_binder, moduleInfo.Name);
             foreach (var t in moduleInfo)
             {
                 model.RegClass(t.type);
@@ -508,7 +507,7 @@ namespace SharpLuna
 
         public SharpClass RegisterModel(string name, IEnumerable<Type> types)
         {
-            var model = string.IsNullOrEmpty(name) ? _binder : _binder.GetModule(name);
+            var model = string.IsNullOrEmpty(name) ? _binder : SharpModule.Get(_binder, name);
             foreach (Type t in types)
             {
                 model.RegClass(t);
@@ -676,7 +675,7 @@ func __class(c, className, base) {
 
     mt.__call = func(cls_table, ...)
     {
-        var obj = { }
+        var obj = {}
         if c.init {
             setmetatable(obj, c)
             obj.init(...)
@@ -684,13 +683,11 @@ func __class(c, className, base) {
         else
         {
             var args = { ...}
-
-
             if #args == 1 and type(args[1]) == 'table' {
                 obj = args[1]
             }
 
-        setmetatable(obj, c)
+            setmetatable(obj, c)
         }
 
         return obj
@@ -703,49 +700,45 @@ func __class(c, className, base) {
     mt.__tostring = func(self)
     {
         let mt = self._class
+        let name = mt.name
+        setmetatable(self, nil)
+        var str = tostring(self)
+        setmetatable(self, mt)
 
-            let name = mt.name
-
-            setmetatable(self, nil)
-
-            var str = tostring(self)
-
-            setmetatable(self, mt)
-
-            if name { str = name..str.gsub('table', '') }
+        if name { str = name..str.gsub('table', '') }
         return str
-        }
-
-        return c
     }
 
-    let type = type
-    let types = {}
-    let _typeof = luna.typeof
-    let _findtype = luna.findType
+    return c
+}
 
-    func typeof(obj) {
-	    let t = type(obj)
-	    var ret = nil
+let type = type
+let types = {}
+let _typeof = luna.typeof
+let _findtype = luna.findType
+
+func typeof(obj) {
+	let t = type(obj)
+	var ret = nil
 	
-	    if t == ""table"" {
-		    ret = types[obj]		
-		    if ret == nil {
-                ret = _typeof(obj)
-                types[obj] = ret
-            }
-         } else if t == ""string"" {
-            ret = types[obj]
-  		    if ret == nil {
-                ret = _findtype(obj)
-                types[obj] = ret
-            }
-        } else {
-              error(debug.traceback(""attemp to call typeof on type ""..t))
+	if t == ""table"" {
+		ret = types[obj]		
+		if ret == nil {
+            ret = _typeof(obj)
+            types[obj] = ret
         }
-	
-        return ret
+        } else if t == ""string"" {
+        ret = types[obj]
+  		if ret == nil {
+            ret = _findtype(obj)
+            types[obj] = ret
+        }
+    } else {
+            error(debug.traceback(""attemp to call typeof on type ""..t))
     }
+	
+    return ret
+}
 
 ";
 

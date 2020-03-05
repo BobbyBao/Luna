@@ -12,10 +12,17 @@ namespace SharpLuna
 
     public unsafe static partial class Lua
     {
+        public unsafe static void GetOrCreate(lua_State L, string name)
+        {
+            var p = Marshal.StringToHGlobalAnsi(name);
+            GetGlobal(L, (byte*)p, true);
+            Marshal.FreeHGlobal(p);
+        }
+
         public unsafe static void GetGlobal(lua_State L, string name)
         {
             var p = Marshal.StringToHGlobalAnsi(name);
-            GetGlobal(L, (byte*)p);
+            GetGlobal(L, (byte*)p, false);
             Marshal.FreeHGlobal(p);
         }
 
@@ -45,7 +52,7 @@ namespace SharpLuna
             return (*p == ch) ? p : null;
         }
 
-        private unsafe static void GetGlobal(lua_State L, byte* name)
+        private unsafe static void GetGlobal(lua_State L, byte* name, bool create)
         {
             byte* p = strchr(name, '.');
             if (p != null)
@@ -56,18 +63,55 @@ namespace SharpLuna
                     lua_pushlstring(L, name, p - name); // <table> <key>
 
                     lua_gettable(L, -2);                // <table> <table_value>
+                    
+                    if (lua_isnoneornil(L, -1))
+                    {
+                        if (!create)
+                        {
+                            lua_remove(L, -2);
+                            return;
+                        }
+
+                        lua_pop(L, 1);
+                        lua_pushlstring(L, name, p - name);
+                        lua_newtable(L);
+                        lua_settable(L, -3);
+                        lua_pushlstring(L, name, p - name); // <table> <key>
+                        lua_gettable(L, -2);                // <table> <table_value>                        
+                    }
+                                        
                     lua_remove(L, -2);                  // <table_value>
-                    if (lua_isnoneornil(L, -1)) return;
+                    
                     name = p + 1;
                     p = strchr(name, '.');
                 }
                 lua_pushstring(L, name);                // <last_table> <key>
                 lua_gettable(L, -2);                    // <last_table> <table_value>
+               
+                if (create && lua_isnoneornil(L, -1))
+                {
+                    lua_pop(L, 1);
+                    lua_pushstring(L, name);
+                    lua_newtable(L);
+                    lua_settable(L, -3);
+                    lua_pushstring(L, name);            // <table> <key>
+                    lua_gettable(L, -2);                // <table> <table_value>
+                }
+
                 lua_remove(L, -2);                      // <table_value>
             }
             else
             {
                 lua_getglobal(L, name);
+
+                if (create && lua_isnoneornil(L, -1))
+                {
+                    lua_pop(L, 1);
+                    lua_newtable(L);
+                    lua_setglobal(L, name);
+                    lua_getglobal(L, name);                // <table> <table_value>
+                                                        //return;
+                }
             }
         }
 

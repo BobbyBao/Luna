@@ -12,7 +12,6 @@ namespace SharpLuna
     public class SharpModule : SharpClass
     {
         protected Luna luna;
-
         static Dictionary<string, SharpModule> registeredModule;
         static Dictionary<Type, SharpClass> registeredClass = new Dictionary<Type, SharpClass>();
         static Dictionary<Type, string> classAlias = new Dictionary<Type, string>();
@@ -24,8 +23,9 @@ namespace SharpLuna
             Name = "_G";
         }
         
-        public SharpModule(SharpModule parent, LuaRef parentMeta, string name) : base(parent)
+        public SharpModule(SharpModule parent, string name) : base(parent)
         {
+            LuaRef parentMeta = parent.meta;
             LuaRef luaref = parentMeta.RawGet(name) as LuaRef;
             if (luaref)
             {
@@ -35,6 +35,13 @@ namespace SharpLuna
 
             this.parent = parent;
             meta = create_module(parentMeta.State, parentMeta, name);
+            Name = name;
+        }
+
+        public SharpModule(SharpModule parent, string name, LuaRef meta) : base(parent)
+        {              
+            this.meta = meta;
+            this.parent = parent;
             Name = name;
         }
 
@@ -49,6 +56,24 @@ namespace SharpLuna
             }
         }
 
+        public static SharpModule Get(SharpModule global, string name)
+        {
+            if (registeredModule == null)
+            {
+                registeredModule = new Dictionary<string, SharpModule>();
+            }
+
+            if (registeredModule.TryGetValue(name, out var module))
+            {
+                return module;
+            }
+
+            LuaRef meta = new LuaRef(global.State, name);
+            module = new SharpModule(global, name, meta);
+            registeredModule.Add(name, module);
+            return module;
+        }
+
         public SharpModule GetModule(string name)
         {
             if (registeredModule == null)
@@ -61,7 +86,7 @@ namespace SharpLuna
                 return module;
             }
 
-            module = new SharpModule(this, meta, name);
+            module = new SharpModule(this, name);
             registeredModule.Add(name, module);
             return module;
         }
@@ -82,7 +107,6 @@ namespace SharpLuna
             cls.OnRegClass();
             return this;
         }
-
 
         public SharpClass GetClass(Type classType, Type superClass = null)
         {

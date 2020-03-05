@@ -23,7 +23,7 @@ class UITestPerformance : UIPanel {
         self.addClickByName("Buttons/Button9", self.onTest9)
         self.addClickByName("Buttons/Button10", self.onTestTable)
 
-		LunaHelper.AddEventTrigger(self.gameObject, EventTriggerType.PointerClick, self.onClickBack, self)
+		LunaHelper.AddEventTrigger(self.gameObject, UnityEngine.UI.EventTriggerType.PointerClick, self.onClickBack, self)
     }
 
     func onButtonClick(go) {

@@ -9,9 +9,7 @@ BehaviorState = {
 class Behavior {
     var name = ""
     var parent = nil
-    var state = 0
-    //var children = nil
-    //var activeList = nil
+    var state = BehaviorState.Init
 
     init(n) {
         self.name = n

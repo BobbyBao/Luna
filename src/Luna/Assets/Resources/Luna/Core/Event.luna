@@ -36,14 +36,12 @@ class Event {
 	}
 
 	func invoke(...) {
-		//print("invoke", self)	
 		let _list = self.list	
 		self.lock = true
 		let ilist = ilist	
 
 		for i, f in _list.iter() {		
-			self.current = i			
-			//print(self, f)				
+			self.current = i					
 			let flag, msg = f(...)
 			if not flag {			
 				_list.remove(i)			
@@ -67,7 +65,7 @@ class Event {
 	}
 
 	func + (self, handle) {
-		//assert(handle)
+		assert(handle)
 		if self.lock {		
 			table.insert(self.opList, func() { self.list.pushnode(handle) } )		
 		} else {
@@ -76,8 +74,8 @@ class Event {
 		return self
 	}
 
-	func - (self, handle)	{
-		//assert(handle)	
+	func - (self, handle)	{	
+		assert(handle)
 		if self.lock {		
 			table.insert(self.opList, func() { self.list.remove(handle) })				
 		} else {

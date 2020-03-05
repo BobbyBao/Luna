@@ -62,7 +62,7 @@ namespace SharpLuna.Unity
             typeof(TouchPhase),
         };
 
-        public static readonly ModuleInfo uiTypes = new ModuleInfo
+        public static readonly ModuleInfo uiTypes = new ModuleInfo("UnityEngine.UI")
         {
             typeof(Image),
             typeof(Button),

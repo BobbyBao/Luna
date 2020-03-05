@@ -66,6 +66,8 @@ namespace SharpLuna
                 return;
             }
 
+            module = module.Replace(".", "_");
+
             string code = GenerateClass(module, type, genSuper, excludeMembers);
             string fileName = type.Name.Replace("[]", "Array") + "Wrap.cs";
             if(!string.IsNullOrEmpty(module))
