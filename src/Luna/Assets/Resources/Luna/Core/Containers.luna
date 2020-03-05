@@ -68,6 +68,9 @@ class Sequence  : SequenceBase {
         return 0
     }
 
+    func sort(cmp) {
+        table.sort(self, cmp)
+    }
 }
 
 class Stack : SequenceBase {
