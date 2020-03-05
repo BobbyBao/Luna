@@ -22,7 +22,7 @@ namespace SharpLuna
         public static LuaRef CreateTableWithMeta(lua_State L, string meta)
         {
             lua_newtable(L);
-            Lua.PushGlobal(L, meta);
+            Lua.GetGlobal(L, meta);
             lua_setmetatable(L, -2);
             return PopFromStack(L);
         }

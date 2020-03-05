@@ -2,26 +2,28 @@
 import "Coroutine"
 
 
-var a = coroutine.start(func() {
+var task = coroutine.start(func() {
+
     print('coroutine a started')
-	coroutine.yield(coroutine.start(func() {
+
+	cwait(func() {
             print('coroutine b stated inside cotoutine a')
-            coroutine.yield(new UnityEngine.WaitForSeconds(1))
+            cwait(new UnityEngine.WaitForSeconds(1))
             print('i am coroutine b')
         }
-	))
+	)
 
 	print('coroutine b finish')
     
 	while true {
-		coroutine.yield(new UnityEngine.WaitForSeconds(1))
+		cwait(new UnityEngine.WaitForSeconds(1))
 		print('i am coroutine a')
 	}
 })
 
 coroutine.start(func() {
     print('stop coroutine a after 5 seconds')
-	coroutine.yield(new UnityEngine.WaitForSeconds(5))
-	coroutine.stop(a)
+	cwait(new UnityEngine.WaitForSeconds(5))
+	coroutine.stop(task)
     print('coroutine a stoped')
 })

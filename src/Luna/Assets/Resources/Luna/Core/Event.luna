@@ -66,23 +66,25 @@ class Event {
 		return {value = fn, _prev = 0, _next = 0, removed = true}		
 	}
 
-	func add(handle) {
+	func + (self, handle) {
 		//assert(handle)
 		if self.lock {		
 			table.insert(self.opList, func() { self.list.pushnode(handle) } )		
 		} else {
 			self.list.pushnode(handle)
 		}	
-		
+		return self
 	}
 
-	func remove(handle)	{
+	func - (self, handle)	{
 		//assert(handle)	
 		if self.lock {		
 			table.insert(self.opList, func() { self.list.remove(handle) })				
 		} else {
 			self.list.remove(handle)
 		}
+
+		return self
 	}
 
 	func count() {
@@ -117,12 +119,12 @@ class Events {
 
 	func addListener(name, handle) {	
 		let evt = self.events[name]
-		evt.add(handle)
+		evt += handle
 	}
 
 	func removeListener(name, handle) {
 		let evt = self.events[name]
-		evt.remove(handle)
+		evt -= handle
 	}
 
 }

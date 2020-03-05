@@ -12,17 +12,17 @@ namespace SharpLuna
 
     public unsafe static partial class Lua
     {
-        public unsafe static void PushGlobal(lua_State L, string name)
+        public unsafe static void GetGlobal(lua_State L, string name)
         {
             var p = Marshal.StringToHGlobalAnsi(name);
-            PushGlobal(L, (byte*)p);
+            GetGlobal(L, (byte*)p);
             Marshal.FreeHGlobal(p);
         }
 
-        public static void PopToGlobal(lua_State L, string name)
+        public static void SetGlobal(lua_State L, string name)
         {
             var p = Marshal.StringToHGlobalAnsi(name);
-            PopToGlobal(L, (byte*)p);
+            SetGlobal(L, (byte*)p);
             Marshal.FreeHGlobal(p);
         }
 
@@ -45,7 +45,7 @@ namespace SharpLuna
             return (*p == ch) ? p : null;
         }
 
-        private unsafe static void PushGlobal(lua_State L, byte* name)
+        private unsafe static void GetGlobal(lua_State L, byte* name)
         {
             byte* p = strchr(name, '.');
             if (p != null)
@@ -71,7 +71,7 @@ namespace SharpLuna
             }
         }
 
-        private static unsafe void PopToGlobal(lua_State L, byte* name)
+        private static unsafe void SetGlobal(lua_State L, byte* name)
         {
             byte* p = strchr(name, '.');
             if (p != null)

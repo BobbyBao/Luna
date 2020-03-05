@@ -26,7 +26,6 @@ namespace SharpLuna
         public bool IsExecuting => _executing;
         private bool _executing;
 
-
         public static Action<string> Print { get; set; }
         public static Func<string, byte[]> ReadBytes { get; set; }
 
@@ -34,19 +33,13 @@ namespace SharpLuna
         public event EventHandler<HookExceptionEventArgs> HookException;
         public event EventHandler<DebugHookEventArgs> DebugHook;
         private KyHookFunction _hookCallback;
-      
         private List<ModuleInfo> _config = new List<ModuleInfo>();
         private SharpModule _binder;
         private readonly Dictionary<Type, ClassWraper> _classWrapers = new Dictionary<Type, ClassWraper>();
 
+        private static List<Assembly> assemblies = new List<Assembly>();
         public static ModuleInfo systemModule = new ModuleInfo
         {
-            /*
-            new ClassInfo(typeof(Type))
-            {
-                "IsSZArray"
-            },*/
-
             typeof(object),
             typeof(Enum),
             new ClassInfo(typeof(string))
@@ -63,12 +56,12 @@ namespace SharpLuna
             typeof(float[]),
             typeof(object[]),
         };
-        
+
         public Luna(params ModuleInfo[] modules)
         {
             _config.Add(systemModule);
 
-            foreach(var m in modules)
+            foreach (var m in modules)
             {
                 _config.Add(m);
             }
@@ -87,22 +80,29 @@ namespace SharpLuna
             }
 
             L = Lua.newstate();
-            
+
             luaL_openlibs(L);
             lua_atpanic(L, PanicCallback);
 
             Register("print", DoPrint);
             Register("dofile", DoFile);
             Register("loadfile", LoadFile);
-            Register("typeof", GetClassType);
 
             errorFuncRef = get_error_func_ref(L);
+
+            AddAssembly(Assembly.GetExecutingAssembly());
+
+            _global = LuaRef.Globals(L);
+            _global.Set("luna", LuaRef.CreateTable(L));
+
+            Register("luna.typeof", GetClassType);
+            Register("luna.findType", FindClassType);
+            
 #if LUNA_SCRIPT
             DoString(classSource);
             DoString(listSource);
 #endif
 
-            _global = LuaRef.Globals(L);
             _binder = new SharpModule(this);
 
             AddSearcher(LuaLoader);
@@ -120,7 +120,7 @@ namespace SharpLuna
             PostInit?.Invoke();
 
             var it = _classWrapers.GetEnumerator();
-            while(it.MoveNext())
+            while (it.MoveNext())
             {
                 if (!SharpModule.IsRegistered(it.Current.Key))
                 {
@@ -130,7 +130,7 @@ namespace SharpLuna
 
             _classWrapers.Clear();
 
-            
+
         }
 
         public void Dispose()
@@ -146,19 +146,49 @@ namespace SharpLuna
                 return;
 
             _binder.Dispose();
-            
+
             _global.Dispose();
 
             L.unrefall();
             Lua.closestate(L);
             L = IntPtr.Zero;
         }
-        
+
+        public static bool LoadAssembly(string name)
+        {
+            for (int i = 0; i < assemblies.Count; i++)
+            {
+                if (assemblies[i].GetName().Name == name)
+                {
+                    return true;
+                }
+            }
+
+            Assembly assembly = Assembly.Load(name);
+            if (assembly == null)
+            {
+                assembly = Assembly.Load(AssemblyName.GetAssemblyName(name));
+            }
+
+            if (assembly != null && !assemblies.Contains(assembly))
+            {
+                assemblies.Add(assembly);
+            }
+
+            return assembly != null;
+        }
+
+        public static void AddAssembly(Assembly ass)
+        {
+            if(!assemblies.Contains(ass))
+                assemblies.Add(ass);
+        }
+
         public void Register(string name, LuaNativeFunction function)
         {
             savedFn.TryAdd(function);
             lua_pushcfunction(L, function);
-            lua_setglobal(L, name);
+            SetGlobal(L, name);
         }
 
         public void AddSearcher(LuaNativeFunction searcher)
@@ -183,7 +213,7 @@ namespace SharpLuna
         {
             int n = lua_gettop(L);
 
-            StringBuilder sb = new StringBuilder();            
+            StringBuilder sb = new StringBuilder();
             for (int i = 1; i <= n; i++)
             {
                 string s = lua_tostring(L, i);
@@ -192,11 +222,11 @@ namespace SharpLuna
                 sb.Append(s);
             }
 
-            if(Print != null)
+            if (Print != null)
                 Print(sb.ToString());
             else
                 Debug.Log(sb.ToString());
- 
+
             return 0;
         }
 
@@ -285,6 +315,23 @@ namespace SharpLuna
         }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+        static int FindClassType(IntPtr L)
+        {
+            Get(L, 1, out string typeName);
+            Type t = null;
+            foreach(var ass in assemblies)
+            {
+                t = ass.GetType(typeName);
+                if(t != null)
+                {
+                    break;
+                }
+            }
+            Push(L, t);
+            return 1;
+        }
+
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         static int PanicCallback(lua_State L)
         {
             string reason = string.Format("Unprotected error in call to Lua API ({0})", lua_tostring(L, -1));
@@ -311,7 +358,7 @@ namespace SharpLuna
             {
                 if (lua_pcall(L, 0, -1, errorFunctionIndex) != LuaStatus.OK)
                     ThrowExceptionFromError(L, oldTop);
-                
+
                 return PopValues(L, oldTop);
             }
             finally
@@ -423,30 +470,30 @@ namespace SharpLuna
         public void RegisterWraps(Type type)
         {
             var types = type.Assembly.GetTypes();
-            foreach(var t in types)
+            foreach (var t in types)
             {
                 var attr = t.GetCustomAttribute<WrapClassAttribute>();
                 if (attr == null)
                 {
                     continue;
                 }
-                 
+
                 AddWrapClass(attr.Type, t);
-                
+
             }
 
         }
-        
+
         void AddWrapClass(Type type, Type wrapType)
         {
-            if(IsWrapered(type))
+            if (IsWrapered(type))
             {
                 return;
             }
 
             var classWrapper = GetClassWrapper(type);
             var method = wrapType.GetMethod("Register", BindingFlags.Static | BindingFlags.Public);
-            method?.Invoke(null, new object[] { classWrapper });           
+            method?.Invoke(null, new object[] { classWrapper });
         }
 
         public SharpClass RegisterModel(ModuleInfo moduleInfo)
@@ -482,7 +529,7 @@ namespace SharpLuna
         public SharpClass RegisterClass(Type classType, Type superType)
         {
             return _binder.RegClass(classType, superType);
-        }   
+        }
 
         #region lua debug functions
 
@@ -519,12 +566,12 @@ namespace SharpLuna
         }
 
         public string SetLocal(LuaDebug luaDebug, int n)
-        {            
+        {
             return Lua.SetLocal(L, luaDebug, n);
         }
 
         public int GetStack(int level, ref LuaDebug ar)
-        {            
+        {
             return Lua.GetStack(L, level, ref ar);
         }
 
@@ -672,8 +719,37 @@ func __class(c, className, base) {
         return c
     }
 
+    let type = type
+    let types = {}
+    let _typeof = luna.typeof
+    let _findtype = luna.findType
+
+    func typeof(obj) {
+	    let t = type(obj)
+	    var ret = nil
+	
+	    if t == ""table"" {
+		    ret = types[obj]		
+		    if ret == nil {
+                ret = _typeof(obj)
+                types[obj] = ret
+            }
+         } else if t == ""string"" {
+            ret = types[obj]
+  		    if ret == nil {
+                ret = _findtype(obj)
+                types[obj] = ret
+            }
+        } else {
+              error(debug.traceback(""attemp to call typeof on type ""..t))
+        }
+	
+        return ret
+    }
+
 ";
-       
+
+
         const string listSource = @"
 class List {
 	var len_ = 0

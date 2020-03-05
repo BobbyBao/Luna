@@ -22,7 +22,7 @@ namespace SharpLuna
             int err_func = load_error_func(L, errorFuncRef);
 
             lua_getref(L, _ref);
-            lua_pushstring(L, "MoveNext");
+            lua_pushstring(L, "moveNext");
 
             if (LuaStatus.OK != xlua_pgettable(L, -2))
             {
@@ -70,7 +70,7 @@ namespace SharpLuna
             int err_func = load_error_func(L, errorFuncRef);
             
             lua_getref(L, _ref);
-            lua_pushstring(L, "Reset");
+            lua_pushstring(L, "reset");
 
             if(LuaStatus.OK != xlua_pgettable(L, -2))
             {
@@ -102,7 +102,7 @@ namespace SharpLuna
             {
                 int oldTop = lua_gettop(L);
                 lua_getref(L, _ref);
-                lua_pushstring(L, "Current");
+                lua_pushstring(L, "current");
 
                 if (LuaStatus.OK != xlua_pgettable(L, -2))
                 {

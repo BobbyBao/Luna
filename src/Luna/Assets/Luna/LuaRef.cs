@@ -33,7 +33,7 @@ namespace SharpLuna
         public LuaRef(lua_State state, string name)
         {
             L = state;
-            PushGlobal(L, name);
+            GetGlobal(L, name);
             _ref = luaL_ref(L, LUA_REGISTRYINDEX);
             state.addref(this);
         }

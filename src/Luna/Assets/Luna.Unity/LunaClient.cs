@@ -37,6 +37,8 @@ namespace SharpLuna.Unity
 
             typeof(Time),
             typeof(WaitForSeconds),
+            typeof(WaitForFixedUpdate),
+            typeof(WaitForEndOfFrame),
             typeof(WWW),
             typeof(UnityWebRequest),
             typeof(Coroutine),
@@ -163,12 +165,16 @@ namespace SharpLuna.Unity
             Converter.RegisterFunc<GameObject>();
 
             Converter.Register(typeof(System.Collections.IEnumerator), IEnumeratorBridge.Create);
+
+            Luna.LoadAssembly("mscorlib");
+            Luna.LoadAssembly("UnityEngine");
+            Luna.LoadAssembly("UnityEngine.UI");
         }
 
         protected virtual void OnPostInit()
         {
-            luna.Register("startCoroutine", startCoroutine);
-            luna.Register("stopCoroutine", stopCoroutine);
+            luna.Register("luna.startCoroutine", startCoroutine);
+            luna.Register("luna.stopCoroutine", stopCoroutine);
         }
 
         protected virtual IEnumerator OnStart()
@@ -189,7 +195,7 @@ namespace SharpLuna.Unity
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         static int startCoroutine(lua_State L)
         {
-            Get(L, 1, out IEnumerator cor);
+            Get(L, STATIC_STARTSTACK, out IEnumerator cor);
             var coro = Instance.StartCoroutine(cor);
             Push(L, coro);
             return 1;
@@ -198,7 +204,7 @@ namespace SharpLuna.Unity
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         static int stopCoroutine(lua_State L)
         {
-            Get(L, 1, out Coroutine cor);
+            Get(L, STATIC_STARTSTACK, out Coroutine cor);
             Instance.StopCoroutine(cor);
             return 0;
         }
@@ -214,7 +220,6 @@ namespace SharpLuna.Unity
 
         protected virtual void FixedUpdate()
         {
-
             if (fixedUpdate)
             {
                 fixedUpdate.Call(Time.fixedDeltaTime);
