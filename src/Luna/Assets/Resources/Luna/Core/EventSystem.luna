@@ -27,7 +27,7 @@ class EventHandler {
 
 
 var subscribedEvents_ = {}
-//setmetatable(subscribedEvents_, {__mode = "kv"})
+setmetatable(subscribedEvents_, {__mode = "kv"})
 
 class EventSystem {
     func subscribeEvent_(oberver, observable, eventType, fn) {
@@ -38,7 +38,7 @@ class EventSystem {
                 return
             }
         } else {
-            subscribedEvents = new Set()           
+            subscribedEvents = new Sequence()           
             subscribedEvents_[oberver] = subscribedEvents
         }
 

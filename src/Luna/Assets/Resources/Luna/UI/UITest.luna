@@ -36,7 +36,7 @@ class UITest : UIPanel {
             dofile("test/test_class")
         }
         else if go == self.btn2 {
-            dofile("test/test_math")
+            dofile("test/test_container")
         }
         else if go == self.btn3 {
             self.testPerfPanel.show()

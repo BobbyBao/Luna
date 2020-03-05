@@ -14,7 +14,7 @@ class Behavior : Observable {
     var state = BehaviorState.Init
 
     init(n) {
-        super.init()
+        //super.init()
         self.name = n
         self.children = List()
         self.activeList = List()

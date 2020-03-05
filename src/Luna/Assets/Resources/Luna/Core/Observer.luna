@@ -29,12 +29,7 @@ class Observer {
 }
 
 class Observable : Observer {
-    var eventHandlers_ = {}
-
-    init() {
-        self.eventHandlers_ = {}
-    }
-
+    var eventHandlers_ = nil
     func subscribeEvent(handler) {
         if self.eventHandlers_ == nil {
             self.eventHandlers_ = {}
@@ -42,7 +37,7 @@ class Observable : Observer {
 
         var handlers = self.eventHandlers_[handler.type]
         if not handlers {
-            handlers = Set()
+            handlers = new Sequence()
             self.eventHandlers_[handler.type] = handlers;
         }
 
@@ -67,7 +62,7 @@ class Observable : Observer {
 
         var handlers = self.eventHandlers_[eventType]
         if handlers {        
-            for k, v in ipairs(handlers) {
+            for v in handlers.iter() {
                 v.invoke(...)
             }
         }

@@ -1,27 +1,33 @@
 
-class Map {
+class SequenceBase {
 
-    func insert(k, v){
-        table.insert(self, k, v)
+    func isEmpty() {
+        return #self != 0
     }
 
-    func remove(k) {
-        table.remove(self, k)
+    func count() {
+        return #self
     }
 
-    func containsKey(k) {
-        return self[k] != nil
-    }
+	func iter() {
+		var k = 0
+		return func (t) {
+			k = k + 1
+			if k <= #t {
+				return t[k]
+			}
+			
+		}, self
+	}
 
     func clear() {
-        for k in pairs(self) {
+        for k in ipairs(self) {
             t [k] = nil
         }
     }
 }
 
-
-class Set {
+class Sequence  : SequenceBase {
 
     func add(v) {
         table.insert(self, v)
@@ -62,27 +68,69 @@ class Set {
         return 0
     }
 
-    func count() {
-        return #self
+}
+
+class Stack : SequenceBase {
+
+    func push(v) {
+        table.insert(self, v)
     }
 
-	func iter() {
-		var k = 0
-		return func (t) {
-			k = k + 1
-			if k < #t {
-				return t[k]
-			}
-			
-		}, self
+    func pop() {
+        return table.remove(self)
+    }
+
+    func peek() {
+        return self[#self]
+    }
+
+}
+
+class Queue : SequenceBase {
+
+    func enqueue(v) {
+        table.insert(self, v)
+    }
+
+    func dequeue() {
+        return table.remove(self, 1)
+    }
+
+}
+
+class Set : Sequence {
+
+	func remove (item) {
+		let idx = self.indexOf(item)
+      
+        if idx != 0 {
+            self[idx] = self[self.count]
+            self.removeAt(self.count())
+        }
 	}
+}
+
+class Map {
+
+    func insert(k, v){
+        table.insert(self, k, v)
+    }
+
+    func remove(k) {
+        table.remove(self, k)
+    }
+
+    func containsKey(k) {
+        return self[k] != nil
+    }
 
     func clear() {
-        for k in ipairs(self) {
+        for k in pairs(self) {
             t [k] = nil
         }
     }
 }
+
 
 
 class Tuple {

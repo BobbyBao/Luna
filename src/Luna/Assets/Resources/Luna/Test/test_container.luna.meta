@@ -1,8 +1,8 @@
 fileFormatVersion: 2
-guid: a7d36689a274ae44f8eec52b248658fc
+guid: 8c32e3ca7e6fd7544a917499c529f526
 ScriptedImporter:
   fileIDToRecycleName:
-    11400000: TestBehaviour
+    11400000: test_container
   externalObjects: {}
   userData: 
   assetBundleName: 

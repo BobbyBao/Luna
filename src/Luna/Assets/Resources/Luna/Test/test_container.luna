@@ -1,0 +1,12 @@
+
+import "containers"
+
+var seq = new Sequence {10, 20, 30, 40, 50}
+
+for k,v in ipairs(seq) {
+    print (k, v)
+}
+
+for v in seq.iter() {
+    print (v)
+}
