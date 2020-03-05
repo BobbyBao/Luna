@@ -1,19 +1,26 @@
 
 import "Time"
 
+Event = {
+	Update = 1,
+	FixedUpdate = 2,
+	LateUpdate = 3,
+}
+
 func Update(deltaTime, unscaledDeltaTime) {
 	Time.setDeltaTime(deltaTime, unscaledDeltaTime)		
 
-	Observable.sendGlobalEvent("Update")
+	Observable.sendGlobalEvent(Event.Update)
 }
 
 func FixedUpdate(fixedDeltaTime) {
 	Time.setFixedDelta(fixedDeltaTime)
 	
-	Observable.sendGlobalEvent("FixedUpdate")
+	Observable.sendGlobalEvent(Event.FixedUpdate, fixedDeltaTime)
 }
 
 func LateUpdate() {	
-	Observable.sendGlobalEvent("LateUpdate")	
+	Observable.sendGlobalEvent(Event.LateUpdate)	
+	
 	Time.setFrameCount()		
 }

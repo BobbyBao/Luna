@@ -12,7 +12,7 @@ class Timer : Observer {
 		self.duration = duration
 		self.loop = loop
 		self.running = false
-		self.eventType = evtType or "Update"
+		self.eventType = evtType or Event.Update
 		self.scale = scale or false and true	
 		self.time = duration	
 	}
