@@ -7,6 +7,9 @@ class UITest : UIPanel {
         super.init("Test", "UI/TestPanel")
         self.testPerfPanel = new UITestPerformance()
         self.addChild(self.testPerfPanel)
+
+        //self.subscribeGlobalEvent("Update", self.update)
+        self.subscribeToEvent(self.testPerfPanel, "LoadFinish", self.onLoadFinish)
     }
 
     func onLoad(go) {
@@ -19,6 +22,10 @@ class UITest : UIPanel {
         self.btn5 = self.addClickByName("Buttons/Button5", self.onButtonClick)
         self.btn6 = self.addClickByName("Buttons/Button6", self.onButtonClick)
 
+    }
+
+    func onLoadFinish(name) {
+        print(name, "LoadFinish")
     }
 
     func onButtonClick(go) {

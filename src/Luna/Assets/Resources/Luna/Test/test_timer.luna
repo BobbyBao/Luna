@@ -7,6 +7,6 @@ func testTimer() {
     lastTime = Time.time
 }
 
-let t = Timer(testTimer, 1, 10)
+let t = Timer(testTimer, 1, 5)
 
 t.start()

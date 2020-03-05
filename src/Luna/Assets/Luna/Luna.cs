@@ -751,13 +751,17 @@ class List {
 		self.len_ = n
 	}
 
-	func len() {
+	func count() {
 		return self.len_
 	}
 
 	func __len() {
 		return self.len_
 	}
+
+    func isEmpty() {
+        return self.len_ == 0
+    }
 
 	func push(i) {
 		self[self.len_] = i
@@ -786,7 +790,7 @@ class List {
 		return self
 	}
 
-	func remove (idx) {
+	func removeAt (idx) {
 		
 		repeat {
 			self[idx] = self[idx + 1]
@@ -798,13 +802,42 @@ class List {
 		return self
 	}
 
-	func clear() {
+	func remove (item) {
+		let idx = self.indexOf(item)
+        print(idx)
+        if idx != -1 {
+            self.removeAt(idx)
+        }
+	}
 
+    func fastRemove(item) {
+		let idx = self.indexOf(item)
+        if idx != -1 {
+		    self[idx] = self[self.len_-1]
+            table.remove(self, self.len_ - 1)
+		    self.len_ = self.len_ - 1
+        }
+    }
+    
+    func contains(item) {
+        return self.indexOf(item) != -1
+    }       
+    
+    func indexOf(item) {
+        for i = 0, self.len_-1 {
+            var it = self[idx]
+            if it == item {
+                return i
+            }
+        }
+        return -1
+    }
+
+	func clear() {
 		while self.len_ > 0 {
 			self.len_ = self.len_ - 1
 			table.remove(self, self.len_)
 		} 
-
 	}
 
 	func iter() {

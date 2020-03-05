@@ -1,0 +1,74 @@
+
+class EventHandler {
+    var type = ""
+    var fn = nil
+    var receiver = nil    
+    var sender = nil
+
+    init(type, fn, receiver, sender) {
+        self.type = type
+        self.fn = fn
+        self.receiver = receiver
+        self.sender = sender
+    }
+
+    func invoke(...) {
+        if nil == self.receiver {
+            return pcall(self.fn, ...)					
+        } else {
+            return pcall(self.fn, self.receiver, ...)					
+        }	
+    }
+    
+    func == (t1, t2) {
+        return t1.type == t2.type && t1.fn == t2.fn && t1.receiver == t2.receiver && t1.sender == t2.sender
+    }
+}
+
+
+var subscribedEvents_ = {}
+//setmetatable(subscribedEvents_, {__mode = "kv"})
+
+class EventSystem {
+    func subscribeEvent_(oberver, observable, eventType, fn) {
+        var subscribedEvents = subscribedEvents_[oberver]
+        var handler = new EventHandler(eventType, fn, oberver, observable)
+        if subscribedEvents != nil  {
+            if subscribedEvents.contains(handler) {
+                return
+            }
+        } else {
+            subscribedEvents = new Set()           
+            subscribedEvents_[oberver] = subscribedEvents
+        }
+
+        observable.subscribeEvent(handler);
+        subscribedEvents.add(handler)
+    }
+
+    func unsubscribeEvent_(oberver, observable, eventType, fn) {
+        var subscribedEvents = subscribedEvents_[oberver]
+        if subscribedEvents != nil {           
+            var handler = new EventHandler(eventType, fn, oberver, observable)
+            subscribedEvents.remove(handler);
+            observable.unsubscribeEvent(handler);
+        }
+
+    }
+
+    func unsubscribeAllEvents(oberver) {    
+        var subscribedEvents = subscribedEvents_[oberver]
+        if subscribedEvents != nil {
+
+            for handler in subscribedEvents.iter() {
+                handler.sender.UnsubscribeEvent(handler)
+            }
+
+            subscribedEvents.clear();
+            table.remove(subscribedEvents_, oberver)
+        }
+
+    }
+
+
+}

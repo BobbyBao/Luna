@@ -1,0 +1,77 @@
+
+
+class Observer {
+
+    func subscribeToEvent(observable, eventType, fn) {
+        EventSystem.subscribeEvent_(self, observable, eventType, fn)
+    }
+
+    func unsubscribeFromEvent(observable, eventType, fn) {
+        EventSystem.unsubscribeEvent_(self, observable, eventType, fn)
+    }
+
+    func subscribeGlobalEvent(eventType, fn) {
+        EventSystem.subscribeEvent_(self, Observable, eventType, fn)
+    }
+
+    func unsubscribeGlobalEvent(eventType, fn) {
+        EventSystem.unsubscribeEvent_(self, Observable, eventType, fn)
+    }
+
+    func close() {
+        EventSystem.unsubscribeAllEvents(self)
+    }
+
+    func sendGlobalEvent(eventType, ...) {
+        //Observable类作为全局被观察者
+        Observable.sendEvent(eventType, ...)
+    }
+}
+
+class Observable : Observer {
+    var eventHandlers_ = {}
+
+    init() {
+        self.eventHandlers_ = {}
+    }
+
+    func subscribeEvent(handler) {
+        if self.eventHandlers_ == nil {
+            self.eventHandlers_ = {}
+        }
+
+        var handlers = self.eventHandlers_[handler.type]
+        if not handlers {
+            handlers = Set()
+            self.eventHandlers_[handler.type] = handlers;
+        }
+
+        handlers.add(handler);
+    }
+
+    func unsubscribeEvent(handler) {
+        if self.eventHandlers_ == nil {
+            return
+        }
+        var handlers = self.eventHandlers_[handler.type]
+        if handlers {            
+            handlers.remove(handler)
+        }
+
+    }
+        
+    func sendEvent(eventType, ...) {
+        if(self.eventHandlers_ == nil) {
+            return
+        }
+
+        var handlers = self.eventHandlers_[eventType]
+        if handlers {        
+            for k, v in ipairs(handlers) {
+                v.invoke(...)
+            }
+        }
+    }
+
+
+}

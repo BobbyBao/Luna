@@ -1,0 +1,108 @@
+
+class Map {
+
+    func insert(k, v){
+        table.insert(self, k, v)
+    }
+
+    func remove(k) {
+        table.remove(self, k)
+    }
+
+    func containsKey(k) {
+        return self[k] != nil
+    }
+
+    func clear() {
+        for k in pairs(self) {
+            t [k] = nil
+        }
+    }
+}
+
+
+class Set {
+
+    func add(v) {
+        table.insert(self, v)
+    }
+
+    func contains(v) {    
+        for _, val in ipairs(self) {
+            if v == val {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    func insert(v){
+        table.insert(self, v)
+    }
+
+    func removeAt(k) {
+        table.remove(self, k)
+    }
+
+	func remove (item) {
+		let idx = self.indexOf(item)
+      
+        if idx != 0 {
+            self.removeAt(idx)
+        }
+	}
+
+    func indexOf(item) {
+        for k,v in ipairs(self) {            
+            if v == item {
+                return k
+            }
+        }
+        return 0
+    }
+
+    func count() {
+        return #self
+    }
+
+	func iter() {
+		var k = 0
+		return func (t) {
+			k = k + 1
+			if k < #t {
+				return t[k]
+			}
+			
+		}, self
+	}
+
+    func clear() {
+        for k in ipairs(self) {
+            t [k] = nil
+        }
+    }
+}
+
+
+class Tuple {
+    
+    init(...) {
+        self.items = {...}
+    }
+
+    func == (t1, t2)  {
+
+        if #t1 != #t2 {
+            return false
+        }
+
+        for k,v in ipairs(t1) {
+            if v != t2[k] {
+                return false
+            }
+        }
+
+        return true
+    }
+}

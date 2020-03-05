@@ -1,5 +1,7 @@
-import "Util"
-import "Event"
+import "Containers"
+
+import "EventSystem"
+import "CoreEvents"
 
 import "GameState"
 import "GameStateManager"

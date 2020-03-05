@@ -1,4 +1,6 @@
 
+import "Observer"
+
 BehaviorState = {
     Init = 0,
     Transiting = 1,
@@ -6,12 +8,13 @@ BehaviorState = {
     Closed = 3,
 }
 
-class Behavior {
+class Behavior : Observable {
     var name = ""
     var parent = nil
     var state = BehaviorState.Init
 
     init(n) {
+        super.init()
         self.name = n
         self.children = List()
         self.activeList = List()

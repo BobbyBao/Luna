@@ -2,17 +2,17 @@ let rawget = rawget
 let UnityTime = UnityEngine.Time
 
 class Time {
-	deltaTime			= 0
-	fixedDeltaTime 	 	= 0
-	maximumDeltaTime	= 0.3333333
-	fixedTime			= 0
-	frameCount			= 1
-	realtimeSinceStartup= 0
-	time 				= 0
-	timeScale			= 1
-	timeSinceLevelLoad	= 0
-	unscaledDeltaTime	= 0	
-	unscaledTime		= 0
+	var deltaTime			= 0
+	var fixedDeltaTime 	 	= 0
+	var maximumDeltaTime	= 0.3333333
+	var fixedTime			= 0
+	var frameCount			= 1
+	var realtimeSinceStartup= 0
+	var time 				= 0
+	var timeScale			= 1
+	var timeSinceLevelLoad	= 0
+	var unscaledDeltaTime	= 0	
+	var unscaledTime		= 0
 	
 	func setDeltaTime(deltaTime, unscaledDeltaTime) {
 		self.deltaTime = deltaTime	

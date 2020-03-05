@@ -1,0 +1,19 @@
+
+import "Time"
+
+func Update(deltaTime, unscaledDeltaTime) {
+	Time.setDeltaTime(deltaTime, unscaledDeltaTime)		
+
+	Observable.sendGlobalEvent("Update")
+}
+
+func FixedUpdate(fixedDeltaTime) {
+	Time.setFixedDelta(fixedDeltaTime)
+	
+	Observable.sendGlobalEvent("FixedUpdate")
+}
+
+func LateUpdate() {	
+	Observable.sendGlobalEvent("LateUpdate")	
+	Time.setFrameCount()		
+}

@@ -2,7 +2,7 @@ let setmetatable = setmetatable
 
 let Time = Time
 
-class Timer {
+class Timer : Observer {
 	var eventType = ""
 
 	init (fn, duration, loop, scale, evtType) {
@@ -25,25 +25,18 @@ class Timer {
 		self.time = duration	
 	}
 
-	func start() {		
-		if not self.handle {	
-			self.handle = Events.createListener(self.eventType, self.update, self)
-		}
-		
+	func start() {	
+		self.subscribeGlobalEvent(self.eventType, self.update)
 		self.running = true
-		Events.addListener(self.eventType, self.handle)	
 	}
 
 	func stop() {
 		self.running = false
-
-		if self.handle {
-			Events.removeListener(self.eventType, self.handle)	
-		}
+		self.unsubscribeGlobalEvent(self.eventType, self.update)
 	}
 
 	func update() {
-	
+
 		if not self.running {
 			return
 		}
