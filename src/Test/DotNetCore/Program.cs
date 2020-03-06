@@ -9,11 +9,12 @@ namespace Tests
         static void Main(string[] args)
         {
             TestFramework.dataPath = "../../../../../Test/Scripts/";
-            
+
             using (var test = new TestFramework())
             {
-                //test.Run();
+                test.Start();
 
+                //test.Run();
                 test.Luna.DoFile("test.luna");
                 //test.Luna.DoFile("test_class.luna");
                 //test.Luna.DoFile("test_perf.luna");

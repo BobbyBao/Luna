@@ -225,16 +225,12 @@ namespace SharpLuna.Unity
             int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
             return () =>
             {
-                //lua_pushcfunction(L, LuaException.traceback);
-                //lua_rawgeti(L, LUA_REGISTRYINDEX, luaref);
                 int errFunc = pcall_prepare(L, errorFuncRef, luaref);
                 if (lua_pcall(L, 0, 0, errFunc) != (int)LuaStatus.OK)
                 {
-                    //lua_remove(L, -2);
                     ThrowExceptionFromError(L, errFunc - 1);
                 }
                 lua_settop(L, errFunc - 1);
-                //lua_pop(L, 1);
             };
         }
 

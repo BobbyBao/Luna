@@ -12,14 +12,14 @@ namespace Tests
         static void Main(string[] args)
         {
             TestFramework.dataPath = "../../../../Test/Scripts/";
-            
+            /*
             using (var test = new TestFramework())
             {
-                //test.Luna.DoFile("test_perf.luna");
-                test.Luna.DoFile("Bugs/bug3.luna");
-            }
+                test.Luna.DoFile("test_math.luna");
+                //test.Luna.DoFile("Bugs/bug1.luna");
+            }*/
 
-            //Application.Run(new Test.TableTree());
+            Application.Run(new Test.TableTree());
         }
     }
 }

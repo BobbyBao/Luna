@@ -22,8 +22,12 @@ namespace Test
 
             InitializeComponent();
 
+            UIManager.Init(this);
+
+
             Luna.Print = this.Print;
             framework = new TestFramework();
+            framework.Start();
 
             var it = Directory.EnumerateFiles(TestFramework.dataPath, "*.luna");
             
@@ -109,6 +113,11 @@ namespace Test
             {
                 Refresh(v, e.Node.Nodes, 2);
             }
+        }
+
+        private void toolStripButton3_Click(object sender, EventArgs e)
+        {
+            UIManager.alertBox.Show();
         }
     }
 }

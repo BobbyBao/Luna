@@ -15,18 +15,20 @@ namespace Tests
         Luna luna;
         public Luna Luna => luna;
         public static string dataPath = "../../../../Test/Scripts/";
-
-        public TestFramework()
+        
+        public event Action onPostInit;
+        public TestFramework(params ModuleInfo[] modules)
         {          
             Luna.ReadBytes = ReadBytes;
-
-            luna = new Luna();
+            luna = new Luna(modules);
             luna.PostInit += Luna_PostInit;
-            
-            GenerateWraps();
+        }
 
+        public void Start()
+        {   
+            GenerateWraps();
             luna.Start();
-            luna.AddSearcher(Loader);           
+            luna.AddSearcher(Loader);
         }
 
         public void Dispose()
@@ -93,7 +95,7 @@ namespace Tests
             luna.DoFile("test.luna");
         }
 
-        private void GenerateWraps()
+        public void GenerateWraps()
         {
             string path = "../../../../Test/Shared/Generate/";
 
@@ -114,6 +116,7 @@ namespace Tests
         private void Luna_PostInit()
         {
             AutoBind();
+            onPostInit?.Invoke();
         }
 
         void AutoBind()
@@ -128,36 +131,6 @@ namespace Tests
             luna.RegisterModel("Tests", testTypes);
         }
 
-        void TestTable()
-        {
-
-            var c = luna.GetGlobal("TestClass");
-            var it = c.GetEnumerator();
-
-            Debug.Log("TestClass : ======================== ");
-
-            while (it.MoveNext())
-            {
-                Debug.Log(it.Current.Key<string>());
-            }
-
-            it.Reset();
-            Debug.Log("TestClass : ======================== ");
-
-            while (it.MoveNext())
-            {
-                Debug.Log(it.Current.Key<string>());
-            }
-
-            Debug.Log("TestClass : ======================== ");
-
-            foreach (var e in c)
-            {
-                Debug.Log(e.Key<string>());
-            }
-
-            it.Dispose();
-        }
 
     }
 }
