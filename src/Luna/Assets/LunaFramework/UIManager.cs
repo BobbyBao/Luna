@@ -1,7 +1,10 @@
 ﻿using SharpLuna;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
@@ -13,6 +16,76 @@ public class UIManager : MonoBehaviour
     private void Awake()
     {
         instance = this;
+    }
+
+    public static void ShowAlertBox(string message, string title, Action onFinished = null)
+    {
+        var alertPanel = GameObject.Find("Canvas").transform.Find("AlertBox");
+        if (alertPanel == null)
+        {
+            alertPanel = ResourceManager.LoadObject("UI/AlertBox").transform;
+            alertPanel.gameObject.name = "AlertBox";
+            alertPanel.SetParent(instance.transform);
+            alertPanel.localPosition = new Vector3(-6f, -6f, 0f);
+        }
+
+        alertPanel.Find("title").GetComponent<Text>().text = title;
+        alertPanel.Find("message").GetComponent<Text>().text = message;
+
+        var button = alertPanel.Find("alertBtn").GetComponent<Button>();
+        UnityAction onclick = () =>
+        {
+            onFinished?.Invoke();
+            button.onClick.RemoveAllListeners();
+            alertPanel.gameObject.SetActive(false);
+        };
+        //防止消息框未关闭时多次被调用
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(onclick);
+        alertPanel.gameObject.SetActive(true);
+    }
+
+    public static void ShowConfirmBox(string message, string title, Action<bool> onFinished = null)
+    {
+        var confirmPanel = GameObject.Find("Canvas").transform.Find("ConfirmBox");
+        if (confirmPanel == null)
+        {
+            confirmPanel = ResourceManager.LoadObject("UI/ConfirmBox").transform;
+            confirmPanel.gameObject.name = "ConfirmBox";
+            confirmPanel.SetParent(instance.transform);
+            confirmPanel.localPosition = new Vector3(-8f, -18f, 0f);
+        }
+
+        confirmPanel.Find("confirmTitle").GetComponent<Text>().text = title;
+        confirmPanel.Find("conmessage").GetComponent<Text>().text = message;
+
+        var confirmBtn = confirmPanel.Find("confirmBtn").GetComponent<Button>();
+        var cancelBtn = confirmPanel.Find("cancelBtn").GetComponent<Button>();
+        Action cleanup = () =>
+        {
+            confirmBtn.onClick.RemoveAllListeners();
+            cancelBtn.onClick.RemoveAllListeners();
+            confirmPanel.gameObject.SetActive(false);
+        };
+
+        UnityAction onconfirm = () =>
+        {
+            onFinished?.Invoke(true);            
+            cleanup();
+        };
+
+        UnityAction oncancel = () =>
+        {
+            onFinished?.Invoke(false);
+            cleanup();
+        };
+
+        //防止消息框未关闭时多次被调用
+        confirmBtn.onClick.RemoveAllListeners();
+        confirmBtn.onClick.AddListener(onconfirm);
+        cancelBtn.onClick.RemoveAllListeners();
+        cancelBtn.onClick.AddListener(oncancel);
+        confirmPanel.gameObject.SetActive(true);
     }
 
     public void OpenPanel(string filePath, LuaRef fn, LuaRef inst)

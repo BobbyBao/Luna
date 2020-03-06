@@ -3,18 +3,16 @@ let setmetatable = setmetatable
 let Time = Time
 
 class Timer : Observer {
-	var eventType = ""
 
 	init (fn, duration, loop, scale, evtType) {
 	
-		loop = loop or 1
 		self.fn = fn
 		self.duration = duration
-		self.loop = loop
-		self.running = false
-		self.eventType = evtType or Event.Update
-		self.scale = scale or false and true	
+		self.loop = loop or 1
+		self.scale = scale or false and true
+		self.eventType = evtType or Event.Update	
 		self.time = duration	
+		self.running = false
 	}
 
 	func reset(fn, duration, loop, scale) {

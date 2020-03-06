@@ -1,8 +1,8 @@
 fileFormatVersion: 2
-guid: a6e2ccd0142334040931e4b50e536452
+guid: de72d4b4774f2034bae41687510469f7
 ScriptedImporter:
   fileIDToRecycleName:
-    11400000: test_async
+    11400000: UITestAsync
   externalObjects: {}
   userData: 
   assetBundleName: 

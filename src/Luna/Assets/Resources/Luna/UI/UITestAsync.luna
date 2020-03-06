@@ -1,0 +1,59 @@
+
+import "UIPanel"
+import "Coroutine"
+
+let sync_alert = coroutine.async_wait(UIManager.ShowAlertBox)
+let sync_confirm = coroutine.async_wait(UIManager.ShowConfirmBox) 
+
+class message_box  {
+    func alert(message, title) {
+        print('alert...', message, tittle)
+		sync_alert(UIManager, message, title)
+    }
+	
+	func confirm(message, title) {
+        print('confirm...')
+		let ret = sync_confirm(UIManager, message, title)
+		return ret == true
+    }
+}
+
+local func async_recharge(num, cb) {
+    print('requst server...')
+    cb(true, num)
+}
+
+let recharge = coroutine.async_wait(async_recharge)
+
+let buy = func() {
+    message_box.alert("您余额不足，请充值！", "余额提醒")
+    if message_box.confirm("确认充值10元吗？", "确认框") {
+        print('recharging...')
+        let r1, r2 = recharge(10)
+        print('recharge result:', r1, r2)
+        message_box.alert("充值成功！", "提示")
+    } else {
+        print('cancel')
+        message_box.alert("取消充值！", "提示")
+    }
+
+    print('recharge finished')
+}
+
+class UITestAsync : UIPanel {
+
+    init() {
+        super.init("UITestAsync", "UI/RechargePanel")        
+    }
+
+    func onLoad(go) {
+        super.onLoad(go)
+
+        self.gameObject.Find("Button").GetComponent("Button").onClick.AddListener(coroutine.call(buy))
+
+        //self.addClickByName("Button", coroutine.call(buy))
+
+    }
+
+	
+}

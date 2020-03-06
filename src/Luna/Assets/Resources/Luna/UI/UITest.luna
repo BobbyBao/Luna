@@ -1,5 +1,6 @@
 
 import "UI/UITestPerformance"
+import "UI/UITestAsync"
 
 class UITest : UIPanel {
 
@@ -8,8 +9,9 @@ class UITest : UIPanel {
         self.testPerfPanel = new UITestPerformance()
         self.addChild(self.testPerfPanel)
 
-        //self.subscribeGlobalEvent("Update", self.update)
-        self.subscribeToEvent(self.testPerfPanel, "LoadFinish", self.onLoadFinish)
+        self.testAsync = new UITestAsync()
+        self.addChild(self.testAsync)
+
     }
 
     func onLoad(go) {
@@ -21,11 +23,8 @@ class UITest : UIPanel {
         self.btn4 = self.addClickByName("Buttons/Button4", self.onButtonClick)
         self.btn5 = self.addClickByName("Buttons/Button5", self.onButtonClick)
         self.btn6 = self.addClickByName("Buttons/Button6", self.onButtonClick)
+        self.btn7 = self.addClickByName("Buttons/Button7", self.onButtonClick)
 
-    }
-
-    func onLoadFinish(name) {
-        print(name, "LoadFinish")
     }
 
     func onButtonClick(go) {
@@ -49,6 +48,9 @@ class UITest : UIPanel {
         }
         else if go == self.btn6 {        
             dofile("test/test_coroutine") 
+        }
+        else if go == self.btn7 {     
+            self.testAsync.show()
         }
     }
 

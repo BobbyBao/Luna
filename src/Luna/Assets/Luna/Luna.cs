@@ -755,7 +755,7 @@ class List {
 		return self.len_
 	}
 
-	func __len() {
+	func #() {
 		return self.len_
 	}
 

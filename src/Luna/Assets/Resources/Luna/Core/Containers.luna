@@ -1,5 +1,5 @@
 
-let tsort,insert,remove = table.sort,table.insert,table.remove
+let tsort, tinsert, tremove = table.sort, table.insert, table.remove
 
 local func cycle_aware_copy(t, cache) {
     if type(t) != 'table' { return t }
@@ -39,7 +39,7 @@ class SequenceBase {
 
     func clear(istart) {
         istart = istart or 1
-        for i = istart,#self { remove(t) }
+        for i = istart,#self { tremove(t) }
     }
 
 }
@@ -47,7 +47,7 @@ class SequenceBase {
 class Sequence  : SequenceBase {
 
     func add(v) {
-        table.insert(self, v)
+        tinsert(self, v)
     }
 
     func contains(v) {    
@@ -61,11 +61,11 @@ class Sequence  : SequenceBase {
     }
 
     func insert(v){
-        table.insert(self, v)
+        tinsert(self, v)
     }
 
     func removeAt(k) {
-        table.remove(self, k)
+        tremove(self, k)
     }
 
 	func remove (item) {
@@ -73,6 +73,15 @@ class Sequence  : SequenceBase {
       
         if idx != 0 {
             self.removeAt(idx)
+        }
+	}
+
+	func fastRemove (item) {
+		let idx = self.indexOf(item)
+      
+        if idx != 0 {
+            self[idx] = self[self.count]
+            self.removeAt(self.count())
         }
 	}
 
@@ -86,7 +95,7 @@ class Sequence  : SequenceBase {
     }
 
     func sort(cmp) {
-        table.sort(self, cmp)
+        tsort(self, cmp)
     }
 
     func forEach(f) {
@@ -99,11 +108,11 @@ class Sequence  : SequenceBase {
 class Stack : SequenceBase {
 
     func push(v) {
-        table.insert(self, v)
+        insert(self, v)
     }
 
     func pop() {
-        return table.remove(self)
+        return tremove(self)
     }
 
     func peek() {
@@ -115,39 +124,41 @@ class Stack : SequenceBase {
 class Queue : SequenceBase {
 
     func enqueue(v) {
-        table.insert(self, v)
+        tinsert(self, v)
     }
 
     func dequeue() {
-        return table.remove(self, 1)
+        return tremove(self, 1)
     }
 
 }
 
-class Set : Sequence {
+class Set {
+    func add(v){
+        tinsert(self, v, 1)
+    }
 
-	func remove (item) {
-		let idx = self.indexOf(item)
-      
-        if idx != 0 {
-            self[idx] = self[self.count]
-            self.removeAt(self.count())
-        }
-	}
+    func remove(v) {
+        tremove(self, v)
+    }
+
+    func contains(v) {
+        return self[v] != nil
+    }
 }
 
 class Map {
 
     func add(k, v){
-        insert(self, k, v)
+        tinsert(self, k, v)
     }
 
     func insert(k, v){
-        insert(self, k, v)
+        tinsert(self, k, v)
     }
 
     func remove(k) {
-        remove(self, k)
+        tremove(self, k)
     }
 
     func containsKey(k) {

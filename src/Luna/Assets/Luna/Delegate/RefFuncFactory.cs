@@ -25,15 +25,13 @@ namespace SharpLuna
             int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
             return () =>
             {
-                lua_pushcfunction(L, LuaException.traceback);
-                lua_rawgeti(L, LUA_REGISTRYINDEX, luaref);
-                if (lua_pcall(L, 0, 0, 2) != (int)LuaStatus.OK)
+                int errFunc = pcall_prepare(L, errorFuncRef, luaref);
+                if (lua_pcall(L, 0, 0, errFunc) != (int)LuaStatus.OK)
                 {
-                    lua_remove(L, -2);
-                    throw new LuaException(L);
+                    ThrowExceptionFromError(L, errFunc - 1);
                 }
-                Get(L, -1, out R ret);
-                lua_pop(L, 2);
+                Get(L, -1, out R ret);                
+                lua_settop(L, errFunc - 1);
                 return ret;
             };
         }
@@ -73,16 +71,14 @@ namespace SharpLuna
             int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
             return (ref T1 t1) =>
             {
-                lua_pushcfunction(L, LuaException.traceback);
-                lua_rawgeti(L, LUA_REGISTRYINDEX, luaref);
+                int errFunc = pcall_prepare(L, errorFuncRef, luaref);
                 Push(L, ref t1);
-                if (lua_pcall(L, 1, 0, -1 + 2) != (int)LuaStatus.OK)
+                if (lua_pcall(L, 1, 0, errFunc) != (int)LuaStatus.OK)
                 {
-                    lua_remove(L, -2);
-                    throw new LuaException(L);
+                    ThrowExceptionFromError(L, errFunc - 1);
                 }
-                Get(L, -1, out R ret);
-                lua_pop(L, 2);
+                Get(L, -1, out R ret);                
+                lua_settop(L, errFunc - 1);
                 return ret;
             };
         }
@@ -122,17 +118,15 @@ namespace SharpLuna
             int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
             return (ref T1 t1, T2 t2) =>
             {
-                lua_pushcfunction(L, LuaException.traceback);
-                lua_rawgeti(L, LUA_REGISTRYINDEX, luaref);
+                int errFunc = pcall_prepare(L, errorFuncRef, luaref);
                 Push(L, ref t1);
                 PushT(L, t2);
-                if (lua_pcall(L, 2, 0, -2 + 2) != (int)LuaStatus.OK)
+                if (lua_pcall(L, 2, 0, errFunc) != (int)LuaStatus.OK)
                 {
-                    lua_remove(L, -2);
-                    throw new LuaException(L);
+                    ThrowExceptionFromError(L, errFunc - 1);
                 }
-                Get(L, -1, out R ret);
-                lua_pop(L, 2);
+                Get(L, -1, out R ret);                
+                lua_settop(L, errFunc - 1);
                 return ret;
             };
         }
@@ -173,18 +167,16 @@ namespace SharpLuna
             int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
             return (ref T1 t1, T2 t2, T3 t3) =>
             {
-                lua_pushcfunction(L, LuaException.traceback);
-                lua_rawgeti(L, LUA_REGISTRYINDEX, luaref);
+                int errFunc = pcall_prepare(L, errorFuncRef, luaref);
                 Push(L, ref t1);
                 PushT(L, t2);
                 PushT(L, t3);
-                if (lua_pcall(L, 3, 0, -3 + 2) != (int)LuaStatus.OK)
+                if (lua_pcall(L, 3, 0, errFunc) != (int)LuaStatus.OK)
                 {
-                    lua_remove(L, -2);
-                    throw new LuaException(L);
+                    ThrowExceptionFromError(L, errFunc - 1);
                 }
-                Get(L, -1, out R ret);
-                lua_pop(L, 2);
+                Get(L, -1, out R ret);                
+                lua_settop(L, errFunc - 1);
                 return ret;
             };
         }
@@ -226,19 +218,17 @@ namespace SharpLuna
             int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
             return (ref T1 t1, T2 t2, T3 t3, T4 t4) =>
             {
-                lua_pushcfunction(L, LuaException.traceback);
-                lua_rawgeti(L, LUA_REGISTRYINDEX, luaref);
+                int errFunc = pcall_prepare(L, errorFuncRef, luaref);
                 Push(L, ref t1);
                 PushT(L, t2);
                 PushT(L, t3);
                 PushT(L, t4);
-                if (lua_pcall(L, 4, 0, -4 + 2) != (int)LuaStatus.OK)
+                if (lua_pcall(L, 4, 0, errFunc) != (int)LuaStatus.OK)
                 {
-                    lua_remove(L, -2);
-                    throw new LuaException(L);
+                    ThrowExceptionFromError(L, errFunc - 1);
                 }
-                Get(L, -1, out R ret);
-                lua_pop(L, 2);
+                Get(L, -1, out R ret);                
+                lua_settop(L, errFunc - 1);
                 return ret;
             };
         }
@@ -281,20 +271,18 @@ namespace SharpLuna
             int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
             return (ref T1 t1, T2 t2, T3 t3, T4 t4, T5 t5) =>
             {
-                lua_pushcfunction(L, LuaException.traceback);
-                lua_rawgeti(L, LUA_REGISTRYINDEX, luaref);
+                int errFunc = pcall_prepare(L, errorFuncRef, luaref);
                 Push(L, ref t1);
                 PushT(L, t2);
                 PushT(L, t3);
                 PushT(L, t4);
                 PushT(L, t5);
-                if (lua_pcall(L, 5, 0, -5 + 2) != (int)LuaStatus.OK)
+                if (lua_pcall(L, 5, 0, errFunc) != (int)LuaStatus.OK)
                 {
-                    lua_remove(L, -2);
-                    throw new LuaException(L);
+                    ThrowExceptionFromError(L, errFunc - 1);
                 }
-                Get(L, -1, out R ret);
-                lua_pop(L, 2);
+                Get(L, -1, out R ret);                
+                lua_settop(L, errFunc - 1);
                 return ret;
             };
         }
@@ -338,21 +326,19 @@ namespace SharpLuna
             int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
             return (ref T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6) =>
             {
-                lua_pushcfunction(L, LuaException.traceback);
-                lua_rawgeti(L, LUA_REGISTRYINDEX, luaref);
+                int errFunc = pcall_prepare(L, errorFuncRef, luaref);
                 Push(L, ref t1);
                 PushT(L, t2);
                 PushT(L, t3);
                 PushT(L, t4);
                 PushT(L, t5);
                 PushT(L, t6);
-                if (lua_pcall(L, 6, 0, -6 + 2) != (int)LuaStatus.OK)
+                if (lua_pcall(L, 6, 0, errFunc) != (int)LuaStatus.OK)
                 {
-                    lua_remove(L, -2);
-                    throw new LuaException(L);
+                    ThrowExceptionFromError(L, errFunc - 1);
                 }
-                Get(L, -1, out R ret);
-                lua_pop(L, 2);
+                Get(L, -1, out R ret);                
+                lua_settop(L, errFunc - 1);
                 return ret;
             };
         }
@@ -397,8 +383,7 @@ namespace SharpLuna
             int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
             return (ref T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6, T7 t7) =>
             {
-                lua_pushcfunction(L, LuaException.traceback);
-                lua_rawgeti(L, LUA_REGISTRYINDEX, luaref);
+                int errFunc = pcall_prepare(L, errorFuncRef, luaref);
                 Push(L, ref t1);
                 PushT(L, t2);
                 PushT(L, t3);
@@ -406,13 +391,12 @@ namespace SharpLuna
                 PushT(L, t5);
                 PushT(L, t6);
                 PushT(L, t7);
-                if (lua_pcall(L, 7, 0, -7 + 2) != (int)LuaStatus.OK)
+                if (lua_pcall(L, 7, 0, errFunc) != (int)LuaStatus.OK)
                 {
-                    lua_remove(L, -2);
-                    throw new LuaException(L);
+                    ThrowExceptionFromError(L, errFunc - 1);
                 }
-                Get(L, -1, out R ret);
-                lua_pop(L, 2);
+                Get(L, -1, out R ret);                
+                lua_settop(L, errFunc - 1);
                 return ret;
             };
         }
@@ -458,8 +442,7 @@ namespace SharpLuna
             int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
             return (ref T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6, T7 t7, T8 t8) =>
             {
-                lua_pushcfunction(L, LuaException.traceback);
-                lua_rawgeti(L, LUA_REGISTRYINDEX, luaref);
+                int errFunc = pcall_prepare(L, errorFuncRef, luaref);
                 Push(L, ref t1);
                 PushT(L, t2);
                 PushT(L, t3);
@@ -468,13 +451,12 @@ namespace SharpLuna
                 PushT(L, t6);
                 PushT(L, t7);
                 PushT(L, t8);
-                if (lua_pcall(L, 8, 0, -8 + 2) != (int)LuaStatus.OK)
+                if (lua_pcall(L, 8, 0, errFunc) != (int)LuaStatus.OK)
                 {
-                    lua_remove(L, -2);
-                    throw new LuaException(L);
+                    ThrowExceptionFromError(L, errFunc - 1);
                 }
-                Get(L, -1, out R ret);
-                lua_pop(L, 2);
+                Get(L, -1, out R ret);                
+                lua_settop(L, errFunc - 1);
                 return ret;
             };
         }

@@ -22,6 +22,10 @@ var task = coroutine.start(func() {
 })
 
 coroutine.start(func() {
+
+	var webReq = UnityEngine.UnityWebRequest.Get("http://www.baidu.com")
+	cwait(webReq.SendWebRequest())
+	print(webReq.downloadHandler.text)
     print('stop coroutine a after 5 seconds')
 	cwait(new UnityEngine.WaitForSeconds(5))
 	coroutine.stop(task)

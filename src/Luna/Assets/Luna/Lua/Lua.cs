@@ -301,6 +301,13 @@ namespace SharpLuna
             return lua_gettop(L);
         }
 
+        public static int pcall_prepare(lua_State L, int error_func_ref, int func_ref)
+        {
+            lua_rawgeti(L, LUA_REGISTRYINDEX, error_func_ref);
+            lua_rawgeti(L, LUA_REGISTRYINDEX, func_ref);
+            return lua_gettop(L) - 1;
+        }
+
         public static string GetDebugTraceback(lua_State L)
         {
             int oldTop = lua_gettop(L);

@@ -93,14 +93,14 @@ namespace SharpLuna
 
             foreach(var type in enums)
             {
-                sb.Append($"\t\tpublic static void Push(IntPtr L, in {type.FullName} v) => Push(L, (int)v);\n");             
+                sb.Append($"\t\tpublic static void Push(IntPtr L, in {type.GetFriendlyName()} v) => Push(L, (int)v);\n");             
             }
 
             sb.AppendLine();
 
             foreach (var type in enums)
             {
-                sb.Append($"\t\tpublic static void Get(IntPtr L, int index, out {type.FullName} v) \n\t\t{{\n\t\t\tGet(L, index, out int v1);\n\t\t\tv = ({type.FullName})v1; \n\t\t}}\n\n");
+                sb.Append($"\t\tpublic static void Get(IntPtr L, int index, out {type.GetFriendlyName()} v) \n\t\t{{\n\t\t\tGet(L, index, out int v1);\n\t\t\tv = ({type.GetFriendlyName()})v1; \n\t\t}}\n\n");
             }
 
             sb.Append("\t}\n");
@@ -123,7 +123,7 @@ namespace SharpLuna
 
             sb.AppendLine();
 
-            sb.Append("[WrapClass(typeof(" + type.FullName + "))]\n");
+            sb.Append("[WrapClass(typeof(" + type.GetFriendlyName() + "))]\n");
             sb.Append("public class ");
 
             if (!string.IsNullOrEmpty(module))
@@ -236,8 +236,8 @@ namespace SharpLuna
                 {
                     sb.Append("namespace SharpLuna\n{\n");
                     sb.Append("\tpublic static partial class Lua\n\t{\n");
-                    sb.Append($"\t\tpublic static void Push(IntPtr L, in {type.FullName} v) => SharpObject.PushUnmanagedObject(L, v);\n\n");
-                    sb.Append($"\t\tpublic static void Get(IntPtr L, int index, out {type.FullName} v) => v = SharpObject.GetUnmanaged<{type.FullName}>(L, index);\n");
+                    sb.Append($"\t\tpublic static void Push(IntPtr L, in {type.GetFriendlyName()} v) => SharpObject.PushUnmanagedObject(L, v);\n\n");
+                    sb.Append($"\t\tpublic static void Get(IntPtr L, int index, out {type.GetFriendlyName()} v) => v = SharpObject.GetUnmanaged<{type.GetFriendlyName()}>(L, index);\n");
                     sb.Append("\t}\n");
                     sb.Append("}\n");
                 }
@@ -259,6 +259,7 @@ namespace SharpLuna
         {
             var ctors = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
             List<ConstructorInfo> ctorList = new List<ConstructorInfo>();
+            int[] parameterCounter = new int[16];
             foreach (var ctor in ctors)
             {
                 if (!ctor.ShouldExport())
@@ -272,7 +273,8 @@ namespace SharpLuna
                 }
 
                 bool gen = true;
-                foreach (var p in ctor.GetParameters())
+                var parameters = ctor.GetParameters();
+                foreach (var p in parameters)
                 {
                     if (!p.ParameterType.ShouldExport())
                     {
@@ -292,6 +294,7 @@ namespace SharpLuna
 
                 if (gen)
                 {
+                    parameterCounter[parameters.Length] = parameterCounter[parameters.Length] + 1;
                     ctorList.Add(ctor);
                 }
 
@@ -300,7 +303,7 @@ namespace SharpLuna
             if (ctorList.Count > 0)
             {
                 ctorList.Sort((a, b) => a.GetParameters().Length - b.GetParameters().Length);
-                GenerateConstructor(type, ctorList, sb);
+                GenerateConstructor(type, ctorList, parameterCounter, sb);
                 members.Add(new MemberGenInfo(MemberTypes.Constructor, "ctor", false, false));
             }
 
@@ -418,8 +421,8 @@ namespace SharpLuna
                     }
 
                     bool gen = true;
-                    var paramments = mi.GetParameters();
-                    foreach (var p in paramments)
+                    var methodParaments = mi.GetParameters();
+                    foreach (var p in methodParaments)
                     {
                         if (!p.ParameterType.ShouldExport())
                         {
@@ -438,7 +441,7 @@ namespace SharpLuna
 
                     if (gen)
                     {
-                        paraments[paramments.Length] = paraments[paramments.Length] + 1;
+                        paraments[methodParaments.Length] = paraments[methodParaments.Length] + 1;
                         methodInfos.Add((MethodInfo)m);
                     }
                 }
@@ -464,7 +467,7 @@ namespace SharpLuna
             generatedTypes.Add(type);*/
         }
 
-        static void GenerateConstructor(Type type, List<ConstructorInfo> ctorList, StringBuilder sb)
+        static void GenerateConstructor(Type type, List<ConstructorInfo> ctorList, int[] paraments, StringBuilder sb)
         {
             bool isArray = type.IsArray;
             sb.Append("\t[AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]\n");
@@ -472,7 +475,7 @@ namespace SharpLuna
 
             sb.Append($"\t\tint n = lua_gettop(L) - 1;\n");
 
-            sb.Append($"\t\t{type.FullName} obj = default;\n");
+            sb.Append($"\t\t{type.GetFriendlyName()} obj = default;\n");
 
             bool first = true;
 
@@ -480,7 +483,7 @@ namespace SharpLuna
             {
                 first = false;
                 sb.Append($"\t\tif(n == 0)\n\t\t{{\n");               
-                sb.Append($"\t\t\tobj = new {type.FullName}();\n");
+                sb.Append($"\t\t\tobj = new {type.GetFriendlyName()}();\n");
             }
 
             int idx = 0;
@@ -499,18 +502,50 @@ namespace SharpLuna
                     {
                         sb.Append($"\t\t}}\n\t\telse if(n == 0)\n\t\t{{\n");
                     }
-                    sb.Append($"\t\t\tobj = new {type.FullName}();\n");
+                    sb.Append($"\t\t\tobj = new {type.GetFriendlyName()}();\n");
                 }
                 else
                 {
                     if (first)
                     {
                         first = false;
-                        sb.Append($"\t\tif(n == {parameters.Length})\n\t\t{{\n");
+                        sb.Append($"\t\tif(n == {parameters.Length}");
+                        if (paraments[parameters.Length] > 1 && parameters.Length > 0)
+                        {
+                            sb.Append(" && CheckType<");
+                            for (int i = 0; i < parameters.Length; i++)
+                            {
+                                var paramInfo = parameters[i];
+                                sb.Append($"{paramInfo.ParameterType.GetFriendlyName()}");
+                                if (i != parameters.Length - 1)
+                                {
+                                    sb.Append(", ");
+                                }
+                            }
+
+                            sb.Append(">(L, 2)");
+                        }
+                        sb.Append(")\n\t\t{\n");
                     }
                     else
                     {
-                        sb.Append($"\t\t}}\n\t\telse if(n == {parameters.Length})\n\t\t{{\n");
+                        sb.Append($"\t\t}}\n\t\telse if(n == {parameters.Length}");
+                        if (paraments[parameters.Length] > 1 && parameters.Length > 0)
+                        {
+                            sb.Append(" && CheckType<");
+                            for (int i = 0; i < parameters.Length; i++)
+                            {
+                                var paramInfo = parameters[i];
+                                sb.Append($"{paramInfo.ParameterType.GetFriendlyName()}");
+                                if (i != parameters.Length - 1)
+                                {
+                                    sb.Append(", ");
+                                }
+                            }
+
+                            sb.Append(">(L, 2)");
+                        }
+                        sb.Append(")\n\t\t{\n");
                     }
 
                     for (int i = 1; i <= parameters.Length; i++)
@@ -522,11 +557,11 @@ namespace SharpLuna
 
                     if(isArray)
                     {
-                        sb.Append($"\t\t\tobj = new {type.GetElementType().FullName}[");
+                        sb.Append($"\t\t\tobj = new {type.GetElementType().GetFriendlyName()}[");
                     }
                     else
                     {
-                        sb.Append($"\t\t\tobj = new {type.FullName}(");
+                        sb.Append($"\t\t\tobj = new {type.GetFriendlyName()}(");
                     }
 
                     for (int i = 1; i <= parameters.Length; i++)
@@ -579,17 +614,17 @@ namespace SharpLuna
 
                 if (isStatic)
                 {
-                    sb.Append($"\t\tPush(L, {type.FullName}.{name});\n");
+                    sb.Append($"\t\tPush(L, {type.GetFriendlyName()}.{name});\n");
                 }
                 else
                 {
                     if (type.IsUnManaged())
                     {
-                        sb.Append($"\t\tref var obj = ref SharpObject.GetValue<{type.FullName}>(L, 1);\n");
+                        sb.Append($"\t\tref var obj = ref SharpObject.GetValue<{type.GetFriendlyName()}>(L, 1);\n");
                     }
                     else
                     {
-                        sb.Append($"\t\tvar obj = SharpObject.Get<{type.FullName}>(L, 1);\n");
+                        sb.Append($"\t\tvar obj = SharpObject.Get<{type.GetFriendlyName()}>(L, 1);\n");
                     }
 
                     sb.Append($"\t\tPush(L, obj.{name});\n");
@@ -608,17 +643,17 @@ namespace SharpLuna
                 if (isStatic)
                 {
                     sb.Append($"\t\tGet(L, 1, out {valType.GetFriendlyName()} p1);\n");
-                    sb.Append($"\t\t{type.FullName}.{name} = p1;\n");
+                    sb.Append($"\t\t{type.GetFriendlyName()}.{name} = p1;\n");
                 }
                 else
                 {                
                     if (type.IsUnManaged())
                     {
-                        sb.Append($"\t\tref var obj = ref SharpObject.GetValue<{type.FullName}>(L, 1);\n");
+                        sb.Append($"\t\tref var obj = ref SharpObject.GetValue<{type.GetFriendlyName()}>(L, 1);\n");
                     }
                     else
                     {
-                        sb.Append($"\t\tvar obj = SharpObject.Get<{type.FullName}>(L, 1);\n");
+                        sb.Append($"\t\tvar obj = SharpObject.Get<{type.GetFriendlyName()}>(L, 1);\n");
                     }
 
                     sb.Append($"\t\tGet(L, 2, out {valType.GetFriendlyName()} p1);\n");
@@ -686,7 +721,11 @@ namespace SharpLuna
                                     sb.Append(", ");
                                 }
                             }
-                            sb.Append(">(L, 1)");
+
+                            if(method.IsStatic)
+                                sb.Append(">(L, STATIC_STARTSTACK)");
+                            else
+                                sb.Append(">(L, 2)");
                         }
                         sb.Append(")\n\t\t{\n");
                     }                    
@@ -705,7 +744,10 @@ namespace SharpLuna
                                     sb.Append(", ");
                                 }
                             }
-                            sb.Append(">(L, 1)");
+                            if (method.IsStatic)
+                                sb.Append(">(L, STATIC_STARTSTACK)");
+                            else
+                                sb.Append(">(L, 2)");
                         }
                         sb.Append(")\n\t\t{\n");;
                     }
@@ -726,11 +768,11 @@ namespace SharpLuna
                 {
                     if (type.IsUnManaged())
                     {
-                        sb.Indent(indent).Append($"ref var obj = ref SharpObject.GetValue<{type.FullName}>(L, 1);\n");
+                        sb.Indent(indent).Append($"ref var obj = ref SharpObject.GetValue<{type.GetFriendlyName()}>(L, 1);\n");
                     }
                     else
                     {
-                        sb.Indent(indent).Append($"var obj = SharpObject.Get<{type.FullName}>(L, 1);\n");
+                        sb.Indent(indent).Append($"var obj = SharpObject.Get<{type.GetFriendlyName()}>(L, 1);\n");
                     }
 
                     for (int i = 0; i < parameters.Length; i++)
@@ -746,7 +788,7 @@ namespace SharpLuna
                 {
                     sb.Indent(indent).Append($"{method.ReturnType.GetFriendlyName()} ret = ");
                     if (method.IsStatic)
-                        sb.Append($"{type.FullName}.{method.Name}(");
+                        sb.Append($"{type.GetFriendlyName()}.{method.Name}(");
                     else
                     {
                         if (isArrayGet || isArraySet)
@@ -760,7 +802,7 @@ namespace SharpLuna
                 else
                 {
                     if (method.IsStatic)
-                        sb.Indent(indent).Append($"{type.FullName}.{method.Name}(");
+                        sb.Indent(indent).Append($"{type.GetFriendlyName()}.{method.Name}(");
                     else
                     {
                         if(isArrayGet || isArraySet)

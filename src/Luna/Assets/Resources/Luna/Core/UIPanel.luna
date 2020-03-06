@@ -14,8 +14,10 @@ class UIPanel : Behavior {
 
     func addClickByName(name, clickFn) {
         var child = LunaHelper.FindChild(self.gameObject, name)
-        self.eventObjects[child] = 1
-        LunaHelper.AddClick(child, clickFn, self)
+        if child {
+            self.addClick(child, clickFn)
+        }
+
         return child
     }
 
@@ -24,23 +26,20 @@ class UIPanel : Behavior {
         LunaHelper.AddClick(child, clickFn, self)
     }
     
-    func removeEvent(child, evtFn) {
-        LunaHelper.RemoveAction(child, evtFn)
+    func removeListener(evtFn, child) {
+        var obj = child or self.gameObject
+        LunaHelper.RemoveAction(obj, evtFn)
     }
 
-    func removeAllEvent(child) {
+    func removeAllListener(child) {
         LunaHelper.RemoveAction(child, nil)
     }
 
-    func removeAllEvents() {
+    func removeAllListeners() {
         for k, _ in pairs(self.eventObjects) {
             LunaHelper.RemoveAction(k, nil)
             table.remove(self.eventObjects, k)
         }
-    }
-
-    func remove(evtFn) {
-        LunaHelper.RemoveAction(self, evtFn)
     }
 
     func show() {

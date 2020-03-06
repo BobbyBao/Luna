@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.Networking;
 using UnityEngine.UI;
@@ -39,8 +40,11 @@ namespace SharpLuna.Unity
             typeof(WaitForSeconds),
             typeof(WaitForFixedUpdate),
             typeof(WaitForEndOfFrame),
-            typeof(WWW),
+
             typeof(UnityWebRequest),
+            typeof(DownloadHandler),
+            typeof(DownloadHandlerBuffer),
+
             typeof(Coroutine),
             typeof(Space),
             typeof(UnityEngine.Rendering.ShadowCastingMode),
@@ -69,6 +73,8 @@ namespace SharpLuna.Unity
             typeof(RawImage),
             typeof(EventTriggerType),
             typeof(BaseEventData),
+            typeof(UnityEvent),
+            typeof(Button.ButtonClickedEvent),
         };
 
         private Luna luna;
@@ -158,23 +164,27 @@ namespace SharpLuna.Unity
 
         protected virtual void OnInit()
         {
+            Luna.LoadAssembly("mscorlib");
+            Luna.LoadAssembly("UnityEngine");
+            Luna.LoadAssembly("UnityEngine.UI");
+
+
             Converter.RegisterAction<UnityEngine.Object>();
             Converter.RegisterAction<GameObject>();
+            Converter.RegisterAction<AsyncOperation>();            
 
             Converter.RegisterFunc<UnityEngine.Object>();
             Converter.RegisterFunc<GameObject>();
 
-            Converter.Register(typeof(System.Collections.IEnumerator), IEnumeratorBridge.Create);
+            Converter.Register<System.Collections.IEnumerator>(IEnumeratorBridge.Create);
 
-            Luna.LoadAssembly("mscorlib");
-            Luna.LoadAssembly("UnityEngine");
-            Luna.LoadAssembly("UnityEngine.UI");
+            Converter.Register<UnityAction>(CreateUnityAction);
         }
 
         protected virtual void OnPostInit()
         {
-            luna.Register("luna.startCoroutine", startCoroutine);
-            luna.Register("luna.stopCoroutine", stopCoroutine);
+            luna.Register("luna.startCoroutine", _StartCoroutine);
+            luna.Register("luna.stopCoroutine", _StopCoroutine);
         }
 
         protected virtual IEnumerator OnStart()
@@ -193,7 +203,7 @@ namespace SharpLuna.Unity
         }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        static int startCoroutine(lua_State L)
+        static int _StartCoroutine(lua_State L)
         {
             Get(L, STATIC_STARTSTACK, out IEnumerator cor);
             var coro = Instance.StartCoroutine(cor);
@@ -202,11 +212,30 @@ namespace SharpLuna.Unity
         }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        static int stopCoroutine(lua_State L)
+        static int _StopCoroutine(lua_State L)
         {
             Get(L, STATIC_STARTSTACK, out Coroutine cor);
             Instance.StopCoroutine(cor);
             return 0;
+        }
+
+        public static UnityAction CreateUnityAction(IntPtr L, int index)
+        {
+            lua_pushvalue(L, index);
+            int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
+            return () =>
+            {
+                //lua_pushcfunction(L, LuaException.traceback);
+                //lua_rawgeti(L, LUA_REGISTRYINDEX, luaref);
+                int errFunc = pcall_prepare(L, errorFuncRef, luaref);
+                if (lua_pcall(L, 0, 0, errFunc) != (int)LuaStatus.OK)
+                {
+                    //lua_remove(L, -2);
+                    ThrowExceptionFromError(L, errFunc - 1);
+                }
+                lua_settop(L, errFunc - 1);
+                //lua_pop(L, 1);
+            };
         }
 
         protected virtual void Update()

@@ -15,10 +15,13 @@ namespace SharpLuna
         static Dictionary<Type, Func<IntPtr, int, object>> converterFactory = new Dictionary<Type, Func<IntPtr, int, object>>();
         static Converter()
         {
+            RegisterAction();
+            RegisterAction<bool>();
             RegisterAction<int>();
             RegisterAction<string>();
             RegisterAction<object>();
 
+            RegisterFunc<bool>();
             RegisterFunc<int>();
             RegisterFunc<string>();
             RegisterFunc<object>();
