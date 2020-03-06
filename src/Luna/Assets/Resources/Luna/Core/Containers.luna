@@ -1,4 +1,21 @@
 
+let tsort,insert,remove = table.sort,table.insert,table.remove
+
+local func cycle_aware_copy(t, cache) {
+    if type(t) != 'table' { return t }
+    if cache[t] { return cache[t] }
+    var res = {}
+    cache[t] = res
+    var mt = getmetatable(t)
+    for k,v in pairs(t) {
+        k = cycle_aware_copy(k, cache)
+        v = cycle_aware_copy(v, cache)
+        res[k] = v
+    }
+    setmetatable(res,mt)
+    return res
+}
+
 class SequenceBase {
 
     func isEmpty() {
@@ -20,11 +37,11 @@ class SequenceBase {
 		}, self
 	}
 
-    func clear() {
-        for k in ipairs(self) {
-            t [k] = nil
-        }
+    func clear(istart) {
+        istart = istart or 1
+        for i = istart,#self { remove(t) }
     }
+
 }
 
 class Sequence  : SequenceBase {
@@ -71,6 +88,12 @@ class Sequence  : SequenceBase {
     func sort(cmp) {
         table.sort(self, cmp)
     }
+
+    func forEach(f) {
+        for v in self.iter() {            
+            f(v)
+        }
+    }
 }
 
 class Stack : SequenceBase {
@@ -115,12 +138,16 @@ class Set : Sequence {
 
 class Map {
 
+    func add(k, v){
+        insert(self, k, v)
+    }
+
     func insert(k, v){
-        table.insert(self, k, v)
+        insert(self, k, v)
     }
 
     func remove(k) {
-        table.remove(self, k)
+        remove(self, k)
     }
 
     func containsKey(k) {
@@ -131,6 +158,20 @@ class Map {
         for k in pairs(self) {
             t [k] = nil
         }
+    }
+
+    func count() {
+        var i = 0
+        for k in pairs(self) { i = i + 1 }
+        return i
+    }
+
+    func iter () {
+        return pairs(self)
+    }
+
+    func clone() {
+        return cycle_aware_copy(self, {})
     }
 }
 

@@ -52,7 +52,7 @@ func coroutine.stop(c) {
     luna.stopCoroutine(c)
 }
 
-func coroutine.await(async_func, callback_pos) {
+func coroutine.async_wait(async_func, callback_pos) {
     return func(...) {
         let _co = coroutine.running() or error ('this function must be run in coroutine')
         var rets

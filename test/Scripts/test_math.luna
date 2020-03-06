@@ -16,6 +16,8 @@ print(v1 > v2)
 print(v1 >= v2)
 
 
+print("len : ", #v2)
+
 print(-v2)
 
 print(tostring(v1 + v2))

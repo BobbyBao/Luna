@@ -1,12 +1,26 @@
 
 class vec3 {
-    var x = 0, y = 0, z = 0
+    var x = 0
+    var y = 0
+    var z = 0
 
     init(x, y, z) {
         self.x = x
         self.y = y
         self.z = z
     }
+
+    deinit(){
+    }
+
+    /*
+    X {
+        get{
+        }
+
+        set{
+        }
+    }*/
 
     func set(x, y, z) {
         self.x = x
@@ -40,6 +54,10 @@ class vec3 {
 
     func <= (v1, v2) {
         return v1.x <= v2.x && v1.y <= v2.y && v1.z <= v2.z
+    }
+    
+    func #() {
+        return 3
     }
 
     func __unm() {

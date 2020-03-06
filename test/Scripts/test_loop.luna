@@ -1,16 +1,16 @@
 
 var a = [1, 2, 3, 4, 5]
 
+print "range:"
+let len = 4
+for i = 0, len {
+	print(i, a[i])
+}
+
 print "iter():"
 
 for v in a.iter() {
 	print(v)
-}
-
-print "range:"
-
-for i = 0, 4 {
-	print(i, a[i])
 }
 
 var i = 5
@@ -30,7 +30,7 @@ do
 {
     let i = 5
     print(i)
-    i = 6 //±¨´í
+    //i = 6 //±¨´í
     let i = 6
     print(i)
 
