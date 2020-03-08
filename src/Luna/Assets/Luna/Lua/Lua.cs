@@ -33,7 +33,7 @@ namespace SharpLuna
 #else
 	    public const int STATIC_STARTSTACK = 1;
 #endif
-        internal static Encoding Encoding { get; set; } = Encoding.Default;
+        public static Encoding Encoding { get; set; } = Encoding.Default;
         internal static HashSet<object> savedFn = new HashSet<object>();
         public static bool UseTraceback { get; set; } = false;
         public static int errorFuncRef = -1;

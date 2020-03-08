@@ -17,6 +17,12 @@ namespace Test
     {
         TestFramework framework;
         public Luna Luna => framework.Luna;
+
+        public static ModuleInfo testModule = new ModuleInfo
+        {
+            typeof(UIManager),
+        };
+
         public TableTree()
         {
 
@@ -26,7 +32,7 @@ namespace Test
 
 
             Luna.Print = this.Print;
-            framework = new TestFramework();
+            framework = new TestFramework(testModule);
             framework.Start();
 
             var it = Directory.EnumerateFiles(TestFramework.dataPath, "*.luna");
@@ -115,9 +121,16 @@ namespace Test
             }
         }
 
+        public Action onRecharge;
         private void toolStripButton3_Click(object sender, EventArgs e)
         {
-            UIManager.alertBox.Show();
+            //UIManager.alertBox.Show();
+            onRecharge?.Invoke();
+        }
+
+        private void toolStripButton4_Click(object sender, EventArgs e)
+        {
+            framework.GenerateWraps();
         }
     }
 }

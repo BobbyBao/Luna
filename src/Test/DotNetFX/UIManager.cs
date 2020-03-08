@@ -30,4 +30,9 @@ public class UIManager
     {
         confirmBox.Show(message, title, onFinished);
     }
+
+    public static void AddListener(Action action)
+    {
+        tableTree.onRecharge = action;
+    }
 }

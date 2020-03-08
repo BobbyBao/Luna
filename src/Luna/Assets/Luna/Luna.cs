@@ -72,6 +72,11 @@ namespace SharpLuna
             Dispose();
         }
 
+        public void AddModuleInfo(ModuleInfo moduleInfo)
+        {
+            _config.Add(moduleInfo);
+        }
+
         public void Start()
         {
             if (ReadBytes == null)

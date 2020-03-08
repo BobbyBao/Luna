@@ -126,7 +126,7 @@ namespace SharpLuna
             PushToStack();
             var pointer = lua_topointer(L, -1);
             lua_pop(L, 1);
-            return pointer.ToInt32();
+            return pointer.GetHashCode();
         }
 
         public int CompareTo(LuaRef r)

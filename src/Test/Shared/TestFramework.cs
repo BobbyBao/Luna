@@ -17,16 +17,28 @@ namespace Tests
         public static string dataPath = "../../../../Test/Scripts/";
         
         public event Action onPostInit;
+
+        public static ModuleInfo testModule = new ModuleInfo("Tests")
+        {
+            typeof(TestEnum),typeof(TestStruct),typeof(TestClass),
+        };
+
         public TestFramework(params ModuleInfo[] modules)
         {          
             Luna.ReadBytes = ReadBytes;
-            luna = new Luna(modules);
+            luna = new Luna(testModule);
+            foreach(var m in modules)
+            {
+                luna.AddModuleInfo(m);
+            }
             luna.PostInit += Luna_PostInit;
+            Lua.Encoding = Encoding.UTF8;
         }
 
         public void Start()
         {   
             GenerateWraps();
+
             luna.Start();
             luna.AddSearcher(Loader);
         }
@@ -95,27 +107,27 @@ namespace Tests
             luna.DoFile("test.luna");
         }
 
-        public void GenerateWraps()
+        public void GenerateWraps(bool force = false)
         {
             string path = "../../../../Test/Shared/Generate/";
 
-            if (Directory.Exists(path))
+            if(!force)
             {
-                luna.RegisterWraps(this.GetType());
-                return;
+                if (Directory.Exists(path))
+                {
+                    luna.RegisterWraps(this.GetType());
+                    return;
+                }
             }
-     
-            WrapGenerator.ExportPath = path;
-            //WrapGenerator.GenerateClassWrap(typeof(string));
-            WrapGenerator.GenerateClassWrap("", typeof(TestStruct));
-            WrapGenerator.GenerateClassWrap("", typeof(TestClass));
 
+            WrapGenerator.GenerateModule(testModule, path);
+            
             luna.RegisterWraps(this.GetType());
         }
 
         private void Luna_PostInit()
         {
-            AutoBind();
+            //AutoBind();
             onPostInit?.Invoke();
         }
 

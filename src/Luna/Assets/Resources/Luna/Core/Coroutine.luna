@@ -54,23 +54,24 @@ func coroutine.stop(c) {
     luna.stopCoroutine(c)
 }
 
-func coroutine.async_wait(async_func, callback_pos) {
+func coroutine.async_wait(async_func/*, callback_pos*/) {
     return func(...) {
         print("async_wait")
-        let _co = coroutine.running() or error ('this function must be run in coroutine')
+        var _co = coroutine.running() or error ('this function must be run in coroutine')
         var rets
         var waiting = false
         local func cb_func(...) {
             print("async_wait", "cb_func", waiting)
             if waiting {
                 print("async_wait", "cb_func")
+                _co = coroutine.running() or error ('this function must be run in coroutine')
                 //coroutine.resume(_co, ...)
             } else {
                 rets = {...}
             }
         }
-        let params = {...}
-        table.insert(params, callback_pos or (#params + 1), cb_func)
+        var params = {...}
+        table.insert(params, /*callback_pos or (#params + 1),*/ cb_func)
         print("async_wait", unpack(params))
         async_func(unpack(params))
         if rets == nil {

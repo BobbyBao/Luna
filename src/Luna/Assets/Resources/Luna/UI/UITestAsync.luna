@@ -7,7 +7,7 @@ let sync_confirm = coroutine.async_wait(UIManager.ShowConfirmBox)
 
 class message_box  {
     func alert(message, title) {
-        print('alert...', message, tittle)
+        print('alert...', message, title)
 		sync_alert(UIManager, message, title)
     }
 	

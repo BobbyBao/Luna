@@ -53,17 +53,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AlertBox.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="AlertBox.Designer.cs">
-      <DependentUpon>AlertBox.cs</DependentUpon>
-    </Compile>
     <Compile Include="ConfirmBox.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="ConfirmBox.Designer.cs">
       <DependentUpon>ConfirmBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AlertBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AlertBox.Designer.cs">
+      <DependentUpon>AlertBox.cs</DependentUpon>
     </Compile>
     <Compile Include="TableTree.cs">
       <SubType>Form</SubType>

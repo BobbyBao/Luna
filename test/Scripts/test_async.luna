@@ -1,4 +1,6 @@
 
+let unpack = table.unpack
+
 func coroutine.call(fn) {
     return func(...) {
         //print("coroutine.call")
@@ -8,10 +10,11 @@ func coroutine.call(fn) {
     }
 }
 
-func coroutine.async_wait(async_func, callback_pos) {
+func coroutine.async_wait(async_func/*, callback_pos*/) {
     return func(...) {
         print("async_wait")
         let _co = coroutine.running() or error ('this function must be run in coroutine')
+        
         var rets
         var waiting = false
         local func cb_func(...) {
@@ -23,10 +26,11 @@ func coroutine.async_wait(async_func, callback_pos) {
                 rets = {...}
             }
         }
-        let params = {...}
-        table.insert(params, callback_pos or (#params + 1), cb_func)
-        //print("async_wait", unpack(params))
-        async_func(unpack(params))
+
+        var args = {...}
+        table.insert(args,/* callback_pos or (#args + 1),*/ cb_func)
+        print("async_wait", unpack(args))
+        async_func(unpack(args))
         if rets == nil {
             waiting = true
             rets = {coroutine.yield()}
@@ -42,7 +46,7 @@ let sync_confirm = coroutine.async_wait(UIManager.ShowConfirmBox)
 
 class message_box  {
     func alert(message, title) {
-        print('alert...', message, tittle)
+        print('alert...', message, title)
 		sync_alert(UIManager, message, title)
     }
 	
@@ -75,5 +79,6 @@ let buy = func() {
     print('recharge finished')
 }
 
+print "test async"
 
-self.gameObject.Find("Button").GetComponent("Button").onClick.AddListener(coroutine.call(buy))
+UIManager.AddListener(coroutine.call(buy))

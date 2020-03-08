@@ -58,6 +58,17 @@ namespace SharpLuna
             public string Name => string.IsNullOrEmpty(alias) ? name : alias;
         }
 
+        public static void GenerateModule(ModuleInfo moduleInfo, string path)
+        {
+            WrapGenerator.ExportPath = path;
+
+            foreach (var t in moduleInfo)
+            {
+                WrapGenerator.GenerateClassWrap(moduleInfo.Name, t.type, t.generateSuperMembers, t.excludeMembers);
+            }
+
+        }
+
         public static void GenerateClassWrap(string module, Type type, bool genSuper = false, List<string> excludeMembers = null)
         {
             if(type.IsEnum)
