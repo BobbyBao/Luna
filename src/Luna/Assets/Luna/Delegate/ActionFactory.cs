@@ -15,6 +15,7 @@ namespace SharpLuna
             int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
             return () =>
             {
+                L = mainState;
                 int errFunc = pcall_prepare(L, errorFuncRef, luaref);
                 if (lua_pcall(L, 0, 0, errFunc) != (int)LuaStatus.OK)
                 {
@@ -58,6 +59,7 @@ namespace SharpLuna
             int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
             return (t1) =>
             {
+                L = mainState;
                 int errFunc = pcall_prepare(L, errorFuncRef, luaref);
                 PushT(L, t1);
                 if (lua_pcall(L, 1, 0, errFunc) != (int)LuaStatus.OK)
@@ -105,6 +107,7 @@ namespace SharpLuna
             int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
             return (t1, t2) =>
             {
+                L = mainState;
                 int errFunc = pcall_prepare(L, errorFuncRef, luaref);
                 PushT(L, t1);
                 PushT(L, t2);
@@ -154,6 +157,7 @@ namespace SharpLuna
             int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
             return (t1, t2, t3) =>
             {
+                L = mainState;
                 int errFunc = pcall_prepare(L, errorFuncRef, luaref);
                 PushT(L, t1);
                 PushT(L, t2);
@@ -205,6 +209,7 @@ namespace SharpLuna
             int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
             return (t1, t2, t3, t4) =>
             {
+                L = mainState;
                 int errFunc = pcall_prepare(L, errorFuncRef, luaref);
                 PushT(L, t1);
                 PushT(L, t2);
@@ -258,6 +263,7 @@ namespace SharpLuna
             int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
             return (t1, t2, t3, t4, t5) =>
             {
+                L = mainState;
                 int errFunc = pcall_prepare(L, errorFuncRef, luaref);
                 PushT(L, t1);
                 PushT(L, t2);
@@ -313,6 +319,7 @@ namespace SharpLuna
             int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
             return (t1, t2, t3, t4, t5, t6) =>
             {
+                L = mainState;
                 int errFunc = pcall_prepare(L, errorFuncRef, luaref);
                 PushT(L, t1);
                 PushT(L, t2);
@@ -370,6 +377,7 @@ namespace SharpLuna
             int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
             return (t1, t2, t3, t4, t5, t6, t7) =>
             {
+                L = mainState;
                 int errFunc = pcall_prepare(L, errorFuncRef, luaref);
                 PushT(L, t1);
                 PushT(L, t2);
@@ -429,6 +437,7 @@ namespace SharpLuna
             int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
             return (t1, t2, t3, t4, t5, t6, t7, t8) =>
             {
+                L = mainState;
                 int errFunc = pcall_prepare(L, errorFuncRef, luaref);
                 PushT(L, t1);
                 PushT(L, t2);

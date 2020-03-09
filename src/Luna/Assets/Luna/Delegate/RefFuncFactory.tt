@@ -27,6 +27,7 @@ namespace SharpLuna
             int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
             return () =>
             {
+                L = mainState;
                 int errFunc = pcall_prepare(L, errorFuncRef, luaref);
                 if (lua_pcall(L, 0, 0, errFunc) != (int)LuaStatus.OK)
                 {
@@ -74,6 +75,7 @@ namespace SharpLuna
             int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
             return (ref <# for(int j= 0; j <= i ; j ++){#><#=typeList[j]#> <#=typeList[j].ToLower()#><#if(j != i)#>, <#}#>) =>
             {
+                L = mainState;
                 int errFunc = pcall_prepare(L, errorFuncRef, luaref);
                 Push(L, ref <#=typeList[0].ToLower()#>);
                 <# for(int j= 1; j <= i ; j ++){#>PushT(L, <#=typeList[j].ToLower()#>);

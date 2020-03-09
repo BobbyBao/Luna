@@ -7,7 +7,7 @@ class BaseObj {
 		print(self.name, self.id)
 	}
 
-	staticVar = 100
+	var staticVar = 100
 
 	func staticFunc() {
 		print "static func"

@@ -1,7 +1,7 @@
 
 func TestIndex(){	
 
-    var test = TestClass()
+    var test = Tests.TestClass()
 	var t = os.clock()	
     test.CreateChild()
 	var c = test.Child

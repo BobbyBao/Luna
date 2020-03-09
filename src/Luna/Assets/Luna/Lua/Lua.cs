@@ -33,10 +33,11 @@ namespace SharpLuna
 #else
 	    public const int STATIC_STARTSTACK = 1;
 #endif
-        public static Encoding Encoding { get; set; } = Encoding.Default;
+        public static Encoding Encoding { get; set; } = Encoding.UTF8;
         internal static HashSet<object> savedFn = new HashSet<object>();
         public static bool UseTraceback { get; set; } = false;
         public static int errorFuncRef = -1;
+        public static lua_State mainState;
         static ConcurrentDictionary<IntPtr, List<IDisposable>> luaStates = new ConcurrentDictionary<IntPtr, List<IDisposable>>();
 
         public static lua_State newstate()
