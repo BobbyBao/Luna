@@ -15,7 +15,7 @@ class UITestAsync : UIPanel {
 
         super.onLoad(go)
 
-        self.gameObject.Find("Button").GetComponent("Button").onClick.AddListener(coroutine.wrap(self.buy, self))
+        self.gameObject.Find("Button").GetComponent("Button").onClick.AddListener(coroutine.call(self.buy, self))
 
     }
         
