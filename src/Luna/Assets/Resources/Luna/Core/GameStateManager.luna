@@ -4,7 +4,7 @@ class GameStateManager : Behavior {
 
     init(n) {
         self.name = n
-        self.children = List()
+        self.children = new Sequence()
         self.currentState = nil
     }
 

@@ -30,7 +30,7 @@ var subscribedEvents_ = {}
 setmetatable(subscribedEvents_, {__mode = "kv"})
 
 class EventSystem {
-    func subscribeEvent_(oberver, observable, eventType, fn) {
+    func subscribeEvent(oberver, observable, eventType, fn) {
         var subscribedEvents = subscribedEvents_[oberver]
         var handler = new EventHandler(eventType, fn, oberver, observable)
         if subscribedEvents != nil  {
@@ -46,7 +46,7 @@ class EventSystem {
         subscribedEvents.add(handler)
     }
 
-    func unsubscribeEvent_(oberver, observable, eventType, fn) {
+    func unsubscribeEvent(oberver, observable, eventType, fn) {
         var subscribedEvents = subscribedEvents_[oberver]
         if subscribedEvents != nil {           
             var handler = new EventHandler(eventType, fn, oberver, observable)

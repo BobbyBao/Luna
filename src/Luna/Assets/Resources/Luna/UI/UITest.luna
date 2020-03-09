@@ -47,7 +47,7 @@ class UITest : UIPanel {
             dofile("test/test_timer")          
         }
         else if go == self.btn6 {        
-            dofile("test/test_coroutine") 
+            dofile("test/test_generator") 
         }
         else if go == self.btn7 {     
             self.testAsync.show()

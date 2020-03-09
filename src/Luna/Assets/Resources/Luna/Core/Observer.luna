@@ -3,19 +3,19 @@
 class Observer {
 
     func subscribeToEvent(observable, eventType, fn) {
-        EventSystem.subscribeEvent_(self, observable, eventType, fn)
+        EventSystem.subscribeEvent(self, observable, eventType, fn)
     }
 
     func unsubscribeFromEvent(observable, eventType, fn) {
-        EventSystem.unsubscribeEvent_(self, observable, eventType, fn)
+        EventSystem.unsubscribeEvent(self, observable, eventType, fn)
     }
 
     func subscribeGlobalEvent(eventType, fn) {
-        EventSystem.subscribeEvent_(self, Observable, eventType, fn)
+        EventSystem.subscribeEvent(self, Observable, eventType, fn)
     }
 
     func unsubscribeGlobalEvent(eventType, fn) {
-        EventSystem.unsubscribeEvent_(self, Observable, eventType, fn)
+        EventSystem.unsubscribeEvent(self, Observable, eventType, fn)
     }
 
     func close() {

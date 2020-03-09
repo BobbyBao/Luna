@@ -1,58 +1,7 @@
 
 let unpack = unpack or table.unpack
 
-class Generator {
-	var move_end = {}
-
-	init(fn, ...) {
-		let params = {...}
-	    self.w_func = func() {
-            fn(unpack(params))
-            return Generator.move_end
-        }
-
-		self.reset()
-	}
-
-    func moveNext() {
-		self.current = self.coro()
-		if self.current == Generator.move_end {
-			self.current = nil
-			return false
-		} else {
-			return true
-		}
-	}
-
-    func reset() {
-		self.coro = coroutine.wrap(self.w_func)	
-    }
-}
-
-func coroutine.start(...) {
-    return luna.startCoroutine(Generator(...))
-}
-
-func cwait(param, ...) {
-	if type(param) =="function" {
-		coroutine.yield(coroutine.start(param, ...))
-	} else {
-		coroutine.yield(param, ...)
-	}
-}
-
-func coroutine.call(fn) {
-    return func(...) {
-        let co = coroutine.create(fn)
-        coroutine.resume(co, ...)
-    }
-}
-
-func coroutine.stop(c) {
-    luna.stopCoroutine(c)
-}
-
-func coroutine.async_wait(async_func/*, callback_pos*/) {
+func coroutine.async_wait(async_func, callback_pos) {
     return func(...) {
         var _co = coroutine.running() or error ('this function must be run in coroutine')
         var rets
@@ -65,7 +14,7 @@ func coroutine.async_wait(async_func/*, callback_pos*/) {
             }
         }
         var params = {...}
-        table.insert(params, /*callback_pos or (#params + 1),*/ cb_func)
+        table.insert(params, callback_pos or (#params + 1), cb_func)
         async_func(unpack(params))
         if rets == nil {
             waiting = true

@@ -14,10 +14,9 @@ class Behavior : Observable {
     var state = BehaviorState.Init
 
     init(n) {
-        //super.init()
         self.name = n
-        self.children = List()
-        self.activeList = List()
+        self.children = new Sequence()
+        self.activeList = new Sequence()
     }
 
     func enter() {
@@ -31,7 +30,7 @@ class Behavior : Observable {
 
     func addChild(child) {
         child.parent = self
-        self.children.append(child)
+        self.children.add(child)
     }
 
     func removeChild(child) {
@@ -40,7 +39,7 @@ class Behavior : Observable {
     }
 
     func activate(behaviour) {    
-        self.activeList.push(behaviour)
+        self.activeList.add(behaviour)
         behaviour.enter()
     }
 
