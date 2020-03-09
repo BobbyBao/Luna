@@ -49,6 +49,6 @@ for v in a.iter() {
 
 print "range:"
 
-for i = 0, a.len() - 1 {
+for i = 0, #a - 1 {
 	print(i, a[i])
 }

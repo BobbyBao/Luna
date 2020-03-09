@@ -134,16 +134,67 @@ class Queue : SequenceBase {
 }
 
 class Set {
-    func add(v){
-        tinsert(self, v, 1)
+
+    init(t) {
+    
+        if t {
+            for k,v in pairs(t) {
+                self[v] = true
+            }
+        }
+    }
+
+    func add(v){ 
+        self[v] = true
     }
 
     func remove(v) {
-        tremove(self, v)
+         self[v] = nil
     }
 
     func contains(v) {
         return self[v] != nil
+    }
+
+    func union(a,b){
+        let set = Set()
+        for k in pairs(a) {
+            set[k] = true
+        }
+        for k in pairs(b) {
+            set[k] = true
+        }
+        return set
+    }
+
+    func intersection(a,b) {
+        let set = Set()
+        for k in pairs(a) {
+            if b[k] {
+                set[k] = true
+            }
+        }
+        return set
+    }
+
+    func clear() {
+        for k in pairs(self) {
+            t [k] = nil
+        }
+    }
+    
+    func count() {
+        var i = 0
+        for k in pairs(self) { i = i + 1 }
+        return i
+    }
+
+    func iter () {
+        return pairs(self)
+    }
+
+    func clone() {
+        return cycle_aware_copy(self, {})
     }
 }
 
@@ -183,29 +234,5 @@ class Map {
 
     func clone() {
         return cycle_aware_copy(self, {})
-    }
-}
-
-
-
-class Tuple {
-    
-    init(...) {
-        self.items = {...}
-    }
-
-    func == (t1, t2)  {
-
-        if #t1 != #t2 {
-            return false
-        }
-
-        for k,v in ipairs(t1) {
-            if v != t2[k] {
-                return false
-            }
-        }
-
-        return true
     }
 }

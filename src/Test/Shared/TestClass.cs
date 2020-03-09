@@ -69,6 +69,9 @@ namespace Tests
         public string name { get; set; } = "Default Name";
 
         public TestClass Child { get; set; }
+
+        public TestStruct position { get; set; }
+
         public event Action testEvent;
 
         Dictionary<int, string> testString = new Dictionary<int, string>();

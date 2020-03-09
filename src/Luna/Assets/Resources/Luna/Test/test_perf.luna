@@ -60,7 +60,7 @@ func test5() {
 	for i = 1,20000 {				
 		let go = GameObject()
 		go.AddComponent(tp)
-    	local c = go.GetComponent(tp)
+    	let c = go.GetComponent(tp)
     	c.shadowCastingMode = 0
     	c.receiveShadows = false
 	}

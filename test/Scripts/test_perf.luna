@@ -1,14 +1,15 @@
 
 func TestIndex(){	
 
-    var test = Tests.TestClass()
+    var test = new Tests.TestClass()
 	var t = os.clock()	
     test.CreateChild()
 	var c = test.Child
 
 	for i = 1,100000 {		
-		c = test.Child		
+		//c = test.Child		
 		//test.Child = c
+		test.position = test.position
 	}
 	
 	t = os.clock() - t

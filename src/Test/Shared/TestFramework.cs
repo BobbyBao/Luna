@@ -109,7 +109,7 @@ namespace Tests
 
         public void GenerateWraps(bool force = false)
         {
-            string path = "../../../../Test/Shared/Generate/";
+            string path = "../../../Test/Shared/Generate/";
 
             if(!force)
             {

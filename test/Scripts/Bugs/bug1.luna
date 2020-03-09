@@ -14,3 +14,13 @@ var a = ClassA()
 a.test()
 
 ClassA.test()
+
+//成员变量没有办法访问类
+
+class ClassB {
+
+	var t = ClassB.test //
+	func test() {
+		print "test"
+	}
+}

@@ -9,7 +9,7 @@ class UIPanel : Behavior {
         super.init(n)
         self.uiFile = uiFile
         self.gameObject = nil
-        self.eventObjects = {}
+        self.eventObjects = new Set()
     }
 
     func addClickByName(name, clickFn) {
@@ -22,11 +22,11 @@ class UIPanel : Behavior {
     }
 
     func addClick(child, clickFn) {
-        self.eventObjects[child] = 1
+        self.eventObjects.add(child)
         LunaHelper.AddClick(child, clickFn, self)
     }
     
-    func removeListener(evtFn, child) {
+    func removeListener(child, evtFn) {
         var obj = child or self.gameObject
         LunaHelper.RemoveAction(obj, evtFn)
     }
@@ -36,9 +36,9 @@ class UIPanel : Behavior {
     }
 
     func removeAllListeners() {
-        for k, _ in pairs(self.eventObjects) {
-            LunaHelper.RemoveAction(k, nil)
-            table.remove(self.eventObjects, k)
+        for v in self.eventObjects.iter() {
+            LunaHelper.RemoveAction(v, nil)
+            self.eventObjects.remove(k)
         }
     }
 

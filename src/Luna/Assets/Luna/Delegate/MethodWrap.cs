@@ -73,7 +73,7 @@ namespace SharpLuna
 
                 if (callDel != null)
                 {
-                    return callDel(L, methodInfo.IsStatic ? 2 : 1, del);
+                 //   return callDel(L, methodInfo.IsStatic ? 2 : 1, del);
                 }
 
 #if LUNA_SCRIPT

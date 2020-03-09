@@ -357,28 +357,14 @@ namespace SharpLuna
         }
 
         public void Call(params object[] args)
-        {
-            try
-            {
-                Invoke(L, this, args);
-            }
-            catch(Exception ex)
-            {
-                //ThrowError(L, ex.Message);
-                Debug.LogError(ex.Message);
-            }
+        {           
+            Invoke(L, this, args);            
         }
 
         public void Dispatch(string func, params object[] args)
         {
-            try
-            {
-                Invoke(L, Get<LuaRef, string>(func), args);
-            }
-            catch(Exception ex)
-            {
-                Debug.LogError(ex.Message);
-            }
+            Invoke(L, Get<LuaRef, string>(func), args);
+
         }
 
         public R Call<R>(params object[] args)
@@ -409,29 +395,29 @@ namespace SharpLuna
 
         static void Invoke(lua_State L, LuaRef f, params object[] args)
         {
-            lua_pushcfunction(L, LuaException.traceback);
+            int oldTop = lua_gettop(L);
+            int errFunc = load_error_func(L, errorFuncRef);
             f.PushToStack();
             PushArgs(L, args);
-            if (lua_pcall(L, args.Length, 0, -args.Length + 2) != (int)LuaStatus.OK)
+            if (lua_pcall(L, args.Length, 0, errFunc) != (int)LuaStatus.OK)
             {
-                lua_remove(L, -2);
-                throw new LuaException(L);
+                ThrowExceptionFromError(L, oldTop);
             }
-            lua_pop(L, 1);
+            lua_settop(L, oldTop);
         }
 
         static R Invoke<R>(lua_State L, LuaRef f, params object[] args)
         {
-            lua_pushcfunction(L, LuaException.traceback);
+            int oldTop = lua_gettop(L);
+            int errFunc = load_error_func(L, errorFuncRef);
             f.PushToStack();
             PushArgs(L, args);
-            if (lua_pcall(L, args.Length, 1, -args.Length + 2) != (int)LuaStatus.OK)
+            if (lua_pcall(L, args.Length, 1, errorFuncRef) != (int)LuaStatus.OK)
             {
-                lua_remove(L, -2);
-                throw new LuaException(L);
+                ThrowExceptionFromError(L, oldTop);
             }
             R v = Lua.Get<R>(L, -1);
-            lua_pop(L, 2);
+            lua_settop(L, oldTop);
             return v;
         }
 

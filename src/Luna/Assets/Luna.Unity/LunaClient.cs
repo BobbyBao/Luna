@@ -225,6 +225,7 @@ namespace SharpLuna.Unity
             int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
             return () =>
             {
+                L = mainState;
                 int errFunc = pcall_prepare(L, errorFuncRef, luaref);
                 if (lua_pcall(L, 0, 0, errFunc) != (int)LuaStatus.OK)
                 {

@@ -2,13 +2,13 @@
 let unpack = unpack or table.unpack
 
 class Generator {
-	var move_end = {}
+	var moveEnd = {}
 
 	init(fn, ...) {
 		let params = {...}
 	    self.w_func = func() {
             fn(unpack(params))
-            return Generator.move_end
+            return Generator.moveEnd
         }
 
 		self.reset()
@@ -16,7 +16,7 @@ class Generator {
 
     func moveNext() {
 		self.current = self.coro()
-		if self.current == Generator.move_end {
+		if self.current == Generator.moveEnd {
 			self.current = nil
 			return false
 		} else {
