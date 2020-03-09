@@ -32,7 +32,7 @@ class Generator {
         return luna.startCoroutine(Generator(...))
     }
 
-    func wait(param, ...) {
+    func yield(param, ...) {
         if type(param) =="function" {
             coroutine.yield(Generator.start(param, ...))
         } else {

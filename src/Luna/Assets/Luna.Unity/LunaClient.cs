@@ -196,9 +196,9 @@ namespace SharpLuna.Unity
         {
             luna.DoFile(file);
 
-            update = luna.GetGlobal("Update");
-            fixedUpdate = luna.GetGlobal("FixedUpdate");
-            lateUpdate = luna.GetGlobal("LateUpdate");
+            update = luna.GetGlobal("update");
+            fixedUpdate = luna.GetGlobal("fixedUpdate");
+            lateUpdate = luna.GetGlobal("lateUpdate");
 
         }
 

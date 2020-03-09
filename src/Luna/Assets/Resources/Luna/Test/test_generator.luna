@@ -6,9 +6,9 @@ var task = Generator.start(func() {
 
     print('coroutine a started')
 
-	Generator.wait(func() {
+	Generator.yield(func() {
             print('coroutine b stated inside cotoutine a')
-            Generator.wait(new UnityEngine.WaitForSeconds(1))
+            Generator.yield(new UnityEngine.WaitForSeconds(1))
             print('i am coroutine b')
         }
 	)
@@ -16,7 +16,7 @@ var task = Generator.start(func() {
 	print('coroutine b finish')
     
 	while true {
-		Generator.wait(new UnityEngine.WaitForSeconds(1))
+		Generator.yield(new UnityEngine.WaitForSeconds(1))
 		print('i am coroutine a')
 	}
 })
@@ -24,10 +24,10 @@ var task = Generator.start(func() {
 Generator.start(func() {
 
 	var webReq = UnityEngine.UnityWebRequest.Get("http://www.baidu.com")
-	Generator.wait(webReq.SendWebRequest())
+	Generator.yield(webReq.SendWebRequest())
 	print(webReq.downloadHandler.text)
     print('stop coroutine a after 5 seconds')
-	Generator.wait(new UnityEngine.WaitForSeconds(5))
+	Generator.yield(new UnityEngine.WaitForSeconds(5))
 	Generator.stop(task)
     print('coroutine a stoped')
 })

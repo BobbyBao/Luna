@@ -7,19 +7,19 @@ Event = {
 	LateUpdate = 3,
 }
 
-func Update(deltaTime, unscaledDeltaTime) {
+func update(deltaTime, unscaledDeltaTime) {
 	Time.setDeltaTime(deltaTime, unscaledDeltaTime)		
 
 	Observable.sendGlobalEvent(Event.Update)
 }
 
-func FixedUpdate(fixedDeltaTime) {
+func fixedUpdate(fixedDeltaTime) {
 	Time.setFixedDelta(fixedDeltaTime)
 	
 	Observable.sendGlobalEvent(Event.FixedUpdate, fixedDeltaTime)
 }
 
-func LateUpdate() {	
+func lateUpdate() {	
 	Observable.sendGlobalEvent(Event.LateUpdate)	
 	
 	Time.setFrameCount()		

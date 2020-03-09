@@ -1,11 +1,9 @@
 
 let unpack = unpack or table.unpack
 
-//对coroutine.wrap函数进行扩充
-func coroutine.wrap(fn, self){
+func coroutine.call(fn, self){
     return func(...){ 
         let co = coroutine.create(fn)
-        //print("coroutine.wrap", ...)
         if self {
             coroutine.resume(co, self, ...)
         } else {
