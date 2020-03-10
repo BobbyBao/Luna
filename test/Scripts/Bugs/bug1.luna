@@ -3,11 +3,13 @@
 //fixed
 
 class ClassA {
-
+	
 	var t = {} //
+
 	func test() {
 		print "test"
 	}
+
 }
 
 var a = ClassA() 
@@ -18,9 +20,13 @@ ClassA.test()
 //成员变量没有办法访问类
 
 class ClassB {
-
-	var t = ClassB.test //
-	func test() {
-		print "test"
+	//var t = ClassB.test
+	func test() {	
+		self.t.test()
 	}
+
+	//var t = __async(ClassB.test)
 }
+
+var b = ClassB()
+print(b.t)

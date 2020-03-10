@@ -105,8 +105,9 @@ namespace SharpLuna
 
             Register("luna.typeof", GetClassType);
             Register("luna.findType", FindClassType);
-            
+
 #if LUNA_SCRIPT
+            DoString(coroutineSource);
             DoString(classSource);
             DoString(listSource);
 #endif
@@ -625,6 +626,55 @@ namespace SharpLuna
         #endregion
 
 #if LUNA_SCRIPT
+
+        const string coroutineSource = @"
+let unpack = unpack or table.unpack
+
+func coroutine.call(fn, self){
+    return func(...){ 
+        let co = coroutine.create(fn)
+        if self {
+            coroutine.resume(co, self, ...)
+        } else {
+            coroutine.resume(co, ...)
+        }
+    }
+}
+
+func coroutine.__async(async_func, callback_pos) {
+    return func(...) {
+        var _co = coroutine.running() or error ('this function must be run in coroutine')
+        var rets
+        var waiting = false
+        local func cb_func(...) {
+            if waiting {
+                coroutine.resume(_co, ...)
+            } else {
+                rets = {...}
+            }
+        }
+        var params = {...}
+        table.insert(params, callback_pos or (#params + 1), cb_func)
+        async_func(unpack(params))
+        if rets == nil {
+            waiting = true
+            rets = {coroutine.yield()}
+        }
+        
+        return unpack(rets)
+    }
+}
+
+__async = coroutine.__async
+
+func __def_async(t, fnName) {
+    t = t or _G
+    t[""_async_""..fnName] = __async(t[fnName])
+}
+
+";
+
+
         const string classSource = @"
 local func is_a(self,klass) {
     if klass == nil {
@@ -676,8 +726,8 @@ func __class(c, className, base) {
     c.is_a = is_a
     c.class_of = class_of
 
-    if c._class_init {
-        c._class_init(mt)
+    if c.__class_init {
+        c.__class_init(mt)
         return c
     }
 

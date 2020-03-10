@@ -21,11 +21,13 @@ public class UIManager
         confirmBox = new ConfirmBox();
     }
 
+    [LuaAsync]
     public static void ShowAlertBox(string message, string title, Action onFinished = null)
     {
         alertBox.Show(message, title, onFinished);
     }
 
+    [LuaAsync]
     public static void ShowConfirmBox(string message, string title, Action<bool> onFinished = null)
     {
         confirmBox.Show(message, title, onFinished);

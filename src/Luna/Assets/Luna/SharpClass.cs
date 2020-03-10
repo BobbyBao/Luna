@@ -169,6 +169,8 @@ namespace SharpLuna
                     continue;
                 }
 
+                bool isAsync = m.GetCustomAttribute<LuaAsyncAttribute>() != null;
+
                 if (classInfo.TryGetValue(m.Name, out methodConfig))
                 {
                     if (methodConfig.func != null)
@@ -183,7 +185,16 @@ namespace SharpLuna
                             meta.RawSet(m.Name, fn);
                         }
 
-                        if(classType.IsArray)
+                        if (isAsync)
+                        {
+                            LuaRef r = new LuaRef(State, "coroutine.__async");
+                            fn = r.Call<LuaRef>(fn);
+
+                            meta.RawSet("_async_" + m.Name, fn);
+
+                        }
+
+                        if (classType.IsArray)
                         {
                             if(m.Name == "Get")
                             {
@@ -211,9 +222,22 @@ namespace SharpLuna
                 registered.Add(m.Name);
                 if (memberInfo.Length > 0)
                 {
-                    RegMethod(m.Name, memberInfo);
+                    RegMethod(m.Name, memberInfo, isAsync);
+
                 }
             }
+        }
+
+        void RegisterAsync(string methodName)
+        {
+            string className = this.classType.Name;
+            if(!string.IsNullOrEmpty(parent.Name) &&  parent.Name != "_G")
+            {
+                className = parent.Name + "." + className;
+            }
+
+            string code = $"rawset({className}, _async_{methodName}, coroutine.__async({className}.{methodName}))";
+            Luna.DoString(code);
         }
 
         public SharpClass RegConstant(FieldInfo field)
@@ -421,7 +445,7 @@ namespace SharpLuna
             return this;
         }
 
-        public SharpClass RegMethod(string name, MethodBase[] methodInfo)
+        public SharpClass RegMethod(string name, MethodBase[] methodInfo, bool isAsync = false)
         {             
             MethodWrap method = new MethodWrap(methodInfo);
 #if !IL2CPP
@@ -461,6 +485,15 @@ namespace SharpLuna
                 {
                     SetMemberFunction(___set_indexed, luaFun);
                 }
+            }
+
+            if (isAsync)
+            {
+                LuaRef r = new LuaRef(State, "coroutine.__async");
+                luaFun = r.Call<LuaRef>(luaFun);
+
+                meta.RawSet("_async_" + name, luaFun);
+
             }
 
             return this;

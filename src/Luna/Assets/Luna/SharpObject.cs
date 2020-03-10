@@ -219,7 +219,14 @@ namespace SharpLuna
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe static ref T GetUnmanaged<T>(lua_State L, int index)
         {
-            var ptr = lua_touserdata(L, index);
+            LuaType type = lua_type(L, index);
+            if (type != LuaType.UserData)
+            {
+                Debug.LogError("error type : " + type);
+                assert(false);
+            }
+               
+            var ptr = lua_touserdata(L, index);            
             return ref Unsafe.AsRef<T>((void*)(ptr + 4));
         }
 

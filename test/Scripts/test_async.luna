@@ -1,55 +1,11 @@
 
-let unpack = table.unpack
 
-func coroutine.call(fn, self){
-    return func(...){ 
-        let co = coroutine.create(fn)
-        print("coroutine.call", ...)
-        if self {
-            coroutine.resume(co, self, ...)
-        } else {
-            coroutine.resume(co, ...)
-        }
-    }
-}
-
-func coroutine.async_wait(async_func/*, callback_pos*/) {
-    return func(...) {
-        print("async_wait")
-        let _co = coroutine.running() or error ('this function must be run in coroutine')
-        
-        var rets
-        var waiting = false
-        local func cb_func(...) {
-            print("async_wait", "cb_func", waiting)
-            if waiting {
-                print("async_wait", "cb_func")
-                coroutine.resume(_co, ...)
-            } else {
-                rets = {...}
-            }
-        }
-
-        var args = {...}
-        table.insert(args,/* callback_pos or (#args + 1),*/ cb_func)
-        print("async_wait", unpack(args))
-        async_func(unpack(args))
-        if rets == nil {
-            waiting = true
-            rets = {coroutine.yield()}
-        }
-        
-        return unpack(rets)
-    }
-}
-
-
-rawset(UIManager, "alert", coroutine.async_wait(UIManager.ShowAlertBox))
-rawset(UIManager, "confirm", coroutine.async_wait(UIManager.ShowConfirmBox))
+//rawset(UIManager, "_async_ShowAlertBox", coroutine.__async(UIManager.ShowAlertBox))
+//rawset(UIManager, "_async_ShowConfirmBox", coroutine.__async(UIManager.ShowConfirmBox))
 
 class Recharge {
 
-    func async_recharge(num, cb) {
+    async func recharge(num, cb) {
         print('requst server...')
         cb(true, num)
     }
@@ -58,21 +14,24 @@ class Recharge {
 
         print("Recharge buy : ", self)
 
-        UIManager.alert("您余额不足，请充值！", "余额提醒")
-        if UIManager.confirm("确认充值10元吗？", "确认框") {
+        await UIManager.ShowAlertBox("您余额不足，请充值！", "余额提醒")
+        if await UIManager.ShowConfirmBox("确认充值10元吗？", "确认框") {
             print('recharging...')
-            self.recharge = coroutine.async_wait(self.async_recharge)
-            let r1, r2 = self.recharge(10)
+            //self.recharge = coroutine.async_wait(self.async_recharge)
+            let r1, r2 = await self.recharge(10)
             print('recharge result:', r1, r2)
-            UIManager.alert("充值成功！", "提示")
+            await UIManager.ShowAlertBox("充值成功！", "提示")
         } else {
             print('cancel')
-            UIManager.alert("取消充值！", "提示")
+            await UIManager.ShowAlertBox("取消充值！", "提示")
         }
 
         print('recharge finished')
     }
 }
+
+//Recharge._async_recharge = __async(Recharge.recharge)
+//__def_async( "recharge", Recharge)
 
 var re = new Recharge()
 

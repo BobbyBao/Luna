@@ -35,13 +35,8 @@ namespace Test
             framework = new TestFramework(testModule);
             framework.Start();
 
-            var it = Directory.EnumerateFiles(TestFramework.dataPath, "*.luna");
-            
-            foreach (var file in it)
-            {
-                var fileInfo = new FileInfo(file);
-                treeView1.Nodes.Add(fileInfo.Name);
-            }
+
+            EnumerateFiles(null, TestFramework.dataPath);
 
             var g = Luna.Global;
             Refresh(g, treeView2.Nodes, 2);
@@ -50,6 +45,41 @@ namespace Test
         void Print(string msg)
         {
             listBox1.Items.Add(msg);
+        }
+
+        void EnumerateFiles(TreeNode node, string path)
+        {
+            var it = Directory.EnumerateDirectories(path);
+            foreach(var dir in it)
+            {
+                DirectoryInfo info = new DirectoryInfo(dir);
+                if (node != null)
+                {
+                    var child = node.Nodes.Add(info.Name);                    
+                    EnumerateFiles(child, dir);
+                }
+                else
+                {
+                    var child = treeView1.Nodes.Add(info.Name);
+                    EnumerateFiles(child, dir);
+                }
+            }
+
+            it = Directory.EnumerateFiles(path, "*.luna");
+            foreach (var file in it)
+            {
+                var fileInfo = new FileInfo(file);
+                if(node != null)
+                {
+                    var child = node.Nodes.Add(fileInfo.Name);
+                    child.Tag = node.FullPath + "/" + fileInfo.Name;
+                }
+                else
+                {
+                    var child = treeView1.Nodes.Add(fileInfo.Name);
+                    child.Tag = fileInfo.Name;
+                }
+            }
         }
 
         void Refresh(LuaRef table, TreeNodeCollection node, int depth)
@@ -90,7 +120,8 @@ namespace Test
 
         private void treeView1_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
         {
-            Luna.DoFile(e.Node.Text);
+            if(e.Node.Tag != null)
+            Luna.DoFile(e.Node.Tag as string);
         }
 
         private void toolStripButton2_Click(object sender, EventArgs e)
@@ -131,6 +162,13 @@ namespace Test
         private void toolStripButton4_Click(object sender, EventArgs e)
         {
             framework.GenerateWraps();
+        }
+
+        private void toolStripButton1_Click(object sender, EventArgs e)
+        {
+
+            var g = Luna.Global;
+            Refresh(g, treeView2.Nodes, 2);
         }
     }
 }

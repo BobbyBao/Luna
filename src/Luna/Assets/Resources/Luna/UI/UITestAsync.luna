@@ -1,9 +1,5 @@
 
 import "UIPanel"
-import "Coroutine"
-
-rawset(UIManager, "alert", coroutine.__async(UIManager.ShowAlertBox))
-rawset(UIManager, "confirm", coroutine.__async(UIManager.ShowConfirmBox))
 
 class UITestAsync : UIPanel {
 
@@ -19,27 +15,25 @@ class UITestAsync : UIPanel {
 
     }
         
-    func async_recharge(num, cb) {
+    async func recharge(num, cb) {
         print('requst server...')
         cb(true, num)
     }
 
     func buy() {
 
-        UIManager.alert("您余额不足，请充值！", "余额提醒")
+        await UIManager.ShowAlertBox("您余额不足，请充值！", "余额提醒")
 
-        if UIManager.confirm("确认充值10元吗？", "确认框") {
+        if await UIManager.ShowConfirmBox("确认充值10元吗？", "确认框") {
             print('recharging...')     
-            let r1, r2 = self.recharge(10)
+            let r1, r2 = await self.recharge(10)
             print('recharge result:', r1, r2)
-            UIManager.alert("充值成功！", "提示")
+            await UIManager.ShowAlertBox("充值成功！", "提示")
         } else {
             print('cancel')
-            UIManager.alert("取消充值！", "提示")
+            await UIManager.ShowAlertBox("取消充值！", "提示")
         }
 
         print('recharge finished')
     }
 }
-
-UITestAsync.recharge = coroutine.__async(UITestAsync.async_recharge)

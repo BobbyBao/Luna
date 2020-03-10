@@ -18,6 +18,7 @@ public class UIManager : MonoBehaviour
         instance = this;
     }
 
+    [LuaAsync]
     public static void ShowAlertBox(string message, string title, Action onFinished = null)
     {
         var alertPanel = GameObject.Find("Canvas").transform.Find("AlertBox");
@@ -45,6 +46,7 @@ public class UIManager : MonoBehaviour
         alertPanel.gameObject.SetActive(true);
     }
 
+    [LuaAsync]
     public static void ShowConfirmBox(string message, string title, Action<bool> onFinished = null)
     {
         var confirmPanel = GameObject.Find("Canvas").transform.Find("ConfirmBox");
