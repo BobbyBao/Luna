@@ -1,8 +1,5 @@
 
 
-//rawset(UIManager, "_async_ShowAlertBox", coroutine.__async(UIManager.ShowAlertBox))
-//rawset(UIManager, "_async_ShowConfirmBox", coroutine.__async(UIManager.ShowConfirmBox))
-
 class Recharge {
 
     async func recharge(num, cb) {
@@ -17,7 +14,6 @@ class Recharge {
         await UIManager.ShowAlertBox("您余额不足，请充值！", "余额提醒")
         if await UIManager.ShowConfirmBox("确认充值10元吗？", "确认框") {
             print('recharging...')
-            //self.recharge = coroutine.async_wait(self.async_recharge)
             let r1, r2 = await self.recharge(10)
             print('recharge result:', r1, r2)
             await UIManager.ShowAlertBox("充值成功！", "提示")
@@ -29,9 +25,6 @@ class Recharge {
         print('recharge finished')
     }
 }
-
-//Recharge._async_recharge = __async(Recharge.recharge)
-//__def_async( "recharge", Recharge)
 
 var re = new Recharge()
 
