@@ -539,7 +539,7 @@ namespace SharpLuna
                     }
                 }
 
-                return SharpObject.Get<object>(L, index);
+                return SharpObject.Get(L, index, objtype);
             }
         }
 

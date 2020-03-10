@@ -159,6 +159,7 @@ namespace SharpLuna
             return 0;
         }
 
+        static LuaNativeFunction gcFn = new LuaNativeFunction(Destructor);
         private SharpClass CreateClass(Type classType, Type superType, SharpClass module)
         {
             string name = GetTableName(classType);
@@ -168,13 +169,13 @@ namespace SharpLuna
             {
                 if (!classType.IsUnManaged()) //未注册Wrap，用反射版api， UnmanagedType同Object
                 {
-                    dctor = Destructor;
+                    dctor = gcFn;
                 }
 
             }
             else
             {
-                dctor = Destructor;
+                dctor = gcFn;
             }
 
             LuaRef meta = CreateClass(module.Meta, name, classType, superType, dctor);
