@@ -3,7 +3,7 @@
 
 ## 主要特点
 
-1.简洁高效的访问接口，没有使用LuaInterface/NLua那一套。开发时使用高性能的Delegate进行反射，发布的时候生成Wrap代码，进一步提高运行效率  
+1.简洁高效的访问接口，开发时使用高性能的Delegate进行反射，发布的时候生成Wrap代码，进一步提高运行效率  
 2.提供基于lua vm的luna脚本语言，同时也支持原生的lua，可根据个人喜好选择  
 3.未对lua接口做修改，可将C风格的lua操作代码直接拷贝的C#中  
 
@@ -234,5 +234,36 @@ class vec3 {
 }
 
 ```
+支持类似C#的async/await 语法，利用了lua的coroutine机制，可以像写同步代码一样写异步代码，以充值的流程为例
 
-由于采用了lua5.4的虚拟机，执行效率上保持和lua一样，比同类其他脚本(Python,Ruby,Wren,AngleScript等)都高出一截
+```
+
+class Recharge {
+
+    async func recharge(num, cb) {
+        print('requst server...')
+        cb(true, num)
+    }
+
+    func buy() {
+
+        print("Recharge buy : ", self)
+
+        await UIManager.ShowAlertBox("您余额不足，请充值！", "余额提醒")
+        if await UIManager.ShowConfirmBox("确认充值10元吗？", "确认框") {
+            print('recharging...')
+            let r1, r2 = await self.recharge(10)
+            print('recharge result:', r1, r2)
+            await UIManager.ShowAlertBox("充值成功！", "提示")
+        } else {
+            print('cancel')
+            await UIManager.ShowAlertBox("取消充值！", "提示")
+        }
+
+        print('recharge finished')
+    }
+}
+
+
+```
+
