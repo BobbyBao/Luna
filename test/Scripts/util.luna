@@ -1,0 +1,61 @@
+
+var key = ""
+func PrintTableLevel(table, level) {
+  level = level or 1
+  var indent = ""
+  for i = 1, level {
+    indent = indent.."  "
+  }
+
+  if key  != "" {
+    print(indent..key.." ".."=".." ".."{")
+  } else {
+    print(indent .. "{")
+  }
+
+  key = ""
+  for k,v in pairs(table) {
+     if type(v) == "table" {
+        key = k
+        PrintTableLevel(v, level + 1)
+     } else {
+        let content = string.format("%s%s = %s", indent .. "  ",tostring(k), tostring(v))
+        print(content)  
+      }
+  }
+  print(indent .. "}")
+
+}
+
+func PrintTable(t) {
+    Print_table_recurse("", t);
+}
+
+func Print_table_recurse(key, t) {
+    if t == nil {
+        return
+    }
+    //print("save table : "..#t);
+    for k, v in pairs(t) {
+        //print(("[%s] = %s"):format(k, v))
+        if key  != "" {
+            Print_value_recurse(key.."."..k, v)
+        } else {
+            Print_value_recurse(k, v)
+        }
+    }
+}
+
+func Print_value_recurse(k, v) {
+    if type(v) == "string" {
+        print(k.."=  "..v)
+    } elseif type(v) == "number" {
+        print(k.."=      "..tostring(v))
+    } elseif type(v) == "boolean" {
+        print(k.."=          "..tostring(v))
+    } elseif type(v) == "table" {
+        Print_table_recurse("    "..k, v)
+    } else {
+        
+    }
+}

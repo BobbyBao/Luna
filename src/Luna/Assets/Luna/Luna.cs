@@ -378,24 +378,19 @@ namespace SharpLuna
         public object[] DoString(string chunk, string chunkName = "chunk")
         {
             int oldTop = lua_gettop(L);
+            int errFunc = load_error_func(L, errorFuncRef);
             _executing = true;
 
             if (lua_loadstring(L, chunk, chunkName) != LuaStatus.OK)
                 ThrowExceptionFromError(L, oldTop);
 
-            int errorFunctionIndex = 0;
-
-            if (UseTraceback)
-            {
-                errorFunctionIndex = PushDebugTraceback(L, 0);
-                oldTop++;
-            }
 
             try
             {
-                if (lua_pcall(L, 0, -1, errorFunctionIndex) != LuaStatus.OK)
+                if (lua_pcall(L, 0, -1, errFunc) != LuaStatus.OK)
                     ThrowExceptionFromError(L, oldTop);
 
+                lua_remove(L, errFunc);
                 return PopValues(L, oldTop);
             }
             finally
@@ -407,32 +402,27 @@ namespace SharpLuna
         public object[] DoFile(string fileName)
         {
             int oldTop = lua_gettop(L);
+            int errFunc = load_error_func(L, errorFuncRef);
 
             byte[] buffer = ReadBytes(fileName);
             if (luaL_loadbuffer(L, buffer, "@" + fileName) != LuaStatus.OK)
                 ThrowExceptionFromError(L, oldTop);
 
             _executing = true;
-
-            int errorFunctionIndex = 0;
-            if (UseTraceback)
-            {
-                errorFunctionIndex = PushDebugTraceback(L, 0);
-                oldTop++;
-            }
-
+            
             try
             {
-                if (lua_pcall(L, 0, -1, errorFunctionIndex) != LuaStatus.OK)
+                if (lua_pcall(L, 0, -1, errFunc) != LuaStatus.OK)
                     ThrowExceptionFromError(L, oldTop);
 
+                lua_remove(L, errFunc);
                 return PopValues(L, oldTop);
-            }/*
+            }
             catch(Exception e)
             {
                 Debug.LogError(e.Message);
                 return null;
-            }*/
+            }
             finally
             {
                 _executing = false;

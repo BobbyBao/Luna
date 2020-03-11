@@ -154,6 +154,11 @@ namespace SharpLuna
             Marshal.FreeHGlobal(p);
         }
 
+        public static void lua_requiref(lua_State L, string n, LuaNativeFunction f)
+        {
+            luaL_requiref(L, n, f.ToFunctionPointer(), 0);
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool lua_isfunction(lua_State L, int n) => (lua_type(L, (n)) == LuaType.Function);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

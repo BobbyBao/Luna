@@ -109,8 +109,9 @@ class UIPanel : Behavior {
     func onClose() {
     }
 
-	func shutdown() {
+	func dispose() {
         removeAllEvents()
+        super.dispose()
 	}
 
 

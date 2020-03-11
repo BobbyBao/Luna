@@ -493,6 +493,12 @@ namespace SharpLuna
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int luna_cacheuserdata(lua_State L, long key, int cache_ref);
+
+        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int luaopen_pb(lua_State L);
+
+        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int luaopen_pb_unsafe(lua_State L);
 #endif
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]

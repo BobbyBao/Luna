@@ -41,6 +41,13 @@ namespace Tests
 
             luna.Start();
             luna.AddSearcher(Loader);
+            var L = luna.State;
+            //luaopen_pb(luna.State);
+            lua_requiref(L, "pb", luaopen_pb);
+            /*
+            lua_requiref(L, "pb.slice", luaopen_pb_slice);
+            lua_requiref(L, "pb.buffer", luaopen_pb_buffer);
+            lua_requiref(L, "pb.conv", luaopen_pb_conv);*/
         }
 
         public void Dispose()

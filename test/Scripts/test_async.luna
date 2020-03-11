@@ -29,3 +29,4 @@ class Recharge {
 var re = new Recharge()
 
 UIManager.AddListener(coroutine.call(re.buy, re))
+//UIManager.AddListener(coroutine.wrap(func(){ re.buy() }))

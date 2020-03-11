@@ -461,8 +461,8 @@
             this.toolStripButton3.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton3.Image")));
             this.toolStripButton3.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton3.Name = "toolStripButton3";
-            this.toolStripButton3.Size = new System.Drawing.Size(67, 22);
-            this.toolStripButton3.Text = "Recharge";
+            this.toolStripButton3.Size = new System.Drawing.Size(69, 22);
+            this.toolStripButton3.Text = "TestAsync";
             this.toolStripButton3.Click += new System.EventHandler(this.toolStripButton3_Click);
             // 
             // TableTree

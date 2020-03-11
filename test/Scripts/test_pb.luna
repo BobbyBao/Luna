@@ -1,0 +1,37 @@
+let pb = import "pb"
+
+import "protoc"
+import "util"
+
+let protoc = Parser()
+protoc.load("""
+   message Phone {
+      optional string name        = 1;
+      optional int64  phonenumber = 2;
+   }
+   message Person {
+      optional string name     = 1;
+      optional int32  age      = 2;
+      optional string address  = 3;
+      repeated Phone  contacts = 4;
+   } """)
+
+// lua table data
+let data = {
+   name = "ilse",
+   age  = 18,
+   contacts = {
+      { name = "alice", phonenumber = 12312341234 },
+      { name = "bob",   phonenumber = 45645674567 }
+   }
+}
+
+// encode lua table data into binary format in lua string and return
+let bytes = pb:encode("Person", data)
+//print(bytes)
+print(pb:tohex(bytes))
+
+// and decode the binary data back into lua table
+let data2 = pb:decode("Person", bytes)
+PrintTable(data2)
+//print(require "serpent".block(data2))
