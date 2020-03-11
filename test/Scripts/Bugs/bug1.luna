@@ -2,31 +2,36 @@
 //table类型的成员不能做构造初始化{}
 //fixed
 
+var str
+
 class ClassA {
 	
 	var t = {} //
 
 	func test() {
-		print "test"
+	print "test1111"
+	print(str)
+	var b = ClassB()
+	b.test()
 	}
 
 }
 
-var a = ClassA() 
-a.test()
-
-ClassA.test()
-
+str = "test local string"
 //成员变量没有办法访问类
 
 class ClassB {
 	//var t = ClassB.test
 	func test() {	
-		self.t.test()
+		print "ClassB"
+		//self.t.test()
 	}
 
 	//var t = __async(ClassB.test)
 }
 
+var a = ClassA()
+a.test()
+
 var b = ClassB()
-print(b.t)
+//print(b.t)

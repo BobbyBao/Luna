@@ -499,6 +499,12 @@ namespace SharpLuna
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int luaopen_pb_unsafe(lua_State L);
+
+        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int luaopen_cjson(lua_State L);
+
+        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int luaopen_cjson_safe(lua_State L);
 #endif
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]

@@ -44,7 +44,21 @@ namespace Test
 
         void Print(string msg)
         {
-            listBox1.Items.Add(msg);
+            int last = 0;
+            for(int i = 0; i < msg.Length; i++)
+            {
+                if(msg[i] == '\n')
+                {
+                    listBox1.Items.Add(msg.Substring(last, i - last));
+                    last = i;
+                }
+            }
+
+            if(last < msg.Length)
+            {
+                listBox1.Items.Add(msg.Substring(last, msg.Length - last));
+            }
+
         }
 
         void EnumerateFiles(TreeNode node, string path)
@@ -57,11 +71,13 @@ namespace Test
                 {
                     var child = node.Nodes.Add(info.Name);                    
                     EnumerateFiles(child, dir);
+                    child.ExpandAll();
                 }
                 else
                 {
                     var child = treeView1.Nodes.Add(info.Name);
                     EnumerateFiles(child, dir);
+                    child.ExpandAll();
                 }
             }
 
@@ -109,7 +125,6 @@ namespace Test
                 {
                     n = node[k];
                 }
-
 
                 if (v.IsTable)
                 {

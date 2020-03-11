@@ -29,6 +29,7 @@
     <None Include="$(MSBuildThisFileDirectory)Scripts\test_if.luna">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Scripts\test_json.luna" />
     <None Include="$(MSBuildThisFileDirectory)Scripts\test_loop.luna">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
@@ -43,6 +44,7 @@
     <None Include="$(MSBuildThisFileDirectory)Scripts\test_perf.luna" />
     <None Include="$(MSBuildThisFileDirectory)Scripts\test_string.luna" />
     <None Include="$(MSBuildThisFileDirectory)Scripts\test_super.luna" />
+    <None Include="$(MSBuildThisFileDirectory)Scripts\util.luna" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Scripts\Math\" />

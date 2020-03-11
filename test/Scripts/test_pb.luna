@@ -3,7 +3,8 @@ let pb = import "pb"
 import "protoc"
 import "util"
 
-let protoc = Parser()
+let protoc = new Parser()
+
 protoc.load("""
    message Phone {
       optional string name        = 1;
@@ -33,5 +34,5 @@ print(pb:tohex(bytes))
 
 // and decode the binary data back into lua table
 let data2 = pb:decode("Person", bytes)
-PrintTable(data2)
-//print(require "serpent".block(data2))
+
+printTable(data2, "data2")

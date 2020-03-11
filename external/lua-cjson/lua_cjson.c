@@ -36,6 +36,7 @@
  *       difficult to know object/array sizes ahead of time.
  */
 
+#define LUA_LIB
 #include <assert.h>
 #include <stdint.h>
 #include <string.h>
@@ -46,6 +47,7 @@
 
 #include "strbuf.h"
 #include "fpconv.h"
+
 
 #ifndef CJSON_MODNAME
 #define CJSON_MODNAME   "cjson"
@@ -749,7 +751,7 @@ static void json_append_data(lua_State *l, json_config_t *cfg,
         }
 
         if (as_array) {
-            len = lua_objlen(l, -1);
+            len = lua_rawlen(l, -1);
             json_append_array(l, cfg, current_depth, json, len);
         } else {
             len = lua_array_length(l, cfg, json);
@@ -1542,10 +1544,10 @@ static int lua_cjson_safe_new(lua_State *l)
     return 1;
 }
 
-int luaopen_cjson(lua_State *l)
+LUALIB_API int luaopen_cjson(lua_State *l)
 {
     lua_cjson_new(l);
-
+#define ENABLE_CJSON_GLOBAL
 #ifdef ENABLE_CJSON_GLOBAL
     /* Register a global "cjson" table. */
     lua_pushvalue(l, -1);
@@ -1556,7 +1558,7 @@ int luaopen_cjson(lua_State *l)
     return 1;
 }
 
-int luaopen_cjson_safe(lua_State *l)
+LUALIB_API int luaopen_cjson_safe(lua_State *l)
 {
     lua_cjson_safe_new(l);
 

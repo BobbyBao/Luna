@@ -1067,11 +1067,11 @@ if has_pb {
    '.protobufB\16DescriptorProtosH\1'
 
    func Parser:reload() {
-      print(descriptor_pb)
-      pb:load(descriptor_pb)//, "load descriptor msg failed")
+      //print(descriptor_pb)
+      assert(pb:load(descriptor_pb), "load descriptor msg failed")
    }
 
-   func do_compile(self, f, ...) {
+   func Parser:do_compile(f, ...) {
       if self.include_imports {
          let old = self.on_import
          let infos = {}
@@ -1087,7 +1087,7 @@ if has_pb {
    }
 
    func Parser:compile(s, name) {
-      let set = do_compile(self, self.parse, self, s, name)
+      let set = self.do_compile(self.parse, self, s, name)
       return pb:encode('.google.protobuf.FileDescriptorSet', set)
    }
 

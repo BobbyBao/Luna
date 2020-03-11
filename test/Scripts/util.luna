@@ -1,61 +1,80 @@
+func table.show(t, name, indent) {
+   var cart     // a container
+   var autoref  // for self references
 
-var key = ""
-func PrintTableLevel(table, level) {
-  level = level or 1
-  var indent = ""
-  for i = 1, level {
-    indent = indent.."  "
-  }
+   /* counts the number of elements in a table
+   local func tablecount(t) {
+      var n = 0
+      for _, _ in pairs(t) { n = n+1 }
+      return n
+   }*/
+   
+   // (RiciLake) returns true if the table is empty
+   local func isemptytable(t) { return next(t) == nil }
 
-  if key  != "" {
-    print(indent..key.." ".."=".." ".."{")
-  } else {
-    print(indent .. "{")
-  }
-
-  key = ""
-  for k,v in pairs(table) {
-     if type(v) == "table" {
-        key = k
-        PrintTableLevel(v, level + 1)
-     } else {
-        let content = string.format("%s%s = %s", indent .. "  ",tostring(k), tostring(v))
-        print(content)  
+   local func basicSerialize (o) {
+      var so = tostring(o)
+      if type(o) == "function" {
+         var info = debug.getinfo(o, "S")
+         // info.name is nil because o is not a calling level
+         if info.what == "C" {
+            return string.format("%q", so .. ", C function")
+         } else {
+            // the information is defined through lines
+            return string.format("%q", so .. ", defined in (" ..
+                info.linedefined .. "-" .. info.lastlinedefined ..
+                ")" .. info.source)
+         }
+      } elseif type(o) == "number" or type(o) == "boolean" {
+         return so
+      } else {
+         return string.format("%q", so)
       }
-  }
-  print(indent .. "}")
+   }
 
+    local func addtocart(value, name, indent, saved, field) {
+      indent = indent or ""
+      saved = saved or {}
+      field = field or name
+
+      cart = cart .. indent .. field
+
+      if type(value) != "table" {
+         cart = cart .. " = " .. basicSerialize(value) .. ";\n"
+      } else {
+         if saved[value] {
+            cart = cart .. " = {}; -- " .. saved[value] 
+                        .. " (self reference)\n"
+            autoref = autoref ..  name .. " = " .. saved[value] .. ";\n"
+         } else {
+            saved[value] = name
+            //if tablecount(value) == 0 then
+            if isemptytable(value) {
+               cart = cart .. " = {};\n"
+            } else {
+               cart = cart .. " = {\n"
+               for k, v in pairs(value) {
+                  k = basicSerialize(k)
+                  var fname = string.format("%s[%s]", name, k)
+                  field = string.format("[%s]", k)
+                  // three spaces between levels
+                  addtocart(v, fname, indent .. "   ", saved, field)
+               }
+               cart = cart .. indent .. "};\n"
+            }
+         }
+      }
+   }
+
+   name = name or "__unnamed__"
+   if type(t) != "table" {
+      return name .. " = " .. basicSerialize(t)
+   }
+   cart, autoref = "", ""
+   addtocart(t, name, indent)
+   return cart .. autoref
 }
 
-func PrintTable(t) {
-    Print_table_recurse("", t);
-}
-
-func Print_table_recurse(key, t) {
-    if t == nil {
-        return
-    }
-    //print("save table : "..#t);
-    for k, v in pairs(t) {
-        //print(("[%s] = %s"):format(k, v))
-        if key  != "" {
-            Print_value_recurse(key.."."..k, v)
-        } else {
-            Print_value_recurse(k, v)
-        }
-    }
-}
-
-func Print_value_recurse(k, v) {
-    if type(v) == "string" {
-        print(k.."=  "..v)
-    } elseif type(v) == "number" {
-        print(k.."=      "..tostring(v))
-    } elseif type(v) == "boolean" {
-        print(k.."=          "..tostring(v))
-    } elseif type(v) == "table" {
-        Print_table_recurse("    "..k, v)
-    } else {
-        
-    }
+func printTable(t, n, ident) {
+    print(table.show(t, n, indent))
 }
