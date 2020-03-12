@@ -11,15 +11,16 @@ import "UI/UITest"
 
 game = GameStateManager()
 
-let mainState = GameState("main")
-game.addChild(mainState)
-
 let test = new UITest()
+test.initOpen = true
+let mainState = GameState("main", "TestScene1", test)
+game.addChild(mainState)
+mainState.sceneName = "TestScene1"
+
+game.changeState("main")
+
+/*
 mainState.addChild(test)
 mainState.activate(test)
 
-/*
-ResourceManager.LoadObject("UI/TestPanel", func (go) {
-    print(go.name)
-})
 */

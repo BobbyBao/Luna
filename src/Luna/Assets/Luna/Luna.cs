@@ -86,9 +86,7 @@ namespace SharpLuna
 
             L = Lua.newstate();
             mainState = L;
-
-            Debug.Log(string.Format("newstate L{0:X000}", L));
-           
+            
             luaL_openlibs(L);
             lua_atpanic(L, PanicCallback);
 

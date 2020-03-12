@@ -5,8 +5,16 @@ class GameState : Behavior {
     var sceneName = ""
     var loadOp = nil
 
-    init(n) {    
-        super.init(n)        
+    init(n, sceneName, ...) {
+
+        super.init(n)
+
+        self.sceneName = sceneName       
+ 
+        args = { ... }
+        for k, v in ipairs(args) {
+            self.addChild(v)
+        }
     }
 
     func enter() {
@@ -26,7 +34,11 @@ class GameState : Behavior {
     }
 
     func onLoad() {
-    
+        for state in self.children.iter() {
+            if state.initOpen {
+                state.show()                
+            }
+        }
     }
 
     func exit() {  

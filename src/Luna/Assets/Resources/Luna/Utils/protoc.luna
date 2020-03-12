@@ -1,0 +1,1112 @@
+let string = string
+let tonumber = tonumber
+let setmetatable = setmetatable
+let error = error
+let ipairs = ipairs
+let io = io
+let table = table
+let math = math
+let assert = assert
+let tostring = tostring
+let type = type
+let insert_tab = table.insert
+
+local func meta(name, t) {
+   t = t or {}
+   t.__name  = name
+   t.__index = t
+   return t
+}
+
+local func default(t, k, def) {
+   var v = t[k]
+   if not v {
+      v = def or {}
+      t[k] = v
+   }
+   return v
+}
+
+let escape = {
+   a = "\a", b = "\b", f = "\f", n = "\n",
+   r = "\r", t = "\t", v = "\v"
+}
+
+local func tohex(x) {  return string.byte(tonumber(x, 16)) }
+local func todec(x) {  return string.byte(tonumber(x, 10)) }
+local func toesc(x) { return escape[x] or x }
+
+class Lexer
+{
+   var __name = "Lexer"
+
+   init(name, src) {      
+      self.name = name
+      self.src = src
+      self.pos = 1   
+   }
+
+   func match(patt, pos) {
+      return self.src.match(patt, pos or self.pos)
+   }
+
+   func test(patt) {
+      self.whitespace()
+      let pos = self.match('^'..patt..'%s*()')
+      if not pos { return false }
+      self.pos = pos
+      return true
+   }
+
+   func expected(patt, name) {
+      if not self.test(patt) {
+         return self.error((name or "'"..patt.."'").." expected")
+      }
+      return self
+   }
+
+   func pos2loc(pos) {
+      var linenr = 1
+      pos = pos or self.pos
+      for start, stop in self.src.gmatch("()[^\n]*()\n?") {
+         if start <= pos and pos <= stop {
+            return linenr, pos - start + 1
+         }
+         linenr = linenr + 1
+      }
+   }
+
+   func error(fmt, ...) {
+      let ln, co = self.pos2loc()
+      return error(("%s:%d:%d: "..fmt).format(self.name, ln, co, ...))
+   }
+
+   func opterror(opt, msg) {
+      if not opt { return self:error(msg) }
+      return nil
+   }
+
+   func whitespace() {
+      let pos, c = self.match("^%s*()(%/?)")
+      self.pos = pos
+      if c == '' { return self }
+      return self.comment()
+   }
+
+   func comment() {
+      var pos = self.match("^%/%/[^\n]*\n?()")
+      if not pos {
+         if self.match("^%/%*") {
+            pos = self.match("^%/%*.-%*%/()")
+            if not pos {
+               self.error("unfinished comment")
+            }
+         }
+      }
+      if not pos { return self }
+      self.pos = pos
+      return self.whitespace()
+   }
+
+   func line_end(opt) {
+      self.whitespace()
+      var pos = self.match('^[%s;]*%s*()')
+      if not pos {
+         return self.opterror(opt, "';' expected")
+      }
+      self.pos = pos
+      return pos
+   }
+
+   func eof() {
+      self.whitespace()
+      return self.pos > #self.src
+   }
+
+   func keyword(kw, opt) {
+      self.whitespace()
+      var ident, pos = self.match("^([%a_][%w_]*)%s*()")
+      if not ident or ident != kw {
+         return self.opterror(opt, "''"..kw..'" expected')
+      }
+      self.pos = pos
+      return kw
+   }
+
+   func ident(name, opt) {
+      self.whitespace()
+      var b, ident, pos = self.match("^()([%a_][%w_]*)%s*()")
+      if not ident {
+         return self.opterror(opt, (name or 'name')..' expected')
+      }
+      self.pos = pos
+      return ident, b
+   }
+
+   func full_ident(name, opt) {
+      self.whitespace()
+      var b, ident, pos = self.match("^()([%a_][%w_.]*)%s*()")
+      if not ident or ident.match("%.%.+") {
+         return self.opterror(opt, (name or 'name')..' expected')
+      }
+      self.pos = pos
+      return ident, b
+   }
+
+   func integer(opt) {
+      self.whitespace()
+      var ns, oct, hex, s, pos =
+         self.match("^([+-]?)(0?)([xX]?)([0-9a-fA-F]+)%s*()")
+      var n
+      if oct == '0' and hex == '' {
+         n = tonumber(s, 8)
+      } elseif oct == '' and hex == '' {
+         n = tonumber(s, 10)
+      } elseif oct == '0' and hex != '' {
+         n = tonumber(s, 16)
+      }
+
+      if not n {
+         return self.opterror(opt, 'integer expected')
+      }
+
+      self.pos = pos
+      return ns == '-' and -n or n
+   }
+
+   func number(opt) {
+      self.whitespace()
+      if self.test("nan%f[%A]") {
+         return 0.0/0.0
+      } elseif self.test("inf%f[%A]") {
+         return 1.0/0.0
+      }
+
+      var ns, d1, s, d2, s2, pos = self.match("^([+-]?)(%.?)([0-9]+)(%.?)([0-9]*)()")
+      if not ns {
+         return self.opterror(opt, 'floating-point number expected')
+      }
+      var es, pos2 = self.match("(^[eE][+-]?[0-9]+)%s*()", pos)
+      if d1 == "." and d2 == "." {
+         return self.error("malformed floating-point number")
+      }
+      self.pos = pos2 or pos
+      var n = tonumber(d1..s..d2..s2..(es or ""))
+      return ns == '-' and -n or n
+   }
+
+   func quote(opt) {
+      self.whitespace()
+      var q, start = self.match('^(["\'])()')
+      if not start {
+         return self.opterror(opt, 'string expected')
+      }
+      self.pos = start
+      var patt = '()(\\?'..q..')%s*()'
+      while true {
+         var stop, s, pos = self.match(patt)
+         if not stop {
+            self.pos = start-1
+            return self.error("unfinished string")
+         }
+         self.pos = pos
+         if s == q {
+            return self.src.sub(start, stop-1)
+                           .gsub('\\x(%x+)', tohex)
+                           .gsub('\\(%d+)', todec)
+                           .gsub('\\(.)', toesc)
+         }
+      }
+   }
+
+   func structure(opt) {
+      self.whitespace()
+      if not self.test("{") {
+         return self.opterror(opt, 'opening curly brace expected')
+      }
+      var t = {}
+      while not self.test("}") {
+         var ident = self.full_ident("field name")     // TODO: full_ident?
+         self.test(":")
+         var value = self.constant()
+         self.test(",")
+         self.line_end("opt")
+         t[ident] = value
+      }
+      return t
+   }
+
+   func array(opt)  {
+      self.whitespace()
+      if not self.test("%[") {
+         return self.opterror(opt, 'opening square bracket expected')
+      }
+      var t = {}
+      while not self.test("]") {
+         var value = self.constant()
+         self.test(",")
+         t[#t + 1] = value
+      }
+      return t
+   }
+
+   func constant(opt) {
+      var c = self.full_ident('constant', 'opt') or
+               self.number('opt') or
+               self.quote('opt') or
+               self.structure('opt') or
+               self.array('opt')
+      if not c and not opt {
+         return self.error("constant expected")
+      }
+      return c
+   }
+
+   func option_name() {
+      var ident
+      if self.test("%(") {
+         ident = self.full_ident("option name")
+         self.expected("%)")
+      } else {
+         ident = self.ident("option name")
+      }
+      while self.test("%.") {
+         ident = ident .. "." .. self.ident()
+      }
+      return ident
+   }
+
+   func type_name() {
+      if self.test("%.") {
+         var id, pos = self.full_ident("type name")
+         return "."..id, pos
+      } else {
+         return self.full_ident("type name")
+      }
+   }
+
+}
+
+class Parser {
+   var __name = "Parser"
+   var typemap = {}
+   var loaded  = {}
+   var paths   = { "", "." }
+
+   init () {
+      self.typemap = {}
+      self.loaded  = {}
+      self.paths   = { "", "." }
+   }
+
+   func error(msg) {
+      return self.lex.error(msg)
+   }
+
+   func addpath(path) {
+      insert_tab(self.paths, path)
+   }
+
+   func parsefile(name) {
+      var info = self.loaded[name]
+      if info { return info }
+      var errors = {}
+      for _, path in ipairs(self.paths) {
+         var fn = path != "" and path.."/"..name or name
+         var fh, err = io.open(fn)
+         if fh {
+            var content = fh.read("*a")
+            info = self.parse(content, name)
+            fh.close()
+            return info
+         }
+         insert_tab(errors, err or fn..": ".."unknown error")
+      }
+      if self.import_fallback {
+         info = self.import_fallback(name)
+      }
+      if not info {
+         error("module load error: "..name.."\n\t"..table.concat(errors, "\n\t"))
+      }
+      return info
+   }
+}
+// parser
+
+let labels = { optional = 1; required = 2; repeated = 3 }
+
+let key_types = {
+   int32    = 5;  int64    = 3;  uint32   = 13;
+   uint64   = 4;  sint32   = 17; sint64   = 18;
+   fixed32  = 7;  fixed64  = 6;  sfixed32 = 15;
+   sfixed64 = 16; bool     = 8;  string   = 9;
+}
+
+let com_types = {
+   group    = 10; message  = 11; enum     = 14;
+}
+
+let types = {
+   double   = 1;  float    = 2;  int32    = 5;
+   int64    = 3;  uint32   = 13; uint64   = 4;
+   sint32   = 17; sint64   = 18; fixed32  = 7;
+   fixed64  = 6;  sfixed32 = 15; sfixed64 = 16;
+   bool     = 8;  string   = 9;  bytes    = 12;
+   group    = 10; message  = 11; enum     = 14;
+}
+
+local func register_type(self, lex, tname, typ) {
+   if not tname.match("%."){
+      tname = self.prefix..tname
+   }
+   if self.typemap[tname] {
+      return lex.error("type %s already defined", tname)
+   }
+   self.typemap[tname] = typ
+}
+
+local func type_info(lex, tname) {
+   var tenum = types[tname]
+   if com_types[tname] {
+      return lex.error("invalid type name: "..tname)
+   } elseif tenum {
+      tname = nil
+   }
+   return tenum, tname
+}
+
+local func map_info(lex) {
+   let keyt = lex.ident("key type")
+   if not key_types[keyt] {
+      return lex.error("invalid key type: "..keyt)
+   }
+   let valt = lex.expected(",").type_name()
+   let name = lex.expected(">").ident()
+   let ident = name.gsub("^%a", string.upper)
+                     .gsub("_(%a)", string.upper).."Entry"
+   let kt, ktn = type_info(lex, keyt)
+   let vt, vtn = type_info(lex, valt)
+   return name, types.message, ident, {
+      name = ident,
+      field = {
+         {
+            name      = "key",
+            number    = 1;
+            label     = labels.optional,
+            type      = kt,
+            type_name = ktn
+         },
+         {
+            name      = "value",
+            number    = 2;
+            label     = labels.optional,
+            type      = vt,
+            type_name = vtn
+         },
+      },
+      options = { map_entry = true }
+   }
+}
+
+local func inline_option(lex, info) {
+   if lex.test("%[") {
+      info = info or {}
+      while true {
+         let name  = lex.option_name()
+         let value = lex.expected('=') .constant()
+         info[name] = value
+         if lex.test("%]") {
+            return info
+         }
+         lex.expected(',')
+      }
+   }
+}
+
+local func field(self, lex, ident) {
+   var name, typ, type_name, map_entry
+   if ident == "map" and lex.test("%<") {
+      name, typ, type_name, map_entry = map_info(lex)
+      self.locmap[map_entry.field[1]] = lex.pos
+      self.locmap[map_entry.field[2]] = lex.pos
+      register_type(self, lex, type_name, types.message)
+   } else {
+      typ, type_name = type_info(lex, ident)
+      name = lex.ident()
+   }
+   let info = {
+      name      = name,
+      number    = lex.expected("=").integer(),
+      label     = ident == "map" and labels.repeated or labels.optional,
+      type      = typ,
+      type_name = type_name
+   }
+   let options = inline_option(lex)
+   if options {
+      info.default_value, options.default = tostring(options.default), nil
+      info.json_name, options.json_name = options.json_name, nil
+      if options.packed and options.packed == "false" {
+         options.packed = false
+      }
+   }
+   info.options = options
+   if info.number <= 0 {
+      lex.error("invalid tag number: "..info.number)
+   }
+   return info, map_entry
+}
+
+local func label_field(self, lex, ident) {
+   var label = labels[ident]
+   var info, map_entry
+   if not label {
+      if self.syntax == "proto2" and ident != "map" {
+         return lex.error("proto2 disallow missing label")
+      }
+      return field(self, lex, ident)
+   }
+   if label == labels.optional and self.syntax == "proto3" {
+      return lex.error("proto3 disallow 'optional' label")
+   }
+   info, map_entry = field(self, lex, lex.type_name())
+   info.label = label
+   return info, map_entry
+}
+
+class toplevel {
+
+   func package(lex, info) {
+      let package = lex.full_ident('package name')
+      lex.line_end()
+      info.package = package
+      self.prefix = "."..package.."."
+      return self
+   }
+
+   func import(lex, info) {
+      let mode = lex.ident('"weak" or "public"', 'opt') or "public"
+      if mode != 'weak' and mode != 'public' {
+         return lex.error('"weak or "public" expected')
+      }
+      let name = lex.quote()
+      lex.line_end()
+      let result = self.parsefile(name)
+      if self.on_import {
+         self.on_import(result)
+      }
+      let dep = default(info, 'dependency')
+      let index = #dep
+      dep[index+1] = name
+      if mode == "public" {
+         let it = default(info, 'public_dependency')
+         insert_tab(it, index)
+      } else {
+         let it = default(info, 'weak_dependency')
+         insert_tab(it, index)
+      }
+   }
+
+}
+
+class msg_body {
+
+   func message(lex, info) {
+      let nested_type = default(info, 'nested_type')
+      insert_tab(nested_type, toplevel.message(self, lex))
+      return self
+   }
+
+   func enum(lex, info) {
+      let nested_type = default(info, 'enum_type')
+      insert_tab(nested_type, toplevel.enum(self, lex))
+      return self
+   }
+
+   func extend(lex, info) {
+      let extension = default(info, 'extension')
+      let nested_type = default(info, 'nested_type')
+      let ft, mt = toplevel.extend(self, lex, {})
+      for _, v in ipairs(ft) {
+         insert_tab(extension, v)
+      }
+      for _, v in ipairs(mt) {
+         insert_tab(nested_type, v)
+      }
+      return self
+   }
+
+   func extensions(lex, info) {
+      let rt = default(info, 'extension_range')
+      repeat {
+         let start = lex.integer("field number range")
+         var stop = math.floor(2^29)
+         lex.keyword('to')
+         if not lex.keyword('max', 'opt') {
+            stop = lex.integer("field number range end or 'max'")
+         }
+         insert_tab(rt, { start = start, ['end'] = stop })
+      } 
+      until not lex.test(',')
+      lex.line_end()
+      return self
+   }
+
+   func reserved(lex, info) {
+      lex.whitespace()
+      if not lex '^%d' {
+         let rt = default(info, 'reserved_name')
+         repeat {
+            insert_tab(rt, (lex.quote()))
+         } until not lex.test ','
+      } else {
+         let rt = default(info, 'reserved_range')
+         var first = true
+         repeat {
+            let start = lex.integer(first and 'field name or number range'
+                                       or 'field number range')
+            if lex.keyword('to', 'opt') {
+               let stop = lex.integer 'field number range end'
+               insert_tab(rt, { start = start, ['end'] = stop })
+            } else {
+               insert_tab(rt, { start = start, ['end'] = start })
+            }
+            first = false
+         } until not lex.test(',')
+      }
+      lex.line_end()
+      return self
+   }
+
+   func oneof(lex, info) {
+      let fs = default(info, "field")
+      let ts = default(info, "nested_type")
+      let ot = default(info, "oneof_decl")
+      let index = #ot + 1
+      let oneof = { name = lex.ident() }
+      lex.expected("{")
+      while not lex.test("}") {
+         let ident = lex.type_name()
+         if ident == "option" {
+            toplevel.option(self, lex, oneof)
+         } else {
+            let f, t = field(self, lex, ident, "no_label")
+            self.locmap[f] = lex.pos
+            if t { insert_tab(ts, t) }
+            f.oneof_index = index - 1
+            insert_tab(fs, f)
+         }
+         lex.line_end('opt')
+      }
+      ot[index] = oneof
+   }
+
+   func option(lex, info) {
+      toplevel.option(self, lex, default(info, 'options'))
+   }
+
+}
+
+func toplevel:message(lex, info) {
+   let name = lex.ident('message name')
+   let typ = { name = name }
+   register_type(self, lex, name, types.message)
+   let prefix = self.prefix
+   self.prefix = prefix..name.."."
+   lex.expected("{")
+   while not lex.test("}") {
+      let ident, pos = lex.type_name()
+      let body_parser = msg_body[ident]
+      if body_parser {
+         body_parser(self, lex, typ)
+      } else {
+         let fs = default(typ, 'field')
+         let f, t = label_field(self, lex, ident)
+         self.locmap[f] = pos
+         insert_tab(fs, f)
+         if t {
+            let ts = default(typ, 'nested_type')
+            insert_tab(ts, t)
+         }
+      }
+      lex.line_end('opt')
+   }
+   lex.line_end('opt')
+   if info {
+      info = default(info, 'message_type')
+      insert_tab(info, typ)
+   }
+   self.prefix = prefix
+   return typ
+}
+
+func toplevel:enum(lex, info) {
+   let name = lex.ident('enum name')
+   let enum = { name = name }
+   register_type(self, lex, name, types.enum)
+   lex.expected("{")
+   while not lex.test("}") {
+      let ident = lex.ident('enum constant name')
+      if ident == 'option' {
+         toplevel.option(self, lex, default(enum, 'options'))
+      } else {
+         let values  = default(enum, 'value')
+         let number  = lex.expected('=') .integer()
+         lex.line_end()
+         insert_tab(values, {
+            name    = ident,
+            number  = number,
+            options = inline_option(lex)
+         })
+      }
+      lex.line_end('opt')
+   }
+   lex.line_end('opt')
+   if info {
+      info = default(info, 'enum_type')
+      insert_tab(info, enum)
+   }
+   return enum
+}
+
+func toplevel:option(lex, info) {
+   let ident = lex.option_name()
+   lex.expected("=")
+   let value = lex.constant()
+   lex.line_end()
+   let options = info and default(info, 'options') or {}
+   options[ident] = value
+   return options, self
+}
+
+func toplevel:extend(lex, info) {
+   let name = lex.type_name()
+   let ft = info and default(info, 'extension') or {}
+   let mt = info and default(info, 'message_type') or {}
+   lex.expected("{")
+   while not lex.test("}") {
+      let ident, pos = lex.type_name()
+      let f, t = label_field(self, lex, ident)
+      self.locmap[f] = pos
+      f.extendee = name
+      insert_tab(ft, f)
+      insert_tab(mt, t)
+      lex.line_end('opt')
+   }
+   return ft, mt
+}
+
+class svr_body {
+
+   func rpc(lex, info) {
+      let name, pos = lex.ident("rpc name")
+      let rpc = { name = name }
+      self.locmap[rpc] = pos
+      var _, tn
+      lex.expected("%(")
+      rpc.client_streaming = lex.keyword("stream", "opt")
+      _, tn = type_info(lex, lex.type_name())
+      if not tn { return lex.error("rpc input type must by message") }
+      rpc.input_type = tn
+      lex.expected("%)").expected("returns").expected("%(")
+      rpc.server_streaming = lex.keyword("stream", "opt")
+      _, tn = type_info(lex, lex.type_name())
+      if not tn { return lex.error("rpc output type must by message") }
+      rpc.output_type = tn
+      lex.expected("%)")
+      if lex.test("{") {
+         while not lex.test("}") {
+            lex.line_end("opt")
+            lex.keyword("option")
+            toplevel.option(self, lex, default(rpc, 'options'))
+         }
+      }
+      lex.line_end("opt")
+      let t = default(info, "method")
+      insert_tab(t, rpc)
+   }
+
+   func option(lex, info) {
+      toplevel.option(self, lex, default(info, 'options'))     // TODO: should be deeper in the info?
+   }
+
+   func stream(_, lex) {
+      lex.error("stream not implement yet")
+   }
+
+}
+
+func toplevel:service(lex, info) {
+   let name = lex.ident('service name')
+   let svr = { name = name }
+   lex.expected("{")
+   while not lex.test("}") {
+      let ident = lex.type_name()
+      let body_parser = svr_body[ident]
+      if body_parser {
+         body_parser(self, lex, svr)
+      } else {
+         return lex.error("expected 'rpc' or 'option' in service body")
+      }
+      lex.line_end('opt')
+   }
+   lex.line_end('opt')
+   if info {
+      info = default(info, 'service')
+      insert_tab(info, svr)
+   }
+   return svr
+}
+
+
+local func make_context(self, lex) {
+   let ctx = {
+      syntax  = "proto2";
+      locmap  = {};
+      prefix  = ".";
+      lex     = lex;
+      parser  = self;
+   }
+   ctx.loaded  = self.loaded
+   ctx.typemap = self.typemap
+   ctx.paths   = self.paths
+
+   func ctx.import_fallback(import_name) {
+      if self.unknown_import == true {
+         return true
+      } elseif type(self.unknown_import) == 'string' {
+         return import_name.match(self.unknown_import) and true or nil
+      } elseif self.unknown_import {
+         return self.unknown_import(import_name)
+      }
+   }
+
+   func ctx.type_fallback(type_name) {
+      if self.unknown_type == true {
+         return true
+      } elseif type(self.unknown_type) == 'string' {
+         return type_name.match(self.unknown_type) and true
+      } elseif self.unknown_type {
+         return self.unknown_type(type_name)
+      }
+   }
+
+   func ctx.on_import(info) {
+      if self.on_import {
+         return self.on_import(info)
+      }
+   }
+
+   return setmetatable(ctx, Parser)
+}
+
+func Parser:parse(src, name) {
+   let loaded = self.loaded[name]
+   if loaded {
+      if loaded == true {
+         error("loop loaded: "..name)
+      }
+      return loaded
+   }
+
+   name = name or "<input>"
+   self.loaded[name] = true
+   let lex = Lexer(name, src)
+   let info = { name = lex.name }
+   let ctx = make_context(self, lex)
+  
+   let syntax = lex.keyword('syntax', 'opt')
+   if syntax {
+      info.syntax = lex.expected('=') .quote()
+      ctx.syntax  = info.syntax
+      lex.line_end()
+   }
+
+   while not lex.eof() {
+      let ident = lex.ident()
+      let top_parser = toplevel[ident]
+      if top_parser {
+         top_parser(ctx, lex, info)
+      } else {
+         lex.error("unknown keyword '"..ident.."'")
+      }
+      lex.line_end("opt")
+   }
+   self.loaded[name] = name != "<input>" and info or nil
+   return ctx.resolve(lex, info)
+}
+
+// resolver
+
+local func empty() {}
+
+local func iter(t, k) {
+   let v = t[k]
+   if v { return ipairs(v) }
+   return empty
+}
+
+local func check_dup(self, lex, typ, map, k, v) {
+   let old = map[v[k]]
+   if old {
+      let ln, co = lex.pos2loc(self.locmap[old])
+      lex.error("%s '%s' exists, previous at %d:%d",
+                typ, v[k], ln, co)
+   }
+   map[v[k]] = v
+}
+
+local func check_type(self, lex, tname) {
+   if tname.match("^%.") {
+      let t = self.typemap[tname]
+      if not t {
+         return lex.error("unknown type '%s'", tname)
+      }
+      return t, tname
+   }
+   let prefix = self.prefix
+   for i = #prefix+1, 1, -1 {
+      let op = prefix[i]
+      prefix[i] = tname
+      let tn = table.concat(prefix, ".", 1, i)
+      prefix[i] = op
+      let t = self.typemap[tn]
+      if t { return t, tn }
+   }
+   var tn, t
+   if self.type_fallback {
+      tn, t = self.type_fallback(tname)
+   }
+   if tn {
+      t = types[t or "message"]
+      if tn == true { tn = "."..tname }
+      return t, tn
+   }
+   return lex.error("unknown type '%s'", tname)
+}
+
+local func check_field(self, lex, info) {
+   if info.extendee {
+      let t, tn = check_type(self, lex, info.extendee)
+      if t != types.message {
+         lex.error("message type expected in extension")
+      }
+      info.extendee = tn
+   }
+   if info.type_name {
+      let t, tn = check_type(self, lex, info.type_name)
+      info.type      = t
+      info.type_name = tn
+   }
+}
+
+local func check_enum(self, lex, info) {
+   let names, numbers = {}, {}
+   for _, v in iter(info, 'value') {
+      lex.pos = self.locmap[v]
+      check_dup(self, lex, 'enum name', names, 'name', v)
+      if not (info.options
+              and info.options.options
+              and info.options.options.allow_alias) {
+          check_dup(self, lex, 'enum number', numbers, 'number', v)
+      }
+   }
+}
+
+local func check_message(self, lex, info) {
+   insert_tab(self.prefix, info.name)
+   let names, numbers = {}, {}
+   for _, v in iter(info, 'field') {
+      lex.pos = assert(self.locmap[v])
+      check_dup(self, lex, 'field name', names, 'name', v)
+      check_dup(self, lex, 'field number', numbers, 'number', v)
+      check_field(self, lex, v)
+   }
+   for _, v in iter(info, 'nested_type') {
+      check_message(self, lex, v)
+   }
+   for _, v in iter(info, 'extension') {
+      lex.pos = assert(self.locmap[v])
+      check_field(self, lex, v)
+   }
+   self.prefix[#self.prefix] = nil
+}
+
+local func check_service(self, lex, info) {
+   let names = {}
+   for _, v in iter(info, 'method') {
+      lex.pos = self.locmap[v]
+      check_dup(self, lex, 'rpc name', names, 'name', v)
+      var t, tn = check_type(self, lex, v.input_type)
+      v.input_type = tn
+      if t != types.message {
+         lex.error("message type expected in parameter")
+      }
+      t, tn = check_type(self, lex, v.output_type)
+      v.output_type = tn
+      if t != types.message {
+         lex.error("message type expected in return")
+      }
+   }
+}
+
+func Parser:resolve(lex, info) {
+   self.prefix = { "", info.package }
+   for _, v in iter(info, 'message_type') {
+      check_message(self, lex, v)
+   }
+   for _, v in iter(info, 'enum_type') {
+      check_enum(self, lex, v)
+   }
+   for _, v in iter(info, 'service') {
+      check_service(self, lex, v)
+   }
+   for _, v in iter(info, 'extension') {
+      lex.pos = assert(self.locmap[v])
+      check_field(self, lex, v)
+   }
+   self.prefix = nil
+   return info
+}
+
+
+
+let has_pb, pb = pcall(import, "pb")
+if has_pb {
+   let descriptor_pb =
+   '\10\249#\10\16descriptor.proto\18\15google.protobuf\"G\10\17FileDescript'..
+   'orSet\0182\10\4file\24\1 \3(\0112$.google.protobuf.FileDescriptorProto\"'..
+   '\219\3\10\19FileDescriptorProto\18\12\10\4name\24\1 \1(\9\18\15\10\7pack'..
+   'age\24\2 \1(\9\18\18\10\10dependency\24\3 \3(\9\18\25\10\17public_depend'..
+   'ency\24\10 \3(\5\18\23\10\15weak_dependency\24\11 \3(\5\0186\10\12messag'..
+   'e_type\24\4 \3(\0112 .google.protobuf.DescriptorProto\0187\10\9enum_type'..
+   '\24\5 \3(\0112$.google.protobuf.EnumDescriptorProto\0188\10\7service\24'..
+   '\6 \3(\0112\'.google.protobuf.ServiceDescriptorProto\0188\10\9extension'..
+   '\24\7 \3(\0112%.google.protobuf.FieldDescriptorProto\18-\10\7options\24'..
+   '\8 \1(\0112\28.google.protobuf.FileOptions\0189\10\16source_code_info\24'..
+   '\9 \1(\0112\31.google.protobuf.SourceCodeInfo\18\14\10\6syntax\24\12 \1('..
+   '\9\"\228\3\10\15DescriptorProto\18\12\10\4name\24\1 \1(\9\0184\10\5field'..
+   '\24\2 \3(\0112%.google.protobuf.FieldDescriptorProto\0188\10\9extension'..
+   '\24\6 \3(\0112%.google.protobuf.FieldDescriptorProto\0185\10\11nested_ty'..
+   'pe\24\3 \3(\0112 .google.protobuf.DescriptorProto\0187\10\9enum_type\24'..
+   '\4 \3(\0112$.google.protobuf.EnumDescriptorProto\18H\10\15extension_rang'..
+   'e\24\5 \3(\0112/.google.protobuf.DescriptorProto.ExtensionRange\0189\10'..
+   '\10oneof_decl\24\8 \3(\0112%.google.protobuf.OneofDescriptorProto\0180'..
+   '\10\7options\24\7 \1(\0112\31.google.protobuf.MessageOptions\26,\10\14Ex'..
+   'tensionRange\18\13\10\5start\24\1 \1(\5\18\11\10\3end\24\2 \1(\5\"\169\5'..
+   '\10\20FieldDescriptorProto\18\12\10\4name\24\1 \1(\9\18\14\10\6number\24'..
+   '\3 \1(\5\18:\10\5label\24\4 \1(\0142+.google.protobuf.FieldDescriptorPro'..
+   'to.Label\0188\10\4type\24\5 \1(\0142*.google.protobuf.FieldDescriptorPro'..
+   'to.Type\18\17\10\9type_name\24\6 \1(\9\18\16\10\8extendee\24\2 \1(\9\18'..
+   '\21\10\13default_value\24\7 \1(\9\18\19\10\11oneof_index\24\9 \1(\5\18.'..
+   '\10\7options\24\8 \1(\0112\29.google.protobuf.FieldOptions\"\182\2\10\4T'..
+   'ype\18\15\10\11TYPE_DOUBLE\16\1\18\14\10\10TYPE_FLOAT\16\2\18\14\10\10TY'..
+   'PE_INT64\16\3\18\15\10\11TYPE_UINT64\16\4\18\14\10\10TYPE_INT32\16\5\18'..
+   '\16\10\12TYPE_FIXED64\16\6\18\16\10\12TYPE_FIXED32\16\7\18\13\10\9TYPE_B'..
+   'OOL\16\8\18\15\10\11TYPE_STRING\16\9\18\14\10\10TYPE_GROUP\16\10\18\16'..
+   '\10\12TYPE_MESSAGE\16\11\18\14\10\10TYPE_BYTES\16\12\18\15\10\11TYPE_UIN'..
+   'T32\16\13\18\13\10\9TYPE_ENUM\16\14\18\17\10\13TYPE_SFIXED32\16\15\18\17'..
+   '\10\13TYPE_SFIXED64\16\16\18\15\10\11TYPE_SINT32\16\17\18\15\10\11TYPE_S'..
+   'INT64\16\18\"C\10\5Label\18\18\10\14LABEL_OPTIONAL\16\1\18\18\10\14LABEL'..
+   '_REQUIRED\16\2\18\18\10\14LABEL_REPEATED\16\3\"$\10\20OneofDescriptorPro'..
+   'to\18\12\10\4name\24\1 \1(\9\"\140\1\10\19EnumDescriptorProto\18\12\10\4'..
+   'name\24\1 \1(\9\0188\10\5value\24\2 \3(\0112).google.protobuf.EnumValueD'..
+   'escriptorProto\18-\10\7options\24\3 \1(\0112\28.google.protobuf.EnumOpti'..
+   'ons\"l\10\24EnumValueDescriptorProto\18\12\10\4name\24\1 \1(\9\18\14\10'..
+   '\6number\24\2 \1(\5\0182\10\7options\24\3 \1(\0112!.google.protobuf.Enum'..
+   'ValueOptions\"\144\1\10\22ServiceDescriptorProto\18\12\10\4name\24\1 \1('..
+   '\9\0186\10\6method\24\2 \3(\0112&.google.protobuf.MethodDescriptorProto'..
+   '\0180\10\7options\24\3 \1(\0112\31.google.protobuf.ServiceOptions\"\193'..
+   '\1\10\21MethodDescriptorProto\18\12\10\4name\24\1 \1(\9\18\18\10\10input'..
+   '_type\24\2 \1(\9\18\19\10\11output_type\24\3 \1(\9\18/\10\7options\24\4 '..
+   '\1(\0112\30.google.protobuf.MethodOptions\18\31\10\16client_streaming\24'..
+   '\5 \1(\8:\5false\18\31\10\16server_streaming\24\6 \1(\8:\5false\"\231\4'..
+   '\10\11FileOptions\18\20\10\12java_package\24\1 \1(\9\18\28\10\20java_out'..
+   'er_classname\24\8 \1(\9\18\"\10\19java_multiple_files\24\10 \1(\8:\5fals'..
+   'e\18,\10\29java_generate_equals_and_hash\24\20 \1(\8:\5false\18%\10\22ja'..
+   'va_string_check_utf8\24\27 \1(\8:\5false\18F\10\12optimize_for\24\9 \1('..
+   '\0142).google.protobuf.FileOptions.OptimizeMode:\5SPEED\18\18\10\10go_pa'..
+   'ckage\24\11 \1(\9\18\"\10\19cc_generic_services\24\16 \1(\8:\5false\18$'..
+   '\10\21java_generic_services\24\17 \1(\8:\5false\18\"\10\19py_generic_ser'..
+   'vices\24\18 \1(\8:\5false\18\25\10\10deprecated\24\23 \1(\8:\5false\18'..
+   '\31\10\16cc_enable_arenas\24\31 \1(\8:\5false\18\25\10\17objc_class_pref'..
+   'ix\24$ \1(\9\18C\10\20uninterpreted_option\24\231\7 \3(\0112$.google.pro'..
+   'tobuf.UninterpretedOption\":\10\12OptimizeMode\18\9\10\5SPEED\16\1\18\13'..
+   '\10\9CODE_SIZE\16\2\18\16\10\12LITE_RUNTIME\16\3*\9\8\232\7\16\128\128'..
+   '\128\128\2\"\230\1\10\14MessageOptions\18&\10\23message_set_wire_format'..
+   '\24\1 \1(\8:\5false\18.\10\31no_standard_descriptor_accessor\24\2 \1(\8:'..
+   '\5false\18\25\10\10deprecated\24\3 \1(\8:\5false\18\17\10\9map_entry\24'..
+   '\7 \1(\8\18C\10\20uninterpreted_option\24\231\7 \3(\0112$.google.protobu'..
+   'f.UninterpretedOption*\9\8\232\7\16\128\128\128\128\2\"\160\2\10\12Field'..
+   'Options\18:\10\5ctype\24\1 \1(\0142#.google.protobuf.FieldOptions.CType:'..
+   '\6STRING\18\14\10\6packed\24\2 \1(\8\18\19\10\4lazy\24\5 \1(\8:\5false'..
+   '\18\25\10\10deprecated\24\3 \1(\8:\5false\18\19\10\4weak\24\10 \1(\8:\5f'..
+   'alse\18C\10\20uninterpreted_option\24\231\7 \3(\0112$.google.protobuf.Un'..
+   'interpretedOption\"/\10\5CType\18\10\10\6STRING\16\0\18\8\10\4CORD\16\1'..
+   '\18\16\10\12STRING_PIECE\16\2*\9\8\232\7\16\128\128\128\128\2\"\141\1\10'..
+   '\11EnumOptions\18\19\10\11allow_alias\24\2 \1(\8\18\25\10\10deprecated'..
+   '\24\3 \1(\8:\5false\18C\10\20uninterpreted_option\24\231\7 \3(\0112$.goo'..
+   'gle.protobuf.UninterpretedOption*\9\8\232\7\16\128\128\128\128\2\"}\10'..
+   '\16EnumValueOptions\18\25\10\10deprecated\24\1 \1(\8:\5false\18C\10\20un'..
+   'interpreted_option\24\231\7 \3(\0112$.google.protobuf.UninterpretedOptio'..
+   'n*\9\8\232\7\16\128\128\128\128\2\"{\10\14ServiceOptions\18\25\10\10depr'..
+   'ecated\24! \1(\8:\5false\18C\10\20uninterpreted_option\24\231\7 \3(\0112'..
+   '$.google.protobuf.UninterpretedOption*\9\8\232\7\16\128\128\128\128\2\"z'..
+   '\10\13MethodOptions\18\25\10\10deprecated\24! \1(\8:\5false\18C\10\20uni'..
+   'nterpreted_option\24\231\7 \3(\0112$.google.protobuf.UninterpretedOption'..
+   '*\9\8\232\7\16\128\128\128\128\2\"\158\2\10\19UninterpretedOption\18;\10'..
+   '\4name\24\2 \3(\0112-.google.protobuf.UninterpretedOption.NamePart\18\24'..
+   '\10\16identifier_value\24\3 \1(\9\18\26\10\18positive_int_value\24\4 \1('..
+   '\4\18\26\10\18negative_int_value\24\5 \1(\3\18\20\10\12double_value\24\6'..
+   '\32\1(\1\18\20\10\12string_value\24\7 \1(\12\18\23\10\15aggregate_value'..
+   '\24\8 \1(\9\0263\10\8NamePart\18\17\10\9name_part\24\1 \2(\9\18\20\10\12'..
+   'is_extension\24\2 \2(\8\"\213\1\10\14SourceCodeInfo\18:\10\8location\24'..
+   '\1 \3(\0112(.google.protobuf.SourceCodeInfo.Location\26\134\1\10\8Locati'..
+   'on\18\16\10\4path\24\1 \3(\5B\2\16\1\18\16\10\4span\24\2 \3(\5B\2\16\1'..
+   '\18\24\10\16leading_comments\24\3 \1(\9\18\25\10\17trailing_comments\24'..
+   '\4 \1(\9\18!\10\25leading_detached_comments\24\6 \3(\9B)\10\19com.google'..
+   '.protobufB\16DescriptorProtosH\1'
+
+   func Parser:reload() {
+      //print(descriptor_pb)
+      assert(pb:load(descriptor_pb), "load descriptor msg failed")
+   }
+
+   func Parser:do_compile(f, ...) {
+      if self.include_imports {
+         let old = self.on_import
+         let infos = {}
+         func self.on_import(info) {
+            insert_tab(infos, info)
+         }
+         let r = f(...)
+         insert_tab(infos, r)
+         self.on_import = old
+         return { file = infos }
+      }
+      return { file = { f(...) } }
+   }
+
+   func Parser:compile(s, name) {
+      let set = self.do_compile(self.parse, self, s, name)
+      return pb:encode('.google.protobuf.FileDescriptorSet', set)
+   }
+
+   func Parser:compilefile(fn) {
+      let set = do_compile(self, self.parsefile, self, fn)
+      return pb:encode('.google.protobuf.FileDescriptorSet', set)
+   }
+
+   func Parser:load(s, name) {
+      let ret, pos = pb:load(self.compile(s, name))
+      if ret { return ret, pos }
+      error("load failed at offset "..pos)
+   }
+
+   func Parser:loadfile(fn) {
+      let ret, pos = pb:load(self.compilefile(fn))
+      if ret { return ret, pos }
+      error("load failed at offset "..pos)
+   }
+
+   Parser.reload()
+}

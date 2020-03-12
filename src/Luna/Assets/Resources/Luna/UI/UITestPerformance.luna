@@ -6,11 +6,12 @@ class UITestPerformance : UIPanel {
 
     init() {
         super.init("TestPerformance", "UI/TestPerfPanel")        
-        self.testObject = new  UnityEngine.GameObject("test")
     }
 
     func onLoad(go) {
         super.onLoad(go)
+        
+        self.testObject = new  UnityEngine.GameObject("test")
 
         self.btn1 = self.addClickByName("Buttons/Button1", self.onButtonClick)
         self.btn2 = self.addClickByName("Buttons/Button2", self.onButtonClick)

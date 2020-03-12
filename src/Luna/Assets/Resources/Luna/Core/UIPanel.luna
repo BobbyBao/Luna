@@ -3,8 +3,8 @@ import "Behavior"
 class UIPanel : Behavior {
     var gameObject = nil
     var uiFile = nil
+    var initOpen = false
     var loaded = false
-
     init(n, uiFile) {
         super.init(n)
         self.uiFile = uiFile
@@ -57,25 +57,7 @@ class UIPanel : Behavior {
     func enter() {
     
         if self.gameObject == nil {
-            self.state = BehaviorState.Transiting
-            UIManager.Instance.OpenPanel(self.uiFile, func(go)  { 
-                self.gameObject = go
-                if self.state == BehaviorState.Transiting {
-                    self.gameObject.SetActive(true)
-
-                    if !self.loaded {
-                        self.onLoad(go)
-                        self.loaded = true
-                    }
-                    
-                    self.onOpen()
-                    self.state = BehaviorState.Open
-                }
-                else if self.state == BehaviorState.Closed {
-                    self.gameObject.SetActive(false)
-                }
-
-            })
+            self.load()
         } else {
             
             if !self.loaded {
@@ -98,6 +80,32 @@ class UIPanel : Behavior {
 
         self.onClose()
         self.state = BehaviourState.Closed
+    }
+
+    func load() {
+        self.state = BehaviorState.Transiting
+        UIManager.Instance.OpenPanel(self.uiFile, func(go)  { 
+            self.gameObject = go
+            if self.state == BehaviorState.Transiting {
+                self.gameObject.SetActive(true)
+
+                if !self.loaded {
+                    self.onLoad(go)
+                    self.loaded = true
+                }
+                
+                self.onOpen()
+                self.state = BehaviorState.Open
+            }
+            else if self.state == BehaviorState.Closed {
+                self.gameObject.SetActive(false)
+            }
+
+        })
+    }
+
+    func unload() {
+        UIManager.Instance.ClosePanel(self.uiFile)
     }
 
     func onLoad(go) {      

@@ -48,8 +48,4 @@ class Behavior : Observable {
         behaviour.exit()
     }
 
-    func shutdown() {
-        
-    }
-
 }

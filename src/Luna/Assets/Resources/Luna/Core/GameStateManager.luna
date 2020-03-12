@@ -8,6 +8,15 @@ class GameStateManager : Behavior {
         self.currentState = nil
     }
 
+    func changeState(stateName) {
+        for state in self.children.iter() {
+            if stateName == state.name {
+                self.activate(state)
+                break
+            }
+        }
+    }
+
     func activate(state) {    
 
         if self.currentState {

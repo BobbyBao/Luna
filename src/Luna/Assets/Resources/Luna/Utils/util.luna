@@ -1,0 +1,72 @@
+
+local func table.show(t, name, indent) {
+   var cart     // a container
+   var autoref  // for self references
+
+   local func isemptytable(t) { return next(t) == nil }
+
+   local func basicSerialize (o) {
+      var so = tostring(o)
+      if type(o) == "function" {
+         var info = debug.getinfo(o, "S")
+         // info.name is nil because o is not a calling level
+         if info.what == "C" {
+            return string.format("%q", so .. ", C function")
+         } else {
+            // the information is defined through lines
+            return string.format("%q", so .. ", defined in (" ..
+                info.linedefined .. "-" .. info.lastlinedefined ..
+                ")" .. info.source)
+         }
+      } elseif type(o) == "number" or type(o) == "boolean" {
+         return so
+      } else {
+         return string.format("%q", so)
+      }
+   }
+
+    local func addtocart(value, name, indent, saved, field) {
+      indent = indent or ""
+      saved = saved or {}
+      field = field or name
+
+      cart = cart .. indent .. field
+
+      if type(value) != "table" {
+         cart = cart .. " = " .. basicSerialize(value) .. ";\n"
+      } else {
+         if saved[value] {
+            cart = cart .. " = {}; -- " .. saved[value] 
+                        .. " (self reference)\n"
+            autoref = autoref ..  name .. " = " .. saved[value] .. ";\n"
+         } else {
+            saved[value] = name
+            if isemptytable(value) {
+               cart = cart .. " = {};\n"
+            } else {
+               cart = cart .. " = {\n"
+               for k, v in pairs(value) {
+                  k = basicSerialize(k)
+                  var fname = string.format("%s[%s]", name, k)
+                  field = string.format("[%s]", k)
+                  // three spaces between levels
+                  addtocart(v, fname, indent .. "   ", saved, field)
+               }
+               cart = cart .. indent .. "};\n"
+            }
+         }
+      }
+   }
+
+   name = name or "__unnamed__"
+   if type(t) != "table" {
+      return name .. " = " .. basicSerialize(t)
+   }
+   cart, autoref = "", ""
+   addtocart(t, name, indent)
+   return cart .. autoref
+}
+
+func printTable(t, n, ident) {
+    print(table.show(t, n, indent))
+}

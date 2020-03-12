@@ -1,7 +1,7 @@
 
 let tsort, tinsert, tremove = table.sort, table.insert, table.remove
 
-local func cycle_aware_copy(t, cache) {
+func cycle_aware_copy(t, cache) {
     if type(t) != 'table' { return t }
     if cache[t] { return cache[t] }
     var res = {}
@@ -39,7 +39,7 @@ class SequenceBase {
 
     func clear(istart) {
         istart = istart or 1
-        for i = istart,#self { tremove(t) }
+        for i = istart, #self { tremove(t) }
     }
 
 }
@@ -51,7 +51,7 @@ class Sequence  : SequenceBase {
     }
 
     func contains(v) {    
-        for _, val in ipairs(self) {
+        for val in self.iter() {
             if v == val {
                 return true
             }
