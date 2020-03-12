@@ -1,5 +1,15 @@
 
 
+local async func testLocal(num, cb) {
+    print('test async local', num)
+    cb()
+}
+
+async func testGlobal(num, cb) {
+    print('test async global', num)
+    cb()
+}
+
 class Recharge {
 
     async func recharge(num, cb) {
@@ -8,6 +18,11 @@ class Recharge {
     }
 
     func buy() {
+
+        await testLocal(1000)
+
+        await testGlobal(2000)
+        
 
         print("Recharge buy : ", self)
 

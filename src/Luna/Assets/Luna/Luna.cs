@@ -655,6 +655,10 @@ func coroutine.__async(async_func, callback_pos) {
 
 __async = coroutine.__async
 
+func __def_async_global(fnName) {
+    _G[""_async_""..fnName] = __async(_G[fnName])
+}
+
 func __def_async(t, fnName) {
     t = t or _G
     t[""_async_""..fnName] = __async(t[fnName])
