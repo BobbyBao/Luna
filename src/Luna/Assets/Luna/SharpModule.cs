@@ -34,7 +34,7 @@ namespace SharpLuna
             }
 
             this.parent = parent;
-            meta = create_module(parentMeta.State, parentMeta, name);
+            meta = LunaNative.create_module(parentMeta.State, parentMeta, name);
             Name = name;
         }
 
@@ -218,7 +218,28 @@ namespace SharpLuna
             return t.Name;
         }
 
-    };
+        public static LuaRef CreateClass(LuaRef module, string name, Type classType, Type superClass, LuaNativeFunction dctor)
+        {
+            LuaRef classref = module.RawGet<LuaRef, string>(name);
+            if (classref)
+            {
+                return classref;
+            }
+
+            var meta = LunaNative.create_class(module.State, module, name, classType, dctor);
+
+            if (superClass != null)
+            {
+                LuaRef registry = new LuaRef(module.State, LUA_REGISTRYINDEX);
+                int superClassID = SharpObject.TypeID(superClass);
+                LuaRef super = registry.RawGet<LuaRef>(superClassID);
+                meta.RawSet(LunaNative.___super, super);
+            }
+
+            return meta;
+        }
+
+    }
 
 
 }

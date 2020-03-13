@@ -395,6 +395,7 @@ namespace SharpLuna
 
         static void Invoke(lua_State L, LuaRef f, params object[] args)
         {
+            assert(L == mainState);
             int oldTop = lua_gettop(L);
             int errFunc = load_error_func(L, errorFuncRef);
             f.PushToStack();
@@ -408,11 +409,12 @@ namespace SharpLuna
 
         static R Invoke<R>(lua_State L, LuaRef f, params object[] args)
         {
+            assert(L == mainState);
             int oldTop = lua_gettop(L);
             int errFunc = load_error_func(L, errorFuncRef);
             f.PushToStack();
             PushArgs(L, args);
-            if (lua_pcall(L, args.Length, 1, errorFuncRef) != (int)LuaStatus.OK)
+            if (lua_pcall(L, args.Length, 1, errFunc) != (int)LuaStatus.OK)
             {
                 ThrowExceptionFromError(L, oldTop);
             }
@@ -420,8 +422,32 @@ namespace SharpLuna
             lua_settop(L, oldTop);
             return v;
         }
+          
+        public static object[] Call(lua_State L, LuaRef f, object[] args, Type[] returnTypes)
+        {
+            int nArgs = 0;
+            int oldTop = lua_gettop(L);
+            int errFunc = load_error_func(L, errorFuncRef);
+            f.PushToStack();
+            if (args != null)
+            {
+                nArgs = args.Length;
+                for (int i = 0; i < args.Length; i++)
+                {
+                    Push(L, args[i]);
+                }
+            }
 
+            var error = lua_pcall(L, nArgs, -1, errFunc);
+            if (error != LuaStatus.OK)
+                ThrowExceptionFromError(L, oldTop);
 
+            lua_remove(L, errFunc);
+            if (returnTypes != null)
+                return PopValues(L, oldTop, returnTypes);
+            else
+                return PopValues(L, oldTop);
+        }
     }
 
     public static partial class Lua

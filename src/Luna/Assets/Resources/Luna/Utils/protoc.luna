@@ -82,7 +82,7 @@ class Lexer
    }
 
    func opterror(opt, msg) {
-      if not opt { return self:error(msg) }
+      if not opt { return self.error(msg) }
       return nil
    }
 

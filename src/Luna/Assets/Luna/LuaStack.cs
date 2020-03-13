@@ -194,6 +194,21 @@ namespace SharpLuna
             return returnValues.ToArray();
         }
 
+        public static object[] PopValues(lua_State L, int oldTop, Type[] returnTypes)
+        {
+            int newTop = lua_gettop(L);
+
+            if (oldTop == newTop)
+                return null;
+
+            var returnValues = new List<object>();
+            for (int i = oldTop + 1; i <= newTop; i++)
+                returnValues.Add(GetObject(L, i, returnTypes[i]));
+
+            lua_settop(L, oldTop);
+            return returnValues.ToArray();
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Push(lua_State L, object obj)
         {

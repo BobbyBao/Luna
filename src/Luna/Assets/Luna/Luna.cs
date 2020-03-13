@@ -114,7 +114,7 @@ namespace SharpLuna
 
             AddSearcher(LuaLoader);
 
-            SharpClass.Init(L);
+            LunaNative.Init(L);
             SharpObject.Init(L);
 
             RegisterWraps(this.GetType());
@@ -135,7 +135,7 @@ namespace SharpLuna
                 }
             }
 
-            _classWrapers.Clear();
+            //_classWrapers.Clear();
 
 
         }
@@ -979,11 +979,9 @@ func __array(c, len) {
 
     public class MethodWraper
     {
-        public ref LuaNativeFunction func => ref funcs[0];
-        public ref LuaNativeFunction setter => ref funcs[1];
-        public ref LuaNativeFunction getter => ref funcs[2];
-        //同一个名字的函数，最多支持8种不同参数类型
-        public LuaNativeFunction[] funcs = new LuaNativeFunction[8];
+        public LuaNativeFunction func;
+        public LuaNativeFunction setter;
+        public LuaNativeFunction getter;
     }
 
     public class ClassWraper : Dictionary<string, MethodWraper>

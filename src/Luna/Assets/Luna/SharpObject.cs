@@ -1,5 +1,4 @@
 ﻿#define LUA_WEAKTABLE
-#define C_API
 
 using System;
 using System.Collections.Generic;
@@ -15,13 +14,6 @@ namespace SharpLuna
 
     public class SharpObject
     {
-        public enum UserDataType : int
-        {
-            Object = 0,
-            Unmanaged = 1,
-            StructStart = 2
-        }
-
         class ReferenceEqualsComparer : IEqualityComparer<object>
         {
             public new bool Equals(object o1, object o2)
@@ -80,7 +72,7 @@ namespace SharpLuna
 
             obj2id[obj] = (int)id;
 
-            CacheUserData(L, id, weakTableRef);
+            LunaNative.CacheUserData(L, id, weakTableRef);
 #else
             GCHandle gc = GCHandle.Alloc(obj, GCHandleType.Weak);
             Unsafe.Write((void*)mem, GCHandle.ToIntPtr(gc));
@@ -180,7 +172,7 @@ namespace SharpLuna
 #if LUA_WEAKTABLE
             if (obj2id.TryGetValue(obj, out var key))
             {
-                if (TryGetUserData(L, key, weakTableRef) == 1)
+                if (LunaNative.TryGetUserData(L, key, weakTableRef) == 1)
                 {
                     return;
                 }
@@ -201,7 +193,7 @@ namespace SharpLuna
 #if LUA_WEAKTABLE
             if (obj2id.TryGetValue(obj, out var key))
             {
-                if (TryGetUserData(L, key, weakTableRef) == 1)
+                if (LunaNative.TryGetUserData(L, key, weakTableRef) == 1)
                 {
                     return;
                 }
@@ -347,7 +339,7 @@ namespace SharpLuna
             //Debug.Log("gc : " + handle);
 
 #if LUA_WEAKTABLE
-            var obj = freeList[(int)handle];
+            var obj = freeList[handle];
             obj2id.Remove(obj);
             freeList.Free((int)handle);
 #else
@@ -360,40 +352,8 @@ namespace SharpLuna
         }
 
 #if LUA_WEAKTABLE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int TryGetUserData(lua_State L, int key, int cache_ref)
-        {
-#if C_API
-            return luna_try_getuserdata(L, key, cache_ref);
+        
 #else
-            lua_rawgeti(L, LUA_REGISTRYINDEX, cache_ref);
-            lua_rawgeti(L, -1, key);
-            if (!lua_isnil(L, -1))
-            {
-                lua_remove(L, -2);
-                return 1;
-            }
-            lua_pop(L, 2);
-            return 0;
-#endif
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void CacheUserData(lua_State L, int key, int cache_ref)
-        {
-#if C_API
-            luna_cacheuserdata(L, key, cache_ref);
-#else
-            lua_rawgeti(L, LUA_REGISTRYINDEX, cache_ref);
-            lua_pushvalue(L, -2);
-            lua_rawseti(L, -2, key);
-            lua_pop(L, 1);
-#endif
-        }
-#endif
-
-
-#if !LUA_WEAKTABLE
         class UserDataRef : IDisposable
         {
             public int Ref { get; }

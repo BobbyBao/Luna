@@ -83,11 +83,11 @@ namespace SharpLuna
         {
             if (name == "Item")
             {
-                SetMemberFunction(___get_indexed, getter);
+                SetMemberFunction(LunaNative.___get_indexed, getter);
             }
             else
             {
-                meta.RawGet(___getters).RawSet(name, getter);
+                meta.RawGet(LunaNative.___getters).RawSet(name, getter);
             }
         }
 
@@ -95,11 +95,11 @@ namespace SharpLuna
         {
             if(name == "Item")
             {
-                SetMemberFunction(___set_indexed, setter);
+                SetMemberFunction(LunaNative.___set_indexed, setter);
             }
             else
             {
-                meta.RawGet(___setters).RawSet(name, setter);
+                meta.RawGet(LunaNative.___setters).RawSet(name, setter);
             }
 
         }
@@ -107,10 +107,10 @@ namespace SharpLuna
         public void SetReadOnly(string name)
         {
             LuaRef meta_class = meta;
-            string full_name = GetMemberName(meta_class, name);
-            LuaRef err = LuaRef.CreateFunctionWith(State, ErrorReadOnly, full_name);
+            string full_name = LunaNative.GetMemberName(meta_class, name);
+            LuaRef err = LuaRef.CreateFunctionWith(State, LunaNative.ErrorReadOnly, full_name);
 
-            meta_class.RawGet(___setters).RawSet(name, err);
+            meta_class.RawGet(LunaNative.___setters).RawSet(name, err);
         }
 
         public void SetMemberFunction(IntPtr name, LuaRef proc)
@@ -209,12 +209,12 @@ namespace SharpLuna
                         {
                             if(m.Name == "Get")
                             {
-                                SetMemberFunction(___get_indexed, fn);
+                                SetMemberFunction(LunaNative.___get_indexed, fn);
                             }
 
                             if (m.Name == "Set")
                             {
-                                SetMemberFunction(___set_indexed, fn);
+                                SetMemberFunction(LunaNative.___set_indexed, fn);
                             }
                         }
 
@@ -416,12 +416,12 @@ namespace SharpLuna
             {
                 if (name == "Get")
                 {
-                    SetMemberFunction(___get_indexed, luaFun);
+                    SetMemberFunction(LunaNative.___get_indexed, luaFun);
                 }
 
                 if (name == "Set")
                 {
-                    SetMemberFunction(___set_indexed, luaFun);
+                    SetMemberFunction(LunaNative.___set_indexed, luaFun);
                 }
             }
 

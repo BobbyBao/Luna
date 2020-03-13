@@ -9,14 +9,20 @@ namespace SharpLuna
     using lua_State = System.IntPtr;
     using static Lua;
 
-    public partial class SharpClass
+    public static class LunaNative
     {
-        protected static IntPtr ___type;
-        protected static IntPtr ___super;
-        protected static IntPtr ___getters;
-        protected static IntPtr ___setters;
-        protected static IntPtr ___get_indexed;
-        protected static IntPtr ___set_indexed;
+        public static IntPtr ___type;
+        public static IntPtr ___super;
+        public static IntPtr ___getters;
+        public static IntPtr ___setters;
+        public static IntPtr ___get_indexed;
+        public static IntPtr ___set_indexed;
+
+        static LuaNativeFunction class_index = _class_index;
+        static LuaNativeFunction class_newindex = _class_newindex;
+        static LuaNativeFunction module_index = _module_index;
+        static LuaNativeFunction module_newindex = _module_newindex;
+        public static LuaNativeFunction ErrorReadOnly = _ErrorReadOnly;
 
         public static void Init(lua_State L)
         {
@@ -60,27 +66,6 @@ namespace SharpLuna
             full_name += '.';
             full_name += name;
             return full_name;
-        }
-
-        public static LuaRef CreateClass(LuaRef module, string name, Type classType, Type superClass, LuaNativeFunction dctor)
-        {
-            LuaRef classref = module.RawGet<LuaRef, string>(name);
-            if (classref)
-            {
-                return classref;
-            }
-
-            var meta = create_class(module.State, module, name, classType, dctor);
-
-            if (superClass != null)
-            {
-                LuaRef registry = new LuaRef(module.State, LUA_REGISTRYINDEX);
-                int superClassID = SharpObject.TypeID(superClass);
-                LuaRef super = registry.RawGet<LuaRef>(superClassID);
-                meta.RawSet(___super, super);
-            }
-
-            return meta;
         }
 
         public static LuaRef create_class(lua_State L, LuaRef parentModule, string name, Type classType, LuaNativeFunction dctor)
@@ -192,7 +177,7 @@ namespace SharpLuna
         //todo: use upvalue
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int class_index(lua_State L)
+        static int _class_index(lua_State L)
         {
 #if C_API
             return luna_class_index(L);
@@ -295,7 +280,7 @@ namespace SharpLuna
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int class_newindex(lua_State L)
+        static int _class_newindex(lua_State L)
         {
 #if C_API
             return luna_class_newindex(L);
@@ -387,7 +372,7 @@ namespace SharpLuna
         }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        public static int module_index(lua_State L)
+        public static int _module_index(lua_State L)
         {
 #if C_API
             return luna_module_index(L);
@@ -427,7 +412,7 @@ namespace SharpLuna
         }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        public static int module_newindex(lua_State L)
+        public static int _module_newindex(lua_State L)
         {
 #if C_API
             return luna_module_newindex(L);
@@ -465,11 +450,61 @@ namespace SharpLuna
             return 0;
 #endif
         }
-
+       
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        public static int ErrorReadOnly(lua_State L)
+        static int _ErrorReadOnly(lua_State L)
         {
             return luaL_error(L, "property '{0}' is read-only", lua_tostring(L, lua_upvalueindex(1)));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int TryGetUserData(lua_State L, int key, int cache_ref)
+        {
+#if C_API
+            return luna_try_getuserdata(L, key, cache_ref);
+#else
+            lua_rawgeti(L, LUA_REGISTRYINDEX, cache_ref);
+            lua_rawgeti(L, -1, key);
+            if (!lua_isnil(L, -1))
+            {
+                lua_remove(L, -2);
+                return 1;
+            }
+            lua_pop(L, 2);
+            return 0;
+#endif
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void CacheUserData(lua_State L, int key, int cache_ref)
+        {
+#if C_API
+            luna_cacheuserdata(L, key, cache_ref);
+#else
+            lua_rawgeti(L, LUA_REGISTRYINDEX, cache_ref);
+            lua_pushvalue(L, -2);
+            lua_rawseti(L, -2, key);
+            lua_pop(L, 1);
+#endif
+        }
+
+
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+        static int c_lua_gettable(lua_State L)
+        {
+            lua_gettable(L, 1);
+            return 1;
+        }
+
+        public static LuaStatus luna_pgettable(lua_State L, int idx)
+        {
+            int top = lua_gettop(L);
+            idx = lua_absindex(L, idx);
+            lua_pushcfunction(L, c_lua_gettable);
+            lua_pushvalue(L, idx);
+            lua_pushvalue(L, top);
+            lua_remove(L, top);
+            return lua_pcall(L, 2, 1, 0);
         }
 
     }

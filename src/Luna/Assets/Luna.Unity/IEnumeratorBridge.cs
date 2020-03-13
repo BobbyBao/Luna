@@ -24,7 +24,7 @@ namespace SharpLuna
             lua_getref(L, _ref);
             lua_pushstring(L, "moveNext");
 
-            if (LuaStatus.OK != xlua_pgettable(L, -2))
+            if (LuaStatus.OK != LunaNative.luna_pgettable(L, -2))
             {
                 ThrowExceptionFromError(L, err_func - 1);
             }
@@ -47,24 +47,6 @@ namespace SharpLuna
             return __gen_ret != 0;
         }
 
-        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        static int c_lua_gettable(lua_State L)
-        {
-            lua_gettable(L, 1);
-            return 1;
-        }
-
-        static LuaStatus xlua_pgettable(lua_State L, int idx)
-        {
-            int top = lua_gettop(L);
-            idx = lua_absindex(L, idx);
-            lua_pushcfunction(L, c_lua_gettable);
-            lua_pushvalue(L, idx);
-            lua_pushvalue(L, top);
-            lua_remove(L, top);
-            return lua_pcall(L, 2, 1, 0);
-        }
-
         void System.Collections.IEnumerator.Reset()
         {
             int err_func = load_error_func(L, errorFuncRef);
@@ -72,7 +54,7 @@ namespace SharpLuna
             lua_getref(L, _ref);
             lua_pushstring(L, "reset");
 
-            if(LuaStatus.OK != xlua_pgettable(L, -2))
+            if(LuaStatus.OK != LunaNative.luna_pgettable(L, -2))
             {
                 ThrowExceptionFromError(L, err_func - 1);
             }
@@ -104,7 +86,7 @@ namespace SharpLuna
                 lua_getref(L, _ref);
                 lua_pushstring(L, "current");
 
-                if (LuaStatus.OK != xlua_pgettable(L, -2))
+                if (LuaStatus.OK != LunaNative.luna_pgettable(L, -2))
                 {
                     ThrowExceptionFromError(L, oldTop);
                 }

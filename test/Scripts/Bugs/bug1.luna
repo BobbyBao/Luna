@@ -9,10 +9,10 @@ class ClassA {
 	var t = {} //
 
 	func test() {
-	print "test1111"
-	print(str)
-	var b = ClassB()
-	b.test()
+		print "test1111"
+		print(str)
+		var b = ClassB()
+		b.test()
 	}
 
 }
