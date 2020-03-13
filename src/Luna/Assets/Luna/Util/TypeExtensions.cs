@@ -2,13 +2,78 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace SharpLuna
 {
-    public static class TypeExtensions
+    public struct StructElement
+    {
+        public IntPtr name;
+        public TypeCode type;
+        public short offset;
+        public short size;
+    }
+
+    public unsafe static class TypeExtensions
     {
         private static Dictionary<Type, bool> cachedTypes = new Dictionary<Type, bool>();
+
+        static int[] size = new int[]
+        {
+            0, 0, 0,
+            sizeof(bool), sizeof(char), sizeof(sbyte), sizeof(byte),
+            sizeof(short), sizeof(ushort), sizeof(int), sizeof(uint),
+            sizeof(long), sizeof(ulong), sizeof(float), sizeof(double),
+            sizeof(decimal), sizeof(DateTime), 0, sizeof(IntPtr)
+        };
+
+        public static StructElement[] GetLayout(this Type type, out int size)
+        {
+            if(!type.IsUnManaged())
+            {
+                size = 0;
+                return null;
+            }
+
+            var fieldInfos = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            int len = fieldInfos.Length;
+            StructElement[] layout = new StructElement[len];
+            size = 0;
+            for (int i = 0; i < len; i++)
+            {
+                var fieldInfo = fieldInfos[i];
+                ref var e = ref layout[i];
+                e.name = Marshal.StringToHGlobalAnsi(fieldInfo.Name);
+                e.type = GetTypeCode(fieldInfo.FieldType);
+                e.offset = (short)Marshal.OffsetOf(type, fieldInfo.Name);
+                e.size = (short)GetSize(fieldInfo.FieldType);
+                Debug.Assert(e.size != 0);
+                size += e.size;
+            }
+
+            return layout;
+        }
+
+        static TypeCode GetTypeCode(Type type)
+        {
+            if(type == typeof(IntPtr))
+            {
+                return TypeCode.Int64;
+            }
+            else if (type == typeof(UIntPtr))
+            {
+                return TypeCode.UInt64;
+            }
+
+            return Type.GetTypeCode(type);
+        }
+
+        static int GetSize(Type type)
+        {
+            return size[(int)GetTypeCode(type)];
+        }
+
         public static bool IsUnManaged(this Type t)
         {
             bool result;
@@ -39,11 +104,6 @@ namespace SharpLuna
 
         public static bool ShouldExport(this Type t)
         {
-            //if (t.IsGenericType)
-            //{
-            //    return false;
-            //}
-
             if (t.IsByRef || t.IsPointer)
             {
                 return false;

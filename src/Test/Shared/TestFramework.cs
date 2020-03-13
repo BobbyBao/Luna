@@ -51,6 +51,9 @@ namespace Tests
             lua_requiref(L, "pb.conv", luaopen_pb_conv);*/
 
             luaopen_cjson(L);
+
+            luna.DoFile("vec3.luna");
+            Converter.RegStructConverter<vec3>(L);
         }
 
         public void Dispose()

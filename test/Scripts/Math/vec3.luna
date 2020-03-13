@@ -13,19 +13,18 @@ class vec3 {
     deinit(){
     }
 
-    /*
-    X {
-        get{
-        }
-
-        set{
-        }
-    }*/
-
     func set(x, y, z) {
         self.x = x
         self.y = y
         self.z = z
+    }
+
+    func pack(x, y, z) {
+        return setmetatable({x = x, y = y, z = z}, vec3)
+    }
+
+    func unpack() {
+        return self.x, self.y, self.z
     }
 
     func + (v1, v2) {

@@ -15,9 +15,9 @@ namespace Tests
                 test.Start();
 
                 //test.Run();
-                test.Luna.DoFile("test.luna");
+                //test.Luna.DoFile("test.luna");
                 //test.Luna.DoFile("test_class.luna");
-                //test.Luna.DoFile("test_perf.luna");
+                test.Luna.DoFile("test_perf.luna");
             }
         }
     }

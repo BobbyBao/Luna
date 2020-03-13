@@ -9,7 +9,7 @@ namespace SharpLuna
     using lua_State = System.IntPtr;
     using static Lua;
 
-    public static class LunaNative
+    public static unsafe class LunaNative
     {
         public static IntPtr ___type;
         public static IntPtr ___super;
@@ -507,6 +507,83 @@ namespace SharpLuna
             return lua_pcall(L, 2, 1, 0);
         }
 
+#if C_API
+        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        public static extern void luna_pushstruct(lua_State L, int metaRef, IntPtr data, StructElement* layout, int count);
+       
+        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        public static extern void luna_getstruct(lua_State L, int idx, IntPtr data, StructElement* layout, int count);
+
+        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        public static extern void luna_packstruct(lua_State L, int newFn, IntPtr data, StructElement* layout, int count);
+        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        public static extern void luna_unpackstruct(lua_State L, int index, int unpackFn, IntPtr data, StructElement* layout, int count);
+#else
+        public static void luna_pushstruct(lua_State L, int metaRef, IntPtr data, StructElement* layout, int count)
+        {
+            lua_newtable(L);
+            for (int i = 0; i < count; i++)
+            {
+                StructElement* e = layout + i;
+                switch (e->type)
+                {
+                    case TypeCode.Boolean:
+                        lua_pushboolean(L, *(bool*)(data + e->offset) ? 1 : 0);
+                        break;
+                    case TypeCode.Int32:
+                        lua_pushnumber(L, *(int*)(data + e->offset));
+                        break;
+                    case TypeCode.Single:
+                        lua_pushnumber(L, *(float*)(data + e->offset));
+                        break;
+                    case TypeCode.Double:
+                        lua_pushnumber(L, *(double*)(data + e->offset));
+                        break;
+                    case TypeCode.String:
+                        UIntPtr l;
+                        lua_pushlstring(L, *(byte**)(data + e->offset), 0);
+                        break;
+                }
+
+                lua_setfield(L, -2, e->name);
+            }
+
+            lua_rawgeti(L, LUA_REGISTRYINDEX, metaRef);
+            lua_setmetatable(L, -2);
+        }
+        
+        public static void luna_getstruct(lua_State L, int idx, IntPtr data, StructElement* layout, int count)
+        {
+            lua_pushvalue(L, idx);
+            for(int i = 0; i < count; i++)
+            {
+                StructElement* e = layout + i;                
+                lua_getfield(L, -1, e->name);
+                switch(e->type)
+                {
+                    case TypeCode.Boolean:
+                        *(bool*)(data + e->offset) = (lua_toboolean(L, -1) != 0);
+                        break;
+                    case TypeCode.Int32:
+                        *(int*)(data + e->offset) = (int)lua_tonumber(L, -1);
+                        break;
+                    case TypeCode.Single:
+                        *(float*)(data + e->offset) = (float)lua_tonumber(L, -1);
+                        break;
+                    case TypeCode.Double:
+                        *(double*)(data + e->offset) = lua_tonumber(L, -1);
+                        break;
+                    case TypeCode.String:
+                        UIntPtr l;
+                        *(IntPtr*)(data + e->offset) = luaL_tolstring(L, -1, &l);
+                        break;
+                }
+
+                lua_pop(L, 1);
+            }
+            lua_pop(L, 1);
+        }
+#endif
     }
 
 }

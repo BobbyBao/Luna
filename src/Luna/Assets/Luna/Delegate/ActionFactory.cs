@@ -12,10 +12,7 @@ namespace SharpLuna
         public static Action Create(IntPtr L, int index)
         {
             lua_pushvalue(L, index);
-            int luaref = luaL_ref(L, LUA_REGISTRYINDEX); 
-//             lua_pushvalue(L, index);
-//             lua_pushnumber(L, luaref);
-//             lua_rawset(L, LUA_REGISTRYINDEX);
+            int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
             return () =>
             {
                 L = mainState;
@@ -60,9 +57,6 @@ namespace SharpLuna
         {
             lua_pushvalue(L, index);
             int luaref = luaL_ref(L, LUA_REGISTRYINDEX);
-//             lua_pushvalue(L, index);
-//             lua_pushnumber(L, luaref);
-//             lua_rawset(L, LUA_REGISTRYINDEX);
             return (t1) =>
             {
                 L = mainState;

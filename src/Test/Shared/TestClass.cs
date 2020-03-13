@@ -2,6 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 
+public struct vec3
+{
+    public float x, y, z;
+}
+
 namespace Tests
 {
     public enum TestEnum
@@ -71,6 +76,8 @@ namespace Tests
         public TestClass Child { get; set; }
 
         public TestStruct position { get; set; }
+
+        public vec3 rot { get; set; }
 
         public event Action testEvent;
 

@@ -243,6 +243,21 @@ namespace SharpLuna
             lua_rawgeti(L, LUA_REGISTRYINDEX, reference);
         }
 
+        public static int lua_getfield(lua_State L, int index, string s)
+        {
+            var p = Marshal.StringToHGlobalAnsi(s);
+            int ret = lua_getfield(L, index, p);
+            Marshal.FreeHGlobal(p);
+            return ret;
+        }
+
+        public static void lua_setfield(lua_State L, int index, string s)
+        {
+            var p = Marshal.StringToHGlobalAnsi(s);
+            lua_setfield(L, index, p);
+            Marshal.FreeHGlobal(p);
+        }
+
         [Conditional("DEBUG")]
         public static void assert(bool condition) => Debug.Assert(condition);
 

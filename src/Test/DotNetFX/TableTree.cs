@@ -176,7 +176,7 @@ namespace Test
 
         private void toolStripButton4_Click(object sender, EventArgs e)
         {
-            framework.GenerateWraps();
+            framework.GenerateWraps(true);
         }
 
         private void toolStripButton1_Click(object sender, EventArgs e)

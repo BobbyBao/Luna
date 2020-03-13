@@ -530,7 +530,8 @@ namespace SharpLuna
             }
             else if (objtype == typeof(LuaRef))
             {
-                var obj = Converter.Convert(objtype, L, index);
+                LuaType type = lua_type(L, index);
+                var obj = Converter.Convert(objtype, type, L, index);
                 if (obj != null)
                     return obj;
                 Get(L, index, out LuaRef luaref);

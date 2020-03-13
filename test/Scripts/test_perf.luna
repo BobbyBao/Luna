@@ -13,7 +13,17 @@ func TestIndex(){
 	}
 	
 	t = os.clock() - t
-	print("TestIndex luna cost time: ", t)	
+	print("TestIndex userdata cost time: ", t)	
+
+	t = os.clock()	
+	for i = 1, 200000 {
+		//c = test.Child		
+		//test.Child = c
+		test.rot = test.rot
+	}
+	
+	t = os.clock() - t
+	print("TestIndex table cost time: ", t)	
 }
 
 TestIndex()

@@ -26,14 +26,14 @@ namespace SharpLuna
     public unsafe static partial class Lua
     {
 #if (UNITY_IPHONE || UNITY_WEBGL || UNITY_SWITCH) && !UNITY_EDITOR
-        private const string LuaLibraryName = "__Internal";
+        public const string LuaLibraryName = "__Internal";
 #else
 
-    #if LUNA_SCRIPT        
-        private const string LuaLibraryName = "luna_dll";
-    #else
-        private const string LuaLibraryName = "lua_dll";
-    #endif
+#if LUNA_SCRIPT
+        public const string LuaLibraryName = "luna_dll";
+#else
+        public const string LuaLibraryName = "lua_dll";
+#endif
 
 #endif
 
@@ -81,8 +81,8 @@ namespace SharpLuna
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
         public static extern lua_Alloc lua_getallocf(lua_State luaState, ref voidptr_t ud);
 
-        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        public static extern int lua_getfield(lua_State luaState, int index, string k);
+        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int lua_getfield(lua_State luaState, int index, IntPtr k);
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static unsafe extern int lua_getglobal(lua_State luaState, byte* name);
@@ -239,8 +239,8 @@ namespace SharpLuna
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void lua_setallocf(lua_State luaState, lua_Alloc f, voidptr_t ud);
 
-        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        public static extern void lua_setfield(lua_State luaState, int index, string key);
+        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void lua_setfield(lua_State luaState, int index, IntPtr key);
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static unsafe extern void lua_setglobal(lua_State luaState, byte* key);

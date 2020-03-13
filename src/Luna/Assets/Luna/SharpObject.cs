@@ -61,6 +61,13 @@ namespace SharpLuna
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe void AllocObject<T>(lua_State L, T obj)
         {
+            var converter = Converter.GetConverter(obj.GetType());
+            if (converter != null)
+            {
+                converter.Push(L, obj);
+                return;
+            }
+
             int classId = TypeID(obj);
 
             IntPtr mem = lua_newuserdata(L, (UIntPtr)sizeof(long));
@@ -100,6 +107,13 @@ namespace SharpLuna
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe void AllocUnmanagedObject<T>(lua_State L, T obj)// where T : unmanaged
         {
+            var converter = Converter.GetConverter(obj.GetType());
+            if (converter != null)
+            {
+                converter.Push(L, obj);
+                return;
+            }
+
             int classId = TypeID(obj);
             IntPtr mem = lua_newuserdata(L, (UIntPtr)Unsafe.SizeOf<T>() + 4);
             Unsafe.Write((void*)(mem + 4), obj);
@@ -122,6 +136,14 @@ namespace SharpLuna
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe void AllocUnmanagedObject(lua_State L, object obj)
         {
+            var converter = Converter.GetConverter(obj.GetType());
+            if(converter != null)
+            {
+                converter.Push(L, obj);
+                return;
+            }
+           
+
             int classId = TypeID(obj);
             IntPtr mem = lua_newuserdata(L, (UIntPtr)Marshal.SizeOf(obj) + 4);
             Marshal.StructureToPtr(obj, mem + 4, false);
@@ -223,10 +245,16 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static object GetUnmanaged(lua_State L, int index, Type type)
+        public unsafe static object GetUnmanaged(lua_State L, int index, Type t)
         {
+            LuaType type = lua_type(L, index);
+            if (type != LuaType.UserData)
+            {
+                return Converter.Convert(t, type, L, index);
+            }
+
             var ptr = lua_touserdata(L, index);
-            return Marshal.PtrToStructure(ptr + 4, type);
+            return Marshal.PtrToStructure(ptr + 4, t);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -270,7 +298,7 @@ namespace SharpLuna
                     return null;
                 }
 
-                return Converter.Convert(t, L, index);
+                return Converter.Convert(t, type, L, index);
             }
 
             var handle = GetHandler(L, index);
@@ -288,7 +316,7 @@ namespace SharpLuna
 
             if (type != LuaType.UserData)
             {
-                return (T)Converter.Convert(typeof(T), L, index);
+                return (T)Converter.Convert<T>(type, L, index);
             }
 
             var handle = GetHandler(L, index);
