@@ -38,7 +38,7 @@ namespace SharpLuna
             {"op_UnaryNegation","__unm"},
 
         };
-
+        
         static bool IsTagMethod(string name, out string tag) => tagMethods.TryGetValue(name, out tag);
         public SharpClass(SharpClass parent)
         {
@@ -81,13 +81,27 @@ namespace SharpLuna
         
         public void SetGetter(string name, LuaRef getter)
         {
-            meta.RawGet(___getters).RawSet(name, getter);
+            if (name == "Item")
+            {
+                SetMemberFunction(___get_indexed, getter);
+            }
+            else
+            {
+                meta.RawGet(___getters).RawSet(name, getter);
+            }
         }
 
         public void SetSetter(string name, LuaRef setter)
         {
-            LuaRef meta_class = meta;
-            meta_class.RawGet(___setters).RawSet(name, setter);
+            if(name == "Item")
+            {
+                SetMemberFunction(___set_indexed, setter);
+            }
+            else
+            {
+                meta.RawGet(___setters).RawSet(name, setter);
+            }
+
         }
 
         public void SetReadOnly(string name)
@@ -153,11 +167,8 @@ namespace SharpLuna
             {
                 if (!p.ShouldExport())
                     continue;
-
-                if (p.Name == "Item")
-                    RegIndexer(p);
-                else
-                    RegProperty(p);
+                  
+                RegProperty(p);
             }
 
             var methods = classType.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly);
@@ -227,19 +238,7 @@ namespace SharpLuna
                 }
             }
         }
-
-        void RegisterAsync(string methodName)
-        {
-            string className = this.classType.Name;
-            if(!string.IsNullOrEmpty(parent.Name) &&  parent.Name != "_G")
-            {
-                className = parent.Name + "." + className;
-            }
-
-            string code = $"rawset({className}, _async_{methodName}, coroutine.__async({className}.{methodName}))";
-            Luna.DoString(code);
-        }
-
+        
         public SharpClass RegConstant(FieldInfo field)
         {
             var v = field.GetValue(null);
@@ -300,7 +299,7 @@ namespace SharpLuna
             return this;
         }
         
-        public SharpClass RegProperty(PropertyInfo propertyInfo)
+        public SharpClass RegProperty(PropertyInfo propertyInfo, bool isIndexer = false)
         {
             if (classInfo.TryGetValue(propertyInfo.Name, out var methodConfig))
             {
@@ -329,16 +328,9 @@ namespace SharpLuna
                 if (methodInfo != null)
                 {
 #if true//IL2CPP
-                    if (methodInfo.IsStatic)
-                    {
-                        var getter = LuaRef.CreateFunction(State, Property.StaticGetter, propertyInfo);
-                        SetGetter(propertyInfo.Name, getter);
-                    }
-                    else
-                    {
-                        var getter = LuaRef.CreateFunction(State, Property.Getter, propertyInfo);
-                        SetGetter(propertyInfo.Name, getter);
-                    }
+                    var fn = methodInfo.IsStatic ? (LuaNativeFunction)Property.StaticGetter : Property.Getter;
+                    var getter = LuaRef.CreateFunction(State, fn, propertyInfo);
+                    SetGetter(propertyInfo.Name, getter);
 #else
                     var luaFun = RegMethod(methodInfo, true);
                     if (luaFun)
@@ -355,16 +347,9 @@ namespace SharpLuna
                 if (methodInfo != null)
                 {
 #if true//IL2CPP
-                    if (methodInfo.IsStatic)
-                    {
-                        var setter = LuaRef.CreateFunction(State, Property.StaticSetter, propertyInfo);
-                        SetSetter(propertyInfo.Name, setter);
-                    }
-                    else
-                    {
-                        var setter = LuaRef.CreateFunction(State, Property.Setter, propertyInfo);
-                        SetSetter(propertyInfo.Name, setter);
-                    }
+                    var fn = methodInfo.IsStatic ? (LuaNativeFunction)Property.StaticSetter : Property.Setter;
+                    var setter = LuaRef.CreateFunction(State, fn, propertyInfo);
+                    SetSetter(propertyInfo.Name, setter);
 #else
                     var luaFun = RegMethod(methodInfo, true);
                     if (luaFun)
@@ -382,72 +367,25 @@ namespace SharpLuna
             return this;
         }
 
-        public SharpClass RegIndexer(PropertyInfo propertyInfo)
+        public LuaRef RegMethod(MethodInfo methodInfo, bool isProp)
         {
-            if (classInfo.TryGetValue(propertyInfo.Name, out var methodConfig))
+#if LUNA_SCRIPT
+            string callFnName = (methodInfo.IsStatic && !isProp) ? "StaticCall" : "Call";
+#else
+            string callFnName = "Call";
+#endif
+            if (DelegateCache.GetMethodDelegate(classType, methodInfo, callFnName, out LuaNativeFunction luaFunc, out Delegate del))
             {
-                if (methodConfig.getter != null)
-                {
-                    var luaFun = LuaRef.CreateFunction(State, methodConfig.getter);
-                    if (luaFun)
-                    {
-                        SetMemberFunction(___get_indexed, luaFun);
-                    }
-                }
-
-                if (methodConfig.setter != null)
-                {
-                    var luaFun = LuaRef.CreateFunction(State, methodConfig.setter);
-                    if (luaFun)
-                    {
-                        SetMemberFunction(___set_indexed, luaFun);
-                    }
-                }
-                else
-                {
-                    SetReadOnly(propertyInfo.Name);
-                }
-
-                return this;
+                return LuaRef.CreateFunction(State, luaFunc, del);
             }
 
-            if (propertyInfo.CanRead)
-            {
-                MethodInfo methodInfo = propertyInfo.GetGetMethod(false);
-                if (methodInfo != null)
-                {
-                    var luaFun = RegMethod(methodInfo, true);
-                    if(luaFun)
-                    {
-                        SetMemberFunction(___get_indexed, luaFun);
-                    }
-                    
-                }
-            }
-
-            if (propertyInfo.CanWrite)
-            {
-                MethodInfo methodInfo = propertyInfo.GetSetMethod(false);
-                if (methodInfo != null)
-                {
-                    var luaFun = RegMethod(methodInfo, true);
-                    if (luaFun)
-                    {
-                        SetMemberFunction(___set_indexed, luaFun);
-                    }
-                }
-            }
-            else
-            {
-                SetReadOnly(propertyInfo.Name);
-            }
-
-            return this;
+            return null;
         }
+
 
         public SharpClass RegMethod(string name, MethodBase[] methodInfo, bool isAsync = false)
         {             
-            MethodWrap method = new MethodWrap(methodInfo);
+            MethodReflection method = new MethodReflection(methodInfo);
 #if !IL2CPP
             for(int i = 0; i < methodInfo.Length; i++)
             {
@@ -464,7 +402,7 @@ namespace SharpLuna
             }
 #endif
             //Luna.Log("反射方式实现");
-            LuaRef luaFun = LuaRef.CreateFunction(State, MethodWrap.Call, method);
+            LuaRef luaFun = LuaRef.CreateFunction(State, MethodReflection.Call, method);
             if (IsTagMethod(name, out var tag))
             {
                 meta.RawSet(tag, luaFun);
@@ -498,22 +436,6 @@ namespace SharpLuna
 
             return this;
         }
-
-        public LuaRef RegMethod(MethodInfo methodInfo, bool isProp)
-        {
-#if LUNA_SCRIPT
-            string callFnName = (methodInfo.IsStatic && !isProp) ? "StaticCall" : "Call";
-#else
-            string callFnName = "Call";
-#endif
-            if (DelegateCache.GetMethodDelegate(classType, methodInfo, callFnName, out LuaNativeFunction luaFunc, out Delegate del))
-            {
-                return LuaRef.CreateFunction(State, luaFunc, del);
-            }
-
-            return null;
-        }
-
 
     }
 

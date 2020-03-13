@@ -11,7 +11,7 @@ namespace SharpLuna
 
     public delegate int CallDel(lua_State L, int start, Delegate del);
 
-    public class MethodWrap
+    public class MethodReflection
     {
         public string methodName;
         public MethodBase[] methodInfo;
@@ -20,7 +20,7 @@ namespace SharpLuna
         public CallDel[] luaFunc;
         public Delegate[] del;
 
-        public MethodWrap(MethodBase[] methodInfo)
+        public MethodReflection(MethodBase[] methodInfo)
         {
             methodName = methodInfo[0].Name;
             this.methodInfo = methodInfo;
@@ -36,8 +36,9 @@ namespace SharpLuna
             del = new Delegate[methodInfo.Length];
         }
 
+        public static LuaNativeFunction Call = _Call;
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        public static int Call(lua_State L)
+        static int _Call(lua_State L)
         {
             try
             {
@@ -45,7 +46,7 @@ namespace SharpLuna
                 MethodBase methodInfo = null;
                 ParameterInfo[] parameterInfo = null;
                 object[] args = null;
-                MethodWrap method = ToLightObject<MethodWrap>(L, lua_upvalueindex(1), false);
+                MethodReflection method = ToLightObject<MethodReflection>(L, lua_upvalueindex(1), false);
                 CallDel callDel = null;
                 Delegate del = null;
                 for (int i = 0; i < method.methodInfo.Length; i++)
@@ -124,8 +125,13 @@ namespace SharpLuna
 
     public struct Field
     {
+        public static LuaNativeFunction StaticGetter = _StaticGetter;
+        public static LuaNativeFunction StaticSetter = _StaticSetter;
+        public static LuaNativeFunction Getter = _Getter;
+        public static LuaNativeFunction Setter = _Setter;
+
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        public static int StaticGetter(lua_State L)
+        static int _StaticGetter(lua_State L)
         {
             try
             {
@@ -141,7 +147,7 @@ namespace SharpLuna
         }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        public static int StaticSetter(lua_State L)
+        static int _StaticSetter(lua_State L)
         {
             try
             {
@@ -157,7 +163,7 @@ namespace SharpLuna
         }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        public static int Getter(lua_State L)
+        static int _Getter(lua_State L)
         {
             try
             {
@@ -174,7 +180,7 @@ namespace SharpLuna
         }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        public static int Setter(lua_State L)
+        static int _Setter(lua_State L)
         {
             try
             {
@@ -194,8 +200,13 @@ namespace SharpLuna
 
     public struct Property
     {
+        public static LuaNativeFunction StaticGetter = _StaticGetter;
+        public static LuaNativeFunction StaticSetter = _StaticSetter;
+        public static LuaNativeFunction Getter = _Getter;
+        public static LuaNativeFunction Setter = _Setter;
+
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        public static int StaticGetter(lua_State L)
+        static int _StaticGetter(lua_State L)
         {
             try
             {
@@ -211,7 +222,7 @@ namespace SharpLuna
         }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        public static int StaticSetter(lua_State L)
+        static int _StaticSetter(lua_State L)
         {
             try
             {
@@ -227,7 +238,7 @@ namespace SharpLuna
         }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        public static int Getter(lua_State L)
+        static int _Getter(lua_State L)
         {
             try
             {
@@ -244,7 +255,7 @@ namespace SharpLuna
         }
 
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
-        public static int Setter(lua_State L)
+        static int _Setter(lua_State L)
         {
             try
             {

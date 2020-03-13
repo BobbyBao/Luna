@@ -10,7 +10,6 @@ namespace SharpLuna
     public struct DelegateCache
     {
         static Dictionary<MethodInfo, Delegate> cache = new Dictionary<MethodInfo, Delegate>();
-        static Dictionary<(MethodInfo, object), Delegate> cacheClose = new Dictionary<(MethodInfo, object), Delegate>();
 
         public static Delegate Get<T>(MethodInfo methodInfo)
         {
@@ -38,50 +37,7 @@ namespace SharpLuna
             cache.Add(methodInfo, del);
             return del;
         }
-
-        public static Delegate Get(Type type, Type targetType, MethodInfo methodInfo)
-        {
-            if (cache.TryGetValue(methodInfo, out var del))
-            {
-                return del;
-            }
-
-            try
-            {
-                del = Delegate.CreateDelegate(type, methodInfo);
-            }
-            catch// (System.Exception ex)
-            {
-                //Debug.LogError(ex.Message);
-                //Debug.LogError(type.ToString());
-                //Debug.LogError(methodInfo.ReflectedType.ToString() + ", " + methodInfo.ToString());
-                return null;
-            }
-            cache.Add(methodInfo, del);
-            return del;
-        }
-
-        public static Delegate GetInvoker(MethodInfo methodInfo, object obj)
-        {
-            if (cacheClose.TryGetValue((methodInfo, obj), out var del))
-            {
-                return del;
-            }
-
-            try
-            {
-                del = (Delegate)methodInfo.Invoke(null, new[] { obj });
-            }
-            catch //(System.Exception ex)
-            {
-                //Debug.LogError(ex.Message);
-                //Debug.LogError(methodInfo.ReflectedType.ToString() + ", " + methodInfo.ToString());
-                return null;
-            }
-            cacheClose.Add((methodInfo, obj), del);
-            return del;
-        }
-
+        
         readonly static (Type, Type)[] actionType =
         {
             (typeof(Action), typeof(ActionFactory)),
@@ -160,14 +116,6 @@ namespace SharpLuna
                     del = null;
                     return false;
                 }
-                /*
-                if (info.ParameterType.IsGenericType)
-                {
-                    Debug.Log("不支持泛型参数:" + methodInfo.ToString());
-                    luaFunc = null;
-                    del = null;
-                    return false;
-                }*/
 
                 paramTypes.Add(info.ParameterType);
             }
@@ -185,14 +133,6 @@ namespace SharpLuna
                     del = null;
                     return false;
                 }
-                /*
-                if (typeOfResult.IsGenericType)
-                {
-                    Debug.Log("不支持泛型参数:" + methodInfo.ToString());
-                    luaFunc = null;
-                    del = null;
-                    return false;
-                }*/
 
                 paramTypes.Add(typeOfResult);
                 var typeArray = paramTypes.ToArray();
@@ -200,6 +140,9 @@ namespace SharpLuna
             }
 
         }
+
+        static CallDel actionCallDel = ActionFactory.CallDel;
+        static LuaNativeFunction actionCall = ActionFactory.Call;
 
         static bool RegAction<T>(Type classType, MethodInfo methodInfo, Type[] typeArray, string callFnName, out T luaFunc, out Delegate del) where T : Delegate
         {
@@ -212,11 +155,11 @@ namespace SharpLuna
                 del = DelegateCache.Get(funcDelegateType, methodInfo);
                 if (typeof(T) == typeof(CallDel))
                 {
-                    luaFunc = (T)(object)(CallDel)ActionFactory.CallDel;
+                    luaFunc = (T)(object)actionCallDel;
                 }
                 else
                 {
-                    luaFunc = (T)(object)(LuaNativeFunction)ActionFactory.Call;
+                    luaFunc = (T)(object)actionCall;
                 }
                 return true;
             }
