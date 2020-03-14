@@ -10,126 +10,6 @@ namespace SharpLuna
 {
     using static Lua;
     using lua_State = IntPtr;
-    public class CustomConverter
-    {
-        public Type type;
-        public Func<IntPtr, int, object> getter;
-        public Action<IntPtr, object> pusher;
-
-        public CustomConverter()
-        {
-        }
-
-        public CustomConverter(Type type, Func<IntPtr, int, object> getter)
-        {
-            this.type = type;
-            this.getter = getter;
-        }
-
-        public virtual object Get(IntPtr L, int index)
-        {
-            return getter(L, index);
-        }
-
-        public virtual void Push(IntPtr L, object data)
-        {            
-            pusher(L, data);
-        }
-
-        public virtual T Get<T>(IntPtr L, int index)
-        {
-            return (T)getter(L, index);
-        }
-
-        public virtual void Push<T>(IntPtr L, T data)
-        {
-            pusher(L, data);
-        }
-    }
-
-    public unsafe class StructConverter : CustomConverter
-    {
-        public int metaRef = -1;
-        public int newRef = -1;
-        public int unpackRef = -1;
-        public int size;
-        public StructElement[] structElements;
-
-        public StructConverter(IntPtr L, Type unmanagedType)
-        {
-            this.type = unmanagedType;
-            structElements = unmanagedType.GetLayout(out size);
-
-            lua_getglobal(L, type.Name);
-
-            lua_getfield(L, -1, "unpack");
-            unpackRef = luaL_ref(L, LUA_REGISTRYINDEX);
-
-            lua_getfield(L, -1, "pack");
-            newRef = luaL_ref(L, LUA_REGISTRYINDEX);
-
-            //luaL_getmetafield(L, -1, "__call");            
-            //newRef = luaL_ref(L, LUA_REGISTRYINDEX);
-
-            metaRef = luaL_ref(L, LUA_REGISTRYINDEX);
-        }
-
-        public override object Get(IntPtr L, int index)
-        {
-            if(getter != null)
-            {
-                return getter(L, index);
-            }
-
-            IntPtr ptr = Marshal.AllocHGlobal(size);
-
-            if (unpackRef == -1)
-                LunaNative.luna_getstruct(L, index, ptr, (StructElement*)Unsafe.AsPointer(ref structElements[0]), structElements.Length);
-            else
-                LunaNative.luna_unpackstruct(L, index, unpackRef, ptr, (StructElement*)Unsafe.AsPointer(ref structElements[0]), structElements.Length);
-            object boxed = Marshal.PtrToStructure(ptr, type);
-            Marshal.FreeHGlobal(ptr);
-            return boxed;
-        }
-
-        public override void Push(IntPtr L, object data)
-        {
-            if (pusher != null)
-            {
-                pusher(L, data);
-                return;
-            }
-
-            IntPtr ptr = Marshal.AllocHGlobal(size);
-            Marshal.StructureToPtr(data, ptr, false);
-            if(newRef == -1)
-                LunaNative.luna_pushstruct(L, metaRef, ptr, (StructElement*)Unsafe.AsPointer(ref structElements[0]), structElements.Length);
-            else
-                LunaNative.luna_packstruct(L, newRef, ptr, (StructElement*)Unsafe.AsPointer(ref structElements[0]), structElements.Length);
-            Marshal.FreeHGlobal(ptr);
-        }
-
-        public override T Get<T>(IntPtr L, int index)
-        {
-            T data = default;
-            if (unpackRef == -1)
-                LunaNative.luna_getstruct(L, index, (IntPtr)Unsafe.AsPointer(ref data), (StructElement*)Unsafe.AsPointer(ref structElements[0]), structElements.Length);
-            else
-                LunaNative.luna_unpackstruct(L, index, unpackRef, (IntPtr)Unsafe.AsPointer(ref data), (StructElement*)Unsafe.AsPointer(ref structElements[0]), structElements.Length);
-            return data;
-
-        }
-
-        public override void Push<T>(IntPtr L, T data)
-        {
-            if (newRef == -1)
-                LunaNative.luna_pushstruct(L, metaRef, (IntPtr)Unsafe.AsPointer(ref data), (StructElement*)Unsafe.AsPointer(ref structElements[0]), structElements.Length);
-            else
-                LunaNative.luna_packstruct(L, newRef, (IntPtr)Unsafe.AsPointer(ref data), (StructElement*)Unsafe.AsPointer(ref structElements[0]), structElements.Length);
-
-        }
-
-    }
 
     public static class Converter
     {
@@ -147,7 +27,7 @@ namespace SharpLuna
             RegisterFunc<string>();
             RegisterFunc<object>();
         }
-        
+
         public static CustomConverter GetConverter(Type type)
         {
             if (converterFactory.TryGetValue(type, out var f))
@@ -158,9 +38,9 @@ namespace SharpLuna
             return null;
         }
 
-        public static void RegStructConverter<T>(IntPtr L) where T : unmanaged
+        public static void RegUnmanagedConverter<T>(IntPtr L) where T : unmanaged
         {
-            var c = new StructConverter(L, typeof(T));
+            var c = new UnamanagedConverter(L, typeof(T));
             converterFactory[typeof(T)] = c;
             Debug.Assert(c.size == Marshal.SizeOf<T>());
         }
@@ -182,7 +62,7 @@ namespace SharpLuna
             return fac.Get(L, index);
         }
 
-        public static T Convert<T>( LuaType luaType, IntPtr L, int index)
+        public static T Convert<T>(LuaType luaType, IntPtr L, int index)
         {
             Type type = typeof(T);
             if (!converterFactory.TryGetValue(type, out var fac))
@@ -191,6 +71,11 @@ namespace SharpLuna
             }
 
             return fac.Get<T>(L, index);
+        }
+
+        public static void Register<T>(CustomConverter converter)
+        {
+            converterFactory[typeof(T)] = converter;
         }
 
         public static void Register<T>(Func<IntPtr, int, object> factory)
@@ -233,7 +118,7 @@ namespace SharpLuna
             Register(typeof(Func<R>), FuncFactory<R>.Create);
         }
 
-        public static void RegisterFunc<T1,R>()
+        public static void RegisterFunc<T1, R>()
         {
             Register(typeof(Func<T1, R>), FuncFactory<T1, R>.Create);
         }
@@ -401,6 +286,134 @@ namespace SharpLuna
 #endif
 
 
+    }
+
+
+    public class CustomConverter
+    {
+        public Type type;
+        public Func<IntPtr, int, object> getter;
+        public Action<IntPtr, object> pusher;
+
+        public CustomConverter()
+        {
+        }
+
+        public CustomConverter(Type type, Func<IntPtr, int, object> getter)
+        {
+            this.type = type;
+            this.getter = getter;
+        }
+
+        public virtual object Get(IntPtr L, int index)
+        {
+            return getter(L, index);
+        }
+
+        public virtual void Push(IntPtr L, object data)
+        {
+            pusher(L, data);
+        }
+
+        public virtual T Get<T>(IntPtr L, int index)
+        {
+            return (T)getter(L, index);
+        }
+
+        public virtual void Push<T>(IntPtr L, T data)
+        {
+            pusher(L, data);
+        }
+    }
+
+    public unsafe class UnamanagedConverter : CustomConverter
+    {
+        public int metaRef = -1;
+        public int newRef = -1;
+        public int unpackRef = -1;
+        public int size;
+        public StructElement[] structElements;
+
+        public UnamanagedConverter(IntPtr L, Type unmanagedType)
+        {
+            this.type = unmanagedType;
+            structElements = unmanagedType.GetLayout(out size);
+
+            lua_getglobal(L, type.Name);
+
+            lua_getfield(L, -1, "unpack");
+            unpackRef = luaL_ref(L, LUA_REGISTRYINDEX);
+
+            lua_getfield(L, -1, "pack");
+            newRef = luaL_ref(L, LUA_REGISTRYINDEX);
+
+            //luaL_getmetafield(L, -1, "__call");            
+            //newRef = luaL_ref(L, LUA_REGISTRYINDEX);
+
+            metaRef = luaL_ref(L, LUA_REGISTRYINDEX);
+        }
+
+        public override object Get(IntPtr L, int index)
+        {
+            if (getter != null)
+            {
+                return getter(L, index);
+            }
+
+            IntPtr ptr = Marshal.AllocHGlobal(size);
+
+            if (unpackRef == -1)
+                LunaNative.luna_getstruct(L, index, ptr, (StructElement*)Unsafe.AsPointer(ref structElements[0]), structElements.Length);
+            else
+                LunaNative.luna_unpackstruct(L, index, unpackRef, ptr, (StructElement*)Unsafe.AsPointer(ref structElements[0]), structElements.Length);
+            object boxed = Marshal.PtrToStructure(ptr, type);
+            Marshal.FreeHGlobal(ptr);
+            return boxed;
+        }
+
+        public override void Push(IntPtr L, object data)
+        {
+            if (pusher != null)
+            {
+                pusher(L, data);
+                return;
+            }
+
+            IntPtr ptr = Marshal.AllocHGlobal(size);
+            Marshal.StructureToPtr(data, ptr, false);
+            if (newRef == -1)
+                LunaNative.luna_pushstruct(L, metaRef, ptr, (StructElement*)Unsafe.AsPointer(ref structElements[0]), structElements.Length);
+            else
+                LunaNative.luna_packstruct(L, newRef, ptr, (StructElement*)Unsafe.AsPointer(ref structElements[0]), structElements.Length);
+            Marshal.FreeHGlobal(ptr);
+        }
+
+        public override T Get<T>(IntPtr L, int index)
+        {
+            T data = default;
+            if (unpackRef == -1)
+                LunaNative.luna_getstruct(L, index, (IntPtr)Unsafe.AsPointer(ref data), (StructElement*)Unsafe.AsPointer(ref structElements[0]), structElements.Length);
+            else
+                LunaNative.luna_unpackstruct(L, index, unpackRef, (IntPtr)Unsafe.AsPointer(ref data), (StructElement*)Unsafe.AsPointer(ref structElements[0]), structElements.Length);
+            return data;
+
+        }
+
+        public override void Push<T>(IntPtr L, T data)
+        {
+            if (newRef == -1)
+                LunaNative.luna_pushstruct(L, metaRef, (IntPtr)Unsafe.AsPointer(ref data), (StructElement*)Unsafe.AsPointer(ref structElements[0]), structElements.Length);
+            else
+                LunaNative.luna_packstruct(L, newRef, (IntPtr)Unsafe.AsPointer(ref data), (StructElement*)Unsafe.AsPointer(ref structElements[0]), structElements.Length);
+
+        }
 
     }
+
+    public class GeneralConverter<T> : CustomConverter
+    {
+        NativeBuffer buffer = new NativeBuffer();
+
+    }
+
 }

@@ -53,7 +53,7 @@ namespace Tests
             luaopen_cjson(L);
 
             luna.DoFile("vec3.luna");
-            Converter.RegStructConverter<vec3>(L);
+            Converter.RegUnmanagedConverter<vec3>(L);
         }
 
         public void Dispose()
