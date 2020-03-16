@@ -7,8 +7,6 @@ func TestIndex(){
 	var c = test.Child
 
 	for i = 1,200000 {		
-		//c = test.Child		
-		//test.Child = c
 		test.position = test.position
 	}
 	
@@ -17,8 +15,6 @@ func TestIndex(){
 
 	t = os.clock()	
 	for i = 1, 200000 {
-		//c = test.Child		
-		//test.Child = c
 		test.rot = test.rot
 	}
 	

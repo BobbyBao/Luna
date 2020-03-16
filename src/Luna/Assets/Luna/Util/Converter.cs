@@ -42,7 +42,7 @@ namespace SharpLuna
         {
             var c = new UnamanagedConverter(L, typeof(T));
             converterFactory[typeof(T)] = c;
-            Debug.Assert(c.size == Marshal.SizeOf<T>());
+            Debug.Assert(c.Size == Marshal.SizeOf<T>());
         }
 
         public static object Convert(Type type, LuaType luaType, IntPtr L, int index)
@@ -331,13 +331,17 @@ namespace SharpLuna
         public int metaRef = -1;
         public int newRef = -1;
         public int unpackRef = -1;
-        public int size;
-        public StructElement[] structElements;
+
+        NativeBuffer buffer = new NativeBuffer();
+        public int Size => buffer.size;
 
         public UnamanagedConverter(IntPtr L, Type unmanagedType)
         {
-            this.type = unmanagedType;
+            this.type = unmanagedType;    
+            int size;
+            StructElement[] structElements;
             structElements = unmanagedType.GetLayout(out size);
+            buffer = new NativeBuffer(structElements);
 
             lua_getglobal(L, type.Name);
 
@@ -360,14 +364,12 @@ namespace SharpLuna
                 return getter(L, index);
             }
 
-            IntPtr ptr = Marshal.AllocHGlobal(size);
-
+            byte* ptr = stackalloc byte[buffer.size];
             if (unpackRef == -1)
-                LunaNative.luna_getstruct(L, index, ptr, (StructElement*)Unsafe.AsPointer(ref structElements[0]), structElements.Length);
+                LunaNative.luna_getstruct(L, index, (IntPtr)ptr, buffer.Addr, buffer.Count);
             else
-                LunaNative.luna_unpackstruct(L, index, unpackRef, ptr, (StructElement*)Unsafe.AsPointer(ref structElements[0]), structElements.Length);
-            object boxed = Marshal.PtrToStructure(ptr, type);
-            Marshal.FreeHGlobal(ptr);
+                LunaNative.luna_unpackstruct(L, index, unpackRef, (IntPtr)ptr, buffer.Addr, buffer.Count);
+            object boxed = Marshal.PtrToStructure((IntPtr)ptr, type);
             return boxed;
         }
 
@@ -379,22 +381,20 @@ namespace SharpLuna
                 return;
             }
 
-            IntPtr ptr = Marshal.AllocHGlobal(size);
-            Marshal.StructureToPtr(data, ptr, false);
+            byte* ptr = stackalloc byte[buffer.size];
             if (newRef == -1)
-                LunaNative.luna_pushstruct(L, metaRef, ptr, (StructElement*)Unsafe.AsPointer(ref structElements[0]), structElements.Length);
+                LunaNative.luna_pushstruct(L, metaRef, (IntPtr)ptr, buffer.Addr, buffer.Count);
             else
-                LunaNative.luna_packstruct(L, newRef, ptr, (StructElement*)Unsafe.AsPointer(ref structElements[0]), structElements.Length);
-            Marshal.FreeHGlobal(ptr);
+                LunaNative.luna_packstruct(L, newRef, (IntPtr)ptr, buffer.Addr, buffer.Count);
         }
 
         public override T Get<T>(IntPtr L, int index)
         {
             T data = default;
             if (unpackRef == -1)
-                LunaNative.luna_getstruct(L, index, (IntPtr)Unsafe.AsPointer(ref data), (StructElement*)Unsafe.AsPointer(ref structElements[0]), structElements.Length);
+                LunaNative.luna_getstruct(L, index, (IntPtr)Unsafe.AsPointer(ref data), buffer.Addr, buffer.Count);
             else
-                LunaNative.luna_unpackstruct(L, index, unpackRef, (IntPtr)Unsafe.AsPointer(ref data), (StructElement*)Unsafe.AsPointer(ref structElements[0]), structElements.Length);
+                LunaNative.luna_unpackstruct(L, index, unpackRef, (IntPtr)Unsafe.AsPointer(ref data), buffer.Addr, buffer.Count);
             return data;
 
         }
@@ -402,9 +402,9 @@ namespace SharpLuna
         public override void Push<T>(IntPtr L, T data)
         {
             if (newRef == -1)
-                LunaNative.luna_pushstruct(L, metaRef, (IntPtr)Unsafe.AsPointer(ref data), (StructElement*)Unsafe.AsPointer(ref structElements[0]), structElements.Length);
+                LunaNative.luna_pushstruct(L, metaRef, (IntPtr)Unsafe.AsPointer(ref data), buffer.Addr, buffer.Count);
             else
-                LunaNative.luna_packstruct(L, newRef, (IntPtr)Unsafe.AsPointer(ref data), (StructElement*)Unsafe.AsPointer(ref structElements[0]), structElements.Length);
+                LunaNative.luna_packstruct(L, newRef, (IntPtr)Unsafe.AsPointer(ref data), buffer.Addr, buffer.Count);
 
         }
 
@@ -412,7 +412,6 @@ namespace SharpLuna
 
     public class GeneralConverter<T> : CustomConverter
     {
-        NativeBuffer buffer = new NativeBuffer();
 
     }
 

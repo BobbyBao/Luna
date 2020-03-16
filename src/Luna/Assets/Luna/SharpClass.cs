@@ -242,15 +242,16 @@ namespace SharpLuna
         public SharpClass RegConstant(FieldInfo field)
         {
             var v = field.GetValue(null);
-            if(field.FieldType.IsEnum)
-            {
-                LuaRef r = LuaRef.FromValue(State, (int)v);
-                SetGetter(field.Name, r);
-            }
-            else
+//             if(field.FieldType.IsEnum)
+//             {
+//                 LuaRef r = LuaRef.FromValue(State, (int)v);
+//                 SetGetter(field.Name, r);
+//             }
+//             else
             {
                 LuaRef r = LuaRef.FromValue(State, v);
-                SetGetter(field.Name, r);
+                meta.RawSet(field.Name, r);
+                //SetGetter(field.Name, r);
             }
 
             SetReadOnly(field.Name);

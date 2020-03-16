@@ -243,9 +243,21 @@ namespace SharpLuna
             try
             {
                 PropertyInfo propertyInfo = ToLightObject<PropertyInfo>(L, lua_upvalueindex(1), false);
+                int n = lua_gettop(L);
                 object obj = GetObject(L, 1, propertyInfo.ReflectedType);
-                object v = propertyInfo.GetValue(obj);
-                Push(L, v);
+                if (n == 2)
+                {
+                    MethodInfo m = propertyInfo.GetGetMethod();
+                    var paramType = m.GetParameters()[0].ParameterType;
+                    object idx = GetObject(L, 2, paramType);
+                    object v = propertyInfo.GetValue(obj, new[] { idx });
+                    Push(L, v);
+                }
+                else
+                {
+                    object v = propertyInfo.GetValue(obj);
+                    Push(L, v);
+                }
                 return 1;
             }
             catch (Exception e)
@@ -260,9 +272,21 @@ namespace SharpLuna
             try
             {
                 PropertyInfo propertyInfo = ToLightObject<PropertyInfo>(L, lua_upvalueindex(1), false);
+                int n = lua_gettop(L);
                 object obj = GetObject(L, 1, propertyInfo.ReflectedType);
-                object v = GetObject(L, 2, propertyInfo.PropertyType);
-                propertyInfo.SetValue(obj, v);
+                if(n == 3)
+                {
+                    MethodInfo m = propertyInfo.GetSetMethod();
+                    var paramType = m.GetParameters()[0].ParameterType;
+                    object idx = GetObject(L, 2, paramType);
+                    object v = GetObject(L, 3, propertyInfo.PropertyType);
+                    propertyInfo.SetValue(obj, v, new[] { idx });
+                }
+                else
+                {
+                    object v = GetObject(L, 2, propertyInfo.PropertyType);
+                    propertyInfo.SetValue(obj, v);
+                }
                 return 0;
             }
             catch (Exception e)

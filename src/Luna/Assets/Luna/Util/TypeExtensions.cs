@@ -29,6 +29,7 @@ namespace SharpLuna
         public NativeBuffer(StructElement[] layout)
         {
             this.layout = new StructElement[layout.Length];
+            Array.Copy(layout, 0, this.layout, 0, layout.Length);
             keys = new List<string>(layout.Length);
             this.size = 0;
             foreach (var e in layout)
