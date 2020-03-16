@@ -271,6 +271,7 @@ namespace SharpLuna
                 if (t.IsEnum)
                 {
                     lua_pushinteger(L, (int)(object)obj);
+                    //SharpObject.PushToStack(L, obj);
                     return;
                 }
                 else if (t.IsValueType)
@@ -409,7 +410,9 @@ namespace SharpLuna
                     Type t = v.GetType();
                     if (t.IsEnum)
                     {
-                        lua_pushinteger(L, (int)(object)v);
+                        //SharpObject.PushToStack(L, v);                       
+                        lua_pushinteger(L, (int)(object)v); 
+                        return;
                     }
                     else if (t.IsValueType)
                     {

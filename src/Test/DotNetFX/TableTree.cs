@@ -105,6 +105,25 @@ namespace Test
                 return;
             }
 
+            var meta = table.GetMetaTable();
+            if(meta)
+            {
+                var k = "metatable";
+                var v = meta;
+                TreeNode n;
+                if (!node.ContainsKey(k))
+                {
+                    n = node.Add(k, k);
+                    n.Tag = v;
+                }
+                else
+                {
+                    n = node[k];
+                }
+                Refresh(v, n.Nodes, depth - 1);
+            }
+
+
             foreach (var t in table)
             {
                 var key = t.Key();
