@@ -186,7 +186,13 @@ namespace Test
             }
         }
 
-        public Action onRecharge;
+        public void recharge(Action onRecharge)
+        {
+            this.onRecharge = onRecharge;
+            this.toolStripButton3.Visible = true;
+        }
+        
+        Action onRecharge;
         private void toolStripButton3_Click(object sender, EventArgs e)
         {
             //UIManager.alertBox.Show();

@@ -64,7 +64,7 @@ namespace SharpLuna
             var converter = Converter.GetConverter(obj.GetType());
             if (converter != null)
             {
-                converter.Push(L, obj);
+                ((TConverter<T>)converter).Push(L, obj);
                 return;
             }
 
@@ -110,7 +110,7 @@ namespace SharpLuna
             var converter = Converter.GetConverter(obj.GetType());
             if (converter != null)
             {
-                converter.Push(L, obj);
+                ((TConverter<T>)converter).Push(L, obj);
                 return;
             }
 
@@ -139,7 +139,7 @@ namespace SharpLuna
             var converter = Converter.GetConverter(obj.GetType());
             if(converter != null)
             {
-                converter.Push(L, obj);
+                converter.pusher(L, obj);
                 return;
             }
            

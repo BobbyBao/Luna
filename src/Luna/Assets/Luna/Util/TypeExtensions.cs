@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -17,118 +18,6 @@ namespace SharpLuna
         public short size;
 
         public string Name => Marshal.PtrToStringAnsi(name);
-    }
-
-    public unsafe struct NativeBuffer : IEnumerable<StructElement>
-    {
-        public int size;
-        public StructElement[] layout;
-        public List<string> keys;
-        public byte* data;
-
-        public NativeBuffer(StructElement[] layout)
-        {
-            this.layout = new StructElement[layout.Length];
-            Array.Copy(layout, 0, this.layout, 0, layout.Length);
-            keys = new List<string>(layout.Length);
-            this.size = 0;
-            foreach (var e in layout)
-            {
-                keys.Add(e.Name);
-                this.size += e.size;
-            }
-
-            data = null;
-        }
-
-        public StructElement* Addr => (StructElement*)Unsafe.AsPointer(ref layout[0]);
-        public int Count => keys.Count;
-
-        public T Get<T>(string key, T v) where T : unmanaged
-        {
-            for (int i = 0; i < keys.Count; i++)
-            {
-                if (key == keys[i])
-                {
-                    Debug.Assert(sizeof(T) == layout[i].size);
-                    return Unsafe.Read<T>(data + layout[i].offset);
-                    
-                }
-            }
-
-            throw new Exception("Ket not found!");
-        }
-
-        public void Set<T>(string key, T v) where T : unmanaged
-        {
-            for (int i = 0; i < keys.Count; i++)
-            {
-                if (key == keys[i])
-                {
-                    Debug.Assert(sizeof(T) == layout[i].size);
-                    Unsafe.Write(data + layout[i].offset, v);
-                    break;
-                }
-            }
-        }
-
-        public void Add(object obj)
-        {
-            if (obj is StructElement e)
-            {
-                Add(e.Name, e);
-            }
-            else if (obj is ValueTuple<string, Type> vt)
-            {
-                Add(vt.Item1, vt.Item2);
-            }
-            else if (obj is Tuple<string, Type> t)
-            {
-                Add(t.Item1, t.Item2);
-            }
-        }
-
-        void Add(string key, StructElement e)
-        {
-            if (keys == null)                  
-                keys = new List<string>();    
-
-            if (this.layout == null)
-                this.layout = new StructElement[4];
-            
-            if(keys.Count == this.layout.Length)
-            {
-                Array.Resize(ref layout, this.layout.Length + 4);
-            }
-
-            this.layout[keys.Count] = e;
-            keys.Add(key);
-        }
-
-        public void Add(string key, Type type)
-        {
-            StructElement e = new StructElement
-            {
-                name = Marshal.StringToHGlobalAnsi(key),
-                type = TypeExtensions.GetTypeCode(type),
-                offset = (short)size,
-                size = (short)TypeExtensions.GetSize(type)
-            };
-
-            this.size += e.size;
-            Add(key, e);
-        }
-
-
-        public IEnumerator<StructElement> GetEnumerator()
-        {
-            return ((IEnumerable<StructElement>)layout).GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return ((IEnumerable<StructElement>)layout).GetEnumerator();
-        }
     }
 
     public unsafe static class TypeExtensions

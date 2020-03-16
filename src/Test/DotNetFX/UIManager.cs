@@ -35,6 +35,6 @@ public class UIManager
 
     public static void AddListener(LuaRef action)
     {
-        tableTree.onRecharge = () => action.Call();
+        tableTree.recharge(() => action.Call());
     }
 }

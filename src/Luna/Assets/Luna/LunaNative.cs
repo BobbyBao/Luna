@@ -193,8 +193,7 @@ namespace SharpLuna
                 // push metatable[key] -> <mt> <mt[key]>
                 lua_pushvalue(L, 2);
 #if DEBUG
-                string key = lua_tostring(L, -1);
-                lua_pop(L, 1);
+                string key = lua_tostring(L, -1);                
 #endif
                 lua_rawget(L, -2);
 

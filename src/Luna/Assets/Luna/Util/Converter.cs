@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -40,9 +41,9 @@ namespace SharpLuna
 
         public static void RegUnmanagedConverter<T>(IntPtr L) where T : unmanaged
         {
-            var c = new UnamanagedConverter(L, typeof(T));
+            var c = new UnamanagedConverter<T>(L, typeof(T));
             converterFactory[typeof(T)] = c;
-            Debug.Assert(c.Size == Marshal.SizeOf<T>());
+            System.Diagnostics.Debug.Assert(c.Size == Marshal.SizeOf<T>());
         }
 
         public static object Convert(Type type, LuaType luaType, IntPtr L, int index)
@@ -59,7 +60,8 @@ namespace SharpLuna
                 return null;
             }
 
-            return fac.Get(L, index);
+              
+            return fac.getter(L, index);            
         }
 
         public static T Convert<T>(LuaType luaType, IntPtr L, int index)
@@ -70,7 +72,7 @@ namespace SharpLuna
                 return default;
             }
 
-            return fac.Get<T>(L, index);
+            return ((TConverter<T>)fac).Get(L, index);
         }
 
         public static void Register<T>(CustomConverter converter)
@@ -304,45 +306,51 @@ namespace SharpLuna
             this.type = type;
             this.getter = getter;
         }
+    }
 
-        public virtual object Get(IntPtr L, int index)
-        {
-            return getter(L, index);
-        }
-
-        public virtual void Push(IntPtr L, object data)
-        {
-            pusher(L, data);
-        }
-
-        public virtual T Get<T>(IntPtr L, int index)
+    public class TConverter<T> : CustomConverter
+    {
+        public virtual T Get(IntPtr L, int index)
         {
             return (T)getter(L, index);
         }
 
-        public virtual void Push<T>(IntPtr L, T data)
+        public virtual void Push(IntPtr L, T data)
         {
             pusher(L, data);
         }
+
     }
 
-    public unsafe class UnamanagedConverter : CustomConverter
+    public unsafe class UnamanagedConverter<T> : TConverter<T>
     {
         public int metaRef = -1;
         public int newRef = -1;
         public int unpackRef = -1;
 
-        NativeBuffer buffer = new NativeBuffer();
+        protected NativeBuffer buffer;
         public int Size => buffer.size;
+
+        public UnamanagedConverter()
+        {
+        }
 
         public UnamanagedConverter(IntPtr L, Type unmanagedType)
         {
-            this.type = unmanagedType;    
+            this.type = unmanagedType;
+
+            getter = _Get;
+            pusher = _Push;
+
             int size;
-            StructElement[] structElements;
-            structElements = unmanagedType.GetLayout(out size);
+            StructElement[] structElements = unmanagedType.GetLayout(out size);
             buffer = new NativeBuffer(structElements);
 
+            InitRef(L);
+        }
+
+        protected void InitRef(IntPtr L)
+        {
             lua_getglobal(L, type.Name);
 
             lua_getfield(L, -1, "unpack");
@@ -357,13 +365,8 @@ namespace SharpLuna
             metaRef = luaL_ref(L, LUA_REGISTRYINDEX);
         }
 
-        public override object Get(IntPtr L, int index)
+        object _Get(IntPtr L, int index)
         {
-            if (getter != null)
-            {
-                return getter(L, index);
-            }
-
             byte* ptr = stackalloc byte[buffer.size];
             if (unpackRef == -1)
                 LunaNative.luna_getstruct(L, index, (IntPtr)ptr, buffer.Addr, buffer.Count);
@@ -373,22 +376,17 @@ namespace SharpLuna
             return boxed;
         }
 
-        public override void Push(IntPtr L, object data)
+        void _Push(IntPtr L, object data)
         {
-            if (pusher != null)
-            {
-                pusher(L, data);
-                return;
-            }
-
             byte* ptr = stackalloc byte[buffer.size];
+            Marshal.StructureToPtr(data, (IntPtr)ptr, false);
             if (newRef == -1)
                 LunaNative.luna_pushstruct(L, metaRef, (IntPtr)ptr, buffer.Addr, buffer.Count);
             else
                 LunaNative.luna_packstruct(L, newRef, (IntPtr)ptr, buffer.Addr, buffer.Count);
         }
 
-        public override T Get<T>(IntPtr L, int index)
+        public override T Get(IntPtr L, int index)
         {
             T data = default;
             if (unpackRef == -1)
@@ -399,7 +397,7 @@ namespace SharpLuna
 
         }
 
-        public override void Push<T>(IntPtr L, T data)
+        public override void Push(IntPtr L, T data)
         {
             if (newRef == -1)
                 LunaNative.luna_pushstruct(L, metaRef, (IntPtr)Unsafe.AsPointer(ref data), buffer.Addr, buffer.Count);
@@ -410,9 +408,108 @@ namespace SharpLuna
 
     }
 
-    public class GeneralConverter<T> : CustomConverter
+    public unsafe class ValueTypeConverter<T> : UnamanagedConverter<T>
     {
+        enum State
+        {
+            Init, Reading, Writing
+        }
 
+        State state;
+
+        public ValueTypeConverter(IntPtr L)
+        {
+            this.type = typeof(T);
+
+            getter = _Get;
+            pusher = _Push;
+
+            InitRef(L);
+
+            state = State.Init; 
+            T obj = default;
+            BuildStruct(ref obj );
+        }
+
+        protected virtual void BuildStruct(ref T obj)
+        {
+        }
+
+        protected ValueTypeConverter<T> Transfer<K>(string key, ref K v)
+        {
+            if(state == State.Init)
+            {
+                buffer.Add(key, ref v);
+            }
+            else if(state == State.Reading)
+            {
+                buffer.Read(key, ref v);
+            }
+            else if (state == State.Writing)
+            {
+                buffer.Write(key, ref v);
+            }
+
+            return this;
+        }
+
+        object _Get(IntPtr L, int index)
+        {
+            return Get(L, index);
+        }
+
+        void _Push(IntPtr L, object data)
+        {
+            Push(L, (T)data);
+        }
+
+        public override T Get(IntPtr L, int index)
+        {
+            byte* ptr = stackalloc byte[buffer.size];
+            if (unpackRef == -1)
+                LunaNative.luna_getstruct(L, index, (IntPtr)ptr, buffer.Addr, buffer.Count);
+            else
+                LunaNative.luna_unpackstruct(L, index, unpackRef, (IntPtr)ptr, buffer.Addr, buffer.Count);
+
+            buffer.Init(ptr, false);
+            state = State.Reading;
+            T obj = default;
+            BuildStruct(ref obj);
+            return (T)obj;
+        }
+
+        public override void Push(IntPtr L, T data)
+        {
+            byte* ptr = stackalloc byte[buffer.size];
+            buffer.Init(ptr, true);
+            state = State.Writing;
+            BuildStruct(ref data);
+
+            if (newRef == -1)
+                LunaNative.luna_pushstruct(L, metaRef, (IntPtr)Unsafe.AsPointer(ref data), buffer.Addr, buffer.Count);
+            else
+                LunaNative.luna_packstruct(L, newRef, (IntPtr)Unsafe.AsPointer(ref data), buffer.Addr, buffer.Count);
+        }
+
+    }
+
+    public struct Test11
+    {
+        public int test1;
+        public float test2;
+    }
+
+    public class TestConverter : ValueTypeConverter<Test11>
+    {
+        public TestConverter(IntPtr L) : base(L)
+        {
+        }
+
+        protected override void BuildStruct(ref Test11 obj)
+        {
+            Transfer("test1", ref obj.test1);
+            Transfer("test2", ref obj.test2);
+        }
     }
 
 }

@@ -82,6 +82,9 @@ namespace SharpLuna.Unity
 
         public string startFile;
 
+        public bool cjson = true;
+        public bool protobuf = true;
+
         private List<ModuleInfo> modules = new List<ModuleInfo>
         {
             mathTypes, baseTypes, uiTypes
@@ -168,7 +171,6 @@ namespace SharpLuna.Unity
             Luna.LoadAssembly("UnityEngine");
             Luna.LoadAssembly("UnityEngine.UI");
 
-
             Converter.RegisterAction<UnityEngine.Object>();
             Converter.RegisterAction<GameObject>();
             Converter.RegisterAction<AsyncOperation>();            
@@ -185,6 +187,14 @@ namespace SharpLuna.Unity
         {
             luna.Register("luna.startCoroutine", _StartCoroutine);
             luna.Register("luna.stopCoroutine", _StopCoroutine);
+            
+            var L = luna.State;
+
+            if(cjson)
+                luaopen_cjson(L);
+
+            if(protobuf)
+                lua_requiref(L, "pb", luaopen_pb);
         }
 
         protected virtual IEnumerator OnStart()

@@ -239,6 +239,7 @@ namespace SharpLuna
 
             sb.Append("}\n");
 
+#if UNITY_EDITOR
             if (!type.IsEnum)
             {
                 sb.AppendLine();
@@ -254,7 +255,7 @@ namespace SharpLuna
                 }
 
             }
-
+#endif
             foreach (var @namespace in namespaces)
             {
                 sbHead.Append("using ").Append(@namespace).Append(";").AppendLine();

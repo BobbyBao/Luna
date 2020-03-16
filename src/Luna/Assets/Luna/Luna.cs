@@ -137,7 +137,6 @@ namespace SharpLuna
 
             //_classWrapers.Clear();
 
-
         }
 
         public void Dispose()
@@ -153,7 +152,6 @@ namespace SharpLuna
                 return;
 
             _binder.Dispose();
-
             _global.Dispose();
 
             L.unrefall();
@@ -381,7 +379,6 @@ namespace SharpLuna
 
             if (lua_loadstring(L, chunk, chunkName) != LuaStatus.OK)
                 ThrowExceptionFromError(L, oldTop);
-
 
             try
             {
