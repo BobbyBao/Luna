@@ -178,9 +178,9 @@ namespace SharpLuna.Unity
             Converter.RegisterFunc<UnityEngine.Object>();
             Converter.RegisterFunc<GameObject>();
 
-            Converter.Register<System.Collections.IEnumerator>(IEnumeratorBridge.Create);
+            Converter.RegDelegateFactory(IEnumeratorBridge.Create);
 
-            Converter.Register<UnityAction>(CreateUnityAction);
+            Converter.RegDelegateFactory(CreateUnityAction);
         }
 
         protected virtual void OnPostInit()

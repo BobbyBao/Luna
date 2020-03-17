@@ -38,13 +38,12 @@ namespace SharpLuna
             lua_pushvalue(L, -2);
             lua_remove(L, -3);
 
-            var __gen_error = lua_pcall(L, 1, 1, err_func);
-            if (__gen_error != 0)
+            if (lua_pcall(L, 1, 1, err_func) != LuaStatus.OK)
                 ThrowExceptionFromError(L, err_func - 1);
 
-            int __gen_ret = lua_toboolean(L, err_func + 1);
+            int ret = lua_toboolean(L, err_func + 1);
             lua_settop(L, err_func - 1);
-            return __gen_ret != 0;
+            return ret != 0;
         }
 
         void System.Collections.IEnumerator.Reset()
@@ -68,8 +67,7 @@ namespace SharpLuna
             lua_pushvalue(L, -2);
             lua_remove(L, -3);
 
-            var __gen_error = lua_pcall(L, 1, 0, err_func);
-            if (__gen_error != 0)
+            if (lua_pcall(L, 1, 0, err_func) != LuaStatus.OK)
                 ThrowExceptionFromError(L, err_func - 1);
 
             lua_settop(L, err_func - 1);
@@ -91,9 +89,9 @@ namespace SharpLuna
                     ThrowExceptionFromError(L, oldTop);
                 }
 
-                object __gen_ret = GetObject(L, -1);
+                object ret = GetObject(L, -1);
                 lua_pop(L, 2);
-                return __gen_ret;
+                return ret;
             }
 
 

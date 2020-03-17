@@ -30,7 +30,7 @@ namespace SharpLuna
             sizeof(bool), sizeof(char), sizeof(sbyte), sizeof(byte),
             sizeof(short), sizeof(ushort), sizeof(int), sizeof(uint),
             sizeof(long), sizeof(ulong), sizeof(float), sizeof(double),
-            sizeof(decimal), sizeof(DateTime), 0, sizeof(IntPtr)
+            sizeof(decimal), sizeof(DateTime), 0, sizeof(int) + sizeof(IntPtr)
         };
 
         public static StructElement[] GetLayout(this Type type, out int size)
