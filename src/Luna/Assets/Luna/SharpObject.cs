@@ -1,6 +1,4 @@
-﻿#define LUA_WEAKTABLE
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -22,7 +20,7 @@ namespace SharpLuna
             }
             public int GetHashCode(object obj)
             {
-                return System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(obj);
+                return RuntimeHelpers.GetHashCode(obj);
             }
         }
 
@@ -65,6 +63,7 @@ namespace SharpLuna
                 lua_pop(L, 1);
                 return;
             }
+
 #if DEBUG || UNITY_EDITOR
             //luaL_checktype(L, -1, (int)LuaType.Table);
 #endif

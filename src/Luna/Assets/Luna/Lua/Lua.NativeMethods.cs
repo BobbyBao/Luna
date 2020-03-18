@@ -466,58 +466,6 @@ namespace SharpLuna
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int luaopen_package(lua_State L);
 
-        //luna extension
-
-        public struct LunaData
-        {
-            public IntPtr type;
-            public IntPtr super;
-            public IntPtr getters;
-            public IntPtr setters;
-            public IntPtr get_indexed;
-            public IntPtr set_indexed;
-        }
-
-        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int luna_init(lua_State L, ref LunaData data);
-
-#if LUNA_SCRIPT
-        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int luna_create_class(lua_State L, int moduleRef, string name, int classId, lua_CFunction dctor);
-
-        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int luna_create_module(lua_State L, int moduleRef, string name);
-
-        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int luna_try_getuserdata(lua_State L, long key, int cache_ref);
-
-        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int luna_cacheuserdata(lua_State L, long key, int cache_ref);
-
-        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int luaopen_pb(lua_State L);
-
-        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int luaopen_pb_unsafe(lua_State L);
-
-        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int luaopen_cjson(lua_State L);
-
-        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int luaopen_cjson_safe(lua_State L);
-#endif
-
-        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int luna_class_index(lua_State L);
-
-        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int luna_class_newindex(lua_State L);
-
-        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int luna_module_index(lua_State L);
-
-        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int luna_module_newindex(lua_State L);
 
 #pragma warning restore IDE1006 // Naming Styles
 

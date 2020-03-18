@@ -24,6 +24,18 @@ namespace SharpLuna
         static LuaNativeFunction module_newindex = _module_newindex;
         public static LuaNativeFunction ErrorReadOnly = _ErrorReadOnly;
 
+        //luna extension
+
+        public struct LunaData
+        {
+            public IntPtr type;
+            public IntPtr super;
+            public IntPtr getters;
+            public IntPtr setters;
+            public IntPtr get_indexed;
+            public IntPtr set_indexed;
+        }
+
         public static void Init(lua_State L)
         {
 #if C_API
@@ -71,62 +83,13 @@ namespace SharpLuna
         public static LuaRef create_class(lua_State L, LuaRef parentModule, string name, Type classType, LuaNativeFunction dctor)
         {
             int moduleRef = parentModule.Ref;
-            int classId = SharpObject.TypeID(classType);
-            
-            //Debug.LogWarning($"Register type : {classType }, id: {classId}");
+            int classId = SharpObject.TypeID(classType);            
 #if C_API
             int metaRef = luna_create_class(L, moduleRef, name, classId, dctor.ToFunctionPointer());
             var meta = new LuaRef(metaRef, L);
-            meta.RawSet("type", classType);
-            return meta;
 #else
             string fullName = GetFullName(parentModule, name);
             
-            lua_createtable(L, 0, 0);
-            lua_pushvalue(L, -1);
-            lua_setmetatable(L, -2);
-
-            lua_pushstring(L, "__index");
-            lua_pushcfunction(L, (LuaNativeFunction)class_index);
-            lua_rawset(L, -3);
-
-            lua_pushstring(L, "__newindex");
-            lua_pushcfunction(L, (LuaNativeFunction)class_newindex);
-            lua_rawset(L, -3);
-   
-            lua_createtable(L, 0, 0);
-            lua_rawsetp(L, -2, ___getters);
-
-            lua_createtable(L, 0, 0);
-            lua_rawsetp(L, -2, ___setters);
-
-            lua_pushstring(L, fullName);
-            lua_rawsetp(L, -2, ___type);
-  
-            if (dctor != null)
-            {
-                lua_pushstring(L, "__gc");
-                lua_pushcfunction(L, dctor);
-                lua_rawset(L, -3);
-            }
-
-            int metaRef = luaL_ref(L, LUA_REGISTRYINDEX);
-
-            if (classId != 0)
-            {
-                lua_pushvalue(L, LUA_REGISTRYINDEX);
-                lua_rawgeti(L, LUA_REGISTRYINDEX, metaRef);
-                lua_rawseti(L, -2, classId);
-                lua_pop(L, 1);
-            }
-
-            lua_rawgeti(L, LUA_REGISTRYINDEX, moduleRef);
-            lua_pushstring(L, name);
-            lua_rawgeti(L, LUA_REGISTRYINDEX, metaRef);
-            lua_rawset(L, -3);
-            lua_pop(L, 1);
-            return new LuaRef(metaRef, L);
-            /*
             LuaRef meta = LuaRef.CreateTable(L);            
             meta.SetMetaTable(meta);
 
@@ -146,9 +109,9 @@ namespace SharpLuna
             }
 
             parentModule.RawSet(name, meta);
-            return meta;*/
 #endif
-
+            meta.RawSet("type", classType);
+            return meta;
         }
 
         public static LuaRef create_module(lua_State L, LuaRef parentModule, string name)
@@ -505,6 +468,48 @@ namespace SharpLuna
             lua_remove(L, top);
             return lua_pcall(L, 2, 1, 0);
         }
+
+        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int luna_init(lua_State L, ref LunaData data);
+
+#if LUNA_SCRIPT
+        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int luna_create_class(lua_State L, int moduleRef, string name, int classId, IntPtr dctor);
+
+        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int luna_create_module(lua_State L, int moduleRef, string name);
+
+        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int luna_try_getuserdata(lua_State L, long key, int cache_ref);
+
+        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int luna_cacheuserdata(lua_State L, long key, int cache_ref);
+
+        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
+        [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
+        public static extern int luaopen_pb(lua_State L);
+
+        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int luaopen_pb_unsafe(lua_State L);
+
+        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int luaopen_cjson(lua_State L);
+
+        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int luaopen_cjson_safe(lua_State L);
+#endif
+
+        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int luna_class_index(lua_State L);
+
+        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int luna_class_newindex(lua_State L);
+
+        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int luna_module_index(lua_State L);
+
+        [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int luna_module_newindex(lua_State L);
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern void luna_pushstruct(lua_State L, int metaRef, IntPtr data, StructElement* layout, int count);

@@ -44,8 +44,8 @@ namespace Tests
 
             var L = luna.State;
 
-            lua_requiref(L, "pb", luaopen_pb);
-            luaopen_cjson(L);
+            lua_requiref(L, "pb", LunaNative.luaopen_pb);
+            LunaNative.luaopen_cjson(L);
 
             luna.DoFile("vec3.luna");
 

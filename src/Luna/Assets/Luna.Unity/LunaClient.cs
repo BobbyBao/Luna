@@ -26,7 +26,12 @@ namespace SharpLuna.Unity
             typeof(UnityEngine.Object),
             typeof(GameObject),
             typeof(Component),
-            typeof(MonoBehaviour),
+
+            new ClassInfo(typeof(MonoBehaviour))
+            {
+                "runInEditMode"
+            },
+
             typeof(Transform),
             typeof(RectTransform),
             typeof(Renderer),
@@ -34,7 +39,11 @@ namespace SharpLuna.Unity
             typeof(SkinnedMeshRenderer),
             typeof(Resources),
             typeof(AsyncOperation),
-            typeof(Input),
+
+            new ClassInfo(typeof(Input))
+            {
+                "IsJoystickPreconfigured"
+            },
 
             typeof(Time),
             typeof(WaitForSeconds),
@@ -191,10 +200,10 @@ namespace SharpLuna.Unity
             var L = luna.State;
 
             if(cjson)
-                luaopen_cjson(L);
+                LunaNative.luaopen_cjson(L);
 
             if(protobuf)
-                lua_requiref(L, "pb", luaopen_pb);
+                lua_requiref(L, "pb", LunaNative.luaopen_pb);
         }
 
         protected virtual IEnumerator OnStart()
