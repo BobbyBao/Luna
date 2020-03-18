@@ -12,7 +12,6 @@ namespace SharpLuna
     using static Lua;
     using lua_State = IntPtr;
 
-
     public partial class Converter
     {
         public Type type;
@@ -82,13 +81,6 @@ namespace SharpLuna
             return null;
         }
 
-        public static void RegUnmanagedConverter<T>(IntPtr L) where T : unmanaged
-        {
-            var c = new UnamanagedConverter<T>(L, typeof(T));
-            converterFactory[typeof(T)] = c;
-            System.Diagnostics.Debug.Assert(c.Size == Marshal.SizeOf<T>());
-        }
-
         public static object Convert(Type type, LuaType luaType, IntPtr L, int index)
         {
             if (type.IsEnum)
@@ -120,6 +112,13 @@ namespace SharpLuna
         public static void Register<T>(Converter converter)
         {
             converterFactory[typeof(T)] = converter;
+        }
+
+        public static void RegUnmanagedConverter<T>(IntPtr L) where T : unmanaged
+        {
+            var c = new UnamanagedConverter<T>(L, typeof(T));
+            converterFactory[typeof(T)] = c;
+            System.Diagnostics.Debug.Assert(c.Size == Marshal.SizeOf<T>());
         }
 
         public static void RegDelegateFactory<T>(Func<IntPtr, int, T> factory) where T : class

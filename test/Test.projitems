@@ -19,6 +19,7 @@
     <None Include="$(MSBuildThisFileDirectory)Scripts\Test.luna">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Scripts\TestValue.luna" />
     <None Include="$(MSBuildThisFileDirectory)Scripts\test_array.luna">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>

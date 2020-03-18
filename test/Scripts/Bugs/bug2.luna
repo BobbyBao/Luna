@@ -1,6 +1,8 @@
 
-//classÇ¶Ì×
+//
 print(tostring(Tests.TestEnum.A))
+
+//classÇ¶Ì×
 
 /*
 class ClassA {

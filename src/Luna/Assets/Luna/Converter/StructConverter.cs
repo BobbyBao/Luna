@@ -97,7 +97,7 @@ namespace SharpLuna
 
     }
 
-    public unsafe class ValueTypeConverter<T> : UnamanagedConverter<T>
+    public unsafe abstract class ValueTypeConverter<T> : UnamanagedConverter<T>
     {
         enum State
         {
@@ -120,9 +120,7 @@ namespace SharpLuna
             BuildStruct(ref obj);
         }
 
-        protected virtual void BuildStruct(ref T obj)
-        {
-        }
+        protected abstract void BuildStruct(ref T obj);
 
         protected ValueTypeConverter<T> Transfer<K>(string key, ref K v)
         {
@@ -160,7 +158,7 @@ namespace SharpLuna
             else
                 LunaNative.luna_unpackstruct(L, index, unpackRef, (IntPtr)ptr, buffer.Addr, buffer.Count);
 
-            buffer.Init(ptr, false);
+            buffer.Init(ptr);
             state = State.Reading;
             T obj = default;
             BuildStruct(ref obj);
@@ -170,18 +168,18 @@ namespace SharpLuna
         public override void Push(IntPtr L, T data)
         {
             byte* ptr = stackalloc byte[buffer.size];
-            buffer.Init(ptr, true);
+            buffer.Init(ptr);
             state = State.Writing;
             BuildStruct(ref data);
 
             if (newRef == -1)
-                LunaNative.luna_pushstruct(L, metaRef, (IntPtr)Unsafe.AsPointer(ref data), buffer.Addr, buffer.Count);
+                LunaNative.luna_pushstruct(L, metaRef, (IntPtr)ptr, buffer.Addr, buffer.Count);
             else
-                LunaNative.luna_packstruct(L, newRef, (IntPtr)Unsafe.AsPointer(ref data), buffer.Addr, buffer.Count);
+                LunaNative.luna_packstruct(L, newRef, (IntPtr)ptr, buffer.Addr, buffer.Count);
         }
 
     }
-
+    /*
     public struct Test11
     {
         public int test1;
@@ -199,6 +197,6 @@ namespace SharpLuna
             Transfer("test1", ref obj.test1);
             Transfer("test2", ref obj.test2);
         }
-    }
+    }*/
 
 }

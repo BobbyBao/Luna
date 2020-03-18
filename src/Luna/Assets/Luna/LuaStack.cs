@@ -272,19 +272,13 @@ namespace SharpLuna
                 {
                     lua_pushinteger(L, (int)(object)obj);
                     //SharpObject.PushToStack(L, obj);
-                    return;
                 }
                 else if (t.IsValueType)
                 {
-                    if(t.IsUnManaged())
-                    {
-                        SharpObject.PushUnmanagedObject(L, obj);
-                        return;
-                    }
-
+                    SharpObject.PushValueToStack(L, obj);
                 }
-                
-                SharpObject.PushToStack(L, obj);
+                else
+                    SharpObject.PushToStack(L, obj);
             }
 
         }
@@ -416,15 +410,10 @@ namespace SharpLuna
                     }
                     else if (t.IsValueType)
                     {
-                        if (t.IsUnManaged())
-                        {
-                            SharpObject.PushUnmanagedObject(L, v);
-                            return;
-                        }
-
+                        SharpObject.PushValueToStack(L, v);
                     }
-
-                    SharpObject.PushToStack(L, v);
+                    else
+                        SharpObject.PushToStack(L, v);
                     break;
             }
         }

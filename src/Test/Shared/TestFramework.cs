@@ -48,7 +48,11 @@ namespace Tests
             luaopen_cjson(L);
 
             luna.DoFile("vec3.luna");
+
             Converter.RegUnmanagedConverter<vec3>(L);
+
+            luna.DoFile("TestValue.luna");
+            Converter.Register<TestValue>(new TestValueTypeConverter(L));
         }
 
         public void Dispose()
@@ -137,18 +141,6 @@ namespace Tests
         {
             //AutoBind();
             onPostInit?.Invoke();
-        }
-
-        void AutoBind()
-        {
-            Type[] testTypes =
-            {
-                typeof(TestEnum),
-                typeof(TestStruct),
-                typeof(TestClass) 
-            };
-
-            luna.RegisterModel("Tests", testTypes);
         }
 
 

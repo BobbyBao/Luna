@@ -10,13 +10,11 @@ namespace SharpLuna
 {
     public unsafe struct NativeBuffer
     {
-        public int size;
         public StructElement[] layout;
         int count;
-
-        public byte* data;
-
+        public int size;
         int pos;
+        public byte* data;
 
         public NativeBuffer(StructElement[] layout)
         {
@@ -37,10 +35,10 @@ namespace SharpLuna
         public StructElement* Addr => (StructElement*)Unsafe.AsPointer(ref layout[0]);
         public int Count => count;
 
-        public void Init(byte* data, bool clear = false)
+        public void Init(byte* data)
         {
             this.data = data;
-            this.pos = clear ? 0 : count;
+            this.pos = 0;
         }
 
         public void Add<T>(string key, ref T v)
@@ -58,16 +56,36 @@ namespace SharpLuna
 
         public void Read<T>(string key, ref T v)
         {
-            Debug.Assert(pos > 0);
-            ref var e = ref layout[--pos];
-            v = Unsafe.Read<T>(data + e.offset);           
+            Debug.Assert(pos < count);
+            ref var e = ref layout[pos++];
+            if(typeof(T) == typeof(string))
+            {
+                int len = *(int*)(data + e.offset);
+                byte* str = *(byte**)(data + e.offset + 4);
+                v = (T)(object)Marshal.PtrToStringAnsi((IntPtr)str, len);
+            }
+            else
+            {
+                v = Unsafe.Read<T>(data + e.offset);
+            }         
         }
 
         public void Write<T>(string key, ref T v)
         {
             Debug.Assert(pos < count);
             ref var e = ref layout[pos++];
-            Unsafe.Write(data + e.offset, v);            
+            if (v is string str)
+            {
+                var p = Marshal.StringToHGlobalAnsi(str);
+                Unsafe.Write(data + e.offset + 4, p);
+                int len = 0;
+                while (*(byte*)p != 0) { len++; p += 1; }
+                Unsafe.Write(data + e.offset, len);
+            }
+            else
+            {
+                Unsafe.Write(data + e.offset, v);
+            }
         }
 
         public void Add(in StructElement e)
@@ -80,7 +98,8 @@ namespace SharpLuna
                 Array.Resize(ref layout, this.layout.Length + 4);
             }
 
-            this.layout[count++] = e;            
+            this.layout[count++] = e;
+            size += e.size;
         }
 
 

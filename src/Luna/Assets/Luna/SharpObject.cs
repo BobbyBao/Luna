@@ -107,13 +107,6 @@ namespace SharpLuna
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe void AllocUnmanagedObject<T>(lua_State L, T obj)// where T : unmanaged
         {
-            var converter = Converter.GetConverter(obj.GetType());
-            if (converter != null)
-            {
-                ((TConverter<T>)converter).Push(L, obj);
-                return;
-            }
-
             int classId = TypeID(obj);
             IntPtr mem = lua_newuserdata(L, (UIntPtr)Unsafe.SizeOf<T>() + 4);
             Unsafe.Write((void*)(mem + 4), obj);
@@ -136,13 +129,6 @@ namespace SharpLuna
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe void AllocUnmanagedObject(lua_State L, object obj)
         {
-            var converter = Converter.GetConverter(obj.GetType());
-            if(converter != null)
-            {
-                converter.pusher(L, obj);
-                return;
-            }
-           
 
             int classId = TypeID(obj);
             IntPtr mem = lua_newuserdata(L, (UIntPtr)Marshal.SizeOf(obj) + 4);
@@ -170,14 +156,41 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void PushUnmanagedObject<T>(lua_State L, in T obj) //where T : unmanaged
+        public static void PushUnmanagedObject<T>(lua_State L, in T obj)
         {
             AllocUnmanagedObject(L, obj);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void PushValueToStack<T>(lua_State L, ref T obj) //where T : struct
+        public static void PushValueToStack(lua_State L, object obj)
         {
+            var converter = Converter.GetConverter(obj.GetType());
+            if (converter != null)
+            {
+                converter.pusher(L, obj);
+                return;
+            }
+
+            if (obj.GetType().IsUnManaged())
+            {
+                AllocUnmanagedObject(L, obj);
+            }
+            else
+            {
+                AllocObject(L, obj);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void PushValueToStack<T>(lua_State L, ref T obj)
+        {
+            var converter = Converter.GetConverter(obj.GetType());
+            if (converter != null)
+            {
+                ((TConverter<T>)converter).Push(L, obj);
+                return;
+            }
+
             if (typeof(T).IsUnManaged())
             {
                 AllocUnmanagedObject(L, obj);
@@ -210,7 +223,7 @@ namespace SharpLuna
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void PushToStack<T>(lua_State L, object obj)
+        public static void PushToStack(lua_State L, object obj)
         {
 #if LUA_WEAKTABLE
             if (obj2id.TryGetValue(obj, out var key))
@@ -271,6 +284,25 @@ namespace SharpLuna
                 return ref Unsafe.Unbox<T>(freeList[(int)handle]);
 #else
                 return ref Unsafe.Unbox<T>(GCHandle.FromIntPtr((IntPtr)handle).Target);
+#endif
+            }
+
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe static object GetValue(lua_State L, int index, Type valueType)
+        {
+            if (valueType.IsUnManaged())
+            {
+                return GetUnmanaged(L, index, valueType);
+            }
+            else
+            {
+                var handle = GetHandler(L, index);
+#if LUA_WEAKTABLE
+                return freeList[(int)handle];
+#else
+                return GCHandle.FromIntPtr((IntPtr)handle).Target;
 #endif
             }
 

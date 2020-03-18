@@ -1,10 +1,32 @@
-﻿using System;
+﻿using SharpLuna;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 public struct vec3
 {
     public float x, y, z;
+}
+
+public struct TestValue
+{
+    public string name;
+    public float x, y, z;
+}
+
+public class TestValueTypeConverter : ValueTypeConverter<TestValue>
+{
+    public TestValueTypeConverter(IntPtr L) : base(L)
+    {
+    }
+
+    protected override void BuildStruct(ref TestValue obj)
+    {
+        Transfer("name", ref obj.name);
+        Transfer("x", ref obj.x);
+        Transfer("y", ref obj.y);
+        Transfer("z", ref obj.z);
+    }
 }
 
 namespace Tests
@@ -78,6 +100,8 @@ namespace Tests
         public TestStruct position { get; set; }
 
         public vec3 rot { get; set; }
+
+        public TestValue testValue { get; set; }
 
         public event Action testEvent;
 
