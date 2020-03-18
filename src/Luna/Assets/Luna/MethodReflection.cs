@@ -36,6 +36,19 @@ namespace SharpLuna
             del = new Delegate[methodInfo.Length];
         }
 
+        static bool CheckParameterType(lua_State L, int index, ParameterInfo[] parameters)
+        {
+            for(int i = 0; i < parameters.Length; i++)
+            {
+                if(!CheckType(L, index + i, parameters[i].ParameterType))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public static LuaNativeFunction Call = _Call;
         [AOT.MonoPInvokeCallback(typeof(LuaNativeFunction))]
         static int _Call(lua_State L)
@@ -60,7 +73,7 @@ namespace SharpLuna
                         paramCount = n;
                     }
 #endif
-                    if (paramInfo.Length == paramCount)
+                    if (paramInfo.Length == paramCount && CheckParameterType(L, n - paramCount + 1, paramInfo))
                     {
                         //todo:CheckType
                         methodInfo = m;

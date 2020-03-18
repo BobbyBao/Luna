@@ -401,6 +401,11 @@ namespace SharpLuna
                     Push(L, bytes);
                     break;
                 default:
+                    if(v == null)
+                    {
+                        lua_pushnil(L);
+                            break;
+                    }
                     Type t = v.GetType();
                     if (t.IsEnum)
                     {
@@ -792,11 +797,15 @@ namespace SharpLuna
                 return luaType == LuaType.Number;
             else if (t == typeof(LuaRef))
                 return luaType == LuaType.Table || luaType == LuaType.Function;
-            else if (t == typeof(LuaByteBuffer))
+            else if (t == typeof(LuaByteBuffer) || t == typeof(Byte[]))
                 return luaType == LuaType.String;
+            else if (t.IsSubclassOf(typeof(Enum)))
+                return luaType == LuaType.Number || luaType == LuaType.String || luaType == LuaType.Table || luaType == LuaType.UserData;
+            else if(t.IsSubclassOf(typeof(Delegate)))
+                return luaType == LuaType.Function || luaType == LuaType.UserData;
             else
             {
-                return luaType == LuaType.UserData;
+                return luaType == LuaType.Table || luaType == LuaType.UserData;
             }
 
         }
