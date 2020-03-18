@@ -275,10 +275,10 @@ namespace SharpLuna
                 }
                 else if (t.IsValueType)
                 {
-                    SharpObject.PushValueToStack(L, obj);
+                    SharpObject.PushValueType(L, obj);
                 }
                 else
-                    SharpObject.PushToStack(L, obj);
+                    SharpObject.PushObject(L, obj);
             }
 
         }
@@ -329,10 +329,10 @@ namespace SharpLuna
         public static void Push(lua_State L, LuaNativeFunction v) => lua_pushcfunction(L, v);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Push<T>(lua_State L, T v) => SharpObject.PushToStack(L, v);
+        public static void Push<T>(lua_State L, T v) => SharpObject.PushObject(L, v);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Push<T>(lua_State L, ref T v) where T : struct => SharpObject.PushValueToStack(L, ref v);
+        public static void Push<T>(lua_State L, ref T v) where T : struct => SharpObject.PushValueType(L, ref v);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void PushT<T>(lua_State L, T v)
@@ -410,10 +410,10 @@ namespace SharpLuna
                     }
                     else if (t.IsValueType)
                     {
-                        SharpObject.PushValueToStack(L, v);
+                        SharpObject.PushValueType(L, v);
                     }
                     else
-                        SharpObject.PushToStack(L, v);
+                        SharpObject.PushObject(L, v);
                     break;
             }
         }

@@ -179,24 +179,5 @@ namespace SharpLuna
         }
 
     }
-    /*
-    public struct Test11
-    {
-        public int test1;
-        public float test2;
-    }
-
-    public class TestConverter : ValueTypeConverter<Test11>
-    {
-        public TestConverter(IntPtr L) : base(L)
-        {
-        }
-
-        protected override void BuildStruct(ref Test11 obj)
-        {
-            Transfer("test1", ref obj.test1);
-            Transfer("test2", ref obj.test2);
-        }
-    }*/
 
 }

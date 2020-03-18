@@ -83,13 +83,6 @@ namespace SharpLuna
 
         public static object Convert(Type type, LuaType luaType, IntPtr L, int index)
         {
-            if (type.IsEnum)
-            {
-                assert(false);
-                Get(L, index, out int v);
-                return (object)v;
-            }
-
             if (!converterFactory.TryGetValue(type, out var fac))
             {
                 return null;

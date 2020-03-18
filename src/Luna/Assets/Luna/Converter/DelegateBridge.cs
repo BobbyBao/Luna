@@ -20,7 +20,7 @@ namespace SharpLuna
             this.fnCreate = create;
         }
 
-        public object Create(IntPtr L, int index)
+        object Create(IntPtr L, int index)
         {
             var type = lua_type(L, index);
             var ptr = lua_topointer(L, index);
