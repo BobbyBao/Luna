@@ -248,7 +248,7 @@ namespace SharpLuna
                 {
                     sb.Append("namespace SharpLuna\n{\n");
                     sb.Append("\tpublic static partial class Lua\n\t{\n");
-                    sb.Append($"\t\tpublic static void Push(IntPtr L, in {type.GetFriendlyName()} v) => SharpObject.PushUnmanagedObject(L, v);\n\n");
+                    sb.Append($"\t\tpublic static void Push(IntPtr L, in {type.GetFriendlyName()} v) => SharpObject.PushUnmanaged(L, v);\n\n");
                     sb.Append($"\t\tpublic static void Get(IntPtr L, int index, out {type.GetFriendlyName()} v) => v = SharpObject.GetUnmanaged<{type.GetFriendlyName()}>(L, index);\n");
                     sb.Append("\t}\n");
                     sb.Append("}\n");
