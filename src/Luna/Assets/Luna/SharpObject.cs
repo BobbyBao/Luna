@@ -58,9 +58,15 @@ namespace SharpLuna
             Unsafe.Write((void*)(mem + 4), obj);
 
             lua_rawgeti(L, LUA_REGISTRYINDEX, classId);
-
+            
+            if (!lua_istable(L, -1))
+            {
+                Debug.LogWarning($"class not registered : {obj.GetType() }, id: {classId} obj: {obj}");
+                lua_pop(L, 1);
+                return;
+            }
 #if DEBUG || UNITY_EDITOR
-            luaL_checktype(L, -1, (int)LuaType.Table);
+            //luaL_checktype(L, -1, (int)LuaType.Table);
 #endif
             lua_setmetatable(L, -2);
         }
@@ -73,9 +79,16 @@ namespace SharpLuna
             Marshal.StructureToPtr(obj, mem + 4, false);
 
             lua_rawgeti(L, LUA_REGISTRYINDEX, classId);
+           
+            if (!lua_istable(L, -1))
+            {
+                Debug.LogWarning($"class not registered : {obj.GetType() }, id: {classId} obj: {obj}");
+                lua_pop(L, 1);
+                return;
+            }
 
 #if DEBUG || UNITY_EDITOR
-            luaL_checktype(L, -1, (int)LuaType.Table);
+            //luaL_checktype(L, -1, (int)LuaType.Table);
 #endif
             lua_setmetatable(L, -2);
         }
@@ -144,9 +157,13 @@ namespace SharpLuna
 
             lua_rawgeti(L, LUA_REGISTRYINDEX, classId);
 
-#if DEBUG || UNITY_EDITOR
-            luaL_checktype(L, -1, (int)LuaType.Table);
-#endif
+            if (!lua_istable(L, -1))
+            {
+                Debug.LogWarning($"class not registered : {obj.GetType() }, id: {classId} obj: {obj}");
+                lua_pop(L, 1);
+                return;
+            }
+
             lua_setmetatable(L, -2);
         }
 
